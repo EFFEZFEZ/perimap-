@@ -2108,10 +2108,11 @@ body.dark-theme .real-select option {
     .form-group-when {
         width: 100%;
     }
-    .btn-swap-direction {
+    .planner-inputs .btn-swap-direction,
+    .results-planner-inputs .btn-swap-direction {
         display: inline-flex;
         margin: 0 auto;
-        order: 2;
+        order: 0;
         align-self: center;
         width: 44px;
         height: 44px;
@@ -2175,7 +2176,7 @@ body.dark-theme .real-select option {
         gap: 1rem;
     }
     .results-planner-inputs .btn-swap-direction {
-        order: 2;
+        order: 0;
         margin: 0 auto;
     }
 }
@@ -2241,7 +2242,7 @@ body.dark-theme .real-select option {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 0.75rem;
-    align-items: start;
+    align-items: end;
     margin-bottom: 1rem;
 }
 .results-planner-inputs .form-group {
