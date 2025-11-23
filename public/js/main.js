@@ -200,7 +200,7 @@ let infoTraficList, infoTraficAvenir, infoTraficCount;
 let alertBanner, alertBannerContent, alertBannerClose;
 let ficheHoraireContainer;
 let searchBar, searchResultsContainer;
-let mapContainer, btnShowMap, headerBtnShowMap, btnBackToDashboardFromMap;
+let mapContainer, btnShowMap, btnBackToDashboardFromMap;
 let itineraryResultsContainer, btnBackToDashboardFromResults, resultsListContainer;
 let resultsMap, resultsModeTabs;
 let resultsFromInput, resultsToInput, resultsFromSuggestions, resultsToSuggestions;
@@ -247,7 +247,6 @@ async function initializeApp() {
     searchResultsContainer = document.getElementById('horaires-search-results');
     mapContainer = document.getElementById('map-container');
     btnShowMap = document.getElementById('btn-show-map');
-    headerBtnShowMap = document.getElementById('header-btn-show-map');
     btnBackToDashboardFromMap = document.getElementById('btn-back-to-dashboard-from-map');
     itineraryResultsContainer = document.getElementById('itinerary-results-container');
     btnBackToDashboardFromResults = document.getElementById('btn-back-to-dashboard-from-results');
@@ -521,8 +520,7 @@ function setupStaticEventListeners() {
         });
     });
 
-    if (btnShowMap) btnShowMap.addEventListener('click', showMapView); 
-    if (headerBtnShowMap) headerBtnShowMap.addEventListener('click', showMapView);
+    btnShowMap.addEventListener('click', showMapView); 
     btnBackToDashboardFromMap.addEventListener('click', showDashboardHall);
     btnBackToDashboardFromResults.addEventListener('click', showDashboardHall); 
     btnBackToHall.addEventListener('click', showDashboardHall);
