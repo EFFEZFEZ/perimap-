@@ -106,6 +106,13 @@ export class RouterWorkerClient {
         const promise = new Promise((resolve, reject) => {
             this.pending.set(requestId, { resolve, reject });
         });
+        
+        // Validate payload is serializable before posting
+        if (!validateSerializable(payload, 'payload')) {
+            this.pending.delete(requestId);
+            return Promise.reject(new Error('Payload contains non-serializable data'));
+        }
+        
         this.worker.postMessage({ type, requestId, payload });
         return promise;
     }
@@ -156,10 +163,19 @@ function validateSerializable(obj, path = 'root') {
     
     // Recursively validate objects and arrays
     if (type === 'object') {
-        // Use Object.keys to avoid inherited properties
-        for (const key of Object.keys(obj)) {
-            if (!validateSerializable(obj[key], `${path}.${key}`)) {
-                return false;
+        // Handle arrays separately for better path reporting
+        if (Array.isArray(obj)) {
+            for (let i = 0; i < obj.length; i++) {
+                if (!validateSerializable(obj[i], `${path}[${i}]`)) {
+                    return false;
+                }
+            }
+        } else {
+            // Use Object.keys to avoid inherited properties
+            for (const key of Object.keys(obj)) {
+                if (!validateSerializable(obj[key], `${path}.${key}`)) {
+                    return false;
+                }
             }
         }
     }
