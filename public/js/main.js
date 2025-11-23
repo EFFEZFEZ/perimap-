@@ -2083,26 +2083,20 @@ function drawRouteOnResultsMap(itinerary) {
                 return;
             }
 
-            let coordinates;
+            let latLngs;
             try {
-                const decoded = decodePolyline(encoded);
-                coordinates = {
-                    type: "LineString",
-                    coordinates: decoded.map(coord => [coord[1], coord[0]]) // [lng, lat]
-                };
+                latLngs = decodePolyline(encoded);
             } catch (e) {
                 console.error("Erreur décodage polyline d'étape:", e, encoded);
                 return;
             }
 
-            if (coordinates) {
+            if (latLngs && latLngs.length) {
                 console.log('drawRouteOnResultsMap: couche ajoutée', {
                     stepType: step.type,
-                    pointCount: coordinates.coordinates.length
+                    pointCount: latLngs.length
                 });
-                const stepLayer = L.geoJSON(coordinates, {
-                    style: style // Utiliser le style dynamique de l'étape
-                });
+                const stepLayer = L.polyline(latLngs, style);
                 stepLayers.push(stepLayer);
             }
         });
