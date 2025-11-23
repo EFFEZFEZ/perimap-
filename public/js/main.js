@@ -827,6 +827,29 @@ function renderSuggestions(suggestions, container, onSelect) {
         container.style.display = 'none';
         return;
     }
+
+    const resolveInputElement = () => {
+        if (!container) return null;
+        let sibling = container.previousElementSibling;
+        while (sibling) {
+            if (sibling.tagName === 'INPUT') return sibling;
+            if (typeof sibling.querySelector === 'function') {
+                const nested = sibling.querySelector('input');
+                if (nested) return nested;
+            }
+            sibling = sibling.previousElementSibling;
+        }
+        let parent = container.parentElement;
+        while (parent) {
+            const nested = parent.querySelector('input');
+            if (nested) return nested;
+            parent = parent.parentElement;
+        }
+        return null;
+    };
+
+    const inputElement = resolveInputElement();
+
     suggestions.forEach(suggestion => {
         const item = document.createElement('div');
         item.className = 'suggestion-item';
@@ -834,8 +857,9 @@ function renderSuggestions(suggestions, container, onSelect) {
         const secondaryText = suggestion.description.substring(mainText.length);
         item.innerHTML = `<strong>${mainText}</strong>${secondaryText}`;
         item.addEventListener('click', () => {
-            const inputElement = container.previousElementSibling; 
-            inputElement.value = suggestion.description; 
+            if (inputElement) {
+                inputElement.value = suggestion.description;
+            }
             onSelect(suggestion.placeId); 
             container.innerHTML = ''; 
             container.style.display = 'none';
