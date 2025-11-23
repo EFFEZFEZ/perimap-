@@ -1230,43 +1230,43 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                                 const boardingST = stopTimesList[boardingIndex] || stopTimesList[0] || st;
                                                 const alightingST = stopTimesList[alightIndex] || st;
 
-                                                // If we have origin candidate IDs from Google, ensure the chosen boarding stop
-                                                // actually matches one of them or is geographically close enough.
-                                                // This avoids proposing trips that merely pass the destination stop
-                                                // but do not start near the requested origin.
-                                                const DIST_THRESHOLD_METERS = 500; // max acceptable walking distance to boarding
-                                                if (originCandidateIds && originCandidateIds.size > 0) {
-                                                    if (!originCandidateIds.has(boardingST.stop_id)) {
-                                                        // Not exact match by ID — compute nearest origin candidate distance
-                                                        let minDist = Infinity;
-                                                        originCandidateIds.forEach(cid => {
-                                                            const cand = dataManager.getStop(cid);
-                                                            if (cand && cand.stop_lat && cand.stop_lon && boardingStopObj && boardingStopObj.stop_lat) {
-                                                                const d = dataManager.calculateDistance(parseFloat(cand.stop_lat), parseFloat(cand.stop_lon), parseFloat(boardingStopObj.stop_lat), parseFloat(boardingStopObj.stop_lon));
-                                                                if (!Number.isNaN(d) && d < minDist) minDist = d;
-                                                            }
-                                                        });
-                                                        if (minDist === Infinity) {
-                                                            console.debug('GTFS injection: no origin candidate coordinates to compare, rejecting trip', { tripId: st.trip_id, boarding: boardingST.stop_id });
-                                                            continue;
-                                                        }
-                                                        if (minDist > DIST_THRESHOLD_METERS) {
-                                                            console.debug('GTFS injection: boarding stop too far from origin candidates, skip', { tripId: st.trip_id, boarding: boardingST.stop_id, minDist });
-                                                            continue;
-                                                        }
-                                                        // Otherwise accept (within distance threshold)
-                                                        console.debug('GTFS injection: boarding stop accepted by proximity', { tripId: st.trip_id, boarding: boardingST.stop_id, minDist });
-                                                    } else {
-                                                        // Exact match by ID
-                                                        console.debug('GTFS injection: boarding stop accepted by exact match', { tripId: st.trip_id, boarding: boardingST.stop_id });
-                                                    }
-                                                }
+                                const boardingStopObj = dataManager.getStop(boardingST.stop_id) || { stop_name: boardingST.stop_id, stop_lat: 0, stop_lon: 0 };
+                                const alightingStopObj = dataManager.getStop(alightingST.stop_id) || { stop_name: alightingST.stop_id, stop_lat: 0, stop_lon: 0 };
+
+                                // If we have origin candidate IDs from Google, ensure the chosen boarding stop
+                                // actually matches one of them or is geographically close enough.
+                                // This avoids proposing trips that merely pass the destination stop
+                                // but do not start near the requested origin.
+                                const DIST_THRESHOLD_METERS = 500; // max acceptable walking distance to boarding
+                                if (originCandidateIds && originCandidateIds.size > 0) {
+                                    if (!originCandidateIds.has(boardingST.stop_id)) {
+                                        // Not exact match by ID — compute nearest origin candidate distance
+                                        let minDist = Infinity;
+                                        originCandidateIds.forEach(cid => {
+                                            const cand = dataManager.getStop(cid);
+                                            if (cand && cand.stop_lat && cand.stop_lon && boardingStopObj && boardingStopObj.stop_lat) {
+                                                const d = dataManager.calculateDistance(parseFloat(cand.stop_lat), parseFloat(cand.stop_lon), parseFloat(boardingStopObj.stop_lat), parseFloat(boardingStopObj.stop_lon));
+                                                if (!Number.isNaN(d) && d < minDist) minDist = d;
+                                            }
+                                        });
+                                        if (minDist === Infinity) {
+                                            console.debug('GTFS injection: no origin candidate coordinates to compare, rejecting trip', { tripId: st.trip_id, boarding: boardingST.stop_id });
+                                            continue;
+                                        }
+                                        if (minDist > DIST_THRESHOLD_METERS) {
+                                            console.debug('GTFS injection: boarding stop too far from origin candidates, skip', { tripId: st.trip_id, boarding: boardingST.stop_id, minDist });
+                                            continue;
+                                        }
+                                        // Otherwise accept (within distance threshold)
+                                        console.debug('GTFS injection: boarding stop accepted by proximity', { tripId: st.trip_id, boarding: boardingST.stop_id, minDist });
+                                    } else {
+                                        // Exact match by ID
+                                        console.debug('GTFS injection: boarding stop accepted by exact match', { tripId: st.trip_id, boarding: boardingST.stop_id });
+                                    }
+                                }
 
                                 const depSeconds = dataManager.timeToSeconds(boardingST.departure_time || boardingST.arrival_time || '00:00:00');
                                 const arrSeconds = dataManager.timeToSeconds(alightingST.arrival_time || alightingST.departure_time || '00:00:00');
-
-                                const boardingStopObj = dataManager.getStop(boardingST.stop_id) || { stop_name: boardingST.stop_id, stop_lat: 0, stop_lon: 0 };
-                                const alightingStopObj = dataManager.getStop(alightingST.stop_id) || { stop_name: alightingST.stop_id, stop_lat: 0, stop_lon: 0 };
 
                                 // Diagnostic: report when readable names are missing or when boarding is far from alight
                                 if (!boardingStopObj || !boardingStopObj.stop_name || boardingStopObj.stop_name === boardingST.stop_id) {
@@ -1535,6 +1535,11 @@ async function ensureItineraryPolylines(itineraries) {
                     }
                     if (!slice || slice.length < 2) slice = [[parseFloat(depStopObj.stop_lat), parseFloat(depStopObj.stop_lon)], [parseFloat(arrStopObj.stop_lat), parseFloat(arrStopObj.stop_lon)]];
                     encoded = encodePolyline(slice);
+                    console.debug('ensureItineraryPolylines: polyline reconstruite depuis la géométrie', {
+                        itinId: itin.tripId || itin.trip?.trip_id || null,
+                        stepRoute: routeId,
+                        pointCount: slice.length
+                    });
                 }
 
                 // Final fallback: direct straight line using available coordinates
@@ -1543,6 +1548,10 @@ async function ensureItineraryPolylines(itineraries) {
                     const arr = arrStopObj ? { lat: parseFloat(arrStopObj.stop_lat), lon: parseFloat(arrStopObj.stop_lon) } : null;
                     if (dep && arr && !Number.isNaN(dep.lat) && !Number.isNaN(arr.lat)) {
                         encoded = encodePolyline([[dep.lat, dep.lon], [arr.lat, arr.lon]]);
+                        console.debug('ensureItineraryPolylines: fallback polyline directe utilisée', {
+                            itinId: itin.tripId || itin.trip?.trip_id || null,
+                            stepRoute: routeId
+                        });
                     }
                 }
 
@@ -1550,7 +1559,12 @@ async function ensureItineraryPolylines(itineraries) {
                     step.polyline = { encodedPolyline: encoded };
                     console.debug('ensureItineraryPolylines: reconstructed polyline', { itinId: itin.tripId || itin.trip?.trip_id || null });
                 } else {
-                    console.warn('ensureItineraryPolylines: impossible de reconstruire la polyline pour une étape BUS (aucune coordonnée fiable)', { itin: itin, step });
+                    console.warn('ensureItineraryPolylines: impossible de reconstruire la polyline pour une étape BUS (aucune coordonnée fiable)', {
+                        itinId: itin.tripId || itin.trip?.trip_id || null,
+                        stepRoute: routeId,
+                        departureStop: step.departureStop,
+                        arrivalStop: step.arrivalStop
+                    });
                 }
             } catch (err) {
                 console.warn('ensureItineraryPolylines error for step', err);
@@ -2014,6 +2028,12 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
 function drawRouteOnResultsMap(itinerary) {
     if (!resultsMapRenderer || !resultsMapRenderer.map || !itinerary || !itinerary.steps) return;
 
+    console.debug('drawRouteOnResultsMap: start', {
+        itineraryType: itinerary.type,
+        stepCount: itinerary.steps.length,
+        itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
+    });
+
     if (currentResultsRouteLayer) {
         resultsMapRenderer.map.removeLayer(currentResultsRouteLayer);
         currentResultsRouteLayer = null;
@@ -2033,7 +2053,10 @@ function drawRouteOnResultsMap(itinerary) {
             ? [step.polyline] // Le bus a une seule polyline
             : step.polylines;  // La marche/vélo ont un tableau de polylines
 
-        if (!polylinesToDraw) return;
+        if (!polylinesToDraw || polylinesToDraw.length === 0) {
+            console.warn('drawRouteOnResultsMap: étape sans polylines', { stepType: step.type, step });
+            return;
+        }
 
         polylinesToDraw.forEach(polyline => {
             const encoded = getEncodedPolylineValue(polyline);
@@ -2055,6 +2078,10 @@ function drawRouteOnResultsMap(itinerary) {
             }
 
             if (coordinates) {
+                console.debug('drawRouteOnResultsMap: couche ajoutée', {
+                    stepType: step.type,
+                    pointCount: coordinates.coordinates.length
+                });
                 const stepLayer = L.geoJSON(coordinates, {
                     style: style // Utiliser le style dynamique de l'étape
                 });
@@ -2077,6 +2104,10 @@ function drawRouteOnResultsMap(itinerary) {
         } else {
             console.warn('drawRouteOnResultsMap: bornes invalides pour le tracé affiché.');
         }
+    } else {
+        console.warn('drawRouteOnResultsMap: aucune couche tracée (liste vide)', {
+            itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
+        });
     }
 }
 
@@ -2194,6 +2225,11 @@ function renderItineraryDetailHTML(itinerary) {
  */
 function renderItineraryDetail(itinerary) {
     if (!detailPanelContent || !detailMapRenderer) return;
+
+    console.debug('renderItineraryDetail: start', {
+        itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null,
+        stepCount: itinerary.steps?.length || 0
+    });
 
     let stepsHtml = '';
 
@@ -2331,7 +2367,10 @@ function renderItineraryDetail(itinerary) {
                 ? [step.polyline] // Le bus a une seule polyline
                 : step.polylines;  // La marche/vélo ont un tableau de polylines
 
-            if (!polylinesToDraw) return;
+            if (!polylinesToDraw || polylinesToDraw.length === 0) {
+                console.warn('renderItineraryDetail: étape sans polylines', { stepType: step.type, step });
+                return;
+            }
             
             polylinesToDraw.forEach(polyline => {
                 const encoded = getEncodedPolylineValue(polyline);
@@ -2353,6 +2392,10 @@ function renderItineraryDetail(itinerary) {
                 }
 
                 if (coordinates) {
+                    console.debug('renderItineraryDetail: couche ajoutée', {
+                        stepType: step.type,
+                        pointCount: coordinates.coordinates.length
+                    });
                     const stepLayer = L.geoJSON(coordinates, {
                         style: style // Utiliser le style dynamique de l'étape
                     });
@@ -2369,6 +2412,10 @@ function renderItineraryDetail(itinerary) {
             addItineraryMarkers(itinerary, detailMapRenderer.map, currentDetailMarkerLayer);
 
             // ✅ V48 (MODIFICATION IMPLÉMENTÉE): La ligne fitBounds est SUPPRIMÉE d'ici
+        } else {
+            console.warn('renderItineraryDetail: aucune couche tracée (liste vide)', {
+                itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
+            });
         }
     }
     
