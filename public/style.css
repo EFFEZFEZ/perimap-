@@ -1612,9 +1612,23 @@ details[open] .accordion-content {
     background: transparent; 
 }
 
+.bus-icon-rect {
+    background: transparent !important;
+    border: none !important;
+}
 .bus-icon-rect div {
     transition: all 0.2s ease;
     border: 2px solid white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-sizing: border-box;
 }
 .bus-icon-rect:hover div {
     transform: scale(1.15);
@@ -1706,22 +1720,20 @@ details[open] .accordion-content {
     height: 40px;
     border-radius: 50%;
     background-color: #4a8cf7;
-    opacity: 0.2;
-    transform: translate(-50%, -50%);
+    margin-top: -20px;
+    margin-left: -20px;
+    opacity: 0.3;
     animation: pulse 2s infinite;
+    pointer-events: none;
 }
 @keyframes pulse {
-    0% { 
-        transform: translate(-50%, -50%) scale(0.5); 
-        opacity: 0.3; /* Au lieu de 0.2 */
+    0% {
+        transform: scale(0.5);
+        opacity: 0.4;
     }
-    50% { 
-        transform: translate(-50%, -50%) scale(0.8); 
-        opacity: 0.15; 
-    }
-    100% { 
-        transform: translate(-50%, -50%) scale(1); 
-        opacity: 0; 
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
     }
 }
 
@@ -1748,6 +1760,13 @@ details[open] .accordion-content {
 }
 .leaflet-control-locate.following svg {
     color: var(--primary);
+}
+
+.leaflet-custom-locate svg,
+.bus-icon-rect svg {
+    width: 18px;
+    height: 18px;
+    display: block;
 }
 
 
