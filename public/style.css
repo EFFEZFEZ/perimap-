@@ -164,6 +164,47 @@ body, .card, .planner-block, #main-header, #map, .btn, .btn-icon-round {
     background: rgba(255,255,255,0.04) !important;
 }
 
+/* Harmonise l'attribution Leaflet avec notre esthétique (pill glassmorphique) */
+.leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-secondary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-full) !important;
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.72rem !important;
+    line-height: 1 !important;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.leaflet-control-attribution a {
+    color: var(--primary) !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+.leaflet-control-attribution a:hover {
+    text-decoration: underline;
+}
+
+body.dark-theme .leaflet-control-attribution,
+#map.dark-theme .leaflet-control-attribution,
+#detail-map.dark-theme .leaflet-control-attribution,
+#results-map.dark-theme .leaflet-control-attribution {
+    background: rgba(6, 12, 20, 0.72) !important;
+    color: var(--text-secondary) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+}
+body.dark-theme .leaflet-control-attribution a,
+#map.dark-theme .leaflet-control-attribution a,
+#detail-map.dark-theme .leaflet-control-attribution a,
+#results-map.dark-theme .leaflet-control-attribution a {
+    color: var(--primary) !important;
+}
+
 /* Ensure the map container is not covered by header or other elements */
 #map { z-index: 1; }
 
