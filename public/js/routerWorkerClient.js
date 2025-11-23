@@ -69,13 +69,37 @@ export class RouterWorkerClient {
 
         const snapshot = dataManager.createRoutingSnapshot();
         const workerIcons = serializeWorkerIcons(this.icons);
+        
+        // Debug: Verify icons are serializable
+        const validateSerializable = (obj, path = 'root') => {
+            if (obj === null || obj === undefined) return true;
+            if (typeof obj === 'function') {
+                console.error(`Found function at ${path}`);
+                return false;
+            }
+            if (typeof obj === 'object') {
+                for (const key in obj) {
+                    if (!validateSerializable(obj[key], `${path}.${key}`)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+        
+        const payload = {
+            snapshot,
+            icons: workerIcons,
+            googleApiKey: this.googleApiKey
+        };
+        
+        if (!validateSerializable(payload)) {
+            throw new Error('Payload contains non-serializable data');
+        }
+        
         this.worker.postMessage({
             type: 'init',
-            payload: {
-                snapshot,
-                icons: workerIcons,
-                googleApiKey: this.googleApiKey
-            }
+            payload
         });
 
         return initPromise;
@@ -114,13 +138,15 @@ export class RouterWorkerClient {
 
 function serializeWorkerIcons(icons) {
     if (!icons || typeof icons !== 'object') {
-        return null;
+        return {};
     }
     const allowedKeys = ['BUS', 'WALK', 'statusWarning'];
     const safeIcons = {};
     allowedKeys.forEach((key) => {
-        if (typeof icons[key] === 'string') {
-            safeIcons[key] = icons[key];
+        const value = icons[key];
+        // Only copy primitive string values, not objects or functions
+        if (typeof value === 'string') {
+            safeIcons[key] = value;
         }
     });
     return safeIcons;
