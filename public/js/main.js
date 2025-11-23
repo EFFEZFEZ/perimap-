@@ -1698,7 +1698,12 @@ function setupResultTabs(itineraries) {
  */
 function renderItineraryResults(modeFilter) {
     if (!resultsListContainer) return;
-    
+
+    console.log('renderItineraryResults: start', {
+        mode: modeFilter,
+        totalItineraries: allFetchedItineraries.length
+    });
+
     resultsListContainer.innerHTML = ''; 
 
     // 1. Filtrer les itinéraires
@@ -1717,6 +1722,7 @@ function renderItineraryResults(modeFilter) {
         let message = "Aucun itinéraire trouvé pour ce mode.";
         if (modeFilter === 'ALL') message = "Aucun itinéraire n'a été trouvé.";
         resultsListContainer.innerHTML = `<p class="results-message">${message}</p>`;
+        console.warn('renderItineraryResults: aucun itinéraire à afficher', { mode: modeFilter });
         return;
     }
 
@@ -1840,6 +1846,11 @@ function renderItineraryResults(modeFilter) {
         
         // Logique Clic (PC vs Mobile)
         card.addEventListener('click', () => {
+            console.log('renderItineraryResults: itinéraire sélectionné', {
+                mode: modeFilter,
+                itineraryType: itinType,
+                itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
+            });
             const isMobile = window.innerWidth <= 768;
             
             // ✅ MODIFICATION V44: Passe l'objet itinéraire entier
