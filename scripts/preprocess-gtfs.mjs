@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
 import { cleanDataset } from '../public/js/utils/gtfsProcessor.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -8,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const GTFS_DIR = path.resolve(__dirname, '../public/data/gtfs');
 const OUTPUT_FILE = path.join(GTFS_DIR, 'gtfs.bundle.json');
+const COMPRESSED_OUTPUT_FILE = `${OUTPUT_FILE}.gz`;
 const GTFS_FILES = [
     { file: 'routes.txt', key: 'routes' },
     { file: 'trips.txt', key: 'trips' },
@@ -31,8 +33,14 @@ async function main() {
     dataset.geoJson = await readGeoJson();
     const cleaned = cleanDataset(dataset);
 
-    await fs.writeFile(OUTPUT_FILE, JSON.stringify(cleaned));
+    const jsonBuffer = Buffer.from(JSON.stringify(cleaned));
+    await fs.writeFile(OUTPUT_FILE, jsonBuffer);
+
+    const gzipped = gzipSync(jsonBuffer, { level: 9 });
+    await fs.writeFile(COMPRESSED_OUTPUT_FILE, gzipped);
+
     console.log(`✅ Bundle GTFS généré: ${OUTPUT_FILE}`);
+    console.log(`✅ Bundle compressé généré: ${COMPRESSED_OUTPUT_FILE}`);
 }
 
 function parseCsv(text) {

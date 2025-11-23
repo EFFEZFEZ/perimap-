@@ -1,6 +1,9 @@
 import { cleanDataset, buildGtfsIndexes } from '../utils/gtfsProcessor.js';
 
-const OPTIMIZED_BUNDLE_PATH = '/data/gtfs/gtfs.bundle.json';
+const OPTIMIZED_BUNDLE_CANDIDATES = [
+    { url: '/data/gtfs/gtfs.bundle.json.gz', type: 'gzip' },
+    { url: '/data/gtfs/gtfs.bundle.json', type: 'json' }
+];
 const GTFS_FILES = [
     { file: 'routes.txt', key: 'routes' },
     { file: 'trips.txt', key: 'trips' },
@@ -41,18 +44,44 @@ function postProgress(message) {
 }
 
 async function loadDataset() {
-    try {
-        const response = await fetch(OPTIMIZED_BUNDLE_PATH, { cache: 'no-store' });
-        if (!response.ok) {
-            throw new Error('Bundle optimisé indisponible');
-        }
-        const optimized = await response.json();
-        optimized.__source = 'bundle';
-        return optimized;
-    } catch (bundleError) {
-        console.warn('Bundle GTFS manquant, fallback CSV.', bundleError);
-        return loadFromCsv();
+    const bundled = await tryLoadOptimizedBundle();
+    if (bundled) {
+        return bundled;
     }
+
+    console.warn('Bundle GTFS manquant, fallback CSV.');
+    return loadFromCsv();
+}
+
+async function tryLoadOptimizedBundle() {
+    for (const candidate of OPTIMIZED_BUNDLE_CANDIDATES) {
+        try {
+            const optimized = await fetchBundle(candidate);
+            optimized.__source = candidate.type === 'gzip' ? 'bundle.gz' : 'bundle';
+            return optimized;
+        } catch (error) {
+            console.warn(`Bundle ${candidate.url} indisponible`, error);
+        }
+    }
+    return null;
+}
+
+async function fetchBundle(candidate) {
+    const response = await fetch(candidate.url, { cache: 'no-store' });
+    if (!response.ok) {
+        throw new Error(`Bundle non trouvé (${response.status})`);
+    }
+
+    if (candidate.type === 'gzip') {
+        if (typeof DecompressionStream === 'undefined' || !response.body) {
+            throw new Error('Décompression gzip non supportée dans ce navigateur');
+        }
+        const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        const text = await new Response(decompressedStream).text();
+        return JSON.parse(text);
+    }
+
+    return response.json();
 }
 
 async function loadFromCsv() {

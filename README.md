@@ -4,7 +4,7 @@ Ce dépôt contient la console web temps réel du réseau Péribus (Grand Périg
 
 ### Prétraitement des données GTFS
 
-Le chargement du navigateur repose désormais sur un bundle optimisé (`public/data/gtfs/gtfs.bundle.json`). Il doit être régénéré à chaque mise à jour des fichiers `*.txt` fournis par l'AO.
+Le chargement du navigateur repose désormais sur un bundle optimisé (`public/data/gtfs/gtfs.bundle.json`) et sur sa version compressée (`gtfs.bundle.json.gz`). La version gzip est la seule à devoir être commitée (elle reste < 50 MB). Les scripts de prétraitement régénèrent automatiquement les deux fichiers à chaque mise à jour des fichiers `*.txt` fournis par l'AO.
 
 #### Option 1 – Node.js (script dédié)
 
@@ -26,6 +26,7 @@ foreach ($name in $files) {
 }
 $bundle['geoJson'] = (Get-Content (Join-Path $base 'map.geojson') -Raw | ConvertFrom-Json)
 $bundle | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $gtfs 'gtfs.bundle.json') -Encoding UTF8
+gzip -k public/data/gtfs/gtfs.bundle.json
 ```
 
 ### Chargement côté client
