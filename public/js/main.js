@@ -1924,6 +1924,12 @@ function getLeafletStyleForStep(step) {
     };
 }
 
+const getEncodedPolylineValue = (polyline) => {
+    if (!polyline) return null;
+    if (typeof polyline === 'string') return polyline;
+    return polyline.encodedPolyline || polyline.points || null;
+};
+
 /**
  * ✅ NOUVELLE FONCTION V46
  * Ajoute les marqueurs de Début, Fin et Correspondance sur une carte
@@ -1937,8 +1943,9 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
     // 1. Marqueur de DÉPART
     const firstStep = itinerary.steps[0];
     const firstPolyline = (firstStep.type === 'BUS') ? firstStep.polyline : firstStep.polylines[0];
-    if (firstPolyline && firstPolyline.encodedPolyline) {
-        const decoded = decodePolyline(firstPolyline.encodedPolyline);
+    const firstEncoded = getEncodedPolylineValue(firstPolyline);
+    if (firstEncoded) {
+        const decoded = decodePolyline(firstEncoded);
         if (decoded.length > 0) {
             const [lat, lng] = decoded[0];
             const startIcon = L.divIcon({
@@ -1956,12 +1963,12 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         const currentStep = itinerary.steps[i];
         
         // On place un marqueur à la FIN de chaque étape (sauf la dernière)
-        const lastPolyline = (currentStep.type === 'BUS') 
-            ? currentStep.polyline 
+        const lastPolyline = (currentStep.type === 'BUS')
+            ? currentStep.polyline
             : currentStep.polylines[currentStep.polylines.length - 1];
-        
-        if (lastPolyline && lastPolyline.encodedPolyline) {
-            const decoded = decodePolyline(lastPolyline.encodedPolyline);
+        const correspondenceEncoded = getEncodedPolylineValue(lastPolyline);
+        if (correspondenceEncoded) {
+            const decoded = decodePolyline(correspondenceEncoded);
             if (decoded.length > 0) {
                 const [lat, lng] = decoded[decoded.length - 1];
                 const corrIcon = L.divIcon({
@@ -1977,12 +1984,12 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
 
     // 3. Marqueur de FIN
     const lastStep = itinerary.steps[itinerary.steps.length - 1];
-    const lastPolyline = (lastStep.type === 'BUS') 
-        ? lastStep.polyline 
+    const lastPolyline = (lastStep.type === 'BUS')
+        ? lastStep.polyline
         : lastStep.polylines[lastStep.polylines.length - 1];
-    
-    if (lastPolyline && lastPolyline.encodedPolyline) {
-        const decoded = decodePolyline(lastPolyline.encodedPolyline);
+    const lastEncoded = getEncodedPolylineValue(lastPolyline);
+    if (lastEncoded) {
+        const decoded = decodePolyline(lastEncoded);
         if (decoded.length > 0) {
             const [lat, lng] = decoded[decoded.length - 1];
             const endIcon = L.divIcon({
@@ -2029,24 +2036,24 @@ function drawRouteOnResultsMap(itinerary) {
         if (!polylinesToDraw) return;
 
         polylinesToDraw.forEach(polyline => {
-            if (!polyline || !polyline.encodedPolyline) {
+            const encoded = getEncodedPolylineValue(polyline);
+            if (!encoded) {
                 console.warn("Étape sans polyline:", step);
                 return;
             }
 
-            // ✅ FIX V42: Décoder la polyline encodée de Google
             let coordinates;
             try {
-                const decoded = decodePolyline(polyline.encodedPolyline);
+                const decoded = decodePolyline(encoded);
                 coordinates = {
                     type: "LineString",
                     coordinates: decoded.map(coord => [coord[1], coord[0]]) // [lng, lat]
                 };
             } catch (e) {
-                console.error("Erreur décodage polyline d'étape:", e, polyline.encodedPolyline);
+                console.error("Erreur décodage polyline d'étape:", e, encoded);
                 return;
             }
-                
+
             if (coordinates) {
                 const stepLayer = L.geoJSON(coordinates, {
                     style: style // Utiliser le style dynamique de l'étape
@@ -2064,7 +2071,12 @@ function drawRouteOnResultsMap(itinerary) {
         addItineraryMarkers(itinerary, resultsMapRenderer.map, currentResultsMarkerLayer);
 
         // Ajuster la carte pour voir l'ensemble du trajet
-        resultsMapRenderer.map.fitBounds(currentResultsRouteLayer.getBounds(), { padding: [20, 20] });
+        const bounds = currentResultsRouteLayer.getBounds();
+        if (bounds && bounds.isValid()) {
+            resultsMapRenderer.map.fitBounds(bounds, { padding: [20, 20] });
+        } else {
+            console.warn('drawRouteOnResultsMap: bornes invalides pour le tracé affiché.');
+        }
     }
 }
 
@@ -2322,21 +2334,21 @@ function renderItineraryDetail(itinerary) {
             if (!polylinesToDraw) return;
             
             polylinesToDraw.forEach(polyline => {
-                if (!polyline || !polyline.encodedPolyline) {
+                const encoded = getEncodedPolylineValue(polyline);
+                if (!encoded) {
                     console.warn("Étape (détail) sans polyline:", step);
                     return;
                 }
 
-                // ✅ FIX V42: Décoder la polyline encodée de Google
                 let coordinates;
                 try {
-                    const decoded = decodePolyline(polyline.encodedPolyline);
+                    const decoded = decodePolyline(encoded);
                     coordinates = {
                         type: "LineString",
                         coordinates: decoded.map(coord => [coord[1], coord[0]]) // [lng, lat]
                     };
                 } catch (e) {
-                    console.error("Erreur décodage polyline d'étape (détail):", e, polyline.encodedPolyline);
+                    console.error("Erreur décodage polyline d'étape (détail):", e, encoded);
                     return;
                 }
 
