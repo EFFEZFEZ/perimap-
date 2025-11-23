@@ -420,7 +420,7 @@ body.view-is-locked #main-header {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     flex: 1;
     gap: 0.75rem; 
-    align-items: end;
+    align-items: stretch;
     padding-left: 0;
     padding-right: 0;
     position: relative;
@@ -429,8 +429,21 @@ body.view-is-locked #main-header {
     flex: 1;
     margin-bottom: 0;
     min-width: 0; /* prevent flex children from overflowing and causing centering issues */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
-.planner-inputs .btn-swap-direction {
+.planner-inputs .form-group .input-with-action {
+    flex: 1;
+}
+
+.planner-inputs .swap-button-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.planner-inputs .swap-button-slot .btn-swap-direction {
     justify-self: center;
     align-self: center;
 }
@@ -1831,9 +1844,12 @@ details[open] .accordion-content {
     top: 50%;
     transform: translateY(-50%);
     right: 0.65rem;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
     color: var(--primary);
+    border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     z-index: 5;
 }
@@ -2108,12 +2124,17 @@ body.dark-theme .real-select option {
     .form-group-when {
         width: 100%;
     }
-    .planner-inputs .btn-swap-direction,
-    .results-planner-inputs .btn-swap-direction {
+    .planner-inputs .swap-button-slot,
+    .results-planner-inputs .swap-button-slot {
+        order: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .planner-inputs .swap-button-slot .btn-swap-direction,
+    .results-planner-inputs .swap-button-slot .btn-swap-direction {
         display: inline-flex;
         margin: 0 auto;
-        order: 0;
-        align-self: center;
         width: 44px;
         height: 44px;
     }
@@ -2242,14 +2263,25 @@ body.dark-theme .real-select option {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 0.75rem;
-    align-items: end;
+    align-items: stretch;
     margin-bottom: 1rem;
 }
 .results-planner-inputs .form-group {
     margin-bottom: 0;
     align-self: stretch;
+    display: flex;
+    flex-direction: column;
 }
-.results-planner-inputs .btn-swap-direction {
+.results-planner-inputs .form-group .input-with-action {
+    flex: 1;
+}
+.results-planner-inputs .swap-button-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.results-planner-inputs .swap-button-slot .btn-swap-direction {
     justify-self: center;
     align-self: center;
 }
