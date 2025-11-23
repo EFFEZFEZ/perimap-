@@ -4,7 +4,7 @@ Ce dépôt contient la console web temps réel du réseau Péribus (Grand Périg
 
 ### Prétraitement des données GTFS
 
-Le chargement du navigateur repose désormais sur un bundle optimisé (`public/data/gtfs/gtfs.bundle.json`) et sur sa version compressée (`gtfs.bundle.json.gz`). La version gzip est la seule à devoir être commitée (elle reste < 50 MB). Les scripts de prétraitement régénèrent automatiquement les deux fichiers à chaque mise à jour des fichiers `*.txt` fournis par l'AO.
+Le chargement du navigateur repose désormais sur un bundle optimisé (`public/data/gtfs/gtfs.bundle.json`) et sur sa version compressée (`gtfs.bundle.json.gz`). La version gzip est la seule à devoir être commitée (elle reste < 50 MB). Les scripts de prétraitement régénèrent automatiquement les deux fichiers à chaque mise à jour des fichiers `*.txt` fournis par l'AO, y compris `shapes.txt` pour les géométries.
 
 #### Option 1 – Node.js (script dédié)
 
@@ -19,7 +19,7 @@ Le script lit les fichiers CSV présents dans `public/data/gtfs`, nettoie les va
 ```
 $base = "c:/Users/<vous>/Peribus Test design/public/data"
 $gtfs = Join-Path $base 'gtfs'
-$files = 'routes','trips','stop_times','stops','calendar','calendar_dates'
+$files = 'routes','trips','stop_times','stops','calendar','calendar_dates','shapes'
 $bundle = [ordered]@{}
 foreach ($name in $files) {
 	$bundle[$name -replace 'calendar_dates','calendarDates' -replace 'stop_times','stopTimes'] = Import-Csv (Join-Path $gtfs ("$name.txt"))
