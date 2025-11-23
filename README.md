@@ -37,6 +37,12 @@ $bundle | ConvertTo-Json -Depth 12 | Set-Content (Join-Path $gtfs 'gtfs.bundle.j
 
 Ouvrir `public/index.html` avec un serveur statique (Live Server VS Code par exemple). La console affichera la progression du chargement GTFS et la carte deviendra interactive une fois les données prêtes.
 
+**Note importante** : Si vous voyez des erreurs dans la console au sujet de "Leaflet LocateControl", il s'agit probablement de JavaScript en cache. Faites un hard refresh (Ctrl+Shift+R ou Cmd+Shift+R) pour vider le cache du navigateur.
+
+### Configuration de l'API Google Maps
+
+Si vous rencontrez une erreur `RefererNotAllowedMapError`, consultez le fichier [GOOGLE_MAPS_SETUP.md](GOOGLE_MAPS_SETUP.md) pour configurer les referrers autorisés dans Google Cloud Console.
+
 ### Étapes suivantes
 
 - Refactoring complet de `main.js` (UIManager, Router, Geolocation Manager).
