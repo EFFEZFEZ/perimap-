@@ -40,12 +40,13 @@ export class BusPositionCalculator {
         // Tenter d'utiliser le tracé GeoJSON précis si disponible
         if (routeId) {
             const routeGeometry = this.dataManager.getRouteGeometry(routeId);
-            if (routeGeometry && routeGeometry.length > 0) {
+            const routeCoordinates = this.extractRouteCoordinates(routeGeometry);
+            if (routeCoordinates && routeCoordinates.length > 0) {
                 const position = this.interpolateAlongRouteCached(
                     routeId,
                     segment.fromStopInfo.stop_id,
                     segment.toStopInfo.stop_id,
-                    routeGeometry, 
+                    routeCoordinates, 
                     fromLat, fromLon, 
                     toLat, toLon, 
                     progress
@@ -191,6 +192,14 @@ export class BusPositionCalculator {
         const toLon = parseFloat(segment.toStopInfo.stop_lon);
 
         return this.calculateLinearBearing(fromLat, fromLon, toLat, toLon);
+    }
+
+    extractRouteCoordinates(geometry) {
+        if (!geometry) return null;
+        if (Array.isArray(geometry)) return geometry;
+        if (geometry.type === 'LineString') return geometry.coordinates;
+        if (geometry.type === 'MultiLineString') return geometry.coordinates.flat();
+        return null;
     }
 
     /**

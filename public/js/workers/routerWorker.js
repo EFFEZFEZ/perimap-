@@ -49,6 +49,7 @@ async function handleInit(payload = {}) {
     workerDataManager.calendarDates = snapshot.dataset?.calendarDates || [];
     workerDataManager.geoJson = snapshot.dataset?.geoJson || null;
     workerDataManager.shapes = snapshot.dataset?.shapes || [];
+    workerDataManager.buildRouteGeometryIndex();
     workerDataManager.isLoaded = true;
 
     const apiBridge = createWorkerApiBridge(googleApiKey);

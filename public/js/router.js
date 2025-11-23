@@ -381,12 +381,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const alightingPoint = toPoint(alightingStop);
         if (!boardingPoint || !alightingPoint) return null;
 
-        let geometry = null;
-        if (segment.shapeId) {
+        let geometry = dataManager.getRouteGeometry(segment.routeId);
+        if (!geometry && segment.shapeId) {
             geometry = dataManager.getShapeGeoJSON(segment.shapeId, segment.routeId);
-        }
-        if (!geometry) {
-            geometry = dataManager.getRouteGeometry(segment.routeId);
         }
 
         let latLngPolyline = geometryToLatLngs(geometry);

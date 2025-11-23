@@ -1277,9 +1277,10 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                 }
 
                                 // Récupérer géométrie shape/route
-                                let geometry = null;
-                                if (trip.shape_id) geometry = dataManager.getShapeGeoJSON(trip.shape_id, trip.route_id);
-                                if (!geometry) geometry = dataManager.getRouteGeometry(trip.route_id);
+                                let geometry = dataManager.getRouteGeometry(trip.route_id);
+                                if (!geometry && trip.shape_id) {
+                                    geometry = dataManager.getShapeGeoJSON(trip.shape_id, trip.route_id);
+                                }
 
                                 // Convertir geometry en tableau de [lon, lat] points (comme dans geojson)
                                 const extractRouteCoords = (geom) => {
@@ -1485,16 +1486,32 @@ async function ensureItineraryPolylines(itineraries) {
                 const routeId = (itin.route && (itin.route.route_id || itin.routeId)) || null;
                 const shapeId = (itin.trip && itin.trip.shape_id) || (itin.shapeId) || null;
 
-                let geometry = null;
-                if (shapeId) geometry = dataManager.getShapeGeoJSON(shapeId, routeId);
-                if (!geometry && routeId) geometry = dataManager.getRouteGeometry(routeId);
+                let geometry = routeId ? dataManager.getRouteGeometry(routeId) : null;
+                if (!geometry && shapeId) geometry = dataManager.getShapeGeoJSON(shapeId, routeId);
 
                 const geometryToLatLngs = (geom) => {
                     if (!geom) return null;
-                    if (Array.isArray(geom)) return geom.map(p => [p[0], p[1]]);
-                    if (geom.type === 'LineString') return geom.coordinates.map(p => [p[1], p[0]]);
-                    if (geom.type === 'MultiLineString') return geom.coordinates.flat().map(p => [p[1], p[0]]);
-                    return null;
+
+                    const toLatLng = (pair) => {
+                        if (!Array.isArray(pair) || pair.length < 2) return null;
+                        const lon = parseFloat(pair[0]);
+                        const lat = parseFloat(pair[1]);
+                        if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+                        return [lat, lon];
+                    };
+
+                    let rawPoints = null;
+                    if (Array.isArray(geom)) {
+                        rawPoints = geom;
+                    } else if (geom.type === 'LineString') {
+                        rawPoints = geom.coordinates;
+                    } else if (geom.type === 'MultiLineString') {
+                        rawPoints = geom.coordinates.flat();
+                    }
+
+                    if (!rawPoints) return null;
+                    const converted = rawPoints.map(toLatLng).filter(Boolean);
+                    return converted.length >= 2 ? converted : null;
                 };
 
                 const latlngs = geometryToLatLngs(geometry);

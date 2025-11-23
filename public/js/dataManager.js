@@ -26,6 +26,7 @@ export class DataManager {
         this.calendar = [];
         this.calendarDates = [];
         this.shapes = [];
+        this.routeGeometriesById = {};
 
         this.masterStops = []; 
         this.groupedStopMap = {}; 
@@ -161,6 +162,7 @@ export class DataManager {
         this.calendarDates = dataset.calendarDates || [];
         this.geoJson = dataset.geoJson || null;
         this.shapes = dataset.shapes || [];
+        this.buildRouteGeometryIndex();
 
         this.applyIndexes(indexes);
 
@@ -188,6 +190,44 @@ export class DataManager {
         this.masterStops = indexes.masterStops || [];
         this.shapesById = indexes.shapesById || {};
         console.log(`📍 ${this.masterStops.length} arrêts maîtres`);
+    }
+
+    buildRouteGeometryIndex() {
+        const cache = {};
+        if (this.geoJson && Array.isArray(this.geoJson.features)) {
+            this.geoJson.features.forEach((feature) => {
+                const routeId = feature?.properties?.route_id;
+                if (!routeId || cache[routeId]) return;
+                const normalized = this.normalizeRouteGeometry(feature.geometry);
+                if (normalized) {
+                    cache[routeId] = normalized;
+                }
+            });
+        }
+        this.routeGeometriesById = cache;
+    }
+
+    normalizeRouteGeometry(geometry) {
+        if (!geometry || !geometry.type || !geometry.coordinates) return null;
+        const toLonLat = (pair) => {
+            if (!Array.isArray(pair) || pair.length < 2) return null;
+            const lon = Number(pair[0]);
+            const lat = Number(pair[1]);
+            if (Number.isNaN(lon) || Number.isNaN(lat)) return null;
+            return [lon, lat];
+        };
+
+        if (geometry.type === 'LineString') {
+            const coords = geometry.coordinates.map(toLonLat).filter(Boolean);
+            return coords.length ? { type: 'LineString', coordinates: coords } : null;
+        }
+
+        if (geometry.type === 'MultiLineString') {
+            const flattened = geometry.coordinates.flat().map(toLonLat).filter(Boolean);
+            return flattened.length ? { type: 'LineString', coordinates: flattened } : null;
+        }
+
+        return null;
     }
 
     createRoutingSnapshot() {
@@ -602,24 +642,24 @@ export class DataManager {
      * Géométrie de route (gère LineString et MultiLineString)
      */
     getRouteGeometry(routeId) {
-        if (!this.geoJson || !this.geoJson.features) {
+        if (!routeId) return null;
+        if (this.routeGeometriesById && this.routeGeometriesById[routeId]) {
+            return this.routeGeometriesById[routeId];
+        }
+
+        if (!this.geoJson || !Array.isArray(this.geoJson.features)) {
             return null;
         }
-        
-        const feature = this.geoJson.features.find(f => 
-            f.properties && f.properties.route_id === routeId
-        );
-        
-        if (!feature || !feature.geometry) return null;
-        
-        if (feature.geometry.type === 'LineString') {
-            return feature.geometry.coordinates;
+
+        const feature = this.geoJson.features.find(f => f?.properties?.route_id === routeId);
+        if (!feature) return null;
+
+        const normalized = this.normalizeRouteGeometry(feature.geometry);
+        if (normalized) {
+            this.routeGeometriesById[routeId] = normalized;
+            return normalized;
         }
-        
-        if (feature.geometry.type === 'MultiLineString' && feature.geometry.coordinates.length > 0) {
-            return feature.geometry.coordinates[0];
-        }
-        
+
         return null;
     }
 
@@ -628,11 +668,23 @@ export class DataManager {
         return hours * 3600 + minutes * 60 + seconds;
     }
     
-    formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600) % 24;
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    formatTime(seconds, withSeconds = false) {
+        if (seconds === null || seconds === undefined) {
+            return '--:--';
+        }
+        const totalSeconds = Number(seconds);
+        if (Number.isNaN(totalSeconds)) {
+            return '--:--';
+        }
+        const clamped = Math.max(0, Math.floor(totalSeconds));
+        const hours = Math.floor(clamped / 3600) % 24;
+        const minutes = Math.floor((clamped % 3600) / 60);
+        const pad = (value) => String(value).padStart(2, '0');
+        if (!withSeconds) {
+            return `${pad(hours)}:${pad(minutes)}`;
+        }
+        const secs = clamped % 60;
+        return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
     }
 
     toRad(value) {
