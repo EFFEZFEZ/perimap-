@@ -14,6 +14,7 @@ const GTFS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
 const GTFS_CACHE_STORE = 'datasets';
+const REMOTE_GTFS_BASE_URL = 'https://raw.githubusercontent.com/EFFEZFEZ/p-rimap-sans-api-/main/public/data/gtfs';
 export class DataManager {
     constructor() {
         this.routes = [];
@@ -28,6 +29,7 @@ export class DataManager {
         this.shapes = [];
         this.routeGeometriesById = {};
         this._shapesIndexPromise = null;
+        this.remoteGtfsBaseUrl = REMOTE_GTFS_BASE_URL;
 
         this.masterStops = []; 
         this.groupedStopMap = {}; 
@@ -210,7 +212,24 @@ export class DataManager {
         this._shapesIndexPromise = (async () => {
             try {
                 console.log('🔁 Recharge des shapes GTFS à partir de shapes.txt (cache incomplet)…');
-                const rows = await this.loadGTFSFile('shapes.txt');
+                let rows = null;
+                let localError = null;
+                try {
+                    rows = await this.loadGTFSFile('shapes.txt');
+                } catch (error) {
+                    localError = error;
+                    console.warn('ensureShapesIndexLoaded: shapes.txt introuvable localement, tentative via GitHub brut…');
+                }
+
+                if (!rows) {
+                    try {
+                        const remoteUrl = `${this.remoteGtfsBaseUrl}/shapes.txt`;
+                        rows = await this.loadGTFSFile('shapes.txt', remoteUrl);
+                        console.log('ensureShapesIndexLoaded: shapes chargés depuis GitHub brut.');
+                    } catch (remoteError) {
+                        throw localError || remoteError;
+                    }
+                }
                 if (!Array.isArray(rows) || rows.length === 0) {
                     console.warn('ensureShapesIndexLoaded: shapes.txt vide ou introuvable.');
                     return false;
@@ -487,8 +506,9 @@ export class DataManager {
         });
     }
 
-    async loadGTFSFile(filename) {
-        const response = await fetch(`/data/gtfs/${filename}`);
+    async loadGTFSFile(filename, urlOverride = null) {
+        const url = urlOverride || `/data/gtfs/${filename}`;
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Impossible de charger ${filename}: ${response.statusText}`);
         }
