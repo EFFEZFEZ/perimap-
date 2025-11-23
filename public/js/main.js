@@ -1079,6 +1079,46 @@ function processGoogleRoutesResponse(data) {
             itinerary.duration = formatGoogleDuration(`${computedDurationSeconds}s`);
         }
 
+        const firstTimedStepIndex = itinerary.steps.findIndex(step => isMeaningfulTime(step?.departureTime));
+        if (firstTimedStepIndex !== -1) {
+            let anchorTime = itinerary.steps[firstTimedStepIndex].departureTime;
+            for (let i = firstTimedStepIndex - 1; i >= 0; i--) {
+                const stepDuration = typeof itinerary.steps[i]?.durationRaw === 'number' ? itinerary.steps[i].durationRaw : 0;
+                if (stepDuration > 0) {
+                    const recalculated = subtractSecondsFromTimeString(anchorTime, stepDuration);
+                    if (!recalculated) break;
+                    anchorTime = recalculated;
+                }
+            }
+            itinerary.departureTime = anchorTime;
+        } else if (isMeaningfulTime(itinerary.arrivalTime) && computedDurationSeconds > 0) {
+            const derived = subtractSecondsFromTimeString(itinerary.arrivalTime, computedDurationSeconds);
+            if (derived) itinerary.departureTime = derived;
+        }
+
+        const lastTimedArrivalIndex = (() => {
+            for (let i = itinerary.steps.length - 1; i >= 0; i--) {
+                if (isMeaningfulTime(itinerary.steps[i]?.arrivalTime)) return i;
+            }
+            return -1;
+        })();
+
+        if (lastTimedArrivalIndex !== -1) {
+            let anchorTime = itinerary.steps[lastTimedArrivalIndex].arrivalTime;
+            for (let i = lastTimedArrivalIndex + 1; i < itinerary.steps.length; i++) {
+                const stepDuration = typeof itinerary.steps[i]?.durationRaw === 'number' ? itinerary.steps[i].durationRaw : 0;
+                if (stepDuration > 0) {
+                    const recalculated = addSecondsToTimeString(anchorTime, stepDuration);
+                    if (!recalculated) break;
+                    anchorTime = recalculated;
+                }
+            }
+            itinerary.arrivalTime = anchorTime;
+        } else if (isMeaningfulTime(itinerary.departureTime) && computedDurationSeconds > 0) {
+            const derivedArrival = addSecondsToTimeString(itinerary.departureTime, computedDurationSeconds);
+            if (derivedArrival) itinerary.arrivalTime = derivedArrival;
+        }
+
         if (!hasBusSegment) {
             const legDepartureTime = leg.localizedValues?.departureTime?.time?.text || leg.startTime?.text || "--:--";
             const legArrivalTime = leg.localizedValues?.arrivalTime?.time?.text || leg.endTime?.text || "--:--";
@@ -1773,7 +1813,8 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
     const aggregatedStep = {
         type: type, icon: icon, instruction: modeLabel,
         distance: `${distanceKm} km`, duration: `${durationMinutes} min`,
-        subSteps: [], polylines: [], departureTime: "~", arrivalTime: "~"
+        subSteps: [], polylines: [], departureTime: "~", arrivalTime: "~",
+        durationRaw: durationRawSeconds
     };
 
     leg.steps.forEach(step => {
@@ -2759,6 +2800,49 @@ function parseGoogleDuration(durationString) {
     } catch (e) {
         return 0;
     }
+}
+
+const PLACEHOLDER_TIME_VALUES = new Set(['--:--', '~']);
+
+function isMeaningfulTime(value) {
+    if (typeof value !== 'string') return false;
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return false;
+    return !PLACEHOLDER_TIME_VALUES.has(trimmed);
+}
+
+function parseTimeStringToMinutes(value) {
+    if (!isMeaningfulTime(value)) return null;
+    const match = value.match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    const hours = Number.parseInt(match[1], 10);
+    const minutes = Number.parseInt(match[2], 10);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+    return hours * 60 + minutes;
+}
+
+function formatMinutesToTimeString(totalMinutes) {
+    if (!Number.isFinite(totalMinutes)) return null;
+    const dayMinutes = 24 * 60;
+    while (totalMinutes < 0) totalMinutes += dayMinutes;
+    const minutes = Math.abs(totalMinutes) % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const normalizedHours = hours;
+    return `${String(normalizedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function addSecondsToTimeString(timeStr, seconds) {
+    const baseMinutes = parseTimeStringToMinutes(timeStr);
+    if (baseMinutes === null || !Number.isFinite(seconds)) return null;
+    const totalMinutes = baseMinutes + Math.round(seconds / 60);
+    return formatMinutesToTimeString(totalMinutes);
+}
+
+function subtractSecondsFromTimeString(timeStr, seconds) {
+    const baseMinutes = parseTimeStringToMinutes(timeStr);
+    if (baseMinutes === null || !Number.isFinite(seconds)) return null;
+    const totalMinutes = baseMinutes - Math.round(seconds / 60);
+    return formatMinutesToTimeString(totalMinutes);
 }
 
 
