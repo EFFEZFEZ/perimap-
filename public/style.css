@@ -1895,8 +1895,9 @@ details[open] .accordion-content {
 
 .btn-geolocate {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0.25rem;
+    bottom: 0.25rem;
+    margin: auto 0;
     right: 0.65rem;
     width: 36px;
     height: 36px;
