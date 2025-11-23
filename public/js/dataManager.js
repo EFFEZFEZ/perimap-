@@ -9,7 +9,7 @@ import { StopTimesStore } from './stopTimesStore.js';
  */
 
 const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v2';
-const GTFS_CACHE_VERSION = '2.0.0';
+const GTFS_CACHE_VERSION = '2.1.0';
 const GTFS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
@@ -186,6 +186,7 @@ export class DataManager {
         this.stopTimesByStop = indexes.stopTimesByStop || {};
         this.groupedStopMap = indexes.groupedStopMap || {};
         this.masterStops = indexes.masterStops || [];
+        this.shapesById = indexes.shapesById || {};
         console.log(`📍 ${this.masterStops.length} arrêts maîtres`);
     }
 
@@ -198,7 +199,8 @@ export class DataManager {
                 stops: this.stops,
                 calendar: this.calendar,
                 calendarDates: this.calendarDates,
-                geoJson: this.geoJson
+                geoJson: this.geoJson,
+                shapes: this.shapes
             },
             indexes: {
                 routesById: this.routesById,
@@ -210,7 +212,8 @@ export class DataManager {
                 stopTimesByTrip: this.stopTimesByTrip,
                 stopTimesByStop: this.stopTimesByStop,
                 groupedStopMap: this.groupedStopMap,
-                masterStops: this.masterStops
+                masterStops: this.masterStops,
+                shapesById: this.shapesById
             }
         };
     }
@@ -970,6 +973,23 @@ export class DataManager {
      * Recherche une géométrie (GeoJSON geometry) pour un shape_id ou routeId
      */
     getShapeGeoJSON(shapeId, routeId = null) {
+        if (shapeId && this.shapesById && this.shapesById[shapeId] && this.shapesById[shapeId].length) {
+            return {
+                type: 'LineString',
+                coordinates: this.shapesById[shapeId]
+            };
+        }
+
+        if (routeId && this.tripsByRoute && this.tripsByRoute[routeId]) {
+            const fallbackTrip = this.tripsByRoute[routeId].find(t => t.shape_id && this.shapesById[t.shape_id]);
+            if (fallbackTrip) {
+                return {
+                    type: 'LineString',
+                    coordinates: this.shapesById[fallbackTrip.shape_id]
+                };
+            }
+        }
+
         if (!this.geoJson || !this.geoJson.features) return null;
 
         if (shapeId) {

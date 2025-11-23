@@ -2241,11 +2241,12 @@ body.dark-theme .real-select option {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     gap: 0.75rem;
-    align-items: end;
+    align-items: start;
     margin-bottom: 1rem;
 }
 .results-planner-inputs .form-group {
     margin-bottom: 0;
+    align-self: stretch;
 }
 .results-planner-inputs .btn-swap-direction {
     justify-self: center;

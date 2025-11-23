@@ -7,7 +7,8 @@ const GTFS_FILES = [
     { file: 'stop_times.txt', key: 'stopTimes' },
     { file: 'stops.txt', key: 'stops' },
     { file: 'calendar.txt', key: 'calendar' },
-    { file: 'calendar_dates.txt', key: 'calendarDates' }
+    { file: 'calendar_dates.txt', key: 'calendarDates' },
+    { file: 'shapes.txt', key: 'shapes' }
 ];
 
 self.addEventListener('message', async (event) => {
