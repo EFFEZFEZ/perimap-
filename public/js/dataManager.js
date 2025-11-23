@@ -27,6 +27,7 @@ export class DataManager {
         this.calendarDates = [];
         this.shapes = [];
         this.routeGeometriesById = {};
+        this._shapesIndexPromise = null;
 
         this.masterStops = []; 
         this.groupedStopMap = {}; 
@@ -162,6 +163,7 @@ export class DataManager {
         this.calendarDates = dataset.calendarDates || [];
         this.geoJson = dataset.geoJson || null;
         this.shapes = dataset.shapes || [];
+        this._shapesIndexPromise = null;
         this.buildRouteGeometryIndex();
 
         this.applyIndexes(indexes);
@@ -190,6 +192,69 @@ export class DataManager {
         this.masterStops = indexes.masterStops || [];
         this.shapesById = indexes.shapesById || {};
         console.log(`📍 ${this.masterStops.length} arrêts maîtres`);
+    }
+
+    hasShapeData() {
+        return this.shapesById && Object.keys(this.shapesById).length > 0;
+    }
+
+    async ensureShapesIndexLoaded() {
+        if (this.hasShapeData()) {
+            return true;
+        }
+
+        if (this._shapesIndexPromise) {
+            return this._shapesIndexPromise;
+        }
+
+        this._shapesIndexPromise = (async () => {
+            try {
+                console.log('🔁 Recharge des shapes GTFS à partir de shapes.txt (cache incomplet)…');
+                const rows = await this.loadGTFSFile('shapes.txt');
+                if (!Array.isArray(rows) || rows.length === 0) {
+                    console.warn('ensureShapesIndexLoaded: shapes.txt vide ou introuvable.');
+                    return false;
+                }
+
+                const shapesById = {};
+                const sanitize = (value) => {
+                    if (value == null) return '';
+                    if (typeof value === 'number') return value;
+                    return String(value).replace(/^['"]|['"]$/g, '').trim();
+                };
+
+                rows.forEach((row) => {
+                    const shapeId = sanitize(row.shape_id);
+                    if (!shapeId) return;
+                    const seq = parseInt(sanitize(row.shape_pt_sequence), 10);
+                    const lat = parseFloat(sanitize(row.shape_pt_lat));
+                    const lon = parseFloat(sanitize(row.shape_pt_lon));
+                    if (!Number.isFinite(seq) || Number.isNaN(lat) || Number.isNaN(lon)) return;
+                    if (!shapesById[shapeId]) {
+                        shapesById[shapeId] = [];
+                    }
+                    shapesById[shapeId].push({ seq, coord: [lon, lat] });
+                });
+
+                Object.keys(shapesById).forEach((shapeId) => {
+                    shapesById[shapeId]
+                        .sort((a, b) => a.seq - b.seq);
+                    shapesById[shapeId] = shapesById[shapeId].map(entry => entry.coord);
+                });
+
+                this.shapesById = shapesById;
+                this.shapes = rows;
+                console.log(`✅ Shapes rechargés (${Object.keys(shapesById).length} shape_id, ${rows.length} points).`);
+                return true;
+            } catch (error) {
+                console.warn('ensureShapesIndexLoaded: échec du rechargement', error);
+                return false;
+            } finally {
+                this._shapesIndexPromise = null;
+            }
+        })();
+
+        return this._shapesIndexPromise;
     }
 
     buildRouteGeometryIndex() {
@@ -1019,6 +1084,13 @@ export class DataManager {
         }
 
         return Array.from(unique.values()).slice(0, limit);
+    }
+
+    getShapeLatLngs(shapeId) {
+        if (!shapeId || !this.shapesById) return null;
+        const coords = this.shapesById[shapeId];
+        if (!coords || !coords.length) return null;
+        return coords.map(([lon, lat]) => [lat, lon]);
     }
 
     /**

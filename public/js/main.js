@@ -1428,6 +1428,11 @@ function processIntelligentResults(intelligentResults, searchTime) {
 async function ensureItineraryPolylines(itineraries) {
     if (!Array.isArray(itineraries) || !dataManager) return;
 
+    const shapesReady = await dataManager.ensureShapesIndexLoaded();
+    if (shapesReady === false) {
+        console.warn('ensureItineraryPolylines: les shapes GTFS n\'ont pas pu être chargées.');
+    }
+
     const normalize = (s) => (s || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]/g, '').trim();
 
     for (const itin of itineraries) {
