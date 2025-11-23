@@ -342,10 +342,12 @@ async function initializeApp() {
         initializeRouteFilter();
 
         try {
+            const geocodeProxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/geocode` : '/api/geocode';
             routerWorkerClient = new RouterWorkerClient({
                 dataManager,
                 icons: ICONS,
-                googleApiKey: GOOGLE_API_KEY
+                googleApiKey: GOOGLE_API_KEY,
+                geocodeProxyUrl
             });
         } catch (error) {
             console.warn('Router worker indisponible, fallback main thread.', error);

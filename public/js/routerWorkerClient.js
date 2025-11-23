@@ -1,7 +1,7 @@
 const WORKER_MODULE_PATH = './workers/routerWorker.js';
 
 export class RouterWorkerClient {
-    constructor({ dataManager, icons, googleApiKey }) {
+    constructor({ dataManager, icons, googleApiKey, geocodeProxyUrl }) {
         this.worker = null;
         this.isSupported = typeof Worker !== 'undefined';
         this.requestId = 0;
@@ -9,6 +9,7 @@ export class RouterWorkerClient {
         this.readyPromise = null;
         this.icons = icons;
         this.googleApiKey = googleApiKey;
+        this.geocodeProxyUrl = geocodeProxyUrl || (typeof window !== 'undefined' ? `${window.location.origin}/api/geocode` : '/api/geocode');
         if (this.isSupported && dataManager) {
             this.readyPromise = this.initializeWorker(dataManager);
         }
@@ -74,7 +75,8 @@ export class RouterWorkerClient {
             payload: {
                 snapshot,
                 icons: workerIcons,
-                googleApiKey: this.googleApiKey
+                googleApiKey: this.googleApiKey,
+                geocodeProxyUrl: this.geocodeProxyUrl
             }
         });
 

@@ -5,6 +5,7 @@ let routerContext = null;
 let workerDataManager = null;
 let isReady = false;
 let googleApiKey = null;
+let geocodeProxyUrl = '/api/geocode';
 
 self.addEventListener('message', async (event) => {
     const { type, payload, requestId } = event.data || {};
@@ -39,6 +40,7 @@ self.addEventListener('message', async (event) => {
 async function handleInit(payload = {}) {
     const snapshot = payload.snapshot || {};
     googleApiKey = payload.googleApiKey || null;
+    geocodeProxyUrl = payload.geocodeProxyUrl || geocodeProxyUrl;
     workerDataManager = new DataManager();
     workerDataManager.applyIndexes(snapshot.indexes || {});
     workerDataManager.routes = snapshot.dataset?.routes || [];
@@ -52,7 +54,7 @@ async function handleInit(payload = {}) {
     workerDataManager.buildRouteGeometryIndex();
     workerDataManager.isLoaded = true;
 
-    const apiBridge = createWorkerApiBridge(googleApiKey);
+    const apiBridge = createWorkerApiBridge(googleApiKey, { geocodeProxyUrl });
     routerContext = createRouterContext({
         dataManager: workerDataManager,
         apiManager: apiBridge,
@@ -60,12 +62,12 @@ async function handleInit(payload = {}) {
     });
 }
 
-function createWorkerApiBridge(apiKey) {
+function createWorkerApiBridge(apiKey, options = {}) {
     if (!apiKey) {
         return null;
     }
     const ROUTES_API = 'https://routes.googleapis.com/directions/v2:computeRoutes';
-    const GEOCODE_API = 'https://maps.googleapis.com/maps/api/geocode/json';
+    const geocodeEndpoint = options.geocodeProxyUrl || '/api/geocode';
 
     const headers = {
         'Content-Type': 'application/json',
@@ -93,10 +95,11 @@ function createWorkerApiBridge(apiKey) {
             return response.json();
         },
         async reverseGeocode(lat, lon) {
-            const url = `${GEOCODE_API}?latlng=${lat},${lon}&key=${apiKey}`;
+            const url = `${geocodeEndpoint}?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lon)}`;
             const response = await fetch(url, { method: 'GET' });
             if (!response.ok) {
-                throw new Error(`Geocode error: ${response.status}`);
+                const text = await response.text();
+                throw new Error(`Geocode proxy error: ${response.status} ${text}`);
             }
             const data = await response.json();
             const firstResult = data.results?.[0];
