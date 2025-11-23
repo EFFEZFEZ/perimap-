@@ -1906,6 +1906,10 @@ details[open] .accordion-content {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
     z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 .btn-geolocate:hover {
     background: var(--bg-secondary);
@@ -1915,6 +1919,10 @@ details[open] .accordion-content {
     opacity: 0.3;
     cursor: not-allowed;
     box-shadow: none;
+}
+.btn-geolocate svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* ✅ V57: NOUVEAU - Spinner pour le bouton géoloc */
