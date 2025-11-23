@@ -69,13 +69,20 @@ export class RouterWorkerClient {
 
         const snapshot = dataManager.createRoutingSnapshot();
         const workerIcons = serializeWorkerIcons(this.icons);
+        
+        const payload = {
+            snapshot,
+            icons: workerIcons,
+            googleApiKey: this.googleApiKey
+        };
+        
+        if (!validateSerializable(payload)) {
+            throw new Error('Payload contains non-serializable data');
+        }
+        
         this.worker.postMessage({
             type: 'init',
-            payload: {
-                snapshot,
-                icons: workerIcons,
-                googleApiKey: this.googleApiKey
-            }
+            payload
         });
 
         return initPromise;
@@ -99,6 +106,13 @@ export class RouterWorkerClient {
         const promise = new Promise((resolve, reject) => {
             this.pending.set(requestId, { resolve, reject });
         });
+        
+        // Validate payload is serializable before posting
+        if (!validateSerializable(payload, 'payload')) {
+            this.pending.delete(requestId);
+            return Promise.reject(new Error('Payload contains non-serializable data'));
+        }
+        
         this.worker.postMessage({ type, requestId, payload });
         return promise;
     }
@@ -114,14 +128,57 @@ export class RouterWorkerClient {
 
 function serializeWorkerIcons(icons) {
     if (!icons || typeof icons !== 'object') {
-        return null;
+        return {}; // Return empty object for consistency with worker expectations
     }
     const allowedKeys = ['BUS', 'WALK', 'statusWarning'];
     const safeIcons = {};
     allowedKeys.forEach((key) => {
-        if (typeof icons[key] === 'string') {
-            safeIcons[key] = icons[key];
+        const value = icons[key];
+        // Only copy string values (SVG markup) - filter out nested objects, functions, etc.
+        if (typeof value === 'string') {
+            safeIcons[key] = value;
         }
     });
     return safeIcons;
+}
+
+/**
+ * Validates that an object can be safely cloned for postMessage to a Web Worker.
+ * Recursively checks for functions or other non-serializable data.
+ * @param {*} obj - The object to validate
+ * @param {string} path - The current path in the object (for error reporting)
+ * @returns {boolean} - True if serializable, false otherwise
+ */
+function validateSerializable(obj, path = 'root') {
+    // Primitives and null/undefined are always serializable
+    if (obj === null || obj === undefined) return true;
+    const type = typeof obj;
+    if (type === 'string' || type === 'number' || type === 'boolean') return true;
+    
+    // Functions are not serializable
+    if (type === 'function') {
+        console.error(`Found function at ${path}`);
+        return false;
+    }
+    
+    // Recursively validate objects and arrays
+    if (type === 'object') {
+        // Handle arrays separately for better path reporting
+        if (Array.isArray(obj)) {
+            for (let i = 0; i < obj.length; i++) {
+                if (!validateSerializable(obj[i], `${path}[${i}]`)) {
+                    return false;
+                }
+            }
+        } else {
+            // Use Object.keys to avoid inherited properties
+            for (const key of Object.keys(obj)) {
+                if (!validateSerializable(obj[key], `${path}.${key}`)) {
+                    return false;
+                }
+            }
+        }
+    }
+    
+    return true;
 }

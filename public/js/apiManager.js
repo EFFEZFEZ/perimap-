@@ -87,10 +87,9 @@ export class ApiManager {
             const script = document.createElement('script');
             
             // ✅ V57: Charge 'places' (pour Autocomplete) et 'geocoding' (pour Reverse Geocode)
+            // Note: When using loading=async parameter, do NOT set script.async or script.defer
+            // See: https://developers.google.com/maps/documentation/javascript/load-maps-js-api#dynamic-library-import
             script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKey}&libraries=places,geocoding&v=weekly&loading=async`;
-            
-            script.async = true;
-            script.defer = true;
             script.setAttribute('data-google-maps', 'true');
             
             script.onload = () => {
