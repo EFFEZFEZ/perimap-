@@ -128,13 +128,13 @@ export class RouterWorkerClient {
 
 function serializeWorkerIcons(icons) {
     if (!icons || typeof icons !== 'object') {
-        return {};
+        return {}; // Return empty object for consistency with worker expectations
     }
     const allowedKeys = ['BUS', 'WALK', 'statusWarning'];
     const safeIcons = {};
     allowedKeys.forEach((key) => {
         const value = icons[key];
-        // Only copy primitive string values, not objects or functions
+        // Only copy string values (SVG markup) - filter out nested objects, functions, etc.
         if (typeof value === 'string') {
             safeIcons[key] = value;
         }
