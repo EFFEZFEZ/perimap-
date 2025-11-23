@@ -70,23 +70,6 @@ export class RouterWorkerClient {
         const snapshot = dataManager.createRoutingSnapshot();
         const workerIcons = serializeWorkerIcons(this.icons);
         
-        // Debug: Verify icons are serializable
-        const validateSerializable = (obj, path = 'root') => {
-            if (obj === null || obj === undefined) return true;
-            if (typeof obj === 'function') {
-                console.error(`Found function at ${path}`);
-                return false;
-            }
-            if (typeof obj === 'object') {
-                for (const key in obj) {
-                    if (!validateSerializable(obj[key], `${path}.${key}`)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        };
-        
         const payload = {
             snapshot,
             icons: workerIcons,
@@ -150,4 +133,36 @@ function serializeWorkerIcons(icons) {
         }
     });
     return safeIcons;
+}
+
+/**
+ * Validates that an object can be safely cloned for postMessage to a Web Worker.
+ * Recursively checks for functions or other non-serializable data.
+ * @param {*} obj - The object to validate
+ * @param {string} path - The current path in the object (for error reporting)
+ * @returns {boolean} - True if serializable, false otherwise
+ */
+function validateSerializable(obj, path = 'root') {
+    // Primitives and null/undefined are always serializable
+    if (obj === null || obj === undefined) return true;
+    const type = typeof obj;
+    if (type === 'string' || type === 'number' || type === 'boolean') return true;
+    
+    // Functions are not serializable
+    if (type === 'function') {
+        console.error(`Found function at ${path}`);
+        return false;
+    }
+    
+    // Recursively validate objects and arrays
+    if (type === 'object') {
+        // Use Object.keys to avoid inherited properties
+        for (const key of Object.keys(obj)) {
+            if (!validateSerializable(obj[key], `${path}.${key}`)) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
 }
