@@ -207,6 +207,45 @@ const shouldSuppressBusStep = (step) => {
     return lacksIntermediateStops;
 };
 
+function computeTimeDifferenceMinutes(startTime, endTime) {
+    const startMinutes = parseTimeStringToMinutes(startTime);
+    const endMinutes = parseTimeStringToMinutes(endTime);
+    if (startMinutes === null || endMinutes === null) return null;
+    let diff = endMinutes - startMinutes;
+    if (diff < 0) diff += 24 * 60;
+    return diff;
+}
+
+function getWaitStepPresentation(steps, index) {
+    const step = steps?.[index] || {};
+    const previousStep = index > 0 ? steps[index - 1] : null;
+    const nextStep = index < steps.length - 1 ? steps[index + 1] : null;
+
+    const fallbackTime = previousStep?.arrivalTime || step.time || step.arrivalTime || step.departureTime || nextStep?.departureTime;
+    const diffFromNeighbors = computeTimeDifferenceMinutes(previousStep?.arrivalTime, nextStep?.departureTime);
+
+    let waitMinutes = diffFromNeighbors;
+    if (waitMinutes === null && typeof step._durationSeconds === 'number') {
+        waitMinutes = Math.max(0, Math.round(step._durationSeconds / 60));
+    }
+    if (waitMinutes === null && typeof step.duration === 'string') {
+        const match = step.duration.match(/(\d+)/);
+        if (match) waitMinutes = parseInt(match[1], 10);
+    }
+    if (waitMinutes !== null && waitMinutes <= 0 && typeof step._durationSeconds === 'number' && step._durationSeconds > 0) {
+        waitMinutes = 1;
+    }
+
+    const durationLabel = (waitMinutes !== null)
+        ? `${waitMinutes} min`
+        : (step.duration || 'Attente en cours');
+
+    return {
+        timeLabel: getSafeTimeLabel(fallbackTime),
+        durationLabel
+    };
+}
+
 uiManager = new UIManager({ icons: ICONS, geolocationManager: null });
 
 /* ======================
@@ -2622,7 +2661,7 @@ function drawRouteOnResultsMap(itinerary) {
  */
 function renderItineraryDetailHTML(itinerary) {
     
-    const stepsHtml = itinerary.steps.map(step => {
+    const stepsHtml = itinerary.steps.map((step, index) => {
         // ✅ V45: Logique de marche (et vélo) restaurée avec <details>
         if (step.type === 'WALK' || step.type === 'BIKE') {
             const hasSubSteps = step.subSteps && step.subSteps.length > 0;
@@ -2669,8 +2708,9 @@ function renderItineraryDetailHTML(itinerary) {
                 </div>
             `;
         } else if (isWaitStep(step)) {
-            const waitDurationLabel = step.duration || 'Attente en cours';
-            const waitTimeLabel = getSafeTimeLabel(step.time || step.arrivalTime || step.departureTime);
+            const waitMeta = getWaitStepPresentation(itinerary.steps, index);
+            const waitDurationLabel = waitMeta.durationLabel;
+            const waitTimeLabel = waitMeta.timeLabel;
             return `
                 <div class="step-detail wait" style="--line-color: var(--text-secondary);">
                     <div class="step-icon">
@@ -2762,7 +2802,7 @@ function renderItineraryDetail(itinerary) {
     let stepsHtml = '';
 
     // ✅ V45: Logique de marche (et vélo) restaurée avec <details>
-    stepsHtml = itinerary.steps.map(step => {
+    stepsHtml = itinerary.steps.map((step, index) => {
         const lineColor = (step.type === 'BUS') ? (step.routeColor || 'var(--border)') : 'var(--text-secondary)';
         
         if (step.type === 'WALK' || step.type === 'BIKE') {
@@ -2812,8 +2852,9 @@ function renderItineraryDetail(itinerary) {
                 </div>
             `;
         } else if (isWaitStep(step)) {
-            const waitDurationLabel = step.duration || 'Attente en cours';
-            const waitTimeLabel = getSafeTimeLabel(step.time || step.arrivalTime || step.departureTime);
+            const waitMeta = getWaitStepPresentation(itinerary.steps, index);
+            const waitDurationLabel = waitMeta.durationLabel;
+            const waitTimeLabel = waitMeta.timeLabel;
             return `
                 <div class="step-detail wait" style="--line-color: var(--text-secondary);">
                     <div class="step-icon">
