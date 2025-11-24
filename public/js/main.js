@@ -51,6 +51,12 @@ let allFetchedItineraries = []; // Stocke tous les itinéraires (bus/vélo/march
 
 let geolocationManager = null;
 
+const BOTTOM_SHEET_LEVELS = [0.25, 0.5, 0.8];
+const BOTTOM_SHEET_DEFAULT_INDEX = 1;
+let currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
+let bottomSheetDragState = null;
+let bottomSheetControlsInitialized = false;
+
 // ICÔNES SVG
 const ICONS = {
     BUS: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="12" rx="3"/><path d="M4 10h16"/><path d="M6 15v2"/><path d="M18 15v2"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>`,
@@ -690,6 +696,132 @@ function handleInstallTipKeydown(event) {
     }
 }
 
+function isMobileDetailViewport() {
+    return window.innerWidth <= 768;
+}
+
+function getViewportHeight() {
+    return Math.max(window.innerHeight, document.documentElement?.clientHeight || 0);
+}
+
+function getCurrentSheetHeightPx() {
+    if (!itineraryDetailContainer) return 0;
+    const inlineValue = parseFloat(itineraryDetailContainer.style.getPropertyValue('--sheet-height'));
+    if (Number.isFinite(inlineValue)) {
+        return inlineValue;
+    }
+    const viewportHeight = getViewportHeight();
+    return viewportHeight * BOTTOM_SHEET_LEVELS[currentBottomSheetLevelIndex];
+}
+
+function applyBottomSheetLevel(index, { immediate = false } = {}) {
+    if (!itineraryDetailContainer || !isMobileDetailViewport()) return;
+    const targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, index));
+    currentBottomSheetLevelIndex = targetIndex;
+    const viewportHeight = getViewportHeight();
+    if (!viewportHeight) return;
+    const targetPx = Math.round(viewportHeight * BOTTOM_SHEET_LEVELS[targetIndex]);
+    if (immediate) {
+        itineraryDetailContainer.classList.add('sheet-height-no-transition');
+    }
+    itineraryDetailContainer.style.setProperty('--sheet-height', `${targetPx}px`);
+    if (immediate) {
+        requestAnimationFrame(() => itineraryDetailContainer?.classList.remove('sheet-height-no-transition'));
+    }
+}
+
+function prepareBottomSheetForViewport(immediate = false) {
+    if (!itineraryDetailContainer) return;
+    if (!isMobileDetailViewport()) {
+        itineraryDetailContainer.style.removeProperty('--sheet-height');
+        return;
+    }
+    applyBottomSheetLevel(currentBottomSheetLevelIndex, { immediate });
+}
+
+function handleBottomSheetResize() {
+    if (!itineraryDetailContainer) return;
+    if (!isMobileDetailViewport()) {
+        itineraryDetailContainer.style.removeProperty('--sheet-height');
+        cancelBottomSheetDrag();
+        return;
+    }
+    applyBottomSheetLevel(currentBottomSheetLevelIndex, { immediate: true });
+}
+
+function getClosestSheetLevelIndex(fraction) {
+    let bestIdx = 0;
+    let bestDistance = Infinity;
+    BOTTOM_SHEET_LEVELS.forEach((level, idx) => {
+        const distance = Math.abs(level - fraction);
+        if (distance < bestDistance) {
+            bestIdx = idx;
+            bestDistance = distance;
+        }
+    });
+    return bestIdx;
+}
+
+function cancelBottomSheetDrag() {
+    if (!bottomSheetDragState) return;
+    window.removeEventListener('pointermove', onBottomSheetPointerMove);
+    window.removeEventListener('pointerup', onBottomSheetPointerUp);
+    window.removeEventListener('pointercancel', onBottomSheetPointerUp);
+    itineraryDetailContainer?.classList.remove('is-dragging');
+    bottomSheetDragState = null;
+}
+
+function onBottomSheetPointerDown(event) {
+    if (!isMobileDetailViewport() || !itineraryDetailContainer?.classList.contains('is-active')) return;
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    event.preventDefault();
+    bottomSheetDragState = {
+        startY: event.clientY,
+        startHeight: getCurrentSheetHeightPx(),
+        lastHeight: null
+    };
+    itineraryDetailContainer.classList.add('is-dragging');
+    window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
+    window.addEventListener('pointerup', onBottomSheetPointerUp);
+    window.addEventListener('pointercancel', onBottomSheetPointerUp);
+}
+
+function onBottomSheetPointerMove(event) {
+    if (!bottomSheetDragState || !itineraryDetailContainer) return;
+    const viewportHeight = getViewportHeight();
+    if (!viewportHeight) return;
+    const deltaY = bottomSheetDragState.startY - event.clientY;
+    const minHeight = viewportHeight * BOTTOM_SHEET_LEVELS[0];
+    const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
+    let nextHeight = bottomSheetDragState.startHeight + deltaY;
+    nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
+    bottomSheetDragState.lastHeight = nextHeight;
+    itineraryDetailContainer.style.setProperty('--sheet-height', `${nextHeight}px`);
+}
+
+function onBottomSheetPointerUp() {
+    if (!bottomSheetDragState) return;
+    const viewportHeight = getViewportHeight();
+    if (viewportHeight) {
+        const appliedHeight = bottomSheetDragState.lastHeight ?? bottomSheetDragState.startHeight;
+        const fraction = appliedHeight / viewportHeight;
+        const snapIndex = getClosestSheetLevelIndex(fraction);
+        applyBottomSheetLevel(snapIndex);
+    }
+    cancelBottomSheetDrag();
+}
+
+function initBottomSheetControls() {
+    if (bottomSheetControlsInitialized || !itineraryDetailContainer) return;
+    const handle = itineraryDetailContainer.querySelector('.panel-handle');
+    if (handle) {
+        handle.addEventListener('pointerdown', onBottomSheetPointerDown, { passive: false });
+    }
+    window.addEventListener('resize', handleBottomSheetResize);
+    bottomSheetControlsInitialized = true;
+    prepareBottomSheetForViewport(true);
+}
+
 function setupStaticEventListeners() {
     try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
     populateTimeSelects();
@@ -861,6 +993,8 @@ function setupStaticEventListeners() {
             if (resultsToSuggestions) resultsToSuggestions.style.display = 'none';
         }
     });
+
+    initBottomSheetControls();
 }
 
 function setupDataDependentEventListeners() {
@@ -3345,6 +3479,10 @@ function showResultsView() {
  */
 function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
     if (!itineraryDetailContainer) return;
+    initBottomSheetControls();
+    cancelBottomSheetDrag();
+    currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
+    prepareBottomSheetForViewport(true);
     itineraryDetailContainer.classList.remove('hidden');
     itineraryDetailContainer.classList.remove('is-scrolled');
     resetDetailPanelScroll();
@@ -3383,6 +3521,7 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
 // *** NOUVELLE FONCTION V33 ***
 function hideDetailView() {
     if (!itineraryDetailContainer) return;
+    cancelBottomSheetDrag();
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');
     if (itineraryDetailBackdrop) {
