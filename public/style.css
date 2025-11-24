@@ -1747,6 +1747,10 @@ details[open] .accordion-content {
         line-height: 1.1;
         order: 2; /* title after logo */
     }
+    .header-nav {
+        order: 3;
+        margin-left: auto;
+    }
     .brand-name {
         font-size: 1.25rem;
         margin: 0;
