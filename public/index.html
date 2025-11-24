@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PériMap · Planificateur indépendant du réseau Péribus</title>
-    <meta name="description" content="PériMap est une application indépendante qui combine données officielles Péribus et calculs Google pour planifier vos trajets dans le Grand Périgueux.">
-    <meta name="keywords" content="Péribus, Grand Périgueux, itinéraires bus, horaires bus, planificateur, application transport, carte interactive">
+    <title>PériMap · Assistant mobilité Grand Périgueux</title>
+    <meta name="description" content="Assistant mobilité indépendant pour préparer vos trajets dans le Grand Périgueux avec horaires officiels, calculs multi-modes et carte rapide.">
+    <meta name="keywords" content="Grand Périgueux, itinéraires bus, horaires bus, planificateur mobilité, application transport, carte interactive">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://perimap.app/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="PériMap · Planificateur indépendant du réseau Péribus">
-    <meta property="og:description" content="Consultez les horaires, cartes et itinéraires interactifs du réseau Péribus sur une application non officielle et open data.">
+    <meta property="og:title" content="PériMap · Assistant mobilité Grand Périgueux">
+    <meta property="og:description" content="Consultez les horaires, cartes et itinéraires interactifs du réseau du Grand Périgueux dans une application indépendante et open data.">
     <meta property="og:url" content="https://perimap.app/">
-    <meta property="og:image" content="https://i.ibb.co/0jJhLPp8/Peribus.webp">
+    <meta property="og:image" content="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PériMap · Planificateur indépendant du réseau Péribus">
-    <meta name="twitter:description" content="Application open data pour explorer le réseau Péribus, préparer vos trajets et consulter les informations pratiques.">
-    <meta name="twitter:image" content="https://i.ibb.co/0jJhLPp8/Peribus.webp">
+    <meta name="twitter:title" content="PériMap · Assistant mobilité Grand Périgueux">
+    <meta name="twitter:description" content="Application open data pour explorer les lignes du Grand Périgueux, préparer vos trajets et consulter les informations pratiques.">
+    <meta name="twitter:image" content="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
     <meta name="theme-color" content="#22c55e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PériMap">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
-    <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/1f0pp0Tc/Peribus-Icon.webp">
+    <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
@@ -50,8 +50,8 @@
         "url": "https://perimap.app/",
         "applicationCategory": "TravelApplication",
         "operatingSystem": "Web",
-        "description": "Planificateur d'itinéraires indépendant pour le réseau Péribus du Grand Périgueux, basé sur des données open data.",
-        "keywords": ["Péribus", "Grand Périgueux", "bus", "planificateur", "open data"],
+        "description": "Planificateur d'itinéraires indépendant pour le réseau de bus du Grand Périgueux, basé sur des données open data.",
+        "keywords": ["Grand Périgueux", "bus", "planificateur", "open data", "mobilité"],
         "inLanguage": "fr",
         "author": {
             "@type": "Person",
@@ -72,10 +72,13 @@
     <header id="main-header">
     <div class="header-content">
         <div class="logo">
-            <img src="https://i.ibb.co/0jJhLPp8/Peribus.webp" alt="Logo Péribus" class="header-logo-img">
+            <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Logo PériMap" class="header-logo-img">
             <div class="header-title-group">
-                <span class="brand-name">Péribus</span>
-                <span class="brand-sub">Le réseau du Grand Périgueux</span>
+                <span class="brand-pill">Indépendant</span>
+                <div class="brand-text-stack">
+                    <span class="brand-name">PériMap</span>
+                    <span class="brand-sub">Assistant mobilité Grand Périgueux</span>
+                </div>
             </div>
         </div>
         <nav class="header-nav">
@@ -401,12 +404,9 @@
         <div id="results-side-panel">
             
             <div id="itinerary-edit-panel">
-                <div class="itinerary-edit-header">
-                    <button id="btn-back-to-dashboard-from-results" class="btn-icon-round">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                    </button>
-                    <h2>Itinéraires</h2>
-                </div>
+                <button id="btn-back-to-dashboard-from-results" class="btn-icon-round itinerary-back-btn" aria-label="Retour aux résultats">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
 
                 <div class="itinerary-edit-form">
                     <div class="planner-inputs results-planner-inputs">
@@ -509,7 +509,7 @@
 
     <div id="itinerary-detail-container" class="hidden">
 
-        <div class="panel-handle" aria-hidden="true"></div>
+        <div id="detail-map"></div>
 
         <div id="detail-map-header">
             <button id="btn-back-to-results" class="btn-icon-round">
@@ -519,12 +519,13 @@
             <div id="detail-map-summary"></div>
         </div>
 
-        <div id="detail-map"></div>
-
-        <div id="detail-panel-wrapper">
+        <div id="detail-bottom-sheet" aria-live="polite">
+            <div class="panel-handle" aria-hidden="true"></div>
+            <div id="detail-panel-wrapper">
                 <div id="detail-panel-content">
                     </div>
             </div>
+        </div>
 
         </div>
         <script type="module" src="js/main.js"></script>

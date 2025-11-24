@@ -363,7 +363,7 @@ let resultsMap, resultsModeTabs;
 let resultsFromInput, resultsToInput, resultsFromSuggestions, resultsToSuggestions;
 let resultsSwapBtn, resultsWhenBtn, resultsPopover, resultsDate, resultsHour, resultsMinute;
 let resultsPopoverSubmitBtn, resultsPlannerSubmitBtn, resultsGeolocateBtn;
-let itineraryDetailBackdrop, itineraryDetailContainer, btnBackToResults, detailMapHeader, detailMapSummary;
+let itineraryDetailBackdrop, itineraryDetailContainer, btnBackToResults, detailMapHeader, detailMapSummary, detailBottomSheet;
 let detailPanelWrapper, detailPanelContent;
 let hallPlannerSubmitBtn, hallFromInput, hallToInput, hallFromSuggestions, hallToSuggestions;
 let hallWhenBtn, hallPopover, hallDate, hallHour, hallMinute, hallPopoverSubmitBtn, hallSwapBtn, hallGeolocateBtn;
@@ -428,6 +428,7 @@ async function initializeApp() {
     resultsGeolocateBtn = document.getElementById('results-geolocate-btn');
     itineraryDetailBackdrop = document.getElementById('itinerary-detail-backdrop');
     itineraryDetailContainer = document.getElementById('itinerary-detail-container');
+    detailBottomSheet = document.getElementById('detail-bottom-sheet');
     btnBackToResults = document.getElementById('btn-back-to-results');
     detailMapHeader = document.getElementById('detail-map-header');
     detailMapSummary = document.getElementById('detail-map-summary');
@@ -705,8 +706,8 @@ function getViewportHeight() {
 }
 
 function getCurrentSheetHeightPx() {
-    if (!itineraryDetailContainer) return 0;
-    const inlineValue = parseFloat(itineraryDetailContainer.style.getPropertyValue('--sheet-height'));
+    if (!detailBottomSheet) return 0;
+    const inlineValue = parseFloat(detailBottomSheet.style.getPropertyValue('--sheet-height'));
     if (Number.isFinite(inlineValue)) {
         return inlineValue;
     }
@@ -715,34 +716,34 @@ function getCurrentSheetHeightPx() {
 }
 
 function applyBottomSheetLevel(index, { immediate = false } = {}) {
-    if (!itineraryDetailContainer || !isMobileDetailViewport()) return;
+    if (!detailBottomSheet || !isMobileDetailViewport()) return;
     const targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, index));
     currentBottomSheetLevelIndex = targetIndex;
     const viewportHeight = getViewportHeight();
     if (!viewportHeight) return;
     const targetPx = Math.round(viewportHeight * BOTTOM_SHEET_LEVELS[targetIndex]);
     if (immediate) {
-        itineraryDetailContainer.classList.add('sheet-height-no-transition');
+        detailBottomSheet.classList.add('sheet-height-no-transition');
     }
-    itineraryDetailContainer.style.setProperty('--sheet-height', `${targetPx}px`);
+    detailBottomSheet.style.setProperty('--sheet-height', `${targetPx}px`);
     if (immediate) {
-        requestAnimationFrame(() => itineraryDetailContainer?.classList.remove('sheet-height-no-transition'));
+        requestAnimationFrame(() => detailBottomSheet?.classList.remove('sheet-height-no-transition'));
     }
 }
 
 function prepareBottomSheetForViewport(immediate = false) {
-    if (!itineraryDetailContainer) return;
+    if (!detailBottomSheet) return;
     if (!isMobileDetailViewport()) {
-        itineraryDetailContainer.style.removeProperty('--sheet-height');
+        detailBottomSheet.style.removeProperty('--sheet-height');
         return;
     }
     applyBottomSheetLevel(currentBottomSheetLevelIndex, { immediate });
 }
 
 function handleBottomSheetResize() {
-    if (!itineraryDetailContainer) return;
+    if (!detailBottomSheet) return;
     if (!isMobileDetailViewport()) {
-        itineraryDetailContainer.style.removeProperty('--sheet-height');
+        detailBottomSheet.style.removeProperty('--sheet-height');
         cancelBottomSheetDrag();
         return;
     }
@@ -767,12 +768,12 @@ function cancelBottomSheetDrag() {
     window.removeEventListener('pointermove', onBottomSheetPointerMove);
     window.removeEventListener('pointerup', onBottomSheetPointerUp);
     window.removeEventListener('pointercancel', onBottomSheetPointerUp);
-    itineraryDetailContainer?.classList.remove('is-dragging');
+    detailBottomSheet?.classList.remove('is-dragging');
     bottomSheetDragState = null;
 }
 
 function onBottomSheetPointerDown(event) {
-    if (!isMobileDetailViewport() || !itineraryDetailContainer?.classList.contains('is-active')) return;
+    if (!isMobileDetailViewport() || !detailBottomSheet || !itineraryDetailContainer?.classList.contains('is-active')) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     event.preventDefault();
     bottomSheetDragState = {
@@ -780,14 +781,14 @@ function onBottomSheetPointerDown(event) {
         startHeight: getCurrentSheetHeightPx(),
         lastHeight: null
     };
-    itineraryDetailContainer.classList.add('is-dragging');
+    detailBottomSheet.classList.add('is-dragging');
     window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
     window.addEventListener('pointerup', onBottomSheetPointerUp);
     window.addEventListener('pointercancel', onBottomSheetPointerUp);
 }
 
 function onBottomSheetPointerMove(event) {
-    if (!bottomSheetDragState || !itineraryDetailContainer) return;
+    if (!bottomSheetDragState || !detailBottomSheet) return;
     const viewportHeight = getViewportHeight();
     if (!viewportHeight) return;
     const deltaY = bottomSheetDragState.startY - event.clientY;
@@ -796,7 +797,7 @@ function onBottomSheetPointerMove(event) {
     let nextHeight = bottomSheetDragState.startHeight + deltaY;
     nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
     bottomSheetDragState.lastHeight = nextHeight;
-    itineraryDetailContainer.style.setProperty('--sheet-height', `${nextHeight}px`);
+    detailBottomSheet.style.setProperty('--sheet-height', `${nextHeight}px`);
 }
 
 function onBottomSheetPointerUp() {
@@ -812,8 +813,8 @@ function onBottomSheetPointerUp() {
 }
 
 function initBottomSheetControls() {
-    if (bottomSheetControlsInitialized || !itineraryDetailContainer) return;
-    const handle = itineraryDetailContainer.querySelector('.panel-handle');
+    if (bottomSheetControlsInitialized || !detailBottomSheet) return;
+    const handle = detailBottomSheet.querySelector('.panel-handle');
     if (handle) {
         handle.addEventListener('pointerdown', onBottomSheetPointerDown, { passive: false });
     }
@@ -3538,6 +3539,11 @@ function resetDetailViewState() {
     itineraryDetailContainer.classList.add('hidden');
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');
+    if (detailBottomSheet) {
+        detailBottomSheet.classList.remove('is-dragging');
+        detailBottomSheet.classList.remove('sheet-height-no-transition');
+        detailBottomSheet.style.removeProperty('--sheet-height');
+    }
     resetDetailPanelScroll();
     if (detailPanelContent) {
         detailPanelContent.innerHTML = '';

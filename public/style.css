@@ -755,14 +755,13 @@ body.view-is-locked #main-header {
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 1.25rem;
+    gap: 1rem;
     font-weight: 800;
     color: var(--text-primary);
 }
 .header-logo-img {
-    height: 48px;
-    max-width: 160px;
+    height: 52px;
+    max-width: 170px;
     width: auto;
     object-fit: contain;
     display: block;
@@ -770,21 +769,36 @@ body.view-is-locked #main-header {
 .header-title-group {
     display: flex;
     flex-direction: column;
-    line-height: 1.1;
+    gap: 0.25rem;
+}
+.brand-text-stack {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+.brand-pill {
+    align-self: flex-start;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--primary);
+    font-weight: 700;
 }
 .brand-name {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+    background: linear-gradient(120deg, var(--primary), #14b8a6);
+    -webkit-background-clip: text;
+    color: transparent;
 }
 .brand-sub {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
-}
-/* Colour just for the brand word (e.g. <span class="brand-name">Péribus</span>) */
-.brand-name {
-    color: #2563eb; /* var(--primary) */
 }
 .header-logo-icon {
     color: var(--primary);
@@ -1142,6 +1156,18 @@ body.view-is-locked #main-header {
 }
 #btn-back-to-hall svg {
     margin-right: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.itinerary-back-btn {
+    margin-bottom: 1rem;
+    margin-left: 1.5rem;
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+.itinerary-back-btn svg {
     color: var(--text-secondary);
 }
 
@@ -2852,18 +2878,6 @@ body.dark-theme .real-select option {
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
-.itinerary-edit-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem 1.5rem;
-    padding-top: calc(0.75rem + env(safe-area-inset-top)); /* Ajout V35 */
-}
-.itinerary-edit-header h2 {
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin: 0;
-}
 .itinerary-edit-form {
     padding: 0 1.5rem 1rem;
     position: relative;
@@ -3373,19 +3387,18 @@ body.dark-theme .real-select option {
         overflow-y: auto; /* Le panneau ENTIER scrolle */
     }
     
-    #results-side-panel .itinerary-edit-header {
-        padding-top: calc(0.75rem + env(safe-area-inset-top));
+    #itinerary-edit-panel {
+        padding-top: calc(0.5rem + env(safe-area-inset-top));
     }
-    
+
+    .itinerary-back-btn {
+        margin-left: 0.75rem;
+    }
+
     /* Le wrapper de la liste ne doit plus scroller, c'est le parent */
     .results-list-wrapper {
         flex: none; /* Ne grandit pas, s'adapte au contenu */
         overflow-y: visible;
-    }
-    
-    .itinerary-edit-header {
-        padding: 0.5rem 0.75rem;
-        gap: 0.75rem;
     }
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
@@ -3422,32 +3435,55 @@ body.dark-theme .real-select option {
     }
 
     #itinerary-detail-container {
-        display: flex;
-        flex-direction: column;
+        display: block;
         position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: var(--sheet-height, 80vh);
-        max-height: calc(100vh - 32px);
-        background: var(--bg-main);
+        inset: 0;
         z-index: 1110;
-        border-radius: 24px 24px 0 0;
-        box-shadow: 0 -25px 60px rgba(15, 23, 42, 0.45);
         transform: translateY(calc(100% + env(safe-area-inset-bottom)));
-        transition: transform 0.3s ease-in-out, height 0.25s ease;
-        padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
-        overflow: hidden;
+        transition: transform 0.35s ease;
+        pointer-events: none;
     }
     #itinerary-detail-container.is-active {
         transform: translateY(0);
+        pointer-events: auto;
     }
-    #itinerary-detail-container.is-dragging,
-    #itinerary-detail-container.sheet-height-no-transition {
+
+    #detail-map {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #e5e5e5;
+        z-index: 0;
+    }
+
+    #detail-bottom-sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-main);
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -25px 60px rgba(15, 23, 42, 0.45);
+        height: var(--sheet-height, 70vh);
+        padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+        transform: translateY(calc(100% + env(safe-area-inset-bottom)));
+        transition: transform 0.3s ease-in-out, height 0.25s ease;
+        overflow: hidden;
+        pointer-events: auto;
+        display: flex;
+        flex-direction: column;
+        z-index: 1005;
+    }
+    #itinerary-detail-container.is-active #detail-bottom-sheet {
+        transform: translateY(0);
+    }
+    #detail-bottom-sheet.is-dragging,
+    #detail-bottom-sheet.sheet-height-no-transition {
         transition: transform 0.3s ease-in-out, height 0s;
     }
 
-    #itinerary-detail-container .panel-handle {
+    #detail-bottom-sheet .panel-handle {
         display: block;
         width: 48px;
         height: 5px;
@@ -3457,7 +3493,7 @@ body.dark-theme .real-select option {
         cursor: grab;
         touch-action: none;
     }
-    #itinerary-detail-container.is-dragging .panel-handle {
+    #detail-bottom-sheet.is-dragging .panel-handle {
         cursor: grabbing;
     }
 
@@ -3493,18 +3529,6 @@ body.dark-theme .real-select option {
     #detail-map-summary .route-time { margin-right: 0.75rem; }
     #detail-map-summary .route-duration { color: var(--text-secondary); }
 
-    #detail-map {
-        width: 100%;
-        height: 240px;
-        flex: 0 0 240px;
-        flex-shrink: 0;
-        transition: height 0.25s ease-in-out;
-        background: #e5e5e5;
-        border-radius: 24px 24px 12px 12px;
-        overflow: hidden;
-        margin-top: 4px;
-    }
-
     #detail-panel-wrapper {
         flex: 1 1 auto;
         width: 100%;
@@ -3512,8 +3536,7 @@ body.dark-theme .real-select option {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
-        padding-top: 0;
-        transition: padding 0.2s ease;
+        padding-top: 0.5rem;
         position: relative;
         background: var(--bg-main);
     }
@@ -3522,10 +3545,6 @@ body.dark-theme .real-select option {
         padding: 0.75rem 1rem 4rem 1rem;
     }
 
-    #itinerary-detail-container.is-scrolled #detail-map {
-        height: 140px;
-        flex-basis: 140px;
-    }
     #itinerary-detail-container.is-scrolled #detail-map-header {
         background: var(--bg-main);
         box-shadow: var(--shadow-md);
