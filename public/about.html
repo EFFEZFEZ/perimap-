@@ -35,38 +35,22 @@
             </nav>
         </div>
     </header>
-    <main class="about-main">
-        <section class="about-card hero-card fade-in">
-            <div class="hero-badge">Open data • PWA</div>
-            <h1>PériMap simplifie vos trajets Péribus.</h1>
-            <p class="hero-lede">Une web app légère, alignée sur le réseau du Grand Périgueux, qui mixe données officielles et moteur Google pour offrir un guidage clair et agréable.</p>
-            <div class="about-meta-grid">
-                <article>
-                    <h3>Données fiables</h3>
-                    <p>Horaires GTFS officiels + enrichissements Google Maps pour combler les manques.</p>
-                </article>
-                <article>
-                    <h3>Transparence</h3>
-                    <p>Projet non affilié, mention ODbL affichée et base dérivée disponible.</p>
-                </article>
-                <article>
-                    <h3>Usage libre</h3>
-                    <p>Aucune pub, aucun tracking – juste un compagnon pensé pour les usagers.</p>
-                </article>
+    <main class="about-main tile-layout">
+        <section class="about-tile tile-primary" data-animate>
+            <div>
+                <div class="hero-badge">Open data • PWA</div>
+                <h1>PériMap en deux mots</h1>
+                <p class="hero-lede">Un compagnon léger pour le réseau Péribus : données officielles, UI douce, expérience type app native.</p>
             </div>
+            <ul class="tile-points">
+                <li><span>Sources fiables</span><small>GTFS Grand Périgueux + moteur Google Routes.</small></li>
+                <li><span>Projet indépendant</span><small>Non affilié, attribution ODbL respectée, base <code>gtfs.bundle.json</code> publiée.</small></li>
+                <li><span>Sans friction</span><small>Pas de pub ni de tracking, uniquement l'essentiel pour voyager.</small></li>
+            </ul>
             <a class="hero-link" href="https://github.com/EFFEZFEZ/p-rimap-sans-api-" target="_blank" rel="noopener">Voir le code source →</a>
         </section>
 
-        <section class="about-card info-card fade-in">
-            <h2>Ce qui fait la différence</h2>
-            <ul class="info-list">
-                <li><strong>Cartes élégantes.</strong> Itinéraires multi-modes, polylines GTFS, marqueurs velours.</li>
-                <li><strong>Chronos réalistes.</strong> Calculs porte-à-porte avec marche estimée et correspondances.</li>
-                <li><strong>Respect des données.</strong> Attribution claire, base <code>gtfs.bundle.json</code> réutilisable.</li>
-            </ul>
-        </section>
-
-        <section class="about-card install-section fade-in">
+        <section class="about-tile tile-secondary" data-animate>
             <div class="install-heading">
                 <h2>Installer PériMap</h2>
                 <p class="install-blurb">Pensez à ajouter PériMap à votre écran d'accueil 😉 ça ne prend aucune place !</p>
@@ -157,6 +141,28 @@
             setHelper(choice.outcome === 'accepted' ? 'Installation en cours sur votre écran d\'accueil.' : 'Installation annulée.');
             deferredPrompt = null;
         });
+    })();
+
+    (function tileObserver() {
+        const tiles = document.querySelectorAll('[data-animate]');
+        if (!tiles.length) return;
+
+        const reveal = (tile) => tile.classList.add('is-visible');
+
+        if (!('IntersectionObserver' in window)) {
+            tiles.forEach(reveal);
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                reveal(entry.target);
+                obs.unobserve(entry.target);
+            });
+        }, { threshold: 0.35 });
+
+        tiles.forEach(tile => observer.observe(tile));
     })();
     </script>
 </body>

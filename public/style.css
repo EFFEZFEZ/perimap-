@@ -398,6 +398,12 @@ body.about-page {
     padding: 2.5rem 1.5rem 3rem;
 }
 
+.tile-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
 .about-card {
     width: 100%;
     background: var(--bg-main);
@@ -409,11 +415,45 @@ body.about-page {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeSlideUp 0.8s ease forwards;
+.about-card,
+.about-tile {
+    width: 100%;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    line-height: 1.6;
+}
+
+.about-tile {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    opacity: 0;
+    transform: translateY(32px);
+    transition: transform 0.7s ease, opacity 0.7s ease;
+}
+
+.about-tile.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .hero-card {
     background-image: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(99,102,241,0.08));
     border: 1px solid rgba(37,99,235,0.25);
+}
+
+.tile-primary {
+    background-image: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(99,102,241,0.05));
+    border: 1px solid rgba(37,99,235,0.18);
+}
+
+.tile-secondary {
+    background: var(--bg-main);
 }
 
 .hero-badge {
@@ -490,16 +530,22 @@ body.about-page {
     flex-direction: column;
     gap: 0.75rem;
 }
-
-.info-list li {
-    font-size: 1rem;
-    color: var(--text-primary);
-}
-
-.install-heading {
+.tile-points {
+    list-style: none;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.85rem;
+}
+
+.tile-points li span {
+    display: block;
+    font-weight: 700;
+}
+
+.tile-points small {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .install-blurb {
@@ -536,7 +582,8 @@ body.about-page {
     margin-top: auto;
 }
 
-body.dark-theme .about-card {
+body.dark-theme .about-card,
+body.dark-theme .about-tile {
     background: rgba(6, 12, 20, 0.85);
     border-color: rgba(255,255,255,0.08);
     box-shadow: 0 15px 35px rgba(0,0,0,0.55);
@@ -565,7 +612,8 @@ body.dark-theme .install-helper {
         padding-top: 1.5rem;
     }
 
-    .about-card {
+    .about-card,
+    .about-tile {
         padding: 1.5rem;
     }
 }
