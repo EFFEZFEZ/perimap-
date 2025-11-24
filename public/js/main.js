@@ -830,7 +830,7 @@ function onBottomSheetPointerUp() {
 
 function initBottomSheetControls() {
     if (bottomSheetControlsInitialized || !detailBottomSheet || !itineraryDetailContainer) return;
-    itineraryDetailContainer.addEventListener('pointerdown', onBottomSheetPointerDown, { passive: false });
+    detailBottomSheet.addEventListener('pointerdown', onBottomSheetPointerDown, { passive: false });
     window.addEventListener('resize', handleBottomSheetResize);
     bottomSheetControlsInitialized = true;
     prepareBottomSheetForViewport(true);
