@@ -1641,7 +1641,7 @@ async function ensureItineraryPolylines(itineraries) {
         if (!itin || !Array.isArray(itin.steps)) continue;
         for (const step of itin.steps) {
             try {
-                if (!step || step.type !== 'BUS') continue;
+            if (!step || step.type !== 'BUS' || isWaitStep(step)) continue;
 
                 const hasLatLngs = Array.isArray(step?.polyline?.latLngs) && step.polyline.latLngs.length >= 2;
                 if (hasLatLngs) continue;
@@ -2318,8 +2318,18 @@ const getPolylineLatLngs = (polyline) => {
     return null;
 };
 
+const isWaitStep = (step) => {
+    if (!step) return false;
+    if (step.type === 'WAIT') return true;
+    const instruction = (step.instruction || '').toLowerCase();
+    const looksLikeWait = instruction.includes('correspondance') || instruction.includes('attente');
+    const missingRoute = !step.routeShortName || step.routeShortName === 'undefined';
+    const missingStops = !step.departureStop && !step.arrivalStop;
+    return looksLikeWait && (missingRoute || missingStops);
+};
+
 function extractStepPolylines(step) {
-    if (!step || step.type === 'WAIT') return [];
+    if (!step || isWaitStep(step)) return [];
 
     const collected = [];
     const pushIfValid = (poly) => {
@@ -2346,7 +2356,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
 
     markerLayer.clearLayers();
 
-    const busSteps = itinerary.steps.filter(step => step.type === 'BUS');
+    const busSteps = itinerary.steps.filter(step => step.type === 'BUS' && !isWaitStep(step));
     if (!busSteps.length) {
         addFallbackItineraryMarkers(itinerary, markerLayer);
         return;
@@ -2492,7 +2502,7 @@ function drawRouteOnResultsMap(itinerary) {
         const polylinesToDraw = extractStepPolylines(step);
 
         if (!polylinesToDraw.length) {
-            if (step.type !== 'WAIT') {
+            if (!isWaitStep(step)) {
                 console.warn('drawRouteOnResultsMap: étape sans polylines', { stepType: step.type, step });
             }
             return;
@@ -2599,7 +2609,7 @@ function renderItineraryDetailHTML(itinerary) {
                     </div>
                 </div>
             `;
-        } else if (step.type === 'WAIT') {
+        } else if (isWaitStep(step)) {
             const waitLabel = step.duration ? `${step.duration} d'attente` : 'Attente en cours';
             return `
                 <div class="step-detail wait" style="--line-color: var(--text-secondary);">
@@ -2731,7 +2741,7 @@ function renderItineraryDetail(itinerary) {
                     </div>
                 </div>
             `;
-        } else if (step.type === 'WAIT') {
+        } else if (isWaitStep(step)) {
             const waitLabel = step.duration ? `${step.duration} d'attente` : 'Attente en cours';
             return `
                 <div class="step-detail wait" style="--line-color: var(--text-secondary);">
@@ -2826,7 +2836,7 @@ function renderItineraryDetail(itinerary) {
             const polylinesToDraw = extractStepPolylines(step);
 
             if (!polylinesToDraw.length) {
-                if (step.type !== 'WAIT') {
+                if (!isWaitStep(step)) {
                     console.warn('renderItineraryDetail: étape sans polylines', { stepType: step.type, step });
                 }
                 return;
