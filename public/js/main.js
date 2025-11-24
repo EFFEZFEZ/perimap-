@@ -165,6 +165,23 @@ function getAlertBannerIcon(type) {
     return ALERT_BANNER_ICONS[type] || ALERT_BANNER_ICONS.default;
 }
 
+const isMissingTextValue = (value) => {
+    if (value === undefined || value === null) return true;
+    if (typeof value === 'number') return false;
+    const trimmed = String(value).trim();
+    if (!trimmed) return true;
+    const normalized = trimmed.toLowerCase();
+    return normalized === 'undefined' || normalized === 'null';
+};
+
+const getSafeStopLabel = (value, fallback = 'Arrêt à préciser') => {
+    return isMissingTextValue(value) ? fallback : value;
+};
+
+const getSafeTimeLabel = (value, fallback = '--:--') => {
+    return isMissingTextValue(value) ? fallback : value;
+};
+
 uiManager = new UIManager({ icons: ICONS, geolocationManager: null });
 
 /* ======================
@@ -2332,9 +2349,9 @@ const isWaitStep = (step) => {
     if (!step) return false;
     if (step.type === 'WAIT') return true;
     const instruction = (step.instruction || '').toLowerCase();
-    const looksLikeWait = instruction.includes('correspondance') || instruction.includes('attente');
-    const missingRoute = !step.routeShortName || step.routeShortName === 'undefined';
-    const missingStops = !step.departureStop && !step.arrivalStop;
+    const looksLikeWait = instruction.includes('correspondance') || instruction.includes('attente') || instruction.includes('transfert');
+    const missingRoute = isMissingTextValue(step.routeShortName);
+    const missingStops = isMissingTextValue(step.departureStop) && isMissingTextValue(step.arrivalStop);
     return looksLikeWait && (missingRoute || missingStops);
 };
 
@@ -2644,18 +2661,25 @@ function renderItineraryDetailHTML(itinerary) {
             }
 
             const lineColor = step.routeColor || 'var(--border)';
+            const badgeLabel = isMissingTextValue(step.routeShortName) ? 'BUS' : step.routeShortName;
+            const badgeBg = step.routeColor || 'var(--primary)';
+            const badgeText = step.routeTextColor || '#ffffff';
+            const departureStopLabel = getSafeStopLabel(step.departureStop);
+            const arrivalStopLabel = getSafeStopLabel(step.arrivalStop);
+            const departureTimeLabel = getSafeTimeLabel(step.departureTime);
+            const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
             
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
                     <div class="step-icon">
-                        <div class="route-line-badge" style="background-color: ${step.routeColor}; color: ${step.routeTextColor};">${step.routeShortName}</div>
+                        <div class="route-line-badge" style="background-color: ${badgeBg}; color: ${badgeText};">${badgeLabel}</div>
                     </div>
                     <div class="step-info">
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
                         <div class="step-stop-point">
-                            <span class="step-time">Montée à <strong>${step.departureStop}</strong></span>
-                            <span class="step-time-detail">(${step.departureTime})</span>
+                            <span class="step-time">Montée à <strong>${departureStopLabel}</strong></span>
+                            <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
                         
                         ${(intermediateStopCount > 0) ? `
@@ -2673,8 +2697,8 @@ function renderItineraryDetailHTML(itinerary) {
                         ` : ''}
                         
                         <div class="step-stop-point">
-                            <span class="step-time">Descente à <strong>${step.arrivalStop}</strong></span>
-                            <span class="step-time-detail">(${step.arrivalTime})</span>
+                            <span class="step-time">Descente à <strong>${arrivalStopLabel}</strong></span>
+                            <span class="step-time-detail">(${arrivalTimeLabel})</span>
                         </div>
                     </div>
                 </div>
@@ -2775,17 +2799,25 @@ function renderItineraryDetail(itinerary) {
                 stopCountLabel = `1 arrêt`;
             }
 
+            const badgeLabel = isMissingTextValue(step.routeShortName) ? 'BUS' : step.routeShortName;
+            const badgeBg = step.routeColor || 'var(--primary)';
+            const badgeText = step.routeTextColor || '#ffffff';
+            const departureStopLabel = getSafeStopLabel(step.departureStop);
+            const arrivalStopLabel = getSafeStopLabel(step.arrivalStop);
+            const departureTimeLabel = getSafeTimeLabel(step.departureTime);
+            const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
+
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
                     <div class="step-icon">
-                        <div class="route-line-badge" style="background-color: ${step.routeColor}; color: ${step.routeTextColor};">${step.routeShortName}</div>
+                        <div class="route-line-badge" style="background-color: ${badgeBg}; color: ${badgeText};">${badgeLabel}</div>
                     </div>
                     <div class="step-info">
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
                         <div class="step-stop-point">
-                            <span class="step-time">Montée à <strong>${step.departureStop}</strong></span>
-                            <span class="step-time-detail">(${step.departureTime})</span>
+                            <span class="step-time">Montée à <strong>${departureStopLabel}</strong></span>
+                            <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
                         
                         ${(intermediateStopCount > 0) ? `
@@ -2803,8 +2835,8 @@ function renderItineraryDetail(itinerary) {
                         ` : ''}
                         
                         <div class="step-stop-point">
-                            <span class="step-time">Descente à <strong>${step.arrivalStop}</strong></span>
-                            <span class="step-time-detail">(${step.arrivalTime})</span>
+                            <span class="step-time">Descente à <strong>${arrivalStopLabel}</strong></span>
+                            <span class="step-time-detail">(${arrivalTimeLabel})</span>
                         </div>
                     </div>
                 </div>
@@ -2813,6 +2845,7 @@ function renderItineraryDetail(itinerary) {
     }).join('');
 
     detailPanelContent.innerHTML = stepsHtml;
+    resetDetailPanelScroll();
 
     // 2. Mettre à jour le résumé
     if(detailMapSummary) {
@@ -3236,9 +3269,7 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
     if (!itineraryDetailContainer) return;
     itineraryDetailContainer.classList.remove('hidden');
     itineraryDetailContainer.classList.remove('is-scrolled');
-    if (detailPanelWrapper) {
-        detailPanelWrapper.scrollTop = 0;
-    }
+    resetDetailPanelScroll();
     if (itineraryDetailBackdrop) {
         itineraryDetailBackdrop.classList.remove('hidden');
         requestAnimationFrame(() => itineraryDetailBackdrop.classList.add('is-active'));
@@ -3290,9 +3321,7 @@ function resetDetailViewState() {
     itineraryDetailContainer.classList.add('hidden');
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');
-    if (detailPanelWrapper) {
-        detailPanelWrapper.scrollTop = 0;
-    }
+    resetDetailPanelScroll();
     if (detailPanelContent) {
         detailPanelContent.innerHTML = '';
     }
@@ -3307,6 +3336,21 @@ function resetDetailViewState() {
         itineraryDetailBackdrop.classList.remove('is-active');
         itineraryDetailBackdrop.classList.add('hidden');
     }
+}
+
+function resetDetailPanelScroll() {
+    if (!detailPanelWrapper) return;
+    detailPanelWrapper.scrollTop = 0;
+    detailPanelWrapper.scrollLeft = 0;
+    requestAnimationFrame(() => {
+        if (!detailPanelWrapper) return;
+        if (detailPanelWrapper.scrollTop !== 0) {
+            detailPanelWrapper.scrollTop = 0;
+        }
+        if (detailPanelWrapper.scrollLeft !== 0) {
+            detailPanelWrapper.scrollLeft = 0;
+        }
+    });
 }
 
 

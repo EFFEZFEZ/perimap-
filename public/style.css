@@ -3014,7 +3014,8 @@ body.dark-theme .real-select option {
 .route-summary-line {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    column-gap: 0.35rem;
+    row-gap: 0.4rem;
     flex-wrap: wrap; /* Permet le passage à la ligne */
 }
 .route-summary-bus-icon {
@@ -3048,9 +3049,11 @@ body.dark-theme .real-select option {
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     font-size: 0.9rem;
-    border-radius: var(--radius-sm);
-    padding: 0.25rem 0.5rem;
-    min-width: 28px;
+    border-radius: 999px;
+    width: 46px;
+    min-width: 46px;
+    height: 32px;
+    padding: 0;
     text-align: center;
 }
 
