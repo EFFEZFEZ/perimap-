@@ -394,6 +394,24 @@ body.view-is-locked #main-header {
     font-weight: 800;
     color: var(--text-primary);
 }
+#about-section {
+    margin-top: 1.5rem;
+    line-height: 1.6;
+}
+
+#about-section ul {
+    margin: 1rem 0;
+    padding-left: 1.2rem;
+    color: var(--text-primary);
+}
+
+#about-section li {
+    margin-bottom: 0.35rem;
+}
+
+#about-section .about-cta {
+    font-weight: 600;
+}
 .header-logo-img {
     height: 48px;
     max-width: 160px;

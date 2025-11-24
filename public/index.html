@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mon Réseau - Bus en Temps Réel</title>
+    <title>PériMap · Planificateur indépendant du réseau Péribus</title>
+    <meta name="description" content="PériMap est une application indépendante qui combine données officielles Péribus et calculs Google pour planifier vos trajets dans le Grand Périgueux.">
+    <meta name="keywords" content="Péribus, Grand Périgueux, itinéraires bus, horaires bus, planificateur, application transport, carte interactive">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://perimap.app/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="PériMap · Planificateur indépendant du réseau Péribus">
+    <meta property="og:description" content="Consultez les horaires, cartes et itinéraires interactifs du réseau Péribus sur une application non officielle et open data.">
+    <meta property="og:url" content="https://perimap.app/">
+    <meta property="og:image" content="https://i.ibb.co/0jJhLPp8/Peribus.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PériMap · Planificateur indépendant du réseau Péribus">
+    <meta name="twitter:description" content="Application open data pour explorer le réseau Péribus, préparer vos trajets et consulter les informations pratiques.">
+    <meta name="twitter:image" content="https://i.ibb.co/0jJhLPp8/Peribus.webp">
     <meta name="theme-color" content="#22c55e">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/1f0pp0Tc/Peribus-Icon.webp">
@@ -25,6 +38,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "PériMap",
+        "url": "https://perimap.app/",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "Web",
+        "description": "Planificateur d'itinéraires indépendant pour le réseau Péribus du Grand Périgueux, basé sur des données open data.",
+        "keywords": ["Péribus", "Grand Périgueux", "bus", "planificateur", "open data"],
+        "inLanguage": "fr",
+        "author": {
+            "@type": "Person",
+            "name": "Projet PériMap"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        }
+    }
+    </script>
 </head>
 <body>
 
@@ -42,6 +77,18 @@
         <nav class="header-nav">
             <button id="theme-toggle-btn" class="btn-icon-round" aria-label="Basculer thème sombre" title="Thème sombre" aria-pressed="false">
                 <span id="theme-toggle-icon">🌙</span>
+
+                    <section id="about-section" class="card">
+                        <h4>À propos de PériMap</h4>
+                        <p>PériMap est une application web indépendante imaginée pour faciliter les déplacements sur le réseau Péribus du Grand Périgueux. Elle combine les données officielles publiées en open data (format GTFS, licence ODbL) et les calculs d'itinéraires Google pour proposer des trajets détaillés, des cartes interactives et des informations pratiques.</p>
+                        <p>Le service n'est pas affilié au Grand Périgueux : il se limite à agréger des informations publiques afin d'offrir un outil plus moderne. Les horaires et correspondances affichés sont fournis à titre indicatif et peuvent différer des horaires réels. Pensez à vérifier les annonces officielles avant de voyager.</p>
+                        <ul>
+                            <li>Sources : jeux de données officiels Péribus + API Google Maps Platform.</li>
+                            <li>Mise à jour du jeu GTFS dès la publication d'un nouveau lot sur data.grandperigueux.fr.</li>
+                            <li>Accès libre et gratuit, sans publicité ni collecte de données personnelles.</li>
+                        </ul>
+                        <p class="about-cta">Vous pouvez consulter le dépôt open source et réutiliser la base dérivée via <a href="https://github.com/EFFEZFEZ/p-rimap-sans-api-" target="_blank" rel="noopener">GitHub</a>.</p>
+                    </section>
             </button>
             </nav>
     </div>
