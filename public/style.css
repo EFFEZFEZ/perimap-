@@ -370,18 +370,26 @@ body.about-page {
 
 .about-header-content {
     gap: 1rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+.about-header-content .logo {
+    flex: 1;
+    min-width: 0;
+}
+
+.about-header-content .header-nav {
+    flex-shrink: 0;
 }
 
 .about-back-row {
     width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1rem 1.5rem 0;
     display: flex;
     justify-content: flex-start;
+    margin-bottom: 1.25rem;
 }
 
 .about-page .about-back-btn {
