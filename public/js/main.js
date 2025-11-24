@@ -165,13 +165,17 @@ function getAlertBannerIcon(type) {
     return ALERT_BANNER_ICONS[type] || ALERT_BANNER_ICONS.default;
 }
 
+const PLACEHOLDER_TEXT_VALUES = new Set(['undefined', 'null', '--', '--:--', '—', 'n/a', 'na']);
+
 const isMissingTextValue = (value) => {
     if (value === undefined || value === null) return true;
     if (typeof value === 'number') return false;
     const trimmed = String(value).trim();
     if (!trimmed) return true;
     const normalized = trimmed.toLowerCase();
-    return normalized === 'undefined' || normalized === 'null';
+    if (PLACEHOLDER_TEXT_VALUES.has(normalized)) return true;
+    if (/^[-–—\s:._]+$/.test(trimmed)) return true;
+    return normalized === 'inconnu' || normalized === 'unknown';
 };
 
 const getSafeStopLabel = (value, fallback = 'Arrêt à préciser') => {
@@ -192,11 +196,15 @@ const getSafeRouteBadgeLabel = (value, fallback = 'BUS') => {
 
 const shouldSuppressBusStep = (step) => {
     if (!step || step.type !== 'BUS') return false;
-    const lacksRoute = isMissingTextValue(step.routeShortName);
-    const lacksBoardingInfo = !hasStopMetadata(step.departureStop, step.departureTime);
-    const lacksAlightingInfo = !hasStopMetadata(step.arrivalStop, step.arrivalTime);
+    const hasRoute = !isMissingTextValue(step.routeShortName);
+    const hasBoardingInfo = hasStopMetadata(step.departureStop, step.departureTime);
+    const hasAlightingInfo = hasStopMetadata(step.arrivalStop, step.arrivalTime);
+    if (hasBoardingInfo || hasAlightingInfo) {
+        return false;
+    }
+    if (!hasRoute) return true;
     const lacksIntermediateStops = !Array.isArray(step.intermediateStops) || step.intermediateStops.length === 0;
-    return lacksRoute && lacksBoardingInfo && lacksAlightingInfo && lacksIntermediateStops;
+    return lacksIntermediateStops;
 };
 
 uiManager = new UIManager({ icons: ICONS, geolocationManager: null });
