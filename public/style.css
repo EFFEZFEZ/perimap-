@@ -2872,7 +2872,7 @@ body.dark-theme .real-select option {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: calc(env(safe-area-inset-top, 0px) + 0.25rem) 1.5rem 0.25rem;
+    padding: 0.5rem 1.5rem 0.25rem;
 }
 
 .itinerary-edit-header h2 {
@@ -3476,7 +3476,10 @@ body.dark-theme .real-select option {
     #itinerary-detail-container.is-active #detail-bottom-sheet {
         transform: translateY(0);
     }
-    #detail-bottom-sheet.is-dragging,
+    #detail-bottom-sheet.is-dragging {
+        transition: none !important;
+    }
+
     #detail-bottom-sheet.sheet-height-no-transition {
         transition: transform 0.3s ease-in-out, height 0s;
     }
