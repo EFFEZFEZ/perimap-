@@ -193,6 +193,32 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
 
     if (!dataManager || !dataManager.isLoaded) return [];
 
+    const STOP_PLACEHOLDER_TOKENS = new Set(['undefined', 'null', '--', '—', 'n/a', 'na', 'inconnu', 'unknown']);
+    const sanitizeStopText = (value) => {
+        if (value === undefined || value === null) return null;
+        if (typeof value === 'number') return String(value);
+        const trimmed = String(value).trim();
+        if (!trimmed) return null;
+        const normalized = trimmed.toLowerCase();
+        if (STOP_PLACEHOLDER_TOKENS.has(normalized)) return null;
+        if (/^[-–—\s:._]+$/.test(trimmed)) return null;
+        return trimmed;
+    };
+
+    const getStopDisplayName = (stop) => {
+        if (!stop) return null;
+        const direct = sanitizeStopText(stop.stop_name);
+        if (direct) return direct;
+        if (stop.parent_station) {
+            const parent = dataManager.getStop(stop.parent_station);
+            const parentName = sanitizeStopText(parent?.stop_name);
+            if (parentName) return parentName;
+        }
+        const viaCode = sanitizeStopText(stop.stop_code);
+        if (viaCode) return viaCode;
+        return stop.stop_id || null;
+    };
+
     const normalizeCoords = (coord) => {
         if (!coord) return null;
         const lat = parseFloat(coord.lat ?? coord.latitude);
@@ -285,7 +311,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             const distA = (a.distance == null) ? Infinity : a.distance;
             const distB = (b.distance == null) ? Infinity : b.distance;
             if (distA === distB) {
-                return (a.stop.stop_name || '').localeCompare(b.stop.stop_name || '');
+                const nameA = getStopDisplayName(a.stop) || a.stop.stop_name || '';
+                const nameB = getStopDisplayName(b.stop) || b.stop.stop_name || '';
+                return nameA.localeCompare(nameB);
             }
             return distA - distB;
         });
@@ -294,7 +322,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const best = limited[0];
         if (best) {
             const distanceLabel = (best.distance != null) ? `${Math.round(best.distance)} m` : 'distance inconnue';
-            console.log(`🔎 Hybrid: ${limited.length} arrêt(s) candidats pour ${label}. Meilleur: ${best.stop.stop_name} (${distanceLabel}).`);
+            const bestName = getStopDisplayName(best.stop) || best.stop.stop_name || best.stop.stop_id || 'arrêt inconnu';
+            console.log(`🔎 Hybrid: ${limited.length} arrêt(s) candidats pour ${label}. Meilleur: ${bestName} (${distanceLabel}).`);
         }
         return limited;
     };
@@ -381,6 +410,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const alightingPoint = toPoint(alightingStop);
         if (!boardingPoint || !alightingPoint) return null;
 
+        const boardingStopName = getStopDisplayName(boardingStop);
+        const alightingStopName = getStopDisplayName(alightingStop);
+
         let geometry = dataManager.getRouteGeometry(segment.routeId);
         if (!geometry && segment.shapeId) {
             geometry = dataManager.getShapeGeoJSON(segment.shapeId, segment.routeId);
@@ -408,7 +440,10 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const durationSeconds = Math.max(0, segment.arrivalSeconds - segment.departureSeconds);
         const intermediateStops = (segment.stopTimes || [])
             .slice(1, -1)
-            .map(st => dataManager.getStop(st.stop_id)?.stop_name || st.stop_id);
+            .map(st => {
+                const stopObj = dataManager.getStop(st.stop_id);
+                return getStopDisplayName(stopObj) || st.stop_id;
+            });
         const route = segment.route || dataManager.getRoute(segment.routeId);
         const busStep = {
             type: 'BUS',
@@ -418,8 +453,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             routeColor: route?.route_color ? `#${route.route_color}` : '#3388ff',
             routeTextColor: route?.route_text_color ? `#${route.route_text_color}` : '#ffffff',
             routeShortName: route?.route_short_name || segment.routeId,
-            departureStop: boardingStop?.stop_name || 'Arrêt de départ',
-            arrivalStop: alightingStop?.stop_name || 'Arrêt d’arrivée',
+            departureStop: boardingStopName || 'Arrêt de départ',
+            arrivalStop: alightingStopName || 'Arrêt d’arrivée',
             departureTime: dataManager.formatTime(segment.departureSeconds),
             arrivalTime: dataManager.formatTime(segment.arrivalSeconds),
             duration: dataManager.formatDuration(durationSeconds) || 'Horaires théoriques',
@@ -454,6 +489,10 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     }) => {
         if (!firstSegment || !secondSegment || !boardingStop || !transferStop || !finalStop) return null;
 
+        const boardingStopName = getStopDisplayName(boardingStop);
+        const transferStopName = getStopDisplayName(transferStop);
+        const finalStopName = getStopDisplayName(finalStop);
+
         const originMatch = originCandidates.find(c => c.stop.stop_id === boardingStop.stop_id);
         const destMatch = destCandidates.find(c => c.stop.stop_id === finalStop.stop_id);
 
@@ -470,7 +509,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const finalPoint = toPoint(finalStop);
         if (!boardingPoint || !finalPoint) return null;
 
-        const approachLabel = boardingStop?.stop_name ? `Marcher jusqu’à ${boardingStop.stop_name}` : 'Marcher jusqu’à l’arrêt';
+        const approachLabel = boardingStopName ? `Marcher jusqu’à ${boardingStopName}` : 'Marcher jusqu’à l’arrêt';
         const approachStep = await buildWalkStep(approachLabel, origin, boardingPoint);
         if (approachStep) {
             itinerary.steps.push(approachStep);
@@ -487,7 +526,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             itinerary.steps.push({
                 type: 'WAIT',
                 icon: ICONS.statusWarning,
-                instruction: `Correspondance à ${transferStop.stop_name}`,
+                instruction: `Correspondance à ${transferStopName || 'l’arrêt suivant'}`,
                 duration: `${Math.max(1, Math.round(waitSeconds / 60))} min`,
                 time: waitTimeLabel,
                 _durationSeconds: waitSeconds
@@ -531,7 +570,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
 
         itinerary._transferInfo = {
             waitMinutes: Math.round(waitSeconds / 60),
-            transferStopName: transferStop.stop_name
+            transferStopName: transferStopName || transferStop.stop_name
         };
 
         return itinerary;
@@ -743,6 +782,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                 const boardingPoint = toPoint(boardingStop);
                 const alightingPoint = toPoint(alightingStop);
                 if (!boardingPoint || !alightingPoint) continue;
+                const boardingStopName = getStopDisplayName(boardingStop);
+                const alightingStopName = getStopDisplayName(alightingStop);
 
                 const itinerary = {
                     type: 'BUS',
@@ -752,7 +793,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                     summarySegments: []
                 };
 
-                const approachLabel = boardingStop?.stop_name ? `Marcher jusqu’à ${boardingStop.stop_name}` : 'Marcher jusqu’à l’arrêt';
+                const approachLabel = boardingStopName ? `Marcher jusqu’à ${boardingStopName}` : 'Marcher jusqu’à l’arrêt';
                 const approachStep = await buildWalkStep(approachLabel, origin, boardingPoint);
                 if (approachStep) {
                     itinerary.steps.push(approachStep);
@@ -762,7 +803,10 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                 if (!busLeg) continue;
                 itinerary.steps.push(busLeg.step);
 
-                const egressStep = await buildWalkStep('Marcher jusqu’à destination', alightingPoint, destination);
+                const egressInstruction = alightingStopName
+                    ? `Marcher depuis ${alightingStopName}`
+                    : 'Marcher jusqu’à destination';
+                const egressStep = await buildWalkStep(egressInstruction, alightingPoint, destination);
                 if (egressStep) {
                     itinerary.steps.push(egressStep);
                 }
@@ -816,8 +860,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     if (!itineraries.length) {
         console.warn('⚠️ Hybrid: aucun itinéraire GTFS (direct ou correspondance) trouvé.');
         console.table({
-            startCandidates: originCandidates.map(c => ({ id: c.stop.stop_id, name: c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
-            endCandidates: destCandidates.map(c => ({ id: c.stop.stop_id, name: c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
+            startCandidates: originCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
+            endCandidates: destCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
             windowStartSec,
             windowEndSec
         });
