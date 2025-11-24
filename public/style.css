@@ -404,17 +404,6 @@ body.about-page {
     gap: 1.5rem;
 }
 
-.about-card {
-    width: 100%;
-    background: var(--bg-main);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    padding: 2rem;
-    line-height: 1.7;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeSlideUp 0.8s ease forwards;
 .about-card,
 .about-tile {
     width: 100%;
@@ -424,6 +413,13 @@ body.about-page {
     box-shadow: var(--shadow-lg);
     padding: 2rem;
     line-height: 1.6;
+}
+
+.about-card {
+    line-height: 1.7;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideUp 0.8s ease forwards;
 }
 
 .about-tile {
