@@ -1,7 +1,8 @@
 {
-  "name": "Périmap",
-  "short_name": "Peribus",
+  "name": "PériMap",
+  "short_name": "PériMap",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#22c55e",
