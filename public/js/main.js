@@ -182,6 +182,23 @@ const getSafeTimeLabel = (value, fallback = '--:--') => {
     return isMissingTextValue(value) ? fallback : value;
 };
 
+const hasStopMetadata = (stopName, timeValue) => {
+    return !isMissingTextValue(stopName) || !isMissingTextValue(timeValue);
+};
+
+const getSafeRouteBadgeLabel = (value, fallback = 'BUS') => {
+    return isMissingTextValue(value) ? fallback : value;
+};
+
+const shouldSuppressBusStep = (step) => {
+    if (!step || step.type !== 'BUS') return false;
+    const lacksRoute = isMissingTextValue(step.routeShortName);
+    const lacksBoardingInfo = !hasStopMetadata(step.departureStop, step.departureTime);
+    const lacksAlightingInfo = !hasStopMetadata(step.arrivalStop, step.arrivalTime);
+    const lacksIntermediateStops = !Array.isArray(step.intermediateStops) || step.intermediateStops.length === 0;
+    return lacksRoute && lacksBoardingInfo && lacksAlightingInfo && lacksIntermediateStops;
+};
+
 uiManager = new UIManager({ icons: ICONS, geolocationManager: null });
 
 /* ======================
@@ -1110,7 +1127,13 @@ function processGoogleRoutesResponse(data) {
             if (step.type === 'WALK') {
                 return { type: 'WALK', duration: step.duration };
             } else {
-                return { type: 'BUS', name: step.routeShortName, color: step.routeColor, textColor: step.routeTextColor, duration: step.duration };
+                return {
+                    type: 'BUS',
+                    name: getSafeRouteBadgeLabel(step.routeShortName),
+                    color: step.routeColor,
+                    textColor: step.routeTextColor,
+                    duration: step.duration
+                };
             }
         });
         const hasBusSegment = itinerary.steps.some(step => step.type === 'BUS');
@@ -2150,8 +2173,9 @@ function renderItineraryResults(modeFilter) {
             
             // Logique BUS (existante)
             itinerary.summarySegments.forEach((segment, index) => {
+                const segmentLabel = getSafeRouteBadgeLabel(segment.name);
                 summarySegmentsHtml += `
-                    <div class="route-line-badge" style="background-color: ${segment.color}; color: ${segment.textColor};">${segment.name}</div>
+                    <div class="route-line-badge" style="background-color: ${segment.color}; color: ${segment.textColor};">${segmentLabel}</div>
                 `;
                 
                 if (index < itinerary.summarySegments.length - 1) {
@@ -2649,6 +2673,8 @@ function renderItineraryDetailHTML(itinerary) {
                     </div>
                 </div>
             `;
+        } else if (shouldSuppressBusStep(step)) {
+            return '';
         } else { // BUS
             const hasIntermediateStops = step.intermediateStops && step.intermediateStops.length > 0;
             const intermediateStopCount = hasIntermediateStops ? step.intermediateStops.length : (step.numStops > 1 ? step.numStops - 1 : 0);
@@ -2661,7 +2687,7 @@ function renderItineraryDetailHTML(itinerary) {
             }
 
             const lineColor = step.routeColor || 'var(--border)';
-            const badgeLabel = isMissingTextValue(step.routeShortName) ? 'BUS' : step.routeShortName;
+            const badgeLabel = getSafeRouteBadgeLabel(step.routeShortName);
             const badgeBg = step.routeColor || 'var(--primary)';
             const badgeText = step.routeTextColor || '#ffffff';
             const departureStopLabel = getSafeStopLabel(step.departureStop);
@@ -2788,6 +2814,8 @@ function renderItineraryDetail(itinerary) {
                     </div>
                 </div>
             `;
+        } else if (shouldSuppressBusStep(step)) {
+            return '';
         } else { // BUS
             const hasIntermediateStops = step.intermediateStops && step.intermediateStops.length > 0;
             const intermediateStopCount = hasIntermediateStops ? step.intermediateStops.length : (step.numStops > 1 ? step.numStops - 1 : 0);
@@ -2799,7 +2827,7 @@ function renderItineraryDetail(itinerary) {
                 stopCountLabel = `1 arrêt`;
             }
 
-            const badgeLabel = isMissingTextValue(step.routeShortName) ? 'BUS' : step.routeShortName;
+            const badgeLabel = getSafeRouteBadgeLabel(step.routeShortName);
             const badgeBg = step.routeColor || 'var(--primary)';
             const badgeText = step.routeTextColor || '#ffffff';
             const departureStopLabel = getSafeStopLabel(step.departureStop);
