@@ -1607,6 +1607,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                 d.setHours(hh, mm, 0, 0);
                 return d.getTime();
             };
+            const parseDepartureMs = (depStr) => parseArrivalMs(depStr);
 
             const busWithMs = busItins.map(i => ({ itin: i, arrivalMs: parseArrivalMs(i.arrivalTime) })).filter(x => !isNaN(x.arrivalMs));
 
@@ -1911,19 +1912,29 @@ function processIntelligentResults(intelligentResults, searchTime) {
             const allBuses = [];
             // Ajouter les bus Google filtrés (déjà dans la fenêtre [req-30min, req])
             filteredBus.forEach(it => {
-                allBuses.push({ itin: it, arrivalMs: parseArrivalMs(it.arrivalTime), source: 'google' });
+                allBuses.push({ 
+                    itin: it, 
+                    arrivalMs: parseArrivalMs(it.arrivalTime), 
+                    departureMs: parseDepartureMs(it.departureTime),
+                    source: 'google' 
+                });
             });
             // Ajouter les bus GTFS trouvés dans la même fenêtre
             gtfsAdded.forEach(g => {
                 const arrivalMs = parseArrivalMs(g.arrivalTime);
                 // uniquement si dans la fenêtre (sécurité)
                 if (!isNaN(arrivalMs) && arrivalMs >= windowStart && arrivalMs <= reqMs) {
-                    allBuses.push({ itin: g, arrivalMs: arrivalMs, source: 'gtfs' });
+                    allBuses.push({ 
+                        itin: g, 
+                        arrivalMs: arrivalMs, 
+                        departureMs: parseDepartureMs(g.departureTime),
+                        source: 'gtfs' 
+                    });
                 }
             });
 
-            // Trier chronologiquement par heure d'arrivée
-            allBuses.sort((a, b) => a.arrivalMs - b.arrivalMs);
+            // Trier chronologiquement par heure de DÉPART (DESC pour avoir le départ le plus tardif en premier)
+            allBuses.sort((a, b) => (b.departureMs || 0) - (a.departureMs || 0));
 
             // Diagnostics GTFS
             const missingGtfs = gtfsAdded.filter(g => !filteredBus.some(f => `${f.summarySegments[0]?.name}_${f.arrivalTime}` === `${g.summarySegments[0]?.name}_${g.arrivalTime}`));

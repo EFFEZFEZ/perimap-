@@ -913,6 +913,12 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     itineraries.sort((a, b) => {
         const depA = a._departureSeconds !== undefined ? a._departureSeconds : (dataManager.timeToSeconds ? dataManager.timeToSeconds(a.departureTime) : 0);
         const depB = b._departureSeconds !== undefined ? b._departureSeconds : (dataManager.timeToSeconds ? dataManager.timeToSeconds(b.departureTime) : 0);
+        
+        if (searchTime?.type === 'arriver') {
+            // Pour "Arriver à", on veut partir le plus TARD possible (donc décroissant)
+            return depB - depA;
+        }
+        // Pour "Partir à", on veut partir le plus TÔT possible (donc croissant)
         return depA - depB;
     });
 
