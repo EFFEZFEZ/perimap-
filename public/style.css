@@ -1512,7 +1512,8 @@ details[open] .accordion-content {
     position: relative;
     z-index: 1; 
     background: #f0f0f0;
-    touch-action: none;
+    touch-action: pan-x pan-y;
+    -ms-touch-action: pan-x pan-y;
 }
 
 #top-bar {
@@ -2987,6 +2988,7 @@ body.dark-theme .real-select option {
     flex: 1; /* Prend tout l'espace restant à droite */
     height: 100%;
     background: #e5e5e5;
+    touch-action: pan-x pan-y;
 }
 
 
@@ -3461,6 +3463,7 @@ body.dark-theme .real-select option {
         height: 100%;
         background: #e5e5e5;
         z-index: 0;
+        touch-action: pan-x pan-y;
     }
 
     /* Le fond de carte reste toujours interactif */
