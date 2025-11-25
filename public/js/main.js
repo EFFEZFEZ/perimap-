@@ -1206,6 +1206,10 @@ function prefillOtherPlanner(sourceFormName, sourceElements) {
     targetElements.dateSelect.value = sourceElements.dateSelect.value;
     targetElements.hourSelect.value = sourceElements.hourSelect.value;
     targetElements.minuteSelect.value = sourceElements.minuteSelect.value;
+    if (uiManager && typeof uiManager.syncEnhancedTimeSelect === 'function') {
+        uiManager.syncEnhancedTimeSelect(targetElements.hourSelect);
+        uiManager.syncEnhancedTimeSelect(targetElements.minuteSelect);
+    }
     const sourceActiveTab = sourceElements.popover.querySelector('.popover-tab.active').dataset.tab;
     targetElements.popover.querySelectorAll('.popover-tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.tab === sourceActiveTab);

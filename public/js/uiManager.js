@@ -2,6 +2,8 @@ export class UIManager {
     constructor({ icons, geolocationManager }) {
         this.icons = icons;
         this.geolocationManager = geolocationManager;
+        this.timeDropdowns = new Set();
+        this.handleTimeDropdownDocumentClick = this.handleTimeDropdownDocumentClick.bind(this);
     }
 
     applyThemeState(useDarkParam, renderers = []) {
@@ -87,6 +89,9 @@ export class UIManager {
                 if (m === selectedMinute) option.selected = true;
                 minEl.appendChild(option);
             }
+
+            this.enhanceTimeSelect(hourEl, (option) => option?.textContent || '--');
+            this.enhanceTimeSelect(minEl, (option) => option?.textContent || '--');
         };
 
         populate(hall);
@@ -141,6 +146,7 @@ export class UIManager {
             if (popover && !popover.classList.contains('hidden')) {
                 popover.classList.add('hidden');
                 whenBtn.classList.remove('popover-active');
+                this.closeAllTimeDropdowns();
             }
             await onExecuteSearch(source, elements);
         });
@@ -189,6 +195,8 @@ export class UIManager {
                         dateSelect.value = todayValue;
                         hourSelect.value = currentHour;
                         minuteSelect.value = currentMinute;
+                        this.syncEnhancedTimeSelect(hourSelect);
+                        this.syncEnhancedTimeSelect(minuteSelect);
                     } catch (e) {}
                 }
 
@@ -203,6 +211,7 @@ export class UIManager {
                 }
                 popover.classList.add('hidden');
                 whenBtn.classList.remove('popover-active');
+                this.closeAllTimeDropdowns();
             });
             popover.addEventListener('click', (e) => e.stopPropagation());
         }
@@ -236,5 +245,128 @@ export class UIManager {
                 });
             });
         }
+    }
+
+    enhanceTimeSelect(selectEl, formatFn = (option) => option?.textContent || '') {
+        if (!selectEl) return;
+        if (!selectEl._enhancedDropdown) {
+            this.createTimeDropdown(selectEl);
+        }
+        selectEl._enhancedDropdown.formatOption = formatFn;
+        this.buildTimeDropdownOptions(selectEl);
+        this.updateTimeDropdownDisplay(selectEl);
+    }
+
+    createTimeDropdown(selectEl) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'time-select-wrapper';
+        const parent = selectEl.parentNode;
+        parent.insertBefore(wrapper, selectEl);
+        wrapper.appendChild(selectEl);
+        selectEl.classList.add('time-select-native');
+        selectEl.setAttribute('tabindex', '-1');
+        selectEl.setAttribute('aria-hidden', 'true');
+
+        const displayBtn = document.createElement('button');
+        displayBtn.type = 'button';
+        displayBtn.className = 'time-select-display';
+        displayBtn.setAttribute('aria-haspopup', 'listbox');
+        displayBtn.setAttribute('aria-expanded', 'false');
+        wrapper.appendChild(displayBtn);
+
+        const menu = document.createElement('div');
+        menu.className = 'time-select-menu';
+        menu.setAttribute('role', 'listbox');
+        wrapper.appendChild(menu);
+
+        displayBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const isOpen = wrapper.classList.contains('is-open');
+            this.toggleTimeDropdown(selectEl, !isOpen);
+        });
+
+        selectEl.addEventListener('change', () => {
+            this.updateTimeDropdownDisplay(selectEl);
+        });
+
+        selectEl._enhancedDropdown = {
+            wrapper,
+            displayBtn,
+            menu,
+            formatOption: (option) => option?.textContent || ''
+        };
+
+        this.timeDropdowns.add(selectEl);
+        if (!this.timeDropdownListenerAttached) {
+            document.addEventListener('click', this.handleTimeDropdownDocumentClick);
+            this.timeDropdownListenerAttached = true;
+        }
+    }
+
+    buildTimeDropdownOptions(selectEl) {
+        const meta = selectEl?._enhancedDropdown;
+        if (!meta) return;
+        const { menu, formatOption } = meta;
+        menu.innerHTML = '';
+        Array.from(selectEl.options || []).forEach((option) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-select-option';
+            btn.textContent = formatOption(option);
+            btn.dataset.value = option.value;
+            btn.setAttribute('role', 'option');
+            if (option.disabled) btn.disabled = true;
+            if (option.value === selectEl.value) btn.classList.add('is-active');
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                selectEl.value = option.value;
+                this.updateTimeDropdownDisplay(selectEl);
+                this.toggleTimeDropdown(selectEl, false);
+                selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            menu.appendChild(btn);
+        });
+    }
+
+    updateTimeDropdownDisplay(selectEl) {
+        const meta = selectEl?._enhancedDropdown;
+        if (!meta) return;
+        const { displayBtn, menu, formatOption } = meta;
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        displayBtn.textContent = formatOption(selectedOption) || '--';
+        menu.querySelectorAll('.time-select-option').forEach((btn) => {
+            btn.classList.toggle('is-active', btn.dataset.value === selectEl.value);
+        });
+    }
+
+    toggleTimeDropdown(selectEl, shouldOpen) {
+        const meta = selectEl?._enhancedDropdown;
+        if (!meta) return;
+        if (shouldOpen) {
+            this.timeDropdowns.forEach((dropdown) => {
+                if (dropdown !== selectEl) {
+                    this.toggleTimeDropdown(dropdown, false);
+                }
+            });
+        }
+        const { wrapper, displayBtn } = meta;
+        wrapper.classList.toggle('is-open', shouldOpen);
+        displayBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+
+    handleTimeDropdownDocumentClick(event) {
+        if (event.target.closest('.time-select-wrapper')) return;
+        this.closeAllTimeDropdowns();
+    }
+
+    closeAllTimeDropdowns() {
+        this.timeDropdowns.forEach((dropdown) => this.toggleTimeDropdown(dropdown, false));
+    }
+
+    syncEnhancedTimeSelect(selectEl) {
+        if (!selectEl?._enhancedDropdown) return;
+        this.updateTimeDropdownDisplay(selectEl);
     }
 }
