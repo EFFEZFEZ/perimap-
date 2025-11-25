@@ -2865,7 +2865,8 @@ body.dark-theme .real-select option {
     flex: 1; /* Prend toute la hauteur restante sous le header */
     background: var(--bg-light);
     /* Assure que le conteneur ne dépasse pas la hauteur de la vue */
-    height: 100vh;
+    height: 100%; /* FIX: Use 100% instead of 100vh to respect parent flex container */
+    min-height: 0; /* FIX: Allow shrinking */
     overflow: hidden; /* Ensure container doesn't scroll */
 }
 
@@ -3391,14 +3392,14 @@ body.dark-theme .real-select option {
     .step-time-detail {
         font-size: 0.875rem; /* Au lieu de 0.8125rem */
     }
-
     /* ÉTAPE 1: VUE LISTE (IDFM-style) */
     
     /* Rétablit la direction en colonne */
     #itinerary-results-container {
         flex-direction: column;
         /* *** CORRECTION V35: Hauteur dynamique pour s'adapter à Safari *** */
-        height: 100vh; 
+        height: 100%; /* FIX: Use 100% instead of 100vh */
+    }   height: 100vh; 
     }
     
     /* **CORRECTION IDFM**: Cache la carte sur la vue liste */
