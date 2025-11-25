@@ -2860,15 +2860,25 @@ body.dark-theme .real-select option {
 
 @media (max-width: 640px) {
     .time-select-menu {
-        width: calc(100vw - 1.25rem);
-        left: 50%;
-        transform: translate(-50%, -50%);
+        width: min(12rem, 85vw);
+        max-height: 13rem;
+        top: calc(100% + 0.4rem);
+        left: 0;
+        right: auto;
+        transform: none;
+        padding: 0.2rem 0;
+        border-radius: var(--radius-md);
+    }
+    .time-select-wrapper-hour .time-select-menu,
+    .time-select-wrapper-minute .time-select-menu {
+        border-radius: var(--radius-md);
     }
     .time-select-wrapper.is-open .time-select-menu {
-        transform: translate(-50%, -50%);
+        transform: none;
     }
-    .time-select-menu {
-        max-height: 16rem;
+    .time-select-option {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.9rem;
     }
 }
 .time-select-option:hover,
