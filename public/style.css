@@ -3455,6 +3455,16 @@ body.dark-theme .real-select option {
         z-index: 0;
     }
 
+    #itinerary-detail-container.sheet-is-dragging #detail-map,
+    #itinerary-detail-container.sheet-is-dragging #detail-map-header {
+        pointer-events: none;
+        touch-action: none;
+    }
+
+    #itinerary-detail-container.sheet-is-dragging #detail-map-header #btn-back-to-results {
+        pointer-events: none;
+    }
+
     #detail-bottom-sheet {
         position: absolute;
         left: 0;

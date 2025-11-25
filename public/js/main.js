@@ -62,6 +62,9 @@ let currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
 let bottomSheetDragState = null;
 let bottomSheetControlsInitialized = false;
 
+const isSheetAtMinLevel = () => currentBottomSheetLevelIndex === 0;
+const isSheetAtMaxLevel = () => currentBottomSheetLevelIndex === BOTTOM_SHEET_LEVELS.length - 1;
+
 // ICÔNES SVG
 const ICONS = {
     BUS: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="12" rx="3"/><path d="M4 10h16"/><path d="M6 15v2"/><path d="M18 15v2"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>`,
@@ -793,10 +796,12 @@ function onBottomSheetPointerDown(event) {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     const isHandle = Boolean(event.target.closest('.panel-handle'));
     const inDragRegion = isPointerWithinBottomSheetDragRegion(event);
-    if (!isHandle && !inDragRegion) return;
     const wrapperScroll = detailPanelWrapper ? detailPanelWrapper.scrollTop : 0;
-    if (!isHandle && wrapperScroll > BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD) {
-        return; // let the content scroll if we are not on the handle and the panel is scrolled
+    const inSheetContent = Boolean(event.target.closest('#detail-panel-wrapper'));
+    const canUseContentDrag = inSheetContent && wrapperScroll <= BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD;
+    if (!isHandle && !inDragRegion && !canUseContentDrag) return;
+    if (!isHandle && !canUseContentDrag && wrapperScroll > BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD) {
+        return; // let the content scroll if we are not on the handle/drag zone
     }
     event.preventDefault();
     bottomSheetDragState = {
@@ -810,6 +815,7 @@ function onBottomSheetPointerDown(event) {
         startIndex: currentBottomSheetLevelIndex
     };
     detailBottomSheet.classList.add('is-dragging');
+    itineraryDetailContainer?.classList.add('sheet-is-dragging');
     try { detailBottomSheet.setPointerCapture(event.pointerId); } catch (_) { /* ignore */ }
     window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
     window.addEventListener('pointerup', onBottomSheetPointerUp);
@@ -863,6 +869,20 @@ function onBottomSheetPointerUp() {
     cancelBottomSheetDrag();
 }
 
+function handleDetailPanelWheel(event) {
+    if (!isMobileDetailViewport() || !detailPanelWrapper || !detailBottomSheet) return;
+    const nearTop = detailPanelWrapper.scrollTop <= BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD;
+    if (!nearTop) return; // let content scroll when not at the top
+    const direction = Math.sign(event.deltaY);
+    if (direction < 0 && !isSheetAtMaxLevel()) {
+        event.preventDefault();
+        applyBottomSheetLevel(currentBottomSheetLevelIndex + 1);
+    } else if (direction > 0 && !isSheetAtMinLevel()) {
+        event.preventDefault();
+        applyBottomSheetLevel(currentBottomSheetLevelIndex - 1);
+    }
+}
+
 function initBottomSheetControls() {
     if (bottomSheetControlsInitialized || !detailBottomSheet || !itineraryDetailContainer) return;
     detailBottomSheet.addEventListener('pointerdown', onBottomSheetPointerDown, { passive: false });
@@ -907,6 +927,7 @@ function setupStaticEventListeners() {
                 itineraryDetailContainer.classList.add('is-scrolled');
             }
         }, { passive: false }); 
+        detailPanelWrapper.addEventListener('wheel', handleDetailPanelWheel, { passive: false });
         detailPanelWrapper.addEventListener('scroll', () => {
             const currentScrollTop = detailPanelWrapper.scrollTop;
             if (currentScrollTop > 10 && !itineraryDetailContainer.classList.contains('is-scrolled')) {
@@ -3588,7 +3609,8 @@ function resetDetailViewState() {
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');
     if (detailBottomSheet) {
-        detailBottomSheet.classList.remove('is-dragging');
+        detailBottomSheet?.classList.remove('is-dragging');
+        itineraryDetailContainer?.classList.remove('sheet-is-dragging');
         detailBottomSheet.classList.remove('sheet-height-no-transition');
         detailBottomSheet.style.removeProperty('--sheet-height');
     }
