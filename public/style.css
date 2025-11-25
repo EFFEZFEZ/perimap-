@@ -154,6 +154,12 @@ body, .card, .planner-block, #main-header, #map, .btn, .btn-icon-round {
     justify-content: center;
 }
 
+.btn-icon-round:focus,
+.btn-icon-round:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15), var(--shadow-md);
+}
+
 /* Leaflet controls: keep them visible & clickable in dark mode */
 .leaflet-control a, .leaflet-control button, .leaflet-bar a, .leaflet-bar button {
     color: var(--text-primary) !important;
@@ -1489,9 +1495,9 @@ details[open] .accordion-content {
  * VUE CARTE (PLEIN ÉCRAN)
  * ========================================= */
 #map-container {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-light);
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-light);
 }
 
 #map-view {
@@ -2968,6 +2974,7 @@ body.dark-theme .real-select option {
     flex: 1; /* Prend tout l'espace restant dans le panneau latéral */
     overflow-y: auto; /* C'est LUI qui scrolle */
     overscroll-behavior: contain;
+    padding-bottom: 1.5rem;
 }
 
 /* La liste elle-même n'a besoin que de padding */
@@ -3397,6 +3404,7 @@ body.dark-theme .real-select option {
     .results-list-wrapper {
         flex: none; /* Ne grandit pas, s'adapte au contenu */
         overflow-y: visible;
+        padding-bottom: 2rem;
     }
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
