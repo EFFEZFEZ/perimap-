@@ -1989,7 +1989,11 @@ function processIntelligentResults(intelligentResults, searchTime) {
             });
 
             // Trier chronologiquement par heure de DÉPART (DESC pour avoir le départ le plus tardif en premier)
-            allBuses.sort((a, b) => (b.departureMs || 0) - (a.departureMs || 0));
+            allBuses.sort((a, b) => {
+                const valA = (a.departureMs && !isNaN(a.departureMs)) ? a.departureMs : 0;
+                const valB = (b.departureMs && !isNaN(b.departureMs)) ? b.departureMs : 0;
+                return valB - valA;
+            });
 
             // Diagnostics GTFS
             const missingGtfs = gtfsAdded.filter(g => !filteredBus.some(f => `${f.summarySegments[0]?.name}_${f.arrivalTime}` === `${g.summarySegments[0]?.name}_${g.arrivalTime}`));
