@@ -2796,7 +2796,7 @@ body.dark-theme .real-select option {
     position: absolute;
     left: 50%;
     right: auto;
-    top: calc(100% + 0.35rem);
+    top: 50%;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -2804,28 +2804,24 @@ body.dark-theme .real-select option {
     padding: 0.35rem 0;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, -6px);
+    transform: translate(-50%, -50%);
     transition: opacity 0.12s ease, transform 0.12s ease;
     z-index: 25;
     display: flex;
     flex-direction: column;
-    width: min(14rem, calc(100vw - 1.5rem));
-    max-height: none;
-    overflow: visible;
-}
-.time-select-wrapper-hour .time-select-menu {
-    top: 50%;
+    width: min(16rem, calc(100vw - 1.5rem));
     max-height: 18rem;
     overflow-y: auto;
-    transform: translate(-50%, -50%);
+    scrollbar-width: thin;
 }
-.time-select-wrapper-hour.is-open .time-select-menu {
-    transform: translate(-50%, -50%);
+.time-select-wrapper-minute .time-select-menu,
+.time-select-wrapper-hour .time-select-menu {
+    border-radius: var(--radius-lg);
 }
-.time-select-wrapper-hour .time-select-menu::-webkit-scrollbar {
+.time-select-menu::-webkit-scrollbar {
     width: 6px;
 }
-.time-select-wrapper-hour .time-select-menu::-webkit-scrollbar-thumb {
+.time-select-menu::-webkit-scrollbar-thumb {
     background: rgba(0,0,0,0.25);
     border-radius: 999px;
 }
@@ -2863,18 +2859,8 @@ body.dark-theme .real-select option {
 }
 
 @media (max-width: 640px) {
-    .time-select-wrapper-minute .time-select-menu {
-        left: 0;
-        right: 0;
+    .time-select-menu {
         width: calc(100vw - 1.25rem);
-        transform: translate(0, -6px);
-    }
-    .time-select-wrapper-minute.is-open .time-select-menu {
-        transform: translate(0, 0);
-    }
-    .time-select-wrapper-hour .time-select-menu {
-        left: 50%;
-        width: min(18rem, calc(100vw - 1.25rem));
     }
 }
 .time-select-option:hover,
