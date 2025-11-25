@@ -588,19 +588,8 @@ export class DataManager {
             }
         });
 
-        // FALLBACK: Si aucun service trouvé (ex: GTFS périmé), on tente le jour de la semaine uniquement
         if (activeServiceIds.size === 0) {
-            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString} (Strict). Tentative mode souple (Jour semaine uniquement)...`);
-            this.calendar.forEach(s => {
-                if (s[dayOfWeek] === '1' && !removedServiceIds.has(s.service_id)) {
-                    activeServiceIds.add(s.service_id);
-                }
-            });
-            if (activeServiceIds.size > 0) {
-                console.log(`✅ Mode souple: ${activeServiceIds.size} services activés sur base de ${dayOfWeek}.`);
-            } else {
-                console.warn(`❌ Echec mode souple: aucun service pour ${dayOfWeek}.`);
-            }
+            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString}`);
         }
         
         return activeServiceIds;
@@ -760,10 +749,8 @@ export class DataManager {
     }
 
     timeToSeconds(timeStr) {
-        if (!timeStr) return 0;
         const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-        // Gérer les heures > 24 (ex: 25:30:00)
-        return hours * 3600 + minutes * 60 + (seconds || 0);
+        return hours * 3600 + minutes * 60 + seconds;
     }
     
     formatTime(seconds, withSeconds = false) {

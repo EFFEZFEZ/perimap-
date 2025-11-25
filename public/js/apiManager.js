@@ -93,36 +93,25 @@ export class ApiManager {
             script.defer = true;
             script.setAttribute('data-google-maps', 'true');
             
-            script.onload = async () => {
+            script.onload = () => {
                 cleanupAuthHandler();
                 console.log("✅ API Google Maps chargée avec succès.");
-                
-                try {
-                    // Attendre que les bibliothèques soient prêtes via importLibrary
-                    await this.ensureGoogleLibraries();
-                    
-                    // Vérification finale avec un petit délai si nécessaire
-                    let attempts = 0;
-                    const checkLibs = () => {
+                setTimeout(async () => {
+                    try {
+                        await this.ensureGoogleLibraries();
+                        // ✅ V57: Vérifie les deux bibliothèques
                         if (window.google?.maps?.places && window.google?.maps?.Geocoder) {
                             this.initServices();
                             resolve();
-                        } else if (attempts < 10) {
-                            attempts++;
-                            setTimeout(checkLibs, 100);
                         } else {
-                            // Si toujours pas là, on rejette mais on laisse initServices essayer quand même
-                            console.warn("⚠️ Timeout attente bibliothèques Google Maps, tentative d'init forcée.");
-                            this.initServices();
-                            resolve(); 
+                            throw new Error("Bibliothèques places/geocoding non disponibles");
                         }
-                    };
-                    checkLibs();
-                } catch (err) {
-                    console.error("❌ Erreur lors du chargement des bibliothèques Google Maps:", err);
-                    this.apiLoadPromise = null;
-                    reject(err);
-                }
+                    } catch (err) {
+                        console.error("❌ google.maps.places ou google.maps.Geocoder n'est pas disponible");
+                        this.apiLoadPromise = null;
+                        reject(err);
+                    }
+                }, 100);
             };
             
             script.onerror = () => {
