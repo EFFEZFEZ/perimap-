@@ -718,8 +718,10 @@ body.view-is-locked {
     body.view-is-locked {
         position: relative; /* Laisse les sous-vues gérer leur propre scroll */
         inset: auto;
-        height: 100%;
+        height: auto; /* Laisse le body grandir selon son contenu */
         min-height: 100vh;
+        overflow-y: auto; /* Réactive le scroll quand le contenu dépasse */
+        overflow-x: hidden;
     }
 
     body.view-is-locked #app-view-root {
