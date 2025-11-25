@@ -2865,9 +2865,7 @@ body.dark-theme .real-select option {
     flex: 1; /* Prend toute la hauteur restante sous le header */
     background: var(--bg-light);
     /* Assure que le conteneur ne dépasse pas la hauteur de la vue */
-    height: 100%; /* FIX: Use 100% instead of 100vh to respect parent flex container */
-    min-height: 0; /* FIX: Allow shrinking */
-    overflow: hidden; /* Ensure container doesn't scroll */
+    height: 100vh;
 }
 
 /* NOUVEAU : Panneau latéral (colonne) */
@@ -2881,7 +2879,7 @@ body.dark-theme .real-select option {
     border-right: 1px solid var(--border);
     z-index: 10;
     min-height: 0;
-    overflow: hidden; /* NO SCROLL ON PANEL ITSELF (Desktop) */
+    overflow: hidden;
 }
 
 /* NOUVEAU : Panneau d'édition IDFM */
@@ -2993,7 +2991,6 @@ body.dark-theme .real-select option {
     overflow-y: auto; /* C'est LUI qui scrolle */
     overscroll-behavior: contain;
     padding-bottom: 1.5rem;
-    min-height: 0; /* CRITIQUE : Permet au flex-item de rétrécir et d'activer le scroll */
 }
 
 /* La liste elle-même n'a besoin que de padding */
@@ -3392,14 +3389,14 @@ body.dark-theme .real-select option {
     .step-time-detail {
         font-size: 0.875rem; /* Au lieu de 0.8125rem */
     }
+
     /* ÉTAPE 1: VUE LISTE (IDFM-style) */
     
     /* Rétablit la direction en colonne */
     #itinerary-results-container {
         flex-direction: column;
         /* *** CORRECTION V35: Hauteur dynamique pour s'adapter à Safari *** */
-        height: 100%; /* FIX: Use 100% instead of 100vh */
-    }   height: 100vh; 
+        height: 100vh; 
     }
     
     /* **CORRECTION IDFM**: Cache la carte sur la vue liste */
@@ -3412,10 +3409,8 @@ body.dark-theme .real-select option {
         width: 100%;
         flex: 1; /* Prend l'espace restant */
         border-right: none;
-        height: 100%; /* FORCE HEIGHT CONSTRAINT */
-        min-height: 0; /* Important pour le scroll */
+        height: 100%; /* Hauteur auto pour s'adapter au flex: 1 */
         overflow-y: auto; /* Le panneau ENTIER scrolle */
-        -webkit-overflow-scrolling: touch;
     }
     
     .itinerary-edit-header {
@@ -3427,7 +3422,6 @@ body.dark-theme .real-select option {
         flex: none; /* Ne grandit pas, s'adapte au contenu */
         overflow-y: visible;
         padding-bottom: 2rem;
-        height: auto; /* Laisse le contenu définir la hauteur */
     }
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
