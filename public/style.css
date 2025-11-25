@@ -2866,6 +2866,7 @@ body.dark-theme .real-select option {
     background: var(--bg-light);
     /* Assure que le conteneur ne dépasse pas la hauteur de la vue */
     height: 100vh;
+    overflow: hidden; /* Ensure container doesn't scroll */
 }
 
 /* NOUVEAU : Panneau latéral (colonne) */
@@ -2879,7 +2880,7 @@ body.dark-theme .real-select option {
     border-right: 1px solid var(--border);
     z-index: 10;
     min-height: 0;
-    overflow: hidden;
+    overflow: hidden; /* NO SCROLL ON PANEL ITSELF (Desktop) */
 }
 
 /* NOUVEAU : Panneau d'édition IDFM */
@@ -3410,7 +3411,7 @@ body.dark-theme .real-select option {
         width: 100%;
         flex: 1; /* Prend l'espace restant */
         border-right: none;
-        height: auto; /* Laisse flex gérer la hauteur */
+        height: 100%; /* FORCE HEIGHT CONSTRAINT */
         min-height: 0; /* Important pour le scroll */
         overflow-y: auto; /* Le panneau ENTIER scrolle */
         -webkit-overflow-scrolling: touch;
@@ -3425,6 +3426,7 @@ body.dark-theme .real-select option {
         flex: none; /* Ne grandit pas, s'adapte au contenu */
         overflow-y: visible;
         padding-bottom: 2rem;
+        height: auto; /* Laisse le contenu définir la hauteur */
     }
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
