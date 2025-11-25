@@ -668,10 +668,65 @@ function registerServiceWorker() {
         return;
     }
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch((error) => {
+        navigator.serviceWorker.register('/service-worker.js').then(registration => {
+            // Check if there's a waiting worker (update ready)
+            if (registration.waiting) {
+                showUpdateNotification(registration.waiting);
+                return;
+            }
+
+            // Listen for new workers installing
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // New version installed and waiting
+                        showUpdateNotification(newWorker);
+                    }
+                });
+            });
+        }).catch((error) => {
             console.warn('Service worker registration failed:', error);
         });
+
+        // Reload when the new worker takes control
+        let refreshing;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            window.location.reload();
+            refreshing = true;
+        });
     });
+}
+
+function showUpdateNotification(worker) {
+    let notification = document.getElementById('update-notification');
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'update-notification';
+        notification.innerHTML = `
+            <div class="update-text">Une nouvelle version est disponible !</div>
+            <div class="update-actions">
+                <button class="btn-dismiss">Plus tard</button>
+                <button class="btn-update">Mettre à jour</button>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        notification.querySelector('.btn-dismiss').addEventListener('click', () => {
+            notification.classList.remove('visible');
+        });
+        
+        notification.querySelector('.btn-update').addEventListener('click', () => {
+            worker.postMessage({ type: 'SKIP_WAITING' });
+            notification.classList.remove('visible');
+        });
+    }
+    
+    // Small delay to allow DOM insertion before animation
+    setTimeout(() => {
+        notification.classList.add('visible');
+    }, 100);
 }
 
 function populateTimeSelects() {
