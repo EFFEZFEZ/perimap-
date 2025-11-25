@@ -3478,6 +3478,9 @@ body.dark-theme .real-select option {
     }
     #detail-bottom-sheet.is-dragging {
         transition: none !important;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     #detail-bottom-sheet.sheet-height-no-transition {

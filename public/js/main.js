@@ -53,8 +53,11 @@ let geolocationManager = null;
 
 const BOTTOM_SHEET_LEVELS = [0.4, 0.6, 0.8];
 const BOTTOM_SHEET_DEFAULT_INDEX = 0;
-const BOTTOM_SHEET_DRAG_ZONE_PX = 90;
-const BOTTOM_SHEET_DRAG_BUFFER_PX = 30;
+const BOTTOM_SHEET_DRAG_ZONE_PX = 110;
+const BOTTOM_SHEET_DRAG_BUFFER_PX = 40;
+const BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD = 4; // px tolerance before locking drag
+const BOTTOM_SHEET_VELOCITY_THRESHOLD = 0.35; // px per ms
+const BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX = 45; // px delta before forcing next snap
 let currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
 let bottomSheetDragState = null;
 let bottomSheetControlsInitialized = false;
@@ -778,6 +781,9 @@ function cancelBottomSheetDrag() {
     window.removeEventListener('pointermove', onBottomSheetPointerMove);
     window.removeEventListener('pointerup', onBottomSheetPointerUp);
     window.removeEventListener('pointercancel', onBottomSheetPointerUp);
+    if (detailBottomSheet && bottomSheetDragState.pointerId !== undefined) {
+        try { detailBottomSheet.releasePointerCapture(bottomSheetDragState.pointerId); } catch (_) { /* ignore */ }
+    }
     detailBottomSheet?.classList.remove('is-dragging');
     bottomSheetDragState = null;
 }
@@ -788,16 +794,23 @@ function onBottomSheetPointerDown(event) {
     const isHandle = Boolean(event.target.closest('.panel-handle'));
     const inDragRegion = isPointerWithinBottomSheetDragRegion(event);
     if (!isHandle && !inDragRegion) return;
-    if (!isHandle && detailPanelWrapper && detailPanelWrapper.scrollTop > 0) {
+    const wrapperScroll = detailPanelWrapper ? detailPanelWrapper.scrollTop : 0;
+    if (!isHandle && wrapperScroll > BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD) {
         return; // let the content scroll if we are not on the handle and the panel is scrolled
     }
     event.preventDefault();
     bottomSheetDragState = {
+        pointerId: event.pointerId,
         startY: event.clientY,
+        lastClientY: event.clientY,
         startHeight: getCurrentSheetHeightPx(),
-        lastHeight: null
+        lastHeight: null,
+        lastEventTime: performance.now(),
+        velocity: 0,
+        startIndex: currentBottomSheetLevelIndex
     };
     detailBottomSheet.classList.add('is-dragging');
+    try { detailBottomSheet.setPointerCapture(event.pointerId); } catch (_) { /* ignore */ }
     window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
     window.addEventListener('pointerup', onBottomSheetPointerUp);
     window.addEventListener('pointercancel', onBottomSheetPointerUp);
@@ -813,7 +826,17 @@ function onBottomSheetPointerMove(event) {
     const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
     let nextHeight = bottomSheetDragState.startHeight + deltaY;
     nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
+    const now = performance.now();
+    if (bottomSheetDragState.lastHeight !== null) {
+        const deltaHeight = nextHeight - bottomSheetDragState.lastHeight;
+        const elapsed = now - (bottomSheetDragState.lastEventTime || now);
+        if (elapsed > 0) {
+            bottomSheetDragState.velocity = deltaHeight / elapsed;
+        }
+    }
     bottomSheetDragState.lastHeight = nextHeight;
+    bottomSheetDragState.lastClientY = event.clientY;
+    bottomSheetDragState.lastEventTime = now;
     detailBottomSheet.style.setProperty('--sheet-height', `${nextHeight}px`);
 }
 
@@ -823,8 +846,19 @@ function onBottomSheetPointerUp() {
     if (viewportHeight) {
         const appliedHeight = bottomSheetDragState.lastHeight ?? bottomSheetDragState.startHeight;
         const fraction = appliedHeight / viewportHeight;
-        const snapIndex = getClosestSheetLevelIndex(fraction);
-        applyBottomSheetLevel(snapIndex);
+        const closestIndex = getClosestSheetLevelIndex(fraction);
+        let targetIndex = closestIndex;
+        const velocity = bottomSheetDragState.velocity || 0;
+        const deltaFromStart = appliedHeight - bottomSheetDragState.startHeight;
+        const biasNeeded = closestIndex === bottomSheetDragState.startIndex;
+        if (biasNeeded && Math.abs(velocity) > BOTTOM_SHEET_VELOCITY_THRESHOLD) {
+            const direction = velocity > 0 ? 1 : -1;
+            targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, bottomSheetDragState.startIndex + direction));
+        } else if (biasNeeded && Math.abs(deltaFromStart) > BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX) {
+            const direction = deltaFromStart > 0 ? 1 : -1;
+            targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, bottomSheetDragState.startIndex + direction));
+        }
+        applyBottomSheetLevel(targetIndex);
     }
     cancelBottomSheetDrag();
 }
