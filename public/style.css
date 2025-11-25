@@ -2988,19 +2988,14 @@ body.dark-theme .real-select option {
 /* NOUVEAU : Conteneur pour la liste des résultats */
 .results-list-wrapper {
     flex: 1; /* Prend tout l'espace restant dans le panneau latéral */
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Le wrapper ne scrolle pas */
-    min-height: 0;
+    overflow-y: auto; /* C'est LUI qui scrolle */
+    overscroll-behavior: contain;
+    padding-bottom: 1.5rem;
 }
 
-/* La liste elle-même scrolle */
+/* La liste elle-même n'a besoin que de padding */
 .results-list {
-    flex: 1;
-    overflow-y: auto;
     padding: 1rem;
-    padding-bottom: 1.5rem;
-    overscroll-behavior: contain;
 }
 
 /* La CARTE prend le reste de l'espace */
