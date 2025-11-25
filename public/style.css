@@ -3634,6 +3634,7 @@ body.dark-theme .real-select option {
     .results-list {
         flex: none;
         overflow: visible;
+        max-height: none;
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
     }
     
