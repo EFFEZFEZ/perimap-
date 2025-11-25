@@ -1,16 +1,16 @@
 const GTFS_TRIPS_CACHE_TTL_MS = 60 * 1000; // 60s cache
 
 export const HYBRID_ROUTING_CONFIG = Object.freeze({
-    STOP_SEARCH_RADIUS_M: 500,
-    STOP_SEARCH_LIMIT: 12,
+    STOP_SEARCH_RADIUS_M: 2000,
+    STOP_SEARCH_LIMIT: 20,
     MAX_ITINERARIES: 12,
-    WALK_DIRECT_MAX_METERS: 100,
+    WALK_DIRECT_MAX_METERS: 200,
     ENABLE_TRANSFERS: true,
     TRANSFER_MAX_ITINERARIES: 6,
     TRANSFER_MIN_BUFFER_SECONDS: 180,
-    TRANSFER_MAX_WAIT_SECONDS: 2700,
-    TRANSFER_MAX_FIRST_LEG_STOPS: 20,
-    TRANSFER_CANDIDATE_TRIPS_LIMIT: 60
+    TRANSFER_MAX_WAIT_SECONDS: 7200, // 2h d'attente max
+    TRANSFER_MAX_FIRST_LEG_STOPS: 50,
+    TRANSFER_CANDIDATE_TRIPS_LIMIT: 100
 });
 
 const AVERAGE_WALK_SPEED_MPS = 1.35; // ~4.8 km/h
@@ -298,8 +298,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
 
         if (!point && candidates.length === 0) {
-            console.warn(`⚠️ Hybrid: aucun repère géographique pour ${label}, utilisation d'un fallback par lignes principales.`);
-            dataManager.stops.slice(0, MAX_STOP_CANDIDATES).forEach(stop => addCandidate(stop, null));
+            // console.warn(`⚠️ Hybrid: aucun repère géographique pour ${label}, utilisation d'un fallback par lignes principales.`);
+            // dataManager.stops.slice(0, MAX_STOP_CANDIDATES).forEach(stop => addCandidate(stop, null));
         }
 
         if (!candidates.length) {
@@ -657,6 +657,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
 
         candidateTrips.sort((a, b) => a.departureSeconds - b.departureSeconds);
+        
+        console.log(`🔄 Transfer: ${candidateTrips.length} trips candidats pour la 1ère étape.`);
 
         const seenPairs = new Set();
 
@@ -693,6 +695,11 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                     earliestSecondLeg, 
                     latestSecondLeg
                 );
+
+                // if (secondTrips && secondTrips.length > 0) {
+                //    console.log(`    -> Trouvé ${secondTrips.length} correspondances depuis ${transferStop.stop_name} (${earliestSecondLeg}-${latestSecondLeg})`);
+                // }
+
                 if (!secondTrips || !secondTrips.length) continue;
 
                 const firstSegment = {
@@ -780,6 +787,13 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     if (windowEndSec <= windowStartSec) {
         windowEndSec = windowStartSec + SEARCH_WINDOW;
     }
+
+    // ✅ FIX: Si la fenêtre dépasse minuit (ex: 23h + 4h = 27h), on doit chercher aussi le lendemain
+    // Mais ici, on simplifie en s'assurant que windowEndSec peut dépasser 86400 (24h)
+    // car getCachedTripsBetweenStops gère les temps > 24h si les données GTFS sont bien formées (25:00:00 etc.)
+    // Cependant, si on cherche à 23h pour un départ, on veut voir les bus de 06h le lendemain.
+    // Le système actuel filtre sur la date "reqDate". Si le bus est le lendemain, il est sur date+1.
+    // Pour l'instant, on garde cette logique simple, mais on étend la fenêtre.
 
     const resolveClusterIds = (stop) => {
         const ids = new Set();

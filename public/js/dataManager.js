@@ -760,8 +760,10 @@ export class DataManager {
     }
 
     timeToSeconds(timeStr) {
+        if (!timeStr) return 0;
         const [hours, minutes, seconds] = timeStr.split(':').map(Number);
-        return hours * 3600 + minutes * 60 + seconds;
+        // Gérer les heures > 24 (ex: 25:30:00)
+        return hours * 3600 + minutes * 60 + (seconds || 0);
     }
     
     formatTime(seconds, withSeconds = false) {
