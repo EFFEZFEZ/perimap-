@@ -2689,6 +2689,11 @@ body.dark-theme .install-tip-steps section {
 .popover-content {
     padding: 1rem;
 }
+#planner-options-popover > .popover-content,
+#results-planner-options-popover > .popover-content {
+    overflow: visible;
+    max-height: none;
+}
 .popover-time-inputs {
     display: flex;
     gap: 1rem;
