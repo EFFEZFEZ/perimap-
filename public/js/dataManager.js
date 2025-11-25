@@ -588,8 +588,19 @@ export class DataManager {
             }
         });
 
+        // FALLBACK: Si aucun service trouvé (ex: GTFS périmé), on tente le jour de la semaine uniquement
         if (activeServiceIds.size === 0) {
-            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString}`);
+            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString} (Strict). Tentative mode souple (Jour semaine uniquement)...`);
+            this.calendar.forEach(s => {
+                if (s[dayOfWeek] === '1' && !removedServiceIds.has(s.service_id)) {
+                    activeServiceIds.add(s.service_id);
+                }
+            });
+            if (activeServiceIds.size > 0) {
+                console.log(`✅ Mode souple: ${activeServiceIds.size} services activés sur base de ${dayOfWeek}.`);
+            } else {
+                console.warn(`❌ Echec mode souple: aucun service pour ${dayOfWeek}.`);
+            }
         }
         
         return activeServiceIds;

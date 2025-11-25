@@ -9,7 +9,7 @@ export const HYBRID_ROUTING_CONFIG = Object.freeze({
     TRANSFER_MAX_ITINERARIES: 6,
     TRANSFER_MIN_BUFFER_SECONDS: 180,
     TRANSFER_MAX_WAIT_SECONDS: 2700,
-    TRANSFER_MAX_FIRST_LEG_STOPS: 12,
+    TRANSFER_MAX_FIRST_LEG_STOPS: 20,
     TRANSFER_CANDIDATE_TRIPS_LIMIT: 60
 });
 
@@ -770,7 +770,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     };
 
     const reqSeconds = (reqDate.getHours() * 3600) + (reqDate.getMinutes() * 60);
-    const SEARCH_WINDOW = 4 * 3600; // FIX BUG 8: 2h -> 4h
+    const SEARCH_WINDOW = 12 * 3600; // FIX: 4h -> 12h pour trouver les bus même avec peu de fréquence
     let windowStartSec = reqSeconds;
     let windowEndSec = reqSeconds + SEARCH_WINDOW; // FIX BUG 4: Remove 24h cap
     if (searchTime?.type === 'arriver') {
