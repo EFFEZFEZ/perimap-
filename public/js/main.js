@@ -48,6 +48,8 @@ let currentResultsRouteLayer = null; // Tracé sur la carte PC
 let currentDetailMarkerLayer = null; // ✅ NOUVEAU V46.1
 let currentResultsMarkerLayer = null; // ✅ NOUVEAU V46.1
 let allFetchedItineraries = []; // Stocke tous les itinéraires (bus/vélo/marche)
+let lastSearchTime = null; // ✅ NOUVEAU: Stocke le temps de recherche pour le lazy loading
+let hasFetchedOnline = false; // ✅ NOUVEAU: Indique si on a déjà fait l'appel API
 
 let geolocationManager = null;
 
@@ -1104,6 +1106,11 @@ async function executeItinerarySearch(source, sourceElements) {
         hour: hourSelect.value,
         minute: minuteSelect.value
     };
+
+    // ✅ MODIF: Stockage état global
+    lastSearchTime = searchTime;
+    hasFetchedOnline = false;
+
     prefillOtherPlanner(source, sourceElements);
     console.log(`Recherche Google API (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     if (source === 'hall') {
@@ -1159,9 +1166,9 @@ async function executeItinerarySearch(source, sourceElements) {
         if (hybridItins && hybridItins.length) {
             allFetchedItineraries = hybridItins;
         } else {
-            console.log('🆘 Aucun trajet GTFS local, fallback Google Transit en cours...');
-            const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime); 
-            allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+            // ✅ MODIF: Pas de fallback automatique
+            console.log('ℹ️ Aucun trajet GTFS local trouvé. En attente de demande utilisateur pour API Google.');
+            allFetchedItineraries = [];
         }
         // Ensure every BUS step has a polyline (GTFS constructed or fallback)
         try {
@@ -2346,9 +2353,30 @@ function renderItineraryResults(modeFilter) {
 
     if (itinerariesToRender.length === 0) {
         let message = "Aucun itinéraire trouvé pour ce mode.";
-        if (modeFilter === 'ALL') message = "Aucun itinéraire n'a été trouvé.";
+        if (modeFilter === 'ALL') message = "Aucun itinéraire local trouvé.";
         resultsListContainer.innerHTML = `<p class="results-message">${message}</p>`;
         console.warn('renderItineraryResults: aucun itinéraire à afficher', { mode: modeFilter });
+
+        // ✅ MODIF: Bouton "Rechercher en ligne" même si liste vide
+        if (!hasFetchedOnline && (modeFilter === 'ALL' || modeFilter === 'BUS')) {
+            const onlineBtnWrapper = document.createElement('div');
+            onlineBtnWrapper.className = 'route-option-wrapper online-search-btn';
+            onlineBtnWrapper.style.marginTop = '16px';
+            onlineBtnWrapper.style.cursor = 'pointer';
+            
+            onlineBtnWrapper.innerHTML = `
+                <div class="route-option" style="justify-content: center; color: var(--primary); border: 1px dashed var(--primary); background: rgba(37, 99, 235, 0.05);">
+                    <span style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Rechercher plus de résultats en ligne
+                    </span>
+                </div>
+            `;
+            onlineBtnWrapper.addEventListener('click', () => {
+                fetchOnlineItineraries();
+            });
+            resultsListContainer.appendChild(onlineBtnWrapper);
+        }
         return;
     }
 
@@ -2543,6 +2571,27 @@ function renderItineraryResults(modeFilter) {
         
         resultsListContainer.appendChild(wrapper);
     });
+
+    // ✅ NOUVEAU: Bouton "Rechercher en ligne" si pas encore fait
+    if (!hasFetchedOnline && (modeFilter === 'ALL' || modeFilter === 'BUS')) {
+        const onlineBtnWrapper = document.createElement('div');
+        onlineBtnWrapper.className = 'route-option-wrapper online-search-btn';
+        onlineBtnWrapper.style.marginTop = '16px';
+        onlineBtnWrapper.style.cursor = 'pointer';
+        
+        onlineBtnWrapper.innerHTML = `
+            <div class="route-option" style="justify-content: center; color: var(--primary); border: 1px dashed var(--primary); background: rgba(37, 99, 235, 0.05);">
+                <span style="font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    Rechercher plus de résultats en ligne
+                </span>
+            </div>
+        `;
+        onlineBtnWrapper.addEventListener('click', () => {
+            fetchOnlineItineraries();
+        });
+        resultsListContainer.appendChild(onlineBtnWrapper);
+    }
 }
 
 /**
@@ -2606,7 +2655,7 @@ const getPolylineLatLngs = (polyline) => {
                 if (!Array.isArray(pair) || pair.length < 2) return null;
                 const lat = Number(pair[0]);
                 const lon = Number(pair[1]);
-                if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+                if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
                 return [lat, lon];
             })
             .filter(Boolean);
@@ -2849,7 +2898,7 @@ function drawRouteOnResultsMap(itinerary) {
                     length: encoded.length,
                     sample: encoded.slice(0, 120)
                 });
-            }
+                       }
 
             console.log('drawRouteOnResultsMap: couche ajoutée', {
                 stepType: step.type,
@@ -3056,7 +3105,7 @@ function renderItineraryDetail(itinerary) {
                                         ${getManeuverIcon(subStep.maneuver)}
                                         <div class="walk-step-info">
                                             <span>${subStep.instruction}</span>
-                                            <span class="walk-step-meta">${subStep.distance} ${subStep.duration ? `(${subStep.duration})` : ''}</span>
+                                            <span class="walk-step-meta">${subStep.distance} (${subStep.duration})</span>
                                         </div>
                                     </li>
                                 `).join('')}
@@ -3891,4 +3940,38 @@ function updateDataStatus(message, status = '') {
 
 export async function bootstrapApp() {
     await initializeApp();
+}
+
+// Ajout de la fonction fetchOnlineItineraries
+async function fetchOnlineItineraries() {
+    if (!fromPlaceId || !toPlaceId || !lastSearchTime) return;
+    
+    const btn = document.querySelector('.online-search-btn .route-option');
+    if (btn) {
+        btn.innerHTML = '<div class="spinner" style="border-color: var(--primary); border-right-color: transparent; width: 20px; height: 20px; margin-right: 10px;"></div> Recherche Google en cours...';
+        btn.style.pointerEvents = 'none';
+    }
+
+    try {
+        console.log('🌍 Recherche Google API déclenchée manuellement...');
+        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, lastSearchTime); 
+        allFetchedItineraries = processIntelligentResults(intelligentResults, lastSearchTime);
+        
+        await ensureItineraryPolylines(allFetchedItineraries);
+        allFetchedItineraries = filterExpiredItineraries(allFetchedItineraries, lastSearchTime);
+
+        hasFetchedOnline = true;
+        setupResultTabs(allFetchedItineraries);
+        renderItineraryResults('ALL');
+        
+        if (allFetchedItineraries.length > 0) {
+            drawRouteOnResultsMap(allFetchedItineraries[0]);
+        }
+    } catch (error) {
+        console.error("Échec de la recherche en ligne:", error);
+        if (btn) {
+            btn.innerHTML = '<span style="color: var(--color-red);">⚠️ Erreur de connexion. Réessayer ?</span>';
+            btn.style.pointerEvents = 'auto';
+        }
+    }
 }
