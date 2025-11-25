@@ -2991,11 +2991,14 @@ body.dark-theme .real-select option {
     overflow-y: auto; /* C'est LUI qui scrolle */
     overscroll-behavior: contain;
     padding-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 /* La liste elle-même n'a besoin que de padding */
 .results-list {
     padding: 1rem;
+    flex: 1;
 }
 
 /* La CARTE prend le reste de l'espace */
@@ -3246,6 +3249,7 @@ body.dark-theme .real-select option {
     font-weight: 500;
     color: var(--text-secondary);
     margin-left: 0.25rem;
+}
 .route-details .wait-info .wait-time {
     font-size: 0.95rem;
     font-weight: 600;
@@ -3411,25 +3415,23 @@ body.dark-theme .real-select option {
         border-right: none;
         height: 100%; /* Hauteur auto pour s'adapter au flex: 1 */
         overflow-y: auto; /* Le panneau ENTIER scrolle */
-    }
     /* Le wrapper de la liste ne doit plus scroller, c'est le parent */
     .results-list-wrapper {
-        flex: none; /* Ne grandit pas, s'adapte au contenu */
+        flex: 1; /* Doit prendre l'espace restant */
         display: block;
-        overflow: visible;
-        padding-bottom: 2rem;
+        overflow-y: auto; /* Scrolle sur mobile aussi */
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom)); /* Espace pour le scroll final */
+        height: auto;
+        min-height: 0;
     }
     .results-list {
         flex: none;
         overflow: visible;
         height: auto;
-        padding-bottom: 0;
-    }* Le wrapper de la liste ne doit plus scroller, c'est le parent */
-    .results-list-wrapper {
-        flex: none; /* Ne grandit pas, s'adapte au contenu */
-        overflow-y: visible;
         padding-bottom: 2rem;
     }
+    
+    .itinerary-edit-form {
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
     }
