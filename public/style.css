@@ -2692,9 +2692,26 @@ body.dark-theme .install-tip-steps section {
 .popover-time-inputs {
     display: flex;
     gap: 1rem;
+    align-items: stretch;
 }
 .popover-time-inputs .form-group {
     flex: 1;
+    min-width: 0;
+}
+.popover-time-inputs .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-secondary);
+}
+.popover-time-inputs .real-select {
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+    padding-left: 1.5rem;
+    padding-right: 2.75rem;
+    background-position: calc(100% - 0.75rem) center;
 }
 
 .real-select {

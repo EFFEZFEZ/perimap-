@@ -74,7 +74,7 @@ export class UIManager {
             for (let h = 0; h < 24; h++) {
                 const option = document.createElement('option');
                 option.value = h;
-                option.textContent = `${h} h`;
+                option.textContent = `${String(h).padStart(2, '0')} h`;
                 if (h === selectedHour) option.selected = true;
                 hourEl.appendChild(option);
             }
@@ -83,7 +83,7 @@ export class UIManager {
             for (let m = 0; m < 60; m += 5) {
                 const option = document.createElement('option');
                 option.value = m;
-                option.textContent = String(m).padStart(2, '0');
+                option.textContent = `${String(m).padStart(2, '0')} min`;
                 if (m === selectedMinute) option.selected = true;
                 minEl.appendChild(option);
             }
