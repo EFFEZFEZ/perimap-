@@ -274,6 +274,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             candidates.push({ stop, distance: Number.isFinite(distance) ? distance : null });
         };
 
+        // Collecter TOUS les arrêts dans le rayon (pas de limite prématurée)
         if (point) {
             for (const stop of dataManager.stops) {
                 const lat = parseFloat(stop.stop_lat);
@@ -282,7 +283,6 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                 const dist = dataManager.calculateDistance(point.lat, point.lon, lat, lon);
                 if (Number.isNaN(dist) || dist > MAX_STOP_RADIUS_METERS) continue;
                 addCandidate(stop, dist);
-                if (candidates.length >= MAX_STOP_CANDIDATES) break;
             }
         }
 
@@ -307,7 +307,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             return [];
         }
 
+        // Trier par: 1) Quays (location_type != '1') en premier, 2) distance
         candidates.sort((a, b) => {
+            // Prioriser les Quays (arrêts avec horaires) sur les StopPlaces (stations)
+            const isQuayA = a.stop.location_type !== '1';
+            const isQuayB = b.stop.location_type !== '1';
+            if (isQuayA !== isQuayB) {
+                return isQuayA ? -1 : 1;  // Quays first
+            }
             const distA = (a.distance == null) ? Infinity : a.distance;
             const distB = (b.distance == null) ? Infinity : b.distance;
             if (distA === distB) {
@@ -918,6 +925,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
 
     if (!itineraries.length) {
         console.warn('⚠️ Hybrid: aucun itinéraire GTFS (direct ou correspondance) trouvé.');
+        console.log('🔍 DEBUG - expandedStartIds:', expandedStartIds);
+        console.log('🔍 DEBUG - expandedEndIds:', expandedEndIds);
+        console.log('🔍 DEBUG - groupedStopMap keys sample:', Object.keys(dataManager.groupedStopMap || {}).slice(0, 10));
         console.table({
             startCandidates: originCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
             endCandidates: destCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
