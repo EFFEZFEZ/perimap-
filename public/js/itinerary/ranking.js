@@ -90,9 +90,22 @@ function parseTimeToMinutes(timeStr) {
 /**
  * Filtre les itinéraires expirés (départ dans le passé).
  * Fonctionne pour les deux modes.
+ * Si searchTime est fourni et la date est dans le futur, on ne filtre pas.
  */
-export function filterExpiredDepartures(itineraries) {
+export function filterExpiredDepartures(itineraries, searchTime = null) {
   if (!Array.isArray(itineraries)) return [];
+  
+  // Si la recherche est pour une date future, ne pas filtrer
+  if (searchTime && searchTime.date) {
+    const searchDate = new Date(searchTime.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    searchDate.setHours(0, 0, 0, 0);
+    if (searchDate > today) {
+      // Recherche pour demain ou plus tard, pas de filtrage
+      return itineraries;
+    }
+  }
   
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();

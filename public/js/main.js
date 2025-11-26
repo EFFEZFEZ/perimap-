@@ -1194,7 +1194,8 @@ async function executeItinerarySearch(source, sourceElements) {
         }
 
         // TOUJOURS filtrer les trajets dont le départ est passé (même en mode "arriver")
-        allFetchedItineraries = filterExpiredDepartures(allFetchedItineraries);
+        // Mais seulement si la recherche est pour aujourd'hui
+        allFetchedItineraries = filterExpiredDepartures(allFetchedItineraries, searchTime);
         
         // En mode "arriver", filtrer aussi les trajets qui arrivent APRÈS l'heure demandée
         if (searchTime.type === 'arriver') {
