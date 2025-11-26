@@ -220,6 +220,53 @@ function getWaitStepPresentation(steps, index) {
     };
 }
 
+/**
+ * Fonction appelée lors du clic sur une carte d'itinéraire.
+ * Affiche/masque les détails de l'itinéraire et met à jour la carte.
+ */
+function onSelectItinerary(itinerary, cardEl) {
+    if (!itinerary || !cardEl) return;
+
+    const wrapper = cardEl.closest('.route-option-wrapper');
+    if (!wrapper) return;
+
+    const detailsDiv = wrapper.querySelector('.route-details');
+    if (!detailsDiv) return;
+
+    const wasExpanded = !detailsDiv.classList.contains('hidden');
+
+    // Fermer tous les autres détails ouverts
+    document.querySelectorAll('.route-option-wrapper .route-details').forEach(d => {
+        if (d !== detailsDiv) d.classList.add('hidden');
+    });
+    document.querySelectorAll('.route-option-wrapper .route-option').forEach(c => {
+        if (c !== cardEl) c.classList.remove('is-active');
+    });
+
+    // Toggle l'état de cette carte
+    if (wasExpanded) {
+        detailsDiv.classList.add('hidden');
+        cardEl.classList.remove('is-active');
+    } else {
+        // Générer le HTML des détails si pas encore fait
+        if (!detailsDiv.innerHTML.trim()) {
+            detailsDiv.innerHTML = renderItineraryDetailHTML(itinerary);
+        }
+        detailsDiv.classList.remove('hidden');
+        cardEl.classList.add('is-active');
+
+        // Mettre à jour la carte avec l'itinéraire sélectionné
+        if (resultsMapRenderer) {
+            drawRouteOnResultsMap(itinerary);
+        }
+
+        // Scroll vers la carte
+        setTimeout(() => {
+            wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+}
+
 uiManager = new UIManager({ icons: ICONS, geolocationManager: null });
 
 /* ======================
@@ -2601,19 +2648,17 @@ function addFallbackItineraryMarkers(itinerary, markerLayer) {
  * Dessine un tracé sur la carte des résultats PC
  */
 function drawRouteOnResultsMap(itinerary) {
+    // Accepter un tableau ou un objet unique
+    if (Array.isArray(itinerary)) {
+        itinerary = itinerary[0];
+    }
     if (!resultsMapRenderer || !resultsMapRenderer.map || !itinerary || !itinerary.steps) return;
-
-    console.log('drawRouteOnResultsMap: start', {
-        itineraryType: itinerary.type,
-        stepCount: itinerary.steps.length,
-        itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
-    });
 
     if (currentResultsRouteLayer) {
         resultsMapRenderer.map.removeLayer(currentResultsRouteLayer);
         currentResultsRouteLayer = null;
     }
-    // ✅ V46: Vider les anciens marqueurs
+    // Vider les anciens marqueurs
     if (currentResultsMarkerLayer) {
         currentResultsMarkerLayer.clearLayers();
     }
@@ -2626,34 +2671,15 @@ function drawRouteOnResultsMap(itinerary) {
         const polylinesToDraw = extractStepPolylines(step);
 
         if (!polylinesToDraw.length) {
-            if (!isWaitStep(step)) {
-                console.warn('drawRouteOnResultsMap: étape sans polylines', { stepType: step.type, step });
-            }
             return;
         }
 
         polylinesToDraw.forEach(polyline => {
             const latLngs = getPolylineLatLngs(polyline);
             if (!latLngs || !latLngs.length) {
-                console.warn('drawRouteOnResultsMap: polyline sans coordonnées exploitables', { stepType: step.type, step });
                 return;
             }
 
-            const encoded = getEncodedPolylineValue(polyline);
-            if (typeof encoded === 'string') {
-                console.log('drawRouteOnResultsMap: encoded preview', {
-                    stepType: step.type,
-                    length: encoded.length,
-                    sample: encoded.slice(0, 120)
-                });
-            }
-
-            console.log('drawRouteOnResultsMap: couche ajoutée', {
-                stepType: step.type,
-                pointCount: latLngs.length,
-                sampleStart: latLngs[0],
-                sampleEnd: latLngs[latLngs.length - 1]
-            });
             const stepLayer = L.polyline(latLngs, style);
             stepLayers.push(stepLayer);
         });
@@ -2663,20 +2689,14 @@ function drawRouteOnResultsMap(itinerary) {
         // Créer un groupe avec toutes les couches d'étapes
         currentResultsRouteLayer = L.featureGroup(stepLayers).addTo(resultsMapRenderer.map);
         
-        // ✅ V46: Ajouter les marqueurs
+        // Ajouter les marqueurs
         addItineraryMarkers(itinerary, resultsMapRenderer.map, currentResultsMarkerLayer);
 
         // Ajuster la carte pour voir l'ensemble du trajet
         const bounds = currentResultsRouteLayer.getBounds();
         if (bounds && bounds.isValid()) {
             resultsMapRenderer.map.fitBounds(bounds, { padding: [20, 20] });
-        } else {
-            console.warn('drawRouteOnResultsMap: bornes invalides pour le tracé affiché.');
         }
-    } else {
-        console.warn('drawRouteOnResultsMap: aucune couche tracée (liste vide)', {
-            itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
-        });
     }
 }
 
