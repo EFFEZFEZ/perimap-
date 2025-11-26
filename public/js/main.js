@@ -48,6 +48,11 @@ let currentResultsRouteLayer = null; // Tracé sur la carte PC
 let currentDetailMarkerLayer = null; // ✅ NOUVEAU V46.1
 let currentResultsMarkerLayer = null; // ✅ NOUVEAU V46.1
 let allFetchedItineraries = []; // Stocke tous les itinéraires (bus/vélo/marche)
+// Pagination / tri spécifique mode "arriver"
+let lastSearchMode = null; // 'partir' | 'arriver'
+let arrivalRankedAll = []; // Liste complète triée (arriver)
+let arrivalRenderedCount = 0; // Combien affichés actuellement
+const ARRIVAL_PAGE_SIZE = 5; // Limite initiale / pagination
 
 let geolocationManager = null;
 
@@ -1104,6 +1109,12 @@ async function executeItinerarySearch(source, sourceElements) {
         hour: hourSelect.value,
         minute: minuteSelect.value
     };
+    lastSearchMode = searchTime.type; // Mémoriser le mode pour le rendu/pagination
+    if (lastSearchMode === 'arriver') {
+        // Réinitialiser pagination arrivée
+        arrivalRankedAll = [];
+        arrivalRenderedCount = 0;
+    }
     prefillOtherPlanner(source, sourceElements);
     console.log(`Recherche Google API (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     if (source === 'hall') {
@@ -1953,7 +1964,54 @@ function processIntelligentResults(intelligentResults, searchTime) {
         console.warn('Erreur lors du filtrage par heure d\'arrivée:', e);
     }
 
-    return deduplicateItineraries(itineraries); // On ne trie plus par score ici si on est en mode "arriver", l'ordre chrono est mieux.
+    // Deduplication commune
+    let finalList = deduplicateItineraries(itineraries);
+
+    // Tri + pagination spécifique au mode "arriver"
+    if (searchTime && searchTime.type === 'arriver') {
+        const parseArrivalMsGeneric = (arrivalStr, baseDate) => {
+            if (!arrivalStr || typeof arrivalStr !== 'string') return Infinity;
+            const m = arrivalStr.match(/(\d{1,2}):(\d{2})/);
+            if (!m) return Infinity;
+            const hh = parseInt(m[1], 10);
+            const mm = parseInt(m[2], 10);
+            const d = new Date(baseDate);
+            d.setHours(hh, mm, 0, 0);
+            return d.getTime();
+        };
+
+        let baseDate;
+        if (!searchTime.date || searchTime.date === 'today' || searchTime.date === "Aujourd'hui") baseDate = new Date();
+        else baseDate = new Date(searchTime.date);
+        baseDate.setHours(parseInt(searchTime.hour)||0, parseInt(searchTime.minute)||0, 0, 0);
+
+        const scored = finalList.map(it => {
+            const steps = Array.isArray(it.steps) ? it.steps : [];
+            const busSteps = steps.filter(s => s.type === 'BUS');
+            const walkSteps = steps.filter(s => s.type === 'WALK' || s._isWalk);
+            const transfers = Math.max(0, busSteps.length - 1);
+            const walkingDurationMin = walkSteps.reduce((acc, s) => {
+                const m = (s.duration||'').match(/(\d+)/);
+                return acc + (m ? parseInt(m[1],10) : 0);
+            }, 0);
+            const arrivalMs = parseArrivalMsGeneric(it.arrivalTime, baseDate);
+            const durationRaw = it.durationRaw || 0;
+            return { it, arrivalMs, transfers, walkingDurationMin, durationRaw };
+        });
+
+        scored.sort((a, b) => {
+            if (a.arrivalMs !== b.arrivalMs) return a.arrivalMs - b.arrivalMs; // plus tôt d'abord
+            if (a.transfers !== b.transfers) return a.transfers - b.transfers; // moins de correspondances
+            if (a.walkingDurationMin !== b.walkingDurationMin) return a.walkingDurationMin - b.walkingDurationMin; // moins de marche
+            return a.durationRaw - b.durationRaw; // plus rapide
+        });
+
+        arrivalRankedAll = scored.map(x => x.it);
+        arrivalRenderedCount = ARRIVAL_PAGE_SIZE; // initial slice
+        finalList = arrivalRankedAll.slice(0, ARRIVAL_PAGE_SIZE);
+    }
+
+    return finalList;
 }
 
 /**
@@ -2356,16 +2414,20 @@ function renderItineraryResults(modeFilter) {
 
     resultsListContainer.innerHTML = ''; 
 
-    // 1. Filtrer les itinéraires
+    // 1. Sélection de la source selon mode de recherche
     let itinerariesToRender;
-    
-    // ✅ V53 (Logique conservée): L'onglet "ALL" (Suggéré) doit afficher 
-    // TOUS les itinéraires, qui seront ensuite groupés.
-    if (modeFilter === 'ALL') {
-        itinerariesToRender = allFetchedItineraries;
+    const isArrivalMode = (lastSearchMode === 'arriver');
+
+    if (isArrivalMode) {
+        // Pagination arrivée: slice la liste triée
+        const base = arrivalRankedAll.slice(0, arrivalRenderedCount || ARRIVAL_PAGE_SIZE);
+        itinerariesToRender = (modeFilter === 'ALL') ? base : base.filter(i => i.type === modeFilter);
     } else {
-        // Les autres onglets filtrent par type
-        itinerariesToRender = allFetchedItineraries.filter(i => i.type === modeFilter);
+        if (modeFilter === 'ALL') {
+            itinerariesToRender = allFetchedItineraries;
+        } else {
+            itinerariesToRender = allFetchedItineraries.filter(i => i.type === modeFilter);
+        }
     }
 
     if (itinerariesToRender.length === 0) {
@@ -2381,7 +2443,8 @@ function renderItineraryResults(modeFilter) {
     let hasShownBikeTitle = false;
     let hasShownWalkTitle = false;
 
-    if (modeFilter === 'ALL' && itinerariesToRender.length > 1) {
+    // Regroupement par type UNIQUEMENT en mode départ (partir). En mode arrivée on conserve l'ordre de tri.
+    if (!isArrivalMode && modeFilter === 'ALL' && itinerariesToRender.length > 1) {
         const suggested = itinerariesToRender[0];
         const rest = itinerariesToRender.slice(1);
         const buckets = {
@@ -2567,6 +2630,23 @@ function renderItineraryResults(modeFilter) {
         
         resultsListContainer.appendChild(wrapper);
     });
+
+    // Bouton "Charger plus" pour arrivée (uniquement onglet ALL)
+    if (isArrivalMode && modeFilter === 'ALL' && arrivalRenderedCount < arrivalRankedAll.length) {
+        const loadMoreWrapper = document.createElement('div');
+        loadMoreWrapper.className = 'load-more-wrapper';
+        const btn = document.createElement('button');
+        btn.id = 'results-load-more';
+        btn.className = 'btn btn-secondary';
+        btn.textContent = 'Charger plus';
+        btn.addEventListener('click', () => {
+            arrivalRenderedCount = Math.min(arrivalRenderedCount + ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
+            renderItineraryResults('ALL');
+            // Scroll position préservée; le bouton sera régénéré si encore des éléments
+        });
+        loadMoreWrapper.appendChild(btn);
+        resultsListContainer.appendChild(loadMoreWrapper);
+    }
 }
 
 /**

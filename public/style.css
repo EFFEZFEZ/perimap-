@@ -1638,7 +1638,7 @@ details[open] .accordion-content {
     .main-nav-buttons-condensed {
         grid-template-columns: 1fr;
         gap: 1rem;
-    }
+        padding-bottom: 80px; /* Ajout d'espace pour le footer */
     .content-cards {
         grid-template-columns: 1fr;
     }
