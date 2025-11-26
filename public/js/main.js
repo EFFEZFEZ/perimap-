@@ -3688,13 +3688,15 @@ export async function bootstrapApp() {
 // Expose pure / side-effect-light helpers for local testing in debug.html
 if (typeof window !== 'undefined') {
     window.__DEBUG = Object.assign({}, window.__DEBUG || {}, {
-        // Imported pure functions
+        // Imported pure functions from ranking.js
         rankArrivalItineraries,
+        rankDepartureItineraries,
         deduplicateItineraries,
+        filterExpiredDepartures,
+        filterLateArrivals,
         // Local helpers (remain internal but exposed for inspection)
         processIntelligentResults,
         ensureItineraryPolylines,
-        filterExpiredItineraries,
         computeTimeDifferenceMinutes,
         getWaitStepPresentation,
         // State inspectors

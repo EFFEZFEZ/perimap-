@@ -99,7 +99,7 @@ Pour ajouter un nouveau critère de tri mode "arriver": étendre le tableau `sco
 
 Une page `public/debug.html` permet de tester localement les fonctions clés sans appels réseau:
 
-Fonctions exposées: `rankArrivalItineraries`, `deduplicateItineraries`, `processIntelligentResults`, `ensureItineraryPolylines`, `filterExpiredItineraries`, `computeTimeDifferenceMinutes`, `getWaitStepPresentation` via `window.__DEBUG`.
+Fonctions exposées: `rankArrivalItineraries`, `rankDepartureItineraries`, `deduplicateItineraries`, `filterExpiredDepartures`, `filterLateArrivals`, `processIntelligentResults`, `ensureItineraryPolylines`, `computeTimeDifferenceMinutes`, `getWaitStepPresentation` via `window.__DEBUG`.
 
 Utilisation:
 1. Ouvrir `public/debug.html` dans un serveur statique.
