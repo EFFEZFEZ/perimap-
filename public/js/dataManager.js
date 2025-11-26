@@ -9,7 +9,7 @@ import { StopTimesStore } from './stopTimesStore.js';
  */
 
 const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v2';
-const GTFS_CACHE_VERSION = '2.5.0';  // Logs optimisés
+const GTFS_CACHE_VERSION = '2.6.0';  // Logs correspondances optimisés
 const GTFS_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 heures
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';

@@ -595,6 +595,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const candidateTrips = [];
         const startStopIds = Array.from(startStopSet);
         const processedTripIds = new Set();
+        
+        // Compteurs pour le diagnostic
+        let transferSearchStats = { candidatesFound: 0, secondLegSearches: 0, secondLegFound: 0 };
 
         // FIX BUG 7: Use stopTimesByStop index
         if (dataManager.stopTimesByStop) {
@@ -693,6 +696,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                 // FIX BUG 6: Use cluster IDs
                 const transferStopIds = Array.from(resolveClusterIds(transferStop));
 
+                transferSearchStats.secondLegSearches++;
                 const secondTrips = getCachedTripsBetweenStops(
                     transferStopIds,
                     expandedEndIds, 
@@ -701,6 +705,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                     latestSecondLeg
                 );
                 if (!secondTrips || !secondTrips.length) continue;
+                transferSearchStats.secondLegFound += secondTrips.length;
 
                 const firstSegment = {
                     tripId: candidate.trip.trip_id,
@@ -742,6 +747,21 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                         transferResults.push(itinerary);
                     }
                 }
+            }
+        }
+
+        // Log de synthèse pour les correspondances (une seule fois)
+        transferSearchStats.candidatesFound = candidateTrips.length;
+        if (!window._transferStatsLogged) {
+            window._transferStatsLogged = true;
+            console.log('🔄 Recherche correspondances:', {
+                tripsPartantDuDépart: candidateTrips.length,
+                recherchesSecondLeg: transferSearchStats.secondLegSearches,
+                correspondancesTrouvées: transferSearchStats.secondLegFound,
+                itinérairesAssemblés: transferResults.length
+            });
+            if (transferResults.length === 0 && transferSearchStats.secondLegSearches > 0) {
+                console.log('⚠️ Aucune correspondance viable trouvée malgré', transferSearchStats.secondLegSearches, 'recherches');
             }
         }
 
