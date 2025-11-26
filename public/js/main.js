@@ -1209,16 +1209,36 @@ async function executeItinerarySearch(source, sourceElements) {
         const heureDemandeMin = parseInt(searchTime.hour) * 60 + parseInt(searchTime.minute);
         console.log('📊 Heure demandée en minutes:', heureDemandeMin, `(${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')})`);
 
-        if (hybridItins && hybridItins.length) {
-            allFetchedItineraries = hybridItins;
-        } else {
-            console.log('🆘 Aucun trajet GTFS local, fallback Google Transit en cours...');
-            try {
-                const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime); 
-                allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
-                console.log('✅ Résultat API Google:', allFetchedItineraries?.length || 0, 'itinéraires');
-            } catch (apiError) {
-                console.error('❌ Erreur API Google Transit:', apiError);
+        // STRATÉGIE: TOUJOURS utiliser l'API Google comme source principale
+        // Le GTFS local est trop peu fiable pour les correspondances
+        console.log('🌐 Appel API Google Transit (source principale)...');
+        try {
+            const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime); 
+            allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+            console.log('✅ Résultat API Google:', allFetchedItineraries?.length || 0, 'itinéraires');
+            
+            // Si on a aussi des résultats GTFS locaux, les fusionner (pour enrichir)
+            if (hybridItins && hybridItins.length) {
+                console.log('🔄 Fusion avec', hybridItins.length, 'itinéraires GTFS locaux');
+                // Ajouter les itinéraires GTFS qui ne sont pas déjà dans les résultats Google
+                for (const gtfsIt of hybridItins) {
+                    const isDuplicate = allFetchedItineraries.some(googleIt => {
+                        const depMatch = googleIt.departureTime === gtfsIt.departureTime;
+                        const arrMatch = googleIt.arrivalTime === gtfsIt.arrivalTime;
+                        return depMatch && arrMatch;
+                    });
+                    if (!isDuplicate) {
+                        allFetchedItineraries.push(gtfsIt);
+                    }
+                }
+            }
+        } catch (apiError) {
+            console.error('❌ Erreur API Google Transit:', apiError);
+            // Fallback sur GTFS local si l'API échoue
+            if (hybridItins && hybridItins.length) {
+                console.log('🔄 Fallback sur GTFS local:', hybridItins.length, 'itinéraires');
+                allFetchedItineraries = hybridItins;
+            } else {
                 allFetchedItineraries = [];
             }
         }
