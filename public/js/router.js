@@ -574,6 +574,112 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         return itinerary;
     };
 
+    /**
+     * NOUVELLE APPROCHE INTELLIGENTE pour les correspondances
+     * 1. Trouver les routes qui desservent le départ
+     * 2. Trouver les routes qui desservent l'arrivée
+     * 3. Trouver les arrêts de correspondance (intersection ou proximité)
+     * 4. Construire les itinéraires via ces hubs
+     */
+    const findTransferHubs = (startStopIds, endStopIds) => {
+        const startRoutes = new Map(); // route_id -> Set of stop_ids on that route
+        const endRoutes = new Map();   // route_id -> Set of stop_ids on that route
+        
+        // Pour chaque arrêt de départ, trouver les routes qui y passent
+        const startSet = new Set(startStopIds);
+        const endSet = new Set(endStopIds);
+        
+        for (const trip of dataManager.trips) {
+            const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
+            if (!stopTimes || stopTimes.length < 2) continue;
+            
+            const tripStopIds = stopTimes.map(st => st.stop_id);
+            const passesStart = tripStopIds.some(id => startSet.has(id));
+            const passesEnd = tripStopIds.some(id => endSet.has(id));
+            
+            if (passesStart) {
+                if (!startRoutes.has(trip.route_id)) {
+                    startRoutes.set(trip.route_id, new Set());
+                }
+                tripStopIds.forEach(id => startRoutes.get(trip.route_id).add(id));
+            }
+            if (passesEnd) {
+                if (!endRoutes.has(trip.route_id)) {
+                    endRoutes.set(trip.route_id, new Set());
+                }
+                tripStopIds.forEach(id => endRoutes.get(trip.route_id).add(id));
+            }
+        }
+        
+        // Trouver les hubs de correspondance : arrêts communs ou proches
+        const transferHubs = new Map(); // stop_id -> { startRoutes: [], endRoutes: [], score }
+        
+        // 1. Arrêts directement communs
+        for (const [startRouteId, startStops] of startRoutes) {
+            for (const [endRouteId, endStops] of endRoutes) {
+                if (startRouteId === endRouteId) continue; // Même ligne = pas de correspondance
+                
+                // Trouver les arrêts communs
+                for (const stopId of startStops) {
+                    if (endStops.has(stopId)) {
+                        if (!transferHubs.has(stopId)) {
+                            transferHubs.set(stopId, { startRoutes: new Set(), endRoutes: new Set(), isExact: true });
+                        }
+                        transferHubs.get(stopId).startRoutes.add(startRouteId);
+                        transferHubs.get(stopId).endRoutes.add(endRouteId);
+                    }
+                }
+            }
+        }
+        
+        // 2. Si pas de hub direct, chercher des arrêts proches (< 300m)
+        if (transferHubs.size === 0) {
+            const PROXIMITY_RADIUS = 300; // mètres
+            
+            for (const [startRouteId, startStops] of startRoutes) {
+                for (const [endRouteId, endStops] of endRoutes) {
+                    if (startRouteId === endRouteId) continue;
+                    
+                    for (const startStopId of startStops) {
+                        const startStop = dataManager.getStop(startStopId);
+                        if (!startStop) continue;
+                        const startLat = parseFloat(startStop.stop_lat);
+                        const startLon = parseFloat(startStop.stop_lon);
+                        if (!Number.isFinite(startLat)) continue;
+                        
+                        for (const endStopId of endStops) {
+                            const endStop = dataManager.getStop(endStopId);
+                            if (!endStop) continue;
+                            const endLat = parseFloat(endStop.stop_lat);
+                            const endLon = parseFloat(endStop.stop_lon);
+                            if (!Number.isFinite(endLat)) continue;
+                            
+                            const dist = dataManager.calculateDistance(startLat, startLon, endLat, endLon);
+                            if (dist <= PROXIMITY_RADIUS) {
+                                // Utiliser l'arrêt de la ligne de départ comme hub
+                                const hubKey = `${startStopId}|${endStopId}`;
+                                if (!transferHubs.has(hubKey)) {
+                                    transferHubs.set(hubKey, { 
+                                        alightStop: startStopId, 
+                                        boardStop: endStopId,
+                                        startRoutes: new Set(), 
+                                        endRoutes: new Set(), 
+                                        isExact: false,
+                                        walkDistance: Math.round(dist)
+                                    });
+                                }
+                                transferHubs.get(hubKey).startRoutes.add(startRouteId);
+                                transferHubs.get(hubKey).endRoutes.add(endRouteId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return { startRoutes, endRoutes, transferHubs };
+    };
+
     const buildTransferItineraries = async ({
         origin,
         destination,
@@ -593,254 +699,196 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
 
         const isServiceActive = (trip) => Array.from(serviceSet).some(activeServiceId => dataManager.serviceIdsMatch(trip.service_id, activeServiceId));
 
-        const candidateTrips = [];
         const startStopIds = Array.from(startStopSet);
-        const processedTripIds = new Set();
+        const endStopIds = Array.from(endStopSet);
         
-        // Compteurs pour le diagnostic
-        let transferSearchStats = { candidatesFound: 0, secondLegSearches: 0, secondLegFound: 0 };
-
-        // Diagnostic: vérifier stopTimesByStop
-        if (!globalThis._stopTimesByStopDiag) {
-            globalThis._stopTimesByStopDiag = true;
-            const stbsKeys = Object.keys(dataManager.stopTimesByStop || {});
-            const matchingIds = startStopIds.filter(id => dataManager.stopTimesByStop && dataManager.stopTimesByStop[id]);
-            console.log('🔍 stopTimesByStop diagnostic:', JSON.stringify({
-                exists: !!dataManager.stopTimesByStop,
-                totalKeys: stbsKeys.length,
-                sampleKeys: stbsKeys.slice(0, 3),
-                startStopIds: startStopIds.slice(0, 3),
-                matchCount: matchingIds.length,
-                matchingIds: matchingIds
-            }));
+        // NOUVELLE APPROCHE : Trouver les hubs de correspondance intelligemment
+        const { startRoutes, endRoutes, transferHubs } = findTransferHubs(startStopIds, endStopIds);
+        
+        // Log diagnostic
+        if (!globalThis._transferHubsLogged) {
+            globalThis._transferHubsLogged = true;
+            console.log('🎯 Analyse des correspondances:', {
+                routesDepuisDepart: startRoutes.size,
+                routesVersArrivee: endRoutes.size,
+                hubsTrouves: transferHubs.size
+            });
             
-            // Vérifier si les Quay IDs existent
-            const quayIds = startStopIds.filter(id => id.includes('Quay'));
-            const quayMatches = quayIds.filter(id => dataManager.stopTimesByStop && dataManager.stopTimesByStop[id]);
-            console.log('🔍 Quay IDs check:', JSON.stringify({
-                quayIdsSearched: quayIds,
-                quayIdsFound: quayMatches.length
-            }));
-        }
-
-        // FIX BUG 7: Use stopTimesByStop index
-        if (dataManager.stopTimesByStop) {
-            for (const stopId of startStopIds) {
-                const stopTimesAtStop = dataManager.stopTimesByStop[stopId];
-                if (!stopTimesAtStop) continue;
-
-                for (const st of stopTimesAtStop) {
-                    if (processedTripIds.has(st.trip_id)) continue;
-                    processedTripIds.add(st.trip_id);
-
-                    const trip = dataManager.tripsById ? dataManager.tripsById[st.trip_id] : dataManager.trips.find(t => t.trip_id === st.trip_id);
-                    if (!trip || !isServiceActive(trip)) continue;
-
-                    const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
-                    if (!stopTimes || stopTimes.length < 2) continue;
-
-                    let boardingIndex = -1;
-                    if (st.stop_sequence !== undefined) {
-                        boardingIndex = stopTimes.findIndex(s => s.stop_sequence === st.stop_sequence);
-                    }
-                    if (boardingIndex === -1) {
-                        boardingIndex = stopTimes.findIndex(s => s.stop_id === stopId && s.arrival_time === st.arrival_time);
-                    }
-
-                    if (boardingIndex === -1 || boardingIndex >= stopTimes.length - 1) continue;
-
-                    const departureSeconds = dataManager.timeToSeconds(st.departure_time || st.arrival_time);
-                    if (!Number.isFinite(departureSeconds)) continue;
-                    if (departureSeconds < windowStartSec || departureSeconds > windowEndSec) continue;
-
-                    candidateTrips.push({
-                        trip,
-                        stopTimes,
-                        boardingIndex,
-                        departureSeconds
-                    });
-
-                    if (candidateTrips.length >= HYBRID_ROUTING_CONFIG.TRANSFER_CANDIDATE_TRIPS_LIMIT) break;
-                }
-                if (candidateTrips.length >= HYBRID_ROUTING_CONFIG.TRANSFER_CANDIDATE_TRIPS_LIMIT) break;
-            }
-        } else {
-            // Fallback if stopTimesByStop is missing
-            for (const trip of dataManager.trips) {
-                if (!isServiceActive(trip)) continue;
-                const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
-                if (!stopTimes || stopTimes.length < 2) continue;
-                for (let i = 0; i < stopTimes.length - 1; i++) {
-                    const st = stopTimes[i];
-                    if (!startStopSet.has(st.stop_id)) continue;
-                    const departureSeconds = dataManager.timeToSeconds(st.departure_time || st.arrival_time);
-                    if (!Number.isFinite(departureSeconds)) continue;
-                    if (departureSeconds < windowStartSec || departureSeconds > windowEndSec) continue;
-                    candidateTrips.push({
-                        trip,
-                        stopTimes,
-                        boardingIndex: i,
-                        departureSeconds
-                    });
-                    break;
-                }
-                if (candidateTrips.length >= HYBRID_ROUTING_CONFIG.TRANSFER_CANDIDATE_TRIPS_LIMIT) {
-                    break;
-                }
+            if (transferHubs.size > 0) {
+                const hubSamples = Array.from(transferHubs.entries()).slice(0, 3).map(([key, hub]) => {
+                    const stopName = hub.isExact 
+                        ? dataManager.getStop(key)?.stop_name 
+                        : `${dataManager.getStop(hub.alightStop)?.stop_name} → ${dataManager.getStop(hub.boardStop)?.stop_name}`;
+                    return {
+                        hub: stopName,
+                        walk: hub.walkDistance || 0,
+                        fromRoutes: hub.startRoutes.size,
+                        toRoutes: hub.endRoutes.size
+                    };
+                });
+                console.log('🚏 Hubs de correspondance:', hubSamples);
+            } else {
+                console.log('❌ Aucun hub de correspondance trouvé entre les lignes');
             }
         }
-
-        candidateTrips.sort((a, b) => a.departureSeconds - b.departureSeconds);
-
-        // Log les trips candidats pour diagnostic
-        if (!globalThis._candidateTripsLogged) {
-            globalThis._candidateTripsLogged = true;
-            console.log(`🚌 Trips candidats pour correspondance (${candidateTrips.length}):`, 
-                candidateTrips.slice(0, 5).map(c => ({
-                    tripId: c.trip.trip_id.split(':').pop(),
-                    route: c.trip.route_id.split(':').pop(),
-                    depart: `${Math.floor(c.departureSeconds/3600)}:${String(Math.floor((c.departureSeconds%3600)/60)).padStart(2,'0')}`,
-                    fromStop: dataManager.getStop(c.stopTimes[c.boardingIndex]?.stop_id)?.stop_name,
-                    totalStops: c.stopTimes.length - c.boardingIndex
-                }))
-            );
+        
+        // Si aucun hub trouvé, pas de correspondance possible
+        if (transferHubs.size === 0) {
+            return transferResults;
         }
-
-        const seenPairs = new Set();
-
-        for (const candidate of candidateTrips) {
+        
+        // Construire les itinéraires via les hubs trouvés
+        const processedTripPairs = new Set();
+        
+        for (const [hubKey, hub] of transferHubs) {
             if (transferResults.length >= HYBRID_ROUTING_CONFIG.TRANSFER_MAX_ITINERARIES) break;
-
-            const boardingStopTime = candidate.stopTimes[candidate.boardingIndex];
-            const boardingStop = dataManager.getStop(boardingStopTime.stop_id);
-            if (!boardingStop) continue;
-
-            const maxTransferIdx = Math.min(candidate.stopTimes.length - 1, candidate.boardingIndex + HYBRID_ROUTING_CONFIG.TRANSFER_MAX_FIRST_LEG_STOPS);
-
-            for (let idx = candidate.boardingIndex + 1; idx <= maxTransferIdx; idx++) {
-                if (transferResults.length >= HYBRID_ROUTING_CONFIG.TRANSFER_MAX_ITINERARIES) break;
-
-                const transferStopTime = candidate.stopTimes[idx];
-                const transferStop = dataManager.getStop(transferStopTime.stop_id);
-                if (!transferStop) continue;
-
-                const arrivalSeconds = dataManager.timeToSeconds(transferStopTime.arrival_time || transferStopTime.departure_time);
-                const departSeconds = dataManager.timeToSeconds(transferStopTime.departure_time || transferStopTime.arrival_time);
-                if (!Number.isFinite(arrivalSeconds) || !Number.isFinite(departSeconds)) continue;
-                const earliestSecondLeg = departSeconds + HYBRID_ROUTING_CONFIG.TRANSFER_MIN_BUFFER_SECONDS;
-                // FIX BUG 4: Remove 24h cap
-                const latestSecondLeg = earliestSecondLeg + HYBRID_ROUTING_CONFIG.TRANSFER_MAX_WAIT_SECONDS;
-
-                // FIX BUG 6: Use cluster IDs + nearby stops for transfer (ex: Tourny ↔ Tourny Pompidou)
-                const transferStopIds = new Set(resolveClusterIds(transferStop));
-                
-                // Ajouter les arrêts proches pour permettre les correspondances à pied (ex: Tourny → Tourny Pompidou)
-                const transferLat = parseFloat(transferStop.stop_lat);
-                const transferLon = parseFloat(transferStop.stop_lon);
-                if (Number.isFinite(transferLat) && Number.isFinite(transferLon)) {
-                    for (const stop of dataManager.stops) {
-                        if (transferStopIds.has(stop.stop_id)) continue;
-                        const stopLat = parseFloat(stop.stop_lat);
-                        const stopLon = parseFloat(stop.stop_lon);
-                        if (!Number.isFinite(stopLat) || !Number.isFinite(stopLon)) continue;
-                        const dist = dataManager.calculateDistance(transferLat, transferLon, stopLat, stopLon);
-                        if (dist <= HYBRID_ROUTING_CONFIG.TRANSFER_WALK_RADIUS_M) {
-                            // Ajouter cet arrêt et tous ses IDs de cluster
-                            resolveClusterIds(stop).forEach(id => transferStopIds.add(id));
+            
+            const alightStopId = hub.isExact ? hubKey : hub.alightStop;
+            const boardStopId = hub.isExact ? hubKey : hub.boardStop;
+            
+            // Trouver les trips qui vont du départ au hub
+            const firstLegTrips = [];
+            for (const routeId of hub.startRoutes) {
+                const routeTrips = dataManager.tripsByRoute[routeId] || [];
+                for (const trip of routeTrips) {
+                    if (!isServiceActive(trip)) continue;
+                    const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
+                    if (!stopTimes) continue;
+                    
+                    // Trouver l'index de montée (départ) et de descente (hub)
+                    let boardingIdx = -1, alightIdx = -1;
+                    for (let i = 0; i < stopTimes.length; i++) {
+                        if (boardingIdx === -1 && startStopSet.has(stopTimes[i].stop_id)) {
+                            boardingIdx = i;
+                        }
+                        if (stopTimes[i].stop_id === alightStopId) {
+                            alightIdx = i;
+                        }
+                    }
+                    
+                    if (boardingIdx !== -1 && alightIdx !== -1 && boardingIdx < alightIdx) {
+                        const depSec = dataManager.timeToSeconds(stopTimes[boardingIdx].departure_time);
+                        const arrSec = dataManager.timeToSeconds(stopTimes[alightIdx].arrival_time);
+                        if (depSec >= windowStartSec && depSec <= windowEndSec) {
+                            firstLegTrips.push({
+                                trip,
+                                stopTimes,
+                                boardingIdx,
+                                alightIdx,
+                                depSec,
+                                arrSec
+                            });
                         }
                     }
                 }
+            }
+            
+            // Trouver les trips qui vont du hub à l'arrivée
+            for (const firstLeg of firstLegTrips.slice(0, 5)) { // Limiter pour performance
+                if (transferResults.length >= HYBRID_ROUTING_CONFIG.TRANSFER_MAX_ITINERARIES) break;
                 
-                const transferStopIdsArray = Array.from(transferStopIds);
-
-                // Diagnostic: log les 3 premières recherches de second leg
-                if (transferSearchStats.secondLegSearches < 3) {
-                    console.log(`🔎 Second leg search #${transferSearchStats.secondLegSearches + 1}:`, {
-                        transferStop: transferStop.stop_name,
-                        transferStopId: transferStop.stop_id,
-                        transferStopIds: transferStopIdsArray.slice(0, 5),
-                        transferStopCount: transferStopIdsArray.length,
-                        expandedEndIds: expandedEndIds.slice(0, 5),
-                        timeWindow: `${Math.floor(earliestSecondLeg/3600)}:${String(Math.floor((earliestSecondLeg%3600)/60)).padStart(2,'0')} - ${Math.floor(latestSecondLeg/3600)}:${String(Math.floor((latestSecondLeg%3600)/60)).padStart(2,'0')}`
-                    });
-                }
-
-                transferSearchStats.secondLegSearches++;
-                const secondTrips = getCachedTripsBetweenStops(
-                    transferStopIdsArray,
-                    expandedEndIds, 
-                    reqDate, 
-                    earliestSecondLeg, 
-                    latestSecondLeg
-                );
+                const minSecondLegDep = firstLeg.arrSec + HYBRID_ROUTING_CONFIG.TRANSFER_MIN_BUFFER_SECONDS;
+                const maxSecondLegDep = firstLeg.arrSec + HYBRID_ROUTING_CONFIG.TRANSFER_MAX_WAIT_SECONDS;
                 
-                // Diagnostic: si aucun trip trouvé sur les 3 premières recherches
-                if (transferSearchStats.secondLegSearches <= 3 && (!secondTrips || !secondTrips.length)) {
-                    console.log(`❌ Aucun trip trouvé pour second leg #${transferSearchStats.secondLegSearches}`);
-                }
-                
-                if (!secondTrips || !secondTrips.length) continue;
-                transferSearchStats.secondLegFound += secondTrips.length;
-
-                const firstSegment = {
-                    tripId: candidate.trip.trip_id,
-                    routeId: candidate.trip.route_id,
-                    route: dataManager.getRoute(candidate.trip.route_id),
-                    shapeId: candidate.trip.shape_id || null,
-                    boardingStopId: boardingStop.stop_id,
-                    alightingStopId: transferStop.stop_id,
-                    departureSeconds: candidate.departureSeconds,
-                    arrivalSeconds,
-                    stopTimes: candidate.stopTimes.slice(candidate.boardingIndex, idx + 1)
-                };
-
-                for (const second of secondTrips) {
+                for (const routeId of hub.endRoutes) {
                     if (transferResults.length >= HYBRID_ROUTING_CONFIG.TRANSFER_MAX_ITINERARIES) break;
-                    if (second.tripId === firstSegment.tripId) continue;
-                    const dedupeKey = `${firstSegment.tripId}->${second.tripId}`;
-                    if (seenPairs.has(dedupeKey)) continue;
-
-                    const finalStop = dataManager.getStop(second.alightingStopId);
-                    if (!finalStop) continue;
-
-                    const itinerary = await assembleTransferItinerary({
-                        firstSegment,
-                        secondSegment: second,
-                        boardingStop,
-                        transferStop,
-                        finalStop,
-                        origin,
-                        destination,
-                        originCandidates,
-                        destCandidates,
-                        windowStartSec,
-                        windowEndSec
-                    });
-
-                    if (itinerary) {
-                        seenPairs.add(dedupeKey);
-                        transferResults.push(itinerary);
+                    
+                    const routeTrips = dataManager.tripsByRoute[routeId] || [];
+                    for (const trip of routeTrips) {
+                        if (transferResults.length >= HYBRID_ROUTING_CONFIG.TRANSFER_MAX_ITINERARIES) break;
+                        if (trip.trip_id === firstLeg.trip.trip_id) continue; // Pas le même trip
+                        if (!isServiceActive(trip)) continue;
+                        
+                        const pairKey = `${firstLeg.trip.trip_id}->${trip.trip_id}`;
+                        if (processedTripPairs.has(pairKey)) continue;
+                        
+                        const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
+                        if (!stopTimes) continue;
+                        
+                        // Trouver l'index de montée (hub) et de descente (arrivée)
+                        let boardingIdx = -1, alightIdx = -1;
+                        for (let i = 0; i < stopTimes.length; i++) {
+                            if (boardingIdx === -1 && stopTimes[i].stop_id === boardStopId) {
+                                boardingIdx = i;
+                            }
+                            if (endStopSet.has(stopTimes[i].stop_id)) {
+                                alightIdx = i;
+                            }
+                        }
+                        
+                        if (boardingIdx !== -1 && alightIdx !== -1 && boardingIdx < alightIdx) {
+                            const depSec = dataManager.timeToSeconds(stopTimes[boardingIdx].departure_time);
+                            const arrSec = dataManager.timeToSeconds(stopTimes[alightIdx].arrival_time);
+                            
+                            if (depSec >= minSecondLegDep && depSec <= maxSecondLegDep) {
+                                processedTripPairs.add(pairKey);
+                                
+                                // Assembler l'itinéraire
+                                const firstBoardingStop = dataManager.getStop(firstLeg.stopTimes[firstLeg.boardingIdx].stop_id);
+                                const transferAlightStop = dataManager.getStop(alightStopId);
+                                const transferBoardStop = dataManager.getStop(boardStopId);
+                                const finalStop = dataManager.getStop(stopTimes[alightIdx].stop_id);
+                                
+                                const firstSegment = {
+                                    tripId: firstLeg.trip.trip_id,
+                                    routeId: firstLeg.trip.route_id,
+                                    route: dataManager.getRoute(firstLeg.trip.route_id),
+                                    shapeId: firstLeg.trip.shape_id || null,
+                                    boardingStopId: firstLeg.stopTimes[firstLeg.boardingIdx].stop_id,
+                                    alightingStopId: alightStopId,
+                                    departureSeconds: firstLeg.depSec,
+                                    arrivalSeconds: firstLeg.arrSec,
+                                    stopTimes: firstLeg.stopTimes.slice(firstLeg.boardingIdx, firstLeg.alightIdx + 1)
+                                };
+                                
+                                const secondSegment = {
+                                    tripId: trip.trip_id,
+                                    routeId: trip.route_id,
+                                    route: dataManager.getRoute(trip.route_id),
+                                    shapeId: trip.shape_id || null,
+                                    boardingStopId: boardStopId,
+                                    alightingStopId: stopTimes[alightIdx].stop_id,
+                                    departureSeconds: depSec,
+                                    arrivalSeconds: arrSec,
+                                    stopTimes: stopTimes.slice(boardingIdx, alightIdx + 1)
+                                };
+                                
+                                const itinerary = await assembleTransferItinerary({
+                                    firstSegment,
+                                    secondSegment,
+                                    boardingStop: firstBoardingStop,
+                                    transferStop: transferAlightStop,
+                                    finalStop,
+                                    origin,
+                                    destination,
+                                    originCandidates,
+                                    destCandidates,
+                                    windowStartSec,
+                                    windowEndSec
+                                });
+                                
+                                if (itinerary) {
+                                    // Ajouter info sur la marche entre arrêts si différents
+                                    if (!hub.isExact && hub.walkDistance) {
+                                        itinerary._transferInfo.walkBetweenStops = hub.walkDistance;
+                                        itinerary._transferInfo.transferBoardStopName = transferBoardStop?.stop_name;
+                                    }
+                                    transferResults.push(itinerary);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-
-        // Log de synthèse pour les correspondances (une seule fois)
-        transferSearchStats.candidatesFound = candidateTrips.length;
-        if (!globalThis._transferStatsLogged) {
-            globalThis._transferStatsLogged = true;
-            console.log('🔄 Recherche correspondances:', JSON.stringify({
-                tripsPartantDuDépart: candidateTrips.length,
-                recherchesSecondLeg: transferSearchStats.secondLegSearches,
-                correspondancesTrouvées: transferSearchStats.secondLegFound,
-                itinérairesAssemblés: transferResults.length
-            }));
-            if (transferResults.length === 0 && transferSearchStats.secondLegSearches > 0) {
-                console.log('⚠️ Aucune correspondance viable trouvée malgré', transferSearchStats.secondLegSearches, 'recherches');
-            }
-            if (candidateTrips.length === 0) {
-                console.log('❌ Aucun trip ne part des arrêts de départ dans la fenêtre horaire');
-            }
+        
+        // Log de synthèse
+        if (!globalThis._transferResultsLogged) {
+            globalThis._transferResultsLogged = true;
+            console.log('🔄 Résultat correspondances:', {
+                hubsAnalyses: transferHubs.size,
+                itinerairesAssembles: transferResults.length
+            });
         }
 
         return transferResults;
