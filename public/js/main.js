@@ -1121,6 +1121,20 @@ async function executeItinerarySearch(source, sourceElements) {
         hour: hourSelect.value,
         minute: minuteSelect.value
     };
+    
+    // Debug: vérifier l'heure réellement sélectionnée
+    console.log('🕐 Heure sélectionnée:', {
+        date: searchTime.date,
+        heure: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`,
+        mode: searchTime.type,
+        hourSelectValue: hourSelect.value,
+        hourSelectIndex: hourSelect.selectedIndex,
+        minuteSelectValue: minuteSelect.value,
+        minuteSelectIndex: minuteSelect.selectedIndex,
+        // Debug supplémentaire
+        hourOptions: hourSelect.options?.length,
+        selectedHourText: hourSelect.options?.[hourSelect.selectedIndex]?.textContent
+    });
     lastSearchMode = searchTime.type; // Mémoriser le mode pour le rendu/pagination
     if (lastSearchMode === 'arriver') {
         // Réinitialiser pagination arrivée
@@ -1182,7 +1196,7 @@ async function executeItinerarySearch(source, sourceElements) {
         // Debug: afficher ce qu'on a trouvé en local
         console.log('🔍 Résultat routage GTFS local:', {
             mode: searchTime.type || 'partir',
-            heureRecherche: `${searchTime.hour}:${searchTime.minute}`,
+            heureRecherche: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`,
             itinerairesLocaux: hybridItins?.length || 0,
             premiers: hybridItins?.slice(0, 3).map(it => ({
                 dep: it.departureTime,
@@ -1190,6 +1204,10 @@ async function executeItinerarySearch(source, sourceElements) {
                 type: it.type
             }))
         });
+        
+        // Debug: vérifier si l'heure demandée correspond
+        const heureDemandeMin = parseInt(searchTime.hour) * 60 + parseInt(searchTime.minute);
+        console.log('📊 Heure demandée en minutes:', heureDemandeMin, `(${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')})`);
 
         if (hybridItins && hybridItins.length) {
             allFetchedItineraries = hybridItins;
@@ -1235,20 +1253,23 @@ async function executeItinerarySearch(source, sourceElements) {
         console.log('🎯 Après déduplication:', allFetchedItineraries?.length || 0, 'itinéraires uniques');
 
         // Trier les itinéraires selon le mode
+        const heureDemandee = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
         if (searchTime.type === 'arriver') {
+            console.log(`🎯 Mode ARRIVER: on veut arriver AVANT ou À ${heureDemandee}`);
             arrivalRankedAll = rankArrivalItineraries(allFetchedItineraries, searchTime);
             arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
             allFetchedItineraries = arrivalRankedAll; // Utiliser la liste triée
-            console.log('📊 Tri mode ARRIVER (arrivée <= ' + searchTime.hour + ':' + searchTime.minute + '):', 
+            console.log('📊 Tri mode ARRIVER (arrivée <= ' + heureDemandee + '):', 
                 allFetchedItineraries.slice(0, 5).map(it => ({
                     dep: it.departureTime,
                     arr: it.arrivalTime,
                     dur: it.duration
                 })));
         } else {
+            console.log(`🎯 Mode PARTIR: on veut partir APRÈS ou À ${heureDemandee}`);
             // Mode "partir" : trier par premier départ, moins de correspondances
             allFetchedItineraries = rankDepartureItineraries(allFetchedItineraries);
-            console.log('📊 Tri mode PARTIR (départ >= ' + searchTime.hour + ':' + searchTime.minute + '):', 
+            console.log('📊 Tri mode PARTIR (départ >= ' + heureDemandee + '):', 
                 allFetchedItineraries.slice(0, 5).map(it => ({
                     dep: it.departureTime,
                     arr: it.arrivalTime,
@@ -1587,6 +1608,9 @@ function processGoogleRoutesResponse(data) {
 
 function processIntelligentResults(intelligentResults, searchTime) {
     console.log("=== DÉBUT PROCESS INTELLIGENT RESULTS ===");
+    console.log("📥 Mode de recherche:", searchTime?.type || 'partir');
+    console.log("📥 Heure demandée:", `${searchTime?.hour}:${String(searchTime?.minute || 0).padStart(2,'0')}`);
+    
     const itineraries = [];
     const sortedRecommendations = [...intelligentResults.recommendations].sort((a, b) => b.score - a.score);
 
@@ -1626,6 +1650,14 @@ function processIntelligentResults(intelligentResults, searchTime) {
             }
         }
     });
+    
+    // Debug: afficher tous les itinéraires extraits de Google AVANT filtrage
+    console.log("📋 Itinéraires Google bruts (avant filtrage):", itineraries.map(it => ({
+        type: it.type,
+        dep: it.departureTime,
+        arr: it.arrivalTime,
+        dur: it.duration
+    })));
 
     // 2. LOGIQUE DE FENÊTRE TEMPORELLE (Horaire Arrivée)
     try {
@@ -1642,8 +1674,9 @@ function processIntelligentResults(intelligentResults, searchTime) {
             reqDate.setHours(reqHour, reqMinute, 0, 0);
             const reqMs = reqDate.getTime();
 
-            // B. Fenêtre stricte : on accepte uniquement les arrivées AVANT ou pile à l'heure demandée
-            const BEFORE_MINUTES = 45; // fenêtre de recherche en amont
+            // B. Fenêtre élargie : on accepte les arrivées jusqu'à 4h AVANT l'heure demandée
+            // Le tri ensuite classera par proximité à l'heure cible
+            const BEFORE_MINUTES = 240; // 4h de fenêtre en amont pour avoir plus de choix
             const windowStart = reqMs - BEFORE_MINUTES * 60 * 1000;
             const windowEnd = reqMs; // pas de trajets après l'heure demandée
 
@@ -1671,7 +1704,11 @@ function processIntelligentResults(intelligentResults, searchTime) {
                 .filter(x => x.arrivalMs >= windowStart && x.arrivalMs <= windowEnd)
                 .map(x => x.itin);
 
-            console.log(`🚌 Bus Google trouvés dans la fenêtre : ${filteredBus.length}`);
+            console.log(`🚌 Bus Google trouvés dans la fenêtre : ${filteredBus.length} sur ${busItins.length} total`);
+            if (busWithMs.length > filteredBus.length) {
+                const exclus = busWithMs.filter(x => x.arrivalMs < windowStart || x.arrivalMs > windowEnd);
+                console.log(`📅 Bus exclus (hors fenêtre):`, exclus.map(x => ({ arr: x.itin.arrivalTime, ms: x.arrivalMs })));
+            }
 
             // D. INJECTION GTFS (Data locale) pour compléter
             // ON SUPPRIME LA LIMITE "TARGET_BUS_COUNT" pour prendre TOUT ce qui existe.

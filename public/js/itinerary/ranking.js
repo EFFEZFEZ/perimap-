@@ -154,7 +154,10 @@ export function rankArrivalItineraries(itineraries, searchTime) {
   const targetMinute = parseInt(searchTime.minute) || 0;
   const targetMinutes = targetHour * 60 + targetMinute;
   
-  console.log(`🎯 rankArrivalItineraries: cible ${targetHour}:${String(targetMinute).padStart(2,'0')}, ${itineraries.length} itinéraires à trier`);
+  console.log(`🎯 rankArrivalItineraries: cible ${String(targetHour).padStart(2,'0')}:${String(targetMinute).padStart(2,'0')} (${targetMinutes}min), ${itineraries.length} itinéraires à trier`);
+  
+  // Debug: afficher tous les itinéraires avant tri
+  console.log('📋 Avant tri (heures d\'arrivée):', itineraries.map(it => it.arrivalTime).join(', '));
   
   const scored = itineraries.map(it => {
     const steps = Array.isArray(it.steps) ? it.steps : [];
@@ -170,13 +173,14 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     const arrMinutes = parseTimeToMinutes(it.arrivalTime);
     // Distance à l'heure cible (on veut arriver le plus proche possible AVANT ou égal)
     // arrivalDiff = 0 si arrivée = heure cible (parfait)
-    // arrivalDiff > 0 si arrivée avant l'heure cible (ok, plus petit = mieux)
-    // arrivalDiff = Infinity si arrivée après l'heure cible (mauvais)
+    // arrivalDiff > 0 si arrivée avant l'heure cible (ok, plus petit = mieux car plus proche de la cible)
+    // arrivalDiff = Infinity si arrivée après l'heure cible (mauvais - trop tard!)
     const arrivalDiff = targetMinutes - arrMinutes;
     
     return {
       it,
       arrMinutes,
+      arrTime: it.arrivalTime, // Pour debug
       arrivalDiff: arrivalDiff >= 0 ? arrivalDiff : Infinity, // Pénaliser les arrivées tardives
       transfers,
       walkingDurationMin,
@@ -184,9 +188,9 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     };
   });
 
-  // Trier: meilleure arrivée (plus proche de l'heure cible), moins de correspondances
+  // Trier: meilleure arrivée (plus proche de l'heure cible sans dépasser), moins de correspondances
   scored.sort((a, b) => {
-    // D'abord par proximité d'arrivée à l'heure cible (0 = parfait, petit = proche)
+    // D'abord par proximité d'arrivée à l'heure cible (0 = parfait, petit = proche de la cible)
     if (a.arrivalDiff !== b.arrivalDiff) return a.arrivalDiff - b.arrivalDiff;
     // Puis par nombre de correspondances
     if (a.transfers !== b.transfers) return a.transfers - b.transfers;
@@ -196,10 +200,11 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     return a.durationRaw - b.durationRaw;
   });
 
-  console.log('📋 Résultat tri ARRIVER:', scored.slice(0, 5).map(s => ({
-    arr: s.it.arrivalTime,
+  console.log('📋 Après tri ARRIVER (arrivée la plus proche de la cible en premier):', scored.slice(0, 8).map(s => ({
+    arr: s.arrTime,
+    arrMin: s.arrMinutes,
+    diff: s.arrivalDiff === Infinity ? '∞ (trop tard!)' : s.arrivalDiff + 'min avant cible',
     dep: s.it.departureTime,
-    diff: s.arrivalDiff === Infinity ? '∞' : s.arrivalDiff + 'min',
     transfers: s.transfers
   })));
 
@@ -215,6 +220,9 @@ export function rankDepartureItineraries(itineraries) {
   
   console.log(`🎯 rankDepartureItineraries: ${itineraries.length} itinéraires à trier`);
   
+  // Debug: afficher tous les itinéraires avant tri
+  console.log('📋 Avant tri (heures de départ):', itineraries.map(it => it.departureTime).join(', '));
+  
   const scored = itineraries.map(it => {
     const steps = Array.isArray(it.steps) ? it.steps : [];
     const busSteps = steps.filter(s => s.type === 'BUS');
@@ -229,11 +237,13 @@ export function rankDepartureItineraries(itineraries) {
     return {
       it,
       depMinutes,
+      depTime: it.departureTime, // Pour debug
       transfers,
       durationMin
     };
   });
 
+  // Trier: plus tôt d'abord
   scored.sort((a, b) => {
     // D'abord par heure de départ (plus tôt = meilleur)
     if (a.depMinutes !== b.depMinutes) return a.depMinutes - b.depMinutes;
@@ -243,11 +253,11 @@ export function rankDepartureItineraries(itineraries) {
     return a.durationMin - b.durationMin;
   });
 
-  console.log('📋 Résultat tri PARTIR:', scored.slice(0, 5).map(s => ({
-    dep: s.it.departureTime,
+  console.log('📋 Après tri PARTIR (du plus tôt au plus tard):', scored.slice(0, 8).map(s => ({
+    dep: s.depTime,
+    depMin: s.depMinutes,
     arr: s.it.arrivalTime,
-    transfers: s.transfers,
-    dur: s.durationMin + 'min'
+    transfers: s.transfers
   })));
 
   return scored.map(x => x.it);
