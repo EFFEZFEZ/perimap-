@@ -20,8 +20,8 @@ export function createRouterContext({ dataManager, apiManager, icons }) {
     const gtfsTripsCache = new Map();
 
     const getWalkingRoute = (startPoint, endPoint) => getWalkingRouteInternal({ dataManager, apiManager, placeIdCache }, startPoint, endPoint);
-    const getCachedTripsBetweenStops = (startIds, endIds, reqDate, windowStartSec, windowEndSec) =>
-        getCachedTripsBetweenStopsInternal({ dataManager, gtfsTripsCache }, startIds, endIds, reqDate, windowStartSec, windowEndSec);
+    const getCachedTripsBetweenStops = (startIds, endIds, reqDate, windowStartSec, windowEndSec, verbose = false) =>
+        getCachedTripsBetweenStopsInternal({ dataManager, gtfsTripsCache }, startIds, endIds, reqDate, windowStartSec, windowEndSec, verbose);
 
     return {
         computeHybridItinerary: (fromCoordsRaw, toCoordsRaw, searchTime, labels = {}) =>
@@ -164,7 +164,7 @@ async function getCachedPlaceIdInternal(context, lat, lon) {
     }
 }
 
-function getCachedTripsBetweenStopsInternal(context, startIds, endIds, reqDate, windowStartSec, windowEndSec) {
+function getCachedTripsBetweenStopsInternal(context, startIds, endIds, reqDate, windowStartSec, windowEndSec, verbose = false) {
     const { dataManager, gtfsTripsCache } = context;
     try {
         const key = JSON.stringify({ startIds: startIds.slice().sort(), endIds: endIds.slice().sort(), date: reqDate.toISOString().split('T')[0], windowStartSec, windowEndSec });
@@ -173,12 +173,12 @@ function getCachedTripsBetweenStopsInternal(context, startIds, endIds, reqDate, 
         if (cached && (now - cached.ts) < GTFS_TRIPS_CACHE_TTL_MS) {
             return cached.value;
         }
-        const result = dataManager.getTripsBetweenStops(startIds, endIds, reqDate, windowStartSec, windowEndSec) || [];
+        const result = dataManager.getTripsBetweenStops(startIds, endIds, reqDate, windowStartSec, windowEndSec, verbose) || [];
         gtfsTripsCache.set(key, { ts: now, value: result });
         return result;
     } catch (err) {
         console.warn('getCachedTripsBetweenStops error', err);
-        return dataManager.getTripsBetweenStops(startIds, endIds, reqDate, windowStartSec, windowEndSec) || [];
+        return dataManager.getTripsBetweenStops(startIds, endIds, reqDate, windowStartSec, windowEndSec, verbose) || [];
     }
 }
 
@@ -816,6 +816,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     const expandedEndIds = Array.from(endStopSet);
 
     console.log('🔍 Router: Recherche de trajets entre', expandedStartIds.length, 'arrêts départ et', expandedEndIds.length, 'arrêts arrivée');
+    console.log('🔍 Router: Start IDs:', expandedStartIds);
+    console.log('🔍 Router: End IDs:', expandedEndIds);
     console.log('🔍 Router: Fenêtre horaire:', windowStartSec, '-', windowEndSec, 'secondes');
 
     const trips = getCachedTripsBetweenStops(
@@ -823,7 +825,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         expandedEndIds,
         reqDate,
         windowStartSec,
-        windowEndSec
+        windowEndSec,
+        true  // verbose = true pour le premier appel
     );
     
     console.log('🔍 Router: Trips trouvés:', trips?.length || 0);

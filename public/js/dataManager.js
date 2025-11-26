@@ -1007,20 +1007,22 @@ export class DataManager {
      * date: Date object
      * windowStartSeconds/windowEndSeconds: optional seconds-since-midnight window to filter departures
      */
-    getTripsBetweenStops(startStopIds, endStopIds, date, windowStartSeconds = 0, windowEndSeconds = 86400) {
+    getTripsBetweenStops(startStopIds, endStopIds, date, windowStartSeconds = 0, windowEndSeconds = 86400, verbose = false) {
         const startSet = new Set(Array.isArray(startStopIds) ? startStopIds : Array.from(startStopIds || []));
         const endSet = new Set(Array.isArray(endStopIds) ? endStopIds : Array.from(endStopIds || []));
         const serviceSet = this.getServiceIds(date instanceof Date ? date : new Date(date));
 
-        // Debug: log des paramètres de recherche
-        console.log('🔍 getTripsBetweenStops DEBUG:', {
-            startStopIds: Array.from(startSet).slice(0, 5),
-            endStopIds: Array.from(endSet).slice(0, 5),
-            date: date instanceof Date ? date.toISOString() : date,
-            serviceSet: Array.from(serviceSet).slice(0, 3),
-            window: `${windowStartSeconds}s - ${windowEndSeconds}s`,
-            totalTrips: this.trips?.length || 0
-        });
+        // Debug: log des paramètres de recherche (seulement si verbose)
+        if (verbose) {
+            console.log('🔍 getTripsBetweenStops DEBUG:', {
+                startStopIds: Array.from(startSet),
+                endStopIds: Array.from(endSet),
+                date: date instanceof Date ? date.toISOString() : date,
+                serviceSet: Array.from(serviceSet),
+                window: `${windowStartSeconds}s - ${windowEndSeconds}s`,
+                totalTrips: this.trips?.length || 0
+            });
+        }
 
         const results = [];
         let debugStats = { serviceRejected: 0, noStopTimes: 0, noBoardingFound: 0, noAlightFound: 0, wrongOrder: 0, outOfWindow: 0, accepted: 0 };
@@ -1075,7 +1077,9 @@ export class DataManager {
             });
         }
 
-        console.log('🔍 getTripsBetweenStops STATS:', debugStats);
+        if (verbose) {
+            console.log('🔍 getTripsBetweenStops STATS:', debugStats);
+        }
 
         // Sort by departure time
         results.sort((a, b) => a.departureSeconds - b.departureSeconds);
