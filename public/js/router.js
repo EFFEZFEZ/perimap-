@@ -582,10 +582,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
      * 4. Construire les itinéraires via ces hubs
      */
     const findTransferHubs = (startStopIds, endStopIds) => {
-        const startRoutes = new Map(); // route_id -> Set of stop_ids on that route
-        const endRoutes = new Map();   // route_id -> Set of stop_ids on that route
+        const startRoutes = new Map(); // route_id -> Set of stop_ids APRÈS le départ
+        const endRoutes = new Map();   // route_id -> Set of stop_ids AVANT l'arrivée
         
-        // Pour chaque arrêt de départ, trouver les routes qui y passent
         const startSet = new Set(startStopIds);
         const endSet = new Set(endStopIds);
         
@@ -593,21 +592,44 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             const stopTimes = dataManager.stopTimesByTrip[trip.trip_id];
             if (!stopTimes || stopTimes.length < 2) continue;
             
-            const tripStopIds = stopTimes.map(st => st.stop_id);
-            const passesStart = tripStopIds.some(id => startSet.has(id));
-            const passesEnd = tripStopIds.some(id => endSet.has(id));
+            // Trouver l'index du premier arrêt de départ sur ce trip
+            let startIdx = -1;
+            for (let i = 0; i < stopTimes.length; i++) {
+                if (startSet.has(stopTimes[i].stop_id)) {
+                    startIdx = i;
+                    break;
+                }
+            }
             
-            if (passesStart) {
+            // Trouver l'index du premier arrêt d'arrivée sur ce trip
+            let endIdx = -1;
+            for (let i = 0; i < stopTimes.length; i++) {
+                if (endSet.has(stopTimes[i].stop_id)) {
+                    endIdx = i;
+                    break;
+                }
+            }
+            
+            // Si ce trip passe par un arrêt de départ, collecter les arrêts APRÈS
+            if (startIdx !== -1) {
                 if (!startRoutes.has(trip.route_id)) {
                     startRoutes.set(trip.route_id, new Set());
                 }
-                tripStopIds.forEach(id => startRoutes.get(trip.route_id).add(id));
+                // Collecter tous les arrêts APRÈS le départ (potentiels hubs de correspondance)
+                for (let i = startIdx + 1; i < stopTimes.length; i++) {
+                    startRoutes.get(trip.route_id).add(stopTimes[i].stop_id);
+                }
             }
-            if (passesEnd) {
+            
+            // Si ce trip passe par un arrêt d'arrivée, collecter les arrêts AVANT
+            if (endIdx !== -1 && endIdx > 0) {
                 if (!endRoutes.has(trip.route_id)) {
                     endRoutes.set(trip.route_id, new Set());
                 }
-                tripStopIds.forEach(id => endRoutes.get(trip.route_id).add(id));
+                // Collecter tous les arrêts AVANT l'arrivée (potentiels hubs de correspondance)
+                for (let i = 0; i < endIdx; i++) {
+                    endRoutes.get(trip.route_id).add(stopTimes[i].stop_id);
+                }
             }
         }
         
