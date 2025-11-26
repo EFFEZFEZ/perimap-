@@ -20,10 +20,8 @@ export function getGoogleApiKey() {
       return meta.content.trim();
     }
   }
-  // 3. Placeholder (déclenche warning explicite si non remplacé)
-  const placeholder = process?.env?.PERIBUS_GOOGLE_API_KEY || '';
-  if (placeholder) return placeholder;
-  console.warn('[config] Aucune clé API Google trouvée. Les fonctionnalités cartographiques/itinéraires échoueront.');
+  // 3. Aucune clé trouvée - warning explicite
+  console.warn('[config] Aucune clé API Google trouvée. Définissez window.__APP_CONFIG.googleApiKey ou ajoutez <meta name="peribus-api-key" content="VOTRE_CLE">.');
   return '';
 }
 
