@@ -1941,8 +1941,13 @@ function processIntelligentResults(intelligentResults, searchTime) {
             // F. RECONSTRUIRE LA LISTE FINALE: inclure TOUS les bus (Google + GTFS) sans limite
             itineraries.length = 0;
             allBuses.forEach(b => itineraries.push(b.itin));
-            // Rajouter piéton/vélo à la fin
-            itineraries.push(...otherItins);
+            // Rajouter piéton/vélo filtrés dans la fenêtre demandée
+            const filteredOther = otherItins.filter(o => {
+                if (!o.arrivalTime || o.arrivalTime === '~' || o.arrivalTime === '--:--') return false;
+                const ms = parseArrivalMs(o.arrivalTime);
+                return !isNaN(ms) && ms >= windowStart && ms <= windowEnd;
+            });
+            itineraries.push(...filteredOther);
         }
     } catch (e) {
         console.warn('Erreur lors du filtrage par heure d\'arrivée:', e);
@@ -2214,6 +2219,22 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
             arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
         } catch(e) {
             console.warn("Erreur calcul date pour vélo/marche", e);
+        }
+    } else if (searchTime.type === 'arriver') {
+        // Recherche "Arriver" : on fixe l'heure d'arrivée et on déduit l'heure de départ.
+        try {
+            let arrivalDate;
+            if(searchTime.date === 'today' || searchTime.date === "Aujourd'hui" || !searchTime.date) {
+                arrivalDate = new Date();
+            } else {
+                arrivalDate = new Date(searchTime.date);
+            }
+            arrivalDate.setHours(searchTime.hour, searchTime.minute, 0, 0);
+            const departureDate = new Date(arrivalDate.getTime() - durationRawSeconds * 1000);
+            arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
+            departureTimeStr = `${String(departureDate.getHours()).padStart(2, '0')}:${String(departureDate.getMinutes()).padStart(2, '0')}`;
+        } catch(e) {
+            console.warn("Erreur calcul date (arriver) pour vélo/marche", e);
         }
     }
 
@@ -3656,6 +3677,11 @@ function showDashboardView(viewName) {
 
     // V27/V28 : On scrolle le body, pas le dashboard-main
     window.scrollTo({ top: 0, behavior: 'auto' });
+    // Correctif: garantir que la classe 'view-is-locked' (utilisée pour les vues plein écran)
+    // est retirée quand on affiche une sous-vue interne (horaires, info-trafic) afin
+    // de préserver l'en-tête et le scroll.
+    document.body.classList.remove('view-is-locked');
+    try { if (typeof renderAlertBanner === 'function' && dataManager) renderAlertBanner(); } catch(e) { /* non bloquant */ }
 
     document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
         card.classList.remove('view-active');
