@@ -95,4 +95,18 @@ Pour ajouter un nouveau critère de tri mode "arriver": étendre le tableau `sco
 - Extraire logique de détail itinéraire (HTML) dans un module dédié.
 - Ajouter tests unitaires rapides (signature déduplication, tri).
 
+### Mode Debug
+
+Une page `public/debug.html` permet de tester localement les fonctions clés sans appels réseau:
+
+Fonctions exposées: `rankArrivalItineraries`, `deduplicateItineraries`, `processIntelligentResults`, `ensureItineraryPolylines`, `filterExpiredItineraries`, `computeTimeDifferenceMinutes`, `getWaitStepPresentation` via `window.__DEBUG`.
+
+Utilisation:
+1. Ouvrir `public/debug.html` dans un serveur statique.
+2. Ouvrir la console navigateur pour voir les logs détaillés.
+3. Cliquer sur les boutons (Générer & Trier, Déduplication, Renderer, Utilitaires) pour afficher les sorties JSON.
+4. Inspecter `window.__DEBUG.getArrivalState()` pour vérifier la pagination après un vrai appel de recherche.
+
+Extension: Pour ajouter une nouvelle fonction testable, l'ajouter dans le bloc `window.__DEBUG` à la fin de `main.js`.
+
 
