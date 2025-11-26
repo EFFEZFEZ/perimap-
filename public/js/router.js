@@ -754,14 +754,17 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         transferSearchStats.candidatesFound = candidateTrips.length;
         if (!window._transferStatsLogged) {
             window._transferStatsLogged = true;
-            console.log('🔄 Recherche correspondances:', {
+            console.log('🔄 Recherche correspondances:', JSON.stringify({
                 tripsPartantDuDépart: candidateTrips.length,
                 recherchesSecondLeg: transferSearchStats.secondLegSearches,
                 correspondancesTrouvées: transferSearchStats.secondLegFound,
                 itinérairesAssemblés: transferResults.length
-            });
+            }));
             if (transferResults.length === 0 && transferSearchStats.secondLegSearches > 0) {
                 console.log('⚠️ Aucune correspondance viable trouvée malgré', transferSearchStats.secondLegSearches, 'recherches');
+            }
+            if (candidateTrips.length === 0) {
+                console.log('❌ Aucun trip ne part des arrêts de départ dans la fenêtre horaire');
             }
         }
 
