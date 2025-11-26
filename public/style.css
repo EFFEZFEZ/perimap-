@@ -812,6 +812,7 @@ body.view-is-locked #legal-strip {
     letter-spacing: -0.03em;
     background: linear-gradient(120deg, var(--primary), #14b8a6);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 .brand-sub {
@@ -1639,6 +1640,7 @@ details[open] .accordion-content {
         grid-template-columns: 1fr;
         gap: 1rem;
         padding-bottom: 80px; /* Ajout d'espace pour le footer */
+    }
     .content-cards {
         grid-template-columns: 1fr;
     }
@@ -3470,7 +3472,6 @@ body.dark-theme .real-select option {
 .route-details .wait-info .wait-duration {
     font-size: 0.9rem;
     color: var(--text-secondary);
-}
 }
 .route-details .step-sub-instruction {
     font-size: 0.875rem;

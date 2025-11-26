@@ -100,56 +100,7 @@ const ICONS = {
     }
 };
 
-const stopCoordinateCache = new Map();
-
-const normalizeStopNameForLookup = (name) => {
-    if (!name) return '';
-    return name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, '')
-        .replace(/[^a-z0-9]/g, '')
-        .trim();
-};
-
-function resolveStopCoordinates(stopName) {
-    if (!stopName || !dataManager || !dataManager.isLoaded) return null;
-    const cacheKey = normalizeStopNameForLookup(stopName);
-    if (!cacheKey) return null;
-    if (stopCoordinateCache.has(cacheKey)) {
-        return stopCoordinateCache.get(cacheKey);
-    }
-
-    let candidate = null;
-
-    if (typeof dataManager.findStopsByName === 'function') {
-        const matches = dataManager.findStopsByName(stopName, 1);
-        if (matches && matches.length) {
-            candidate = matches[0];
-        }
-    }
-
-    if (!candidate && dataManager.stopsByName && dataManager.stopsByName[cacheKey]) {
-        candidate = dataManager.stopsByName[cacheKey][0];
-    }
-
-    if (!candidate && Array.isArray(dataManager.stops)) {
-        candidate = dataManager.stops.find((stop) => normalizeStopNameForLookup(stop.stop_name) === cacheKey);
-    }
-
-    const coords = candidate ? {
-        lat: Number.parseFloat(candidate.stop_lat),
-        lng: Number.parseFloat(candidate.stop_lon)
-    } : null;
-
-    if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) {
-        stopCoordinateCache.set(cacheKey, null);
-        return null;
-    }
-
-    stopCoordinateCache.set(cacheKey, coords);
-    return coords;
-}
+// normalizeStopNameForLookup & resolveStopCoordinates importés depuis utils/geo.js
 
 const STOP_ROLE_PRIORITY = {
     boarding: 4,
@@ -2090,10 +2041,10 @@ async function ensureItineraryPolylines(itineraries) {
                 }
 
                 if (!depStopObj && step.departureStop) {
-                    resolvedDepCoords = resolveStopCoordinates(step.departureStop);
+                    resolvedDepCoords = resolveStopCoordinates(step.departureStop, dataManager);
                 }
                 if (!arrStopObj && step.arrivalStop) {
-                    resolvedArrCoords = resolveStopCoordinates(step.arrivalStop);
+                    resolvedArrCoords = resolveStopCoordinates(step.arrivalStop, dataManager);
                 }
 
                 // Build encoded polyline from route geometry when possible
@@ -2559,7 +2510,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         }
 
         stepStops.forEach(stop => {
-            const coords = resolveStopCoordinates(stop.name);
+            const coords = resolveStopCoordinates(stop.name, dataManager);
             if (!coords) return;
 
             const key = `${coords.lat.toFixed(5)}-${coords.lng.toFixed(5)}`;
