@@ -3613,6 +3613,10 @@ function showResultsView() {
  */
 function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
     if (!itineraryDetailContainer) return;
+    
+    // Bloquer le scroll du body
+    document.body.classList.add('detail-view-open');
+    
     initBottomSheetControls();
     cancelBottomSheetDrag();
     currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
@@ -3676,6 +3680,10 @@ function hideDetailView() {
 
 function resetDetailViewState() {
     if (!itineraryDetailContainer) return;
+    
+    // Débloquer le scroll du body
+    document.body.classList.remove('detail-view-open');
+    
     itineraryDetailContainer.classList.add('hidden');
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');

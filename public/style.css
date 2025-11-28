@@ -925,6 +925,15 @@ body.view-is-locked {
     overflow: hidden;
 }
 
+/* Quand la vue détail est ouverte, bloquer TOUT scroll */
+body.detail-view-open {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    touch-action: none;
+}
+
 @media (max-width: 768px) {
     body.view-is-locked {
         position: relative; /* Laisse les sous-vues gérer leur propre scroll */
@@ -937,6 +946,14 @@ body.view-is-locked {
 
     body.view-is-locked #app-view-root {
         min-height: 100vh; /* Garantit un conteneur flex plein écran */
+    }
+    
+    /* Sur mobile, quand la vue détail est ouverte */
+    body.detail-view-open {
+        position: fixed !important;
+        inset: 0 !important;
+        overflow: hidden !important;
+        touch-action: none !important;
     }
 }
 
@@ -4075,9 +4092,21 @@ body.dark-theme .real-select option {
         position: fixed;
         inset: 0;
         z-index: 1110;
-        transform: translateY(0); /* Toujours visible, c'est le bottom sheet qui gère l'animation */
         pointer-events: none;
-        overflow: hidden; /* Bloquer tout scroll sur le container */
+        /* Bloquer absolument tout scroll */
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        overscroll-behavior: none;
+        touch-action: none;
+        /* Pas de scrollbar */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    #itinerary-detail-container::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
     }
     #itinerary-detail-container.is-active {
         pointer-events: auto;
