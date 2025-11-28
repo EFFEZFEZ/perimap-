@@ -5,7 +5,7 @@
 import { ICONS } from '../constants.js';
 
 export function createResultsRenderer(deps) {
-  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount } = deps;
+  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount, onLoadMoreDepartures } = deps;
 
   function getItineraryType(itinerary) {
     if (!itinerary) return 'BUS';
@@ -14,6 +14,35 @@ export function createResultsRenderer(deps) {
     if (itinerary._isBike) return 'BIKE';
     if (itinerary._isWalk) return 'WALK';
     return 'BUS';
+  }
+
+  /**
+   * V60: Vérifie si l'itinéraire a de la marche significative
+   * (pas juste entre arrêts du même nom ou très courte)
+   */
+  function hasSignificantWalk(itinerary) {
+    if (!itinerary?.steps) return false;
+    
+    for (const step of itinerary.steps) {
+      if (step.type === 'WALK' || step._isWalk) {
+        // Extraire la durée en minutes
+        const durationMatch = (step.duration || '').match(/(\d+)/);
+        const durationMin = durationMatch ? parseInt(durationMatch[1], 10) : 0;
+        
+        // Considérer comme significatif si > 2 minutes
+        if (durationMin > 2) {
+          return true;
+        }
+        
+        // Ou si la distance est > 100m
+        const distanceMatch = (step.distance || '').match(/(\d+)/);
+        const distanceM = distanceMatch ? parseInt(distanceMatch[1], 10) : 0;
+        if (distanceM > 100) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   function render(mode) {
@@ -85,12 +114,21 @@ export function createResultsRenderer(deps) {
       } else if (type === 'WALK') {
         summaryHtml = `<div class='route-summary-bus-icon' style='color:var(--secondary);border-color:var(--secondary);'>${ICONS.WALK}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à pied (${itinerary.steps[0].distance})</span>`;
       } else {
-        summaryHtml = `<div class='route-summary-bus-icon' style='color:var(--primary);border-color:var(--primary);'>${ICONS.BUS}</div>`;
+        // V60: Ajouter icône marche si marche significative
+        const hasWalk = hasSignificantWalk(itinerary);
+        if (hasWalk) {
+          summaryHtml = `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
+        }
+        summaryHtml += `<div class='route-summary-bus-icon' style='color:var(--primary);border-color:var(--primary);'>${ICONS.BUS}</div>`;
         itinerary.summarySegments.forEach((seg, i) => {
           const label = seg.name || 'Route';
           summaryHtml += `<div class='route-line-badge' style='background-color:${seg.color};color:${seg.textColor};'>${label}</div>`;
           if (i < itinerary.summarySegments.length - 1) summaryHtml += `<span class='route-summary-dot'>•</span>`;
         });
+        // V60: Ajouter icône marche à la fin aussi si marche significative
+        if (hasWalk) {
+          summaryHtml += `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
+        }
       }
 
       const ecoHtml = (index === 0 && mode === 'ALL' && type === 'BUS')
@@ -124,6 +162,28 @@ export function createResultsRenderer(deps) {
       });
       moreWrapper.appendChild(btn);
       resultsListContainer.appendChild(moreWrapper);
+    }
+
+    // V60: Bouton "Charger + de départs" pour le mode partir (BUS uniquement)
+    if (!isArrival && mode === 'ALL' && onLoadMoreDepartures) {
+      const busItineraries = list.filter(it => getItineraryType(it) === 'BUS');
+      if (busItineraries.length > 0) {
+        const moreWrapper = document.createElement('div');
+        moreWrapper.className = 'load-more-wrapper load-more-departures';
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-outline-primary';
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Charger + de départs
+        `;
+        btn.addEventListener('click', () => {
+          btn.disabled = true;
+          btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
+          onLoadMoreDepartures();
+        });
+        moreWrapper.appendChild(btn);
+        resultsListContainer.appendChild(moreWrapper);
+      }
     }
   }
 

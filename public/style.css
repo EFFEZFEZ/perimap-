@@ -1860,6 +1860,55 @@ details[open] .accordion-content {
     }
 }
 
+/* V60: Bouton Charger + de départs */
+.load-more-departures {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem 1.5rem;
+}
+
+.load-more-departures .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.load-more-departures .btn:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+}
+
+.load-more-departures .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.load-more-departures .btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Spinner pour le chargement */
+.spinner-small {
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 
 /* =========================================
  * STYLES COMMUNS
@@ -3303,6 +3352,20 @@ body.dark-theme .real-select option {
     width: 20px;
     height: 20px;
 }
+
+/* V60: Icône de marche dans le résumé */
+.route-summary-walk-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+.route-summary-walk-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
 .route-summary-dot {
     color: var(--text-secondary);
     font-weight: 600;

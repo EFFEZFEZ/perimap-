@@ -52,6 +52,10 @@ let arrivalRankedAll = []; // Liste complète triée (arriver)
 let arrivalRenderedCount = 0; // Combien affichés actuellement
 let ARRIVAL_PAGE_SIZE = 5; // Limite initiale / pagination (surchargée par config runtime)
 
+// V60: État pour charger plus de départs
+let lastSearchTime = null; // Dernier searchTime utilisé
+let loadMoreOffset = 0; // Décalage en minutes pour charger plus
+
 let geolocationManager = null;
 
 const BOTTOM_SHEET_LEVELS = [0.4, 0.8]; // Seulement 2 niveaux: peek (40%) et expanded (80%)
@@ -488,7 +492,8 @@ async function initializeApp() {
         getAllItineraries: () => allFetchedItineraries,
         getArrivalState: () => ({ lastSearchMode, arrivalRankedAll, arrivalRenderedCount, pageSize: ARRIVAL_PAGE_SIZE }),
         setArrivalRenderedCount: (val) => { arrivalRenderedCount = val; },
-        onSelectItinerary: (itinerary, cardEl) => onSelectItinerary(itinerary, cardEl)
+        onSelectItinerary: (itinerary, cardEl) => onSelectItinerary(itinerary, cardEl),
+        onLoadMoreDepartures: () => loadMoreDepartures() // V60: Charger plus de départs
     });
 
     apiManager = new ApiManager(GOOGLE_API_KEY);
@@ -1203,6 +1208,8 @@ async function executeItinerarySearch(source, sourceElements) {
         selectedHourText: hourSelect.options?.[hourSelect.selectedIndex]?.textContent
     });
     lastSearchMode = searchTime.type; // Mémoriser le mode pour le rendu/pagination
+    lastSearchTime = { ...searchTime }; // V60: Mémoriser pour charger plus
+    loadMoreOffset = 0; // V60: Reset l'offset
     // V59: Reset complet de l'état de recherche
     arrivalRankedAll = [];
     arrivalRenderedCount = 0;
@@ -1377,6 +1384,92 @@ async function executeItinerarySearch(source, sourceElements) {
             resultsListContainer.innerHTML = `<p class="results-message error">Impossible de calculer l'itinéraire. ${error.message}</p>`;
         }
         resultsModeTabs.classList.add('hidden');
+    }
+}
+
+/**
+ * V60: Charge plus de départs en décalant l'heure de recherche
+ * Ajoute les nouveaux itinéraires à la liste existante
+ */
+async function loadMoreDepartures() {
+    if (!lastSearchTime || !fromPlaceId || !toPlaceId) {
+        console.warn('loadMoreDepartures: pas de recherche précédente');
+        return;
+    }
+
+    // Trouver le dernier départ bus pour commencer après
+    const busItineraries = allFetchedItineraries.filter(it => it.type === 'BUS' || it.type === 'TRANSIT');
+    let startHour, startMinute;
+    
+    if (busItineraries.length > 0) {
+        // Prendre le dernier départ + 1 minute
+        const lastDep = busItineraries[busItineraries.length - 1].departureTime;
+        const match = lastDep?.match(/(\d{1,2}):(\d{2})/);
+        if (match) {
+            startHour = parseInt(match[1], 10);
+            startMinute = parseInt(match[2], 10) + 1;
+            if (startMinute >= 60) {
+                startMinute = 0;
+                startHour = (startHour + 1) % 24;
+            }
+        }
+    }
+    
+    if (startHour === undefined) {
+        // Fallback: décaler de 30 minutes
+        loadMoreOffset += 30;
+        startHour = parseInt(lastSearchTime.hour) + Math.floor((parseInt(lastSearchTime.minute) + loadMoreOffset) / 60);
+        startMinute = (parseInt(lastSearchTime.minute) + loadMoreOffset) % 60;
+        startHour = startHour % 24;
+    }
+
+    const offsetSearchTime = {
+        ...lastSearchTime,
+        hour: String(startHour).padStart(2, '0'),
+        minute: String(startMinute).padStart(2, '0')
+    };
+
+    console.log(`🔄 Chargement + de départs à partir de ${offsetSearchTime.hour}:${offsetSearchTime.minute}`);
+
+    try {
+        // Appeler l'API avec le nouvel horaire
+        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
+        let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+        
+        // Filtrer les doublons (même heure de départ)
+        const existingDepartures = new Set(allFetchedItineraries.map(it => it.departureTime));
+        newItineraries = newItineraries.filter(it => !existingDepartures.has(it.departureTime));
+        
+        if (newItineraries.length === 0) {
+            console.log('Aucun nouveau départ trouvé');
+            // Afficher un message
+            const btn = document.querySelector('.load-more-departures button');
+            if (btn) {
+                btn.innerHTML = 'Plus de départs disponibles';
+                btn.disabled = true;
+            }
+            return;
+        }
+
+        console.log(`✅ ${newItineraries.length} nouveaux départs ajoutés`);
+        
+        // Ajouter les nouveaux itinéraires
+        allFetchedItineraries = [...allFetchedItineraries, ...newItineraries];
+        
+        // Re-trier
+        allFetchedItineraries = rankDepartureItineraries(allFetchedItineraries);
+        
+        // Re-rendre
+        setupResultTabs(allFetchedItineraries);
+        if (resultsRenderer) resultsRenderer.render('ALL');
+        
+    } catch (error) {
+        console.error('Erreur chargement + de départs:', error);
+        const btn = document.querySelector('.load-more-departures button');
+        if (btn) {
+            btn.innerHTML = 'Erreur - Réessayer';
+            btn.disabled = false;
+        }
     }
 }
 
