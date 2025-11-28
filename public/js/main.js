@@ -1097,7 +1097,17 @@ function handleNavigationAction(action) {
             showMapView();
             break;
         case 'tarifs':
-            showTarifsView();
+        case 'tarifs-grille':
+            showTarifsView('tarifs-grille');
+            break;
+        case 'tarifs-achat':
+            showTarifsView('tarifs-achat');
+            break;
+        case 'tarifs-billettique':
+            showTarifsView('tarifs-billettique');
+            break;
+        case 'tarifs-amendes':
+            showTarifsView('tarifs-amendes');
             break;
         default:
             console.log('Action non gérée:', action);
@@ -1105,9 +1115,9 @@ function handleNavigationAction(action) {
 }
 
 // Afficher la vue Tarifs
-async function showTarifsView() {
+async function showTarifsView(page = 'tarifs-grille') {
     try {
-        const response = await fetch('/views/tarifs.html');
+        const response = await fetch(`/views/${page}.html`);
         const html = await response.text();
         
         const appViewRoot = document.getElementById('app-view-root');
@@ -1120,6 +1130,15 @@ async function showTarifsView() {
                 showDashboardHall();
             });
         }
+        
+        // Liens de navigation entre pages tarifs
+        document.querySelectorAll('.tarifs-nav-card[data-action]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = card.dataset.action;
+                handleNavigationAction(action);
+            });
+        });
         
         // Scroll en haut
         window.scrollTo(0, 0);
