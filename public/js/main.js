@@ -223,10 +223,24 @@ function getWaitStepPresentation(steps, index) {
 /**
  * Fonction appelée lors du clic sur une carte d'itinéraire.
  * Affiche/masque les détails de l'itinéraire et met à jour la carte.
+ * V59: Gère le cas mobile (vue overlay) vs desktop (accordéon inline)
  */
 function onSelectItinerary(itinerary, cardEl) {
     if (!itinerary || !cardEl) return;
 
+    // V59: Sur mobile, on affiche la vue détail overlay
+    if (isMobileDetailViewport()) {
+        // Marquer cette carte comme active visuellement
+        document.querySelectorAll('.route-option').forEach(c => c.classList.remove('is-active'));
+        cardEl.classList.add('is-active');
+        
+        // Rendre le détail dans la vue mobile et afficher l'overlay
+        const routeLayer = renderItineraryDetail(itinerary);
+        showDetailView(routeLayer);
+        return;
+    }
+
+    // Desktop: comportement accordéon existant
     const wrapper = cardEl.closest('.route-option-wrapper');
     if (!wrapper) return;
 
@@ -1119,6 +1133,10 @@ function setupPlannerListeners(source, elements) {
 
 async function executeItinerarySearch(source, sourceElements) {
     const { fromInput, toInput, dateSelect, hourSelect, minuteSelect, popover } = sourceElements;
+    
+    // V59: Reset complet pour nouvelle recherche
+    console.log('🔄 === NOUVELLE RECHERCHE ===');
+    
     if (!fromPlaceId || !toPlaceId) {
         alert("Veuillez sélectionner un point de départ et d'arrivée depuis les suggestions.");
         return;
@@ -1144,11 +1162,11 @@ async function executeItinerarySearch(source, sourceElements) {
         selectedHourText: hourSelect.options?.[hourSelect.selectedIndex]?.textContent
     });
     lastSearchMode = searchTime.type; // Mémoriser le mode pour le rendu/pagination
-    if (lastSearchMode === 'arriver') {
-        // Réinitialiser pagination arrivée
-        arrivalRankedAll = [];
-        arrivalRenderedCount = 0;
-    }
+    // V59: Reset complet de l'état de recherche
+    arrivalRankedAll = [];
+    arrivalRenderedCount = 0;
+    allFetchedItineraries = [];
+    
     prefillOtherPlanner(source, sourceElements);
     console.log(`Recherche Google API (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     if (source === 'hall') {
@@ -1157,7 +1175,6 @@ async function executeItinerarySearch(source, sourceElements) {
         resultsListContainer.innerHTML = '<p class="results-message">Mise à jour de l\'itinéraire...</p>';
     }
     resultsModeTabs.classList.add('hidden');
-    allFetchedItineraries = [];
     try {
         let fromCoords = null;
         let toCoords = null;

@@ -170,6 +170,10 @@ const CrowdsourcingManager = (function() {
      */
     async function promptTripSelection() {
         return new Promise((resolve) => {
+            // Supprimer tout modal existant d'abord
+            const existingModal = document.getElementById('go-trip-modal');
+            if (existingModal) existingModal.remove();
+
             // Créer la modal de sélection
             const modalHTML = `
                 <div id="go-trip-modal" class="go-modal">
@@ -190,6 +194,14 @@ const CrowdsourcingManager = (function() {
 
             const modalEl = document.getElementById('go-trip-modal');
             const listEl = document.getElementById('go-trip-list');
+
+            // Fermer la modal en cliquant sur le backdrop
+            modalEl?.addEventListener('click', (e) => {
+                if (e.target === modalEl) {
+                    modalEl?.remove();
+                    resolve(null);
+                }
+            });
 
             // Fermer la modal
             document.getElementById('go-modal-cancel')?.addEventListener('click', () => {

@@ -247,9 +247,10 @@ body.dark-theme .leaflet-control-attribution a,
     box-sizing: border-box;
 }
 
-/* *** CORRECTION V28 *** */
+/* *** CORRECTION V28 + V59 SCROLL MOBILE *** */
 html, body {
-    height: 100%;
+    height: auto; /* V59: Permettre au contenu de définir la hauteur */
+    min-height: 100%;
     width: 100%;
     overflow-x: hidden; 
     -webkit-font-smoothing: antialiased;
@@ -264,8 +265,10 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh; /* V59: Dynamic viewport height pour mobile */
     /* Par défaut, le body scrolle (pour le dashboard) */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* V59: Smooth scroll iOS */
 }
 
 #app-view-root {
@@ -273,6 +276,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow-y: visible; /* V59: Ne pas bloquer le scroll */
 }
 
 #legal-strip {
@@ -733,6 +737,9 @@ body.view-is-locked {
 #dashboard-container {
     flex: 1 0 auto;
     /* Le dashboard utilise le scroll naturel du body - AUCUNE règle overflow */
+    overflow-y: visible; /* V59: Permettre le scroll */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 80px; /* V59: Espace pour le footer et scroll complet */
 }
 
 /* *** CORRECTION IDFM-STYLE *** */
@@ -1135,6 +1142,8 @@ body.view-is-locked #legal-strip {
 #dashboard-hall {
     /* SUPPRIMÉ: transition */
     visibility: visible;
+    overflow-y: visible; /* V59: Permettre le scroll */
+    padding-bottom: 40px; /* V59: Espace pour scroll complet en bas */
 }
 #dashboard-hall:not(.view-is-active) {
     /* SUPPRIMÉ: opacity, transform */
