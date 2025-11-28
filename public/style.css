@@ -4094,8 +4094,26 @@ body.dark-theme .real-select option {
         background: #e5e5e5;
         z-index: 0;
         touch-action: manipulation; /* Permet le pinch-to-zoom mais bloque le scroll natif */
-        overflow: hidden; /* Bloquer scroll natif */
+        overflow: hidden !important; /* Bloquer scroll natif */
         -webkit-overflow-scrolling: auto;
+        /* Cacher toutes les scrollbars */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    #detail-map::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+    /* Cacher aussi les scrollbars des éléments enfants de la carte */
+    #detail-map * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    #detail-map *::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
     }
 
     /* Le fond de carte reste toujours interactif */
