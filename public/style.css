@@ -5827,7 +5827,10 @@ body.dark-theme .mobile-menu {
 }
 
 .tarifs-icon {
-    font-size: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
 }
 
 .tarifs-subtitle {
@@ -5888,8 +5891,11 @@ body.dark-theme .mobile-menu {
 }
 
 .tarifs-bullet {
-    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    color: var(--primary);
 }
 
 .tarifs-info-item p {
@@ -5943,7 +5949,6 @@ body.dark-theme .mobile-menu {
 }
 
 .tarifs-buy-icon {
-    font-size: 2rem;
     flex-shrink: 0;
     width: 50px;
     height: 50px;
@@ -5953,6 +5958,7 @@ body.dark-theme .mobile-menu {
     background: white;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    color: var(--primary);
 }
 
 .tarifs-buy-text {
@@ -5997,8 +6003,13 @@ body.dark-theme .mobile-menu {
 }
 
 .tarifs-feature-icon {
-    font-size: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    color: var(--primary);
 }
 
 .tarifs-feature-content {
@@ -6144,7 +6155,10 @@ body.dark-theme .tarifs-mediation {
 }
 
 .tarifs-nav-icon {
-    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
 }
 
 .tarifs-nav-title {
@@ -6248,12 +6262,19 @@ body.dark-theme .tarifs-mediation {
 }
 
 .tarifs-benefit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     background: rgba(40, 167, 69, 0.1);
     color: #28a745;
     padding: 0.25rem 0.75rem;
     border-radius: var(--radius-full);
     font-size: 0.8rem;
     font-weight: 600;
+}
+
+.tarifs-benefit svg {
+    flex-shrink: 0;
 }
 
 /* Liste locations billettique */
@@ -6363,8 +6384,13 @@ body.dark-theme .tarifs-alert--warning {
 }
 
 .tarifs-payment-icon {
-    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    color: var(--primary);
 }
 
 .tarifs-payment-text strong {
@@ -6421,7 +6447,10 @@ body.dark-theme .tarifs-alert--warning {
 }
 
 .tarifs-choice-icon {
-    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
 }
 
 .tarifs-choice--pass {
