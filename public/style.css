@@ -6794,4 +6794,520 @@ body.dark-theme .tarifs-choice {
     }
 }
 
+/* =========================================
+ * 🎨 REFONTE MOBILE IDFM-STYLE
+ * Version: 2.0 - Style épuré inspiré IDFM
+ * ========================================= */
+
+@media (max-width: 768px) {
+    
+    /* --- DASHBOARD MAIN --- */
+    #dashboard-main {
+        padding: 0;
+    }
+    
+    /* --- HERO SECTION IDFM --- */
+    .hero-section {
+        border-radius: 0;
+        padding: 1.5rem 1rem 0;
+        margin: 0;
+        background-image: 
+            linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.35)),
+            url('https://www.vie-economique.com/wp-content/uploads/sites/13/2024/12/shutterstock_2365894285-scaled.jpg');
+        min-height: auto;
+    }
+    
+    /* --- HERO HEADLINE COMPACT --- */
+    .hero-headline {
+        margin-bottom: 1rem;
+        padding-top: 0.25rem;
+        animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .hero-headline h1 {
+        font-size: 1.35rem;
+        margin-bottom: 0.4rem;
+        line-height: 1.3;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+    
+    /* --- PLANNER BLOCK IDFM (BLANC) --- */
+    .hero-section .planner-block-wrapper {
+        margin: 0 -1rem;
+        padding: 0;
+    }
+    
+    .hero-section .planner-block {
+        background: #fff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        border-radius: 24px 24px 0 0;
+        padding: 1.5rem 1.25rem 1.75rem;
+        box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+        margin-top: 1rem;
+        animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    body.dark-theme .hero-section .planner-block {
+        background: var(--bg-main);
+    }
+    
+    /* --- PLANNER TITLE BAR IDFM --- */
+    .planner-block .planner-title-bar {
+        margin-bottom: 1.25rem;
+    }
+    
+    .planner-block .planner-title-bar h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+    
+    .planner-block .planner-title-bar svg {
+        width: 22px;
+        height: 22px;
+    }
+    
+    /* --- PLANNER FORM LAYOUT IDFM --- */
+    .planner-form {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .planner-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        position: relative;
+    }
+    
+    /* --- FORM GROUP IDFM STYLE --- */
+    .planner-inputs .form-group {
+        margin-bottom: 0;
+    }
+    
+    .planner-inputs .form-group label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+        margin-bottom: 0.4rem;
+        text-transform: none;
+    }
+    
+    .planner-inputs .form-group label .label-required {
+        color: var(--primary);
+        font-weight: 500;
+    }
+    
+    /* --- INPUTS IDFM STYLE --- */
+    .planner-inputs .form-group input[type="text"] {
+        background: #fff;
+        border: 1.5px solid #d1d5db;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .planner-inputs .form-group input[type="text"]::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+    }
+    
+    .planner-inputs .form-group input[type="text"]:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        transform: none;
+    }
+    
+    body.dark-theme .planner-inputs .form-group input[type="text"] {
+        background: var(--bg-secondary);
+        border-color: var(--border);
+        color: var(--text-primary);
+    }
+    
+    /* --- SWAP BUTTON IDFM --- */
+    .planner-inputs .swap-button-slot {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: auto;
+        padding: 0.5rem 0;
+        margin: 0;
+    }
+    
+    .btn-swap-direction {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-secondary);
+        border: 1.5px solid var(--border);
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .btn-swap-direction:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    
+    .btn-swap-direction:active {
+        transform: scale(0.92);
+    }
+    
+    .btn-swap-direction svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* --- GEOLOCATE BUTTON --- */
+    .btn-geolocate {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        color: var(--primary);
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    
+    .btn-geolocate:hover,
+    .btn-geolocate:focus {
+        opacity: 1;
+        background: transparent;
+    }
+    
+    /* --- WHEN SECTION IDFM --- */
+    .form-group-when {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 100;
+    }
+    
+    .form-group-when label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        color: var(--text-secondary);
+        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        display: block;
+    }
+    
+    .btn-when {
+        width: 100%;
+        justify-content: space-between;
+        background: #fff;
+        border: 1.5px solid #d1d5db;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .btn-when:hover,
+    .btn-when:focus {
+        border-color: var(--primary);
+    }
+    
+    body.dark-theme .btn-when {
+        background: var(--bg-secondary);
+        border-color: var(--border);
+    }
+    
+    /* --- SEARCH BUTTON IDFM (BLEU PLEINE LARGEUR) --- */
+    .planner-search-btn {
+        width: 100%;
+        margin-top: 0.75rem;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 12px;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .planner-search-btn:hover {
+        background: var(--primary-dark);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+        transform: translateY(-2px);
+    }
+    
+    .planner-search-btn:active {
+        transform: translateY(0) scale(0.98);
+    }
+    
+    /* --- SERVICES SECTION IDFM --- */
+    .services-section {
+        margin-top: 0;
+        padding: 1.5rem 1rem 1rem;
+        background: var(--bg-light);
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .services-grid {
+        gap: 0.75rem;
+    }
+    
+    .service-card {
+        padding: 1rem 1.25rem;
+        border-radius: 16px;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.06);
+    }
+    
+    .service-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+    }
+    
+    .service-card:active {
+        transform: scale(0.98);
+    }
+    
+    .service-card-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+    }
+    
+    .service-card-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+    
+    .service-card-content h3 {
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+    
+    .service-card-content p {
+        font-size: 0.8rem;
+        line-height: 1.45;
+        opacity: 0.85;
+    }
+    
+    /* Masquer la description sur très petits écrans */
+    @media (max-width: 400px) {
+        .service-card-content p {
+            display: none;
+        }
+        
+        .service-card {
+            padding: 0.85rem 1rem;
+        }
+    }
+    
+    /* --- PROMO BANNER IDFM STYLE --- */
+    .promo-banner {
+        margin: 0;
+        padding: 1rem;
+    }
+    
+    .promo-banner-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #e91e8c 0%, #c026d3 100%);
+        border-radius: 16px;
+        gap: 1rem;
+    }
+    
+    .promo-banner-icon {
+        display: none;
+    }
+    
+    .promo-banner-text strong {
+        font-size: 0.95rem;
+    }
+    
+    .promo-banner-text span {
+        font-size: 0.85rem;
+    }
+    
+    .promo-banner-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        background: #fff;
+        color: #c026d3;
+    }
+    
+    .promo-banner-btn:hover {
+        transform: scale(1.02);
+    }
+    
+    /* --- STATS SECTION IDFM --- */
+    .stats-section {
+        padding: 0 1rem 1.5rem;
+        margin-top: 0;
+    }
+    
+    .stats-card {
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+    
+    .stats-header {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .stats-header h3 {
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .stat-item {
+        padding: 0.75rem 0.5rem;
+        border-radius: 12px;
+    }
+    
+    .stat-number {
+        font-size: 1.4rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    /* --- NETWORK DELAYS WIDGET --- */
+    .network-delays-widget {
+        margin: 1rem;
+        border-radius: 16px;
+    }
+    
+    /* --- ANIMATIONS FLUIDES --- */
+    .service-card,
+    .promo-banner-content,
+    .stats-card,
+    .planner-block,
+    .btn-when,
+    .planner-search-btn {
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    /* Animation d'entrée pour les cartes services */
+    .services-grid .service-card {
+        animation: slideInUp 0.4s ease forwards;
+        opacity: 0;
+    }
+    
+    .services-grid .service-card:nth-child(1) { animation-delay: 0.1s; }
+    .services-grid .service-card:nth-child(2) { animation-delay: 0.2s; }
+    .services-grid .service-card:nth-child(3) { animation-delay: 0.3s; }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* --- FOOTER MOBILE --- */
+    #site-footer {
+        margin-top: 0;
+    }
+}
+
+/* --- ANIMATION GLOBALES POUR FLUIDITÉ --- */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5);
+    }
+}
+
+/* Pulse subtil sur le bouton rechercher quand les champs sont remplis */
+.planner-search-btn.ready-to-search {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Smooth scroll pour tout le site */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Amélioration des transitions globales */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, a, input, select {
+    -webkit-touch-callout: none;
+}
+
 
