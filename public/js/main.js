@@ -20,6 +20,7 @@ import { createRouterContext, encodePolyline, decodePolyline } from './router.js
 import { RouterWorkerClient } from './routerWorkerClient.js';
 import { UIManager } from './uiManager.js';
 import { createGeolocationManager } from './geolocationManager.js';
+import { loadBaseLayout } from './viewLoader.js';
 
 // === Imports des modules refactorisés ===
 import { 
@@ -305,7 +306,8 @@ const DETAIL_SHEET_TRANSITION_MS = 300;
 
 // getCategoryForRoute est maintenant importée depuis config/routes.js
 
-async function initializeApp() {
+// Initialise toutes les références DOM
+function initializeDomElements() {
     dashboardContainer = document.getElementById('dashboard-container');
     dashboardHall = document.getElementById('dashboard-hall');
     dashboardContentView = document.getElementById('dashboard-content-view');
@@ -363,6 +365,11 @@ async function initializeApp() {
     hallGeolocateBtn = document.getElementById('hall-geolocate-btn');
     installTipContainer = document.getElementById('install-tip');
     installTipCloseBtn = document.getElementById('install-tip-close');
+}
+
+async function initializeApp() {
+    // Initialise les références DOM
+    initializeDomElements();
 
     // Instanciation du renderer (après sélection des éléments DOM)
     resultsRenderer = createResultsRenderer({
@@ -1123,11 +1130,11 @@ async function showTarifsView(page = 'tarifs-grille') {
         const appViewRoot = document.getElementById('app-view-root');
         appViewRoot.innerHTML = html;
         
-        // Bouton retour
+        // Bouton retour - recharge le dashboard complet
         const backBtn = document.getElementById('btn-back-to-hall-tarifs');
         if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                showDashboardHall();
+            backBtn.addEventListener('click', async () => {
+                await reloadDashboardFromTarifs();
             });
         }
         
@@ -1145,6 +1152,59 @@ async function showTarifsView(page = 'tarifs-grille') {
         
     } catch (error) {
         console.error('Erreur chargement vue Tarifs:', error);
+    }
+}
+
+// Recharger le dashboard depuis les pages tarifs
+async function reloadDashboardFromTarifs() {
+    try {
+        // Recharger le layout de base
+        await loadBaseLayout();
+        
+        // Réinitialiser les références DOM
+        initializeDomElements();
+        
+        // Réattacher les event listeners statiques
+        setupStaticEventListeners();
+        attachRobustBackHandlers();
+        
+        // Réafficher les fiches horaires
+        if (dataManager && ficheHoraireContainer) {
+            renderFicheHoraire();
+        }
+        
+        // Afficher le hall
+        if (dashboardContainer) {
+            dashboardContainer.classList.remove('hidden');
+        }
+        if (mapContainer) {
+            mapContainer.classList.add('hidden');
+        }
+        if (itineraryResultsContainer) {
+            itineraryResultsContainer.classList.add('hidden');
+        }
+        if (dashboardHall) {
+            dashboardHall.classList.add('view-is-active');
+        }
+        if (dashboardContentView) {
+            dashboardContentView.classList.remove('view-is-active');
+        }
+        
+        document.body.classList.remove('view-is-locked');
+        
+        // Réafficher les alertes et infos trafic
+        if (dataManager) {
+            renderAlertBanner();
+            renderInfoTrafic();
+        }
+        
+        window.scrollTo(0, 0);
+        console.log('[main] Dashboard rechargé depuis tarifs');
+        
+    } catch (error) {
+        console.error('Erreur rechargement dashboard:', error);
+        // Fallback: recharger la page
+        window.location.reload();
     }
 }
 
