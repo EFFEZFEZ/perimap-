@@ -1115,8 +1115,10 @@ body.view-is-locked #legal-strip {
 .hero-backdrop {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
     width: 100vw;
     height: 380px;
     background: url('https://www.voyageavecvue.com/wp-content/uploads/2023/11/perigueux.png') center top / cover no-repeat;
@@ -1182,13 +1184,16 @@ body.view-is-locked #legal-strip {
     margin-bottom: 0;
 }
 
-/* Ligne de swap avec trait */
+/* Ligne de swap avec trait - centré parfaitement */
 .swap-button-row {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    padding: 0.25rem 0;
-    margin: -0.25rem 0;
+    justify-content: center;
+    padding: 0;
+    margin: -0.5rem 0;
+    position: relative;
+    z-index: 5;
+    height: 0;
 }
 
 .swap-line {
@@ -1196,10 +1201,10 @@ body.view-is-locked #legal-strip {
 }
 
 .btn-swap-direction {
-    background: transparent;
-    border: none;
-    width: 32px;
-    height: 32px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    width: 36px;
+    height: 36px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1207,19 +1212,23 @@ body.view-is-locked #legal-strip {
     color: #6b7280;
     border-radius: 50%;
     transition: all 0.2s ease;
-    margin-right: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 10;
 }
 .btn-swap-direction:hover {
-    background: #f3f4f6;
-    color: #1e3a5f;
+    background: #f8fafc;
+    border-color: #2a9d8f;
+    color: #2a9d8f;
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2);
 }
 
 /* Champs de saisie style Vitalis */
 .planner-block .form-group input[type="text"] {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border-radius: 12px;
+    padding: 0.875rem 1rem 0.875rem 2.75rem;
     font-size: 0.9rem;
     color: #1e3a5f;
     width: 100%;
@@ -1341,19 +1350,24 @@ body.view-is-locked #legal-strip {
 /* Bouton Rechercher style PériMap (vert teal/canard) */
 .planner-search-btn,
 #planner-submit-btn {
-    padding: 0.85rem 2rem !important;
-    font-size: 0.95rem !important;
+    padding: 0.875rem 2rem !important;
+    font-size: 0.9rem !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    border-radius: 25px !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 12px !important;
     background: #2a9d8f !important;
     border: none !important;
     color: #ffffff !important;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     width: 100%;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
 }
 
 .planner-search-btn:hover,
@@ -1425,18 +1439,19 @@ body.dark-theme .planner-title {
 }
 
 body.dark-theme .planner-block .form-group input[type="text"] {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.1);
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #374151;
     color: #e2e8f0;
 }
 
 body.dark-theme .planner-block .form-group input[type="text"]::placeholder {
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.5);
 }
 
 body.dark-theme .planner-block .form-group input[type="text"]:focus {
-    background: rgba(255,255,255,0.08);
+    background: rgba(30, 41, 59, 0.95);
     border-color: #2a9d8f;
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
 }
 
 body.dark-theme .btn-when {
@@ -1446,24 +1461,29 @@ body.dark-theme .btn-when {
 }
 
 body.dark-theme .btn-swap-direction {
-    color: rgba(255,255,255,0.6);
+    background: rgba(30, 41, 59, 0.95);
+    border-color: #374151;
+    color: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-theme .btn-swap-direction:hover {
-    background: rgba(255,255,255,0.1);
-    color: #e2e8f0;
+    background: rgba(42, 157, 143, 0.2);
+    border-color: #2a9d8f;
+    color: #2a9d8f;
 }
 
 body.dark-theme .input-with-icon .input-icon {
-    color: rgba(255,255,255,0.4);
-}
-
-body.dark-theme .btn-geolocate {
     color: rgba(255,255,255,0.5);
 }
 
+body.dark-theme .btn-geolocate {
+    color: rgba(255,255,255,0.6);
+    background: transparent;
+}
+
 body.dark-theme .btn-geolocate:hover:not(:disabled) {
-    background: rgba(255,255,255,0.1);
+    background: rgba(42, 157, 143, 0.2);
     color: #e2e8f0;
 }
 
@@ -1542,20 +1562,22 @@ body.dark-theme .btn-geolocate:hover:not(:disabled) {
     color: #1e3a5f;
 }
 
-/* Dark theme quick actions */
+/* Dark theme quick actions - bordures visibles */
 body.dark-theme .quick-action-card {
-    background: rgba(15, 23, 42, 0.95);
-    border-color: rgba(255,255,255,0.08);
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid #374151;
     color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-theme .quick-action-card:hover {
     border-color: #2a9d8f;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    background: rgba(42, 157, 143, 0.1);
+    box-shadow: 0 8px 24px rgba(42, 157, 143, 0.2);
 }
 
 body.dark-theme .quick-action-icon {
-    background: rgba(42, 157, 143, 0.15);
+    background: rgba(42, 157, 143, 0.2);
     color: #2a9d8f;
 }
 
