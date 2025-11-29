@@ -1153,7 +1153,7 @@ body.view-is-locked #legal-strip {
 .planner-block {
     background: #FFFFFF;
     border-radius: var(--radius-lg);
-    padding: 1.25rem;
+    padding: 1.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     border: 1px solid #e5e7eb;
 }
@@ -1162,7 +1162,7 @@ body.view-is-locked #legal-strip {
     font-size: 1rem;
     font-weight: 700;
     color: #1e3a5f;
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.25rem 0;
     text-align: center;
 }
 
@@ -1170,41 +1170,41 @@ body.view-is-locked #legal-strip {
 .planner-form {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
     width: 100%;
 }
 
 .planner-inputs-vertical {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.5rem;
 }
 
 .planner-inputs-vertical .form-group {
     margin-bottom: 0;
 }
 
-/* Ligne de swap avec trait - centré parfaitement */
+/* Ligne de swap - dans son propre espace */
 .swap-button-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    margin: -0.5rem 0;
+    padding: 0.25rem 0;
     position: relative;
     z-index: 5;
-    height: 0;
 }
 
 .swap-line {
-    display: none;
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
 }
 
 .btn-swap-direction {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1212,9 +1212,9 @@ body.view-is-locked #legal-strip {
     color: #6b7280;
     border-radius: 50%;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
-    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 0 0.75rem;
+    flex-shrink: 0;
 }
 .btn-swap-direction:hover {
     background: #f8fafc;
@@ -1228,11 +1228,13 @@ body.view-is-locked #legal-strip {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 0.875rem 1rem 0.875rem 2.75rem;
-    font-size: 0.9rem;
+    padding: 1rem 1rem 1rem 2.75rem;
+    font-size: 0.95rem;
     color: #1e3a5f;
     width: 100%;
     transition: all 0.2s ease;
+    min-height: 52px;
+    box-sizing: border-box;
 }
 
 .planner-block .form-group input[type="text"]::placeholder {
@@ -1458,6 +1460,10 @@ body.dark-theme .btn-when {
     background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.1);
     color: #e2e8f0;
+}
+
+body.dark-theme .swap-line {
+    background: #374151;
 }
 
 body.dark-theme .btn-swap-direction {
