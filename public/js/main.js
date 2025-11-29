@@ -3456,8 +3456,10 @@ function renderInfoTraficCard() {
         `;
         infoTraficList.appendChild(groupDiv);
     }
-    infoTraficCount.textContent = alertCount;
-    infoTraficCount.classList.toggle('hidden', alertCount === 0);
+    if (infoTraficCount) {
+        infoTraficCount.textContent = alertCount;
+        infoTraficCount.classList.toggle('hidden', alertCount === 0);
+    }
 }
 
 function buildFicheHoraireList() {
