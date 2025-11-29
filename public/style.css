@@ -6475,6 +6475,7 @@ body.dark-theme .mobile-menu-item {
         order: 10;
         display: flex;
         align-items: center;
+        justify-content: center;
         height: 56px;
     }
     
@@ -6482,6 +6483,7 @@ body.dark-theme .mobile-menu-item {
         width: 36px;
         height: 36px;
         font-size: 0.9rem;
+        margin: auto 0;
     }
 }
 
