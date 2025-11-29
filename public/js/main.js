@@ -863,6 +863,39 @@ function setupStaticEventListeners() {
     try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
     populateTimeSelects();
 
+    // Gérer les liens hash (#horaires, #trafic, etc.)
+    function handleHashNavigation() {
+        const hash = window.location.hash.replace('#', '');
+        if (hash) {
+            switch(hash) {
+                case 'horaires':
+                    showDashboardView('horaires');
+                    break;
+                case 'trafic':
+                case 'info-trafic':
+                    showDashboardView('info-trafic');
+                    break;
+                case 'carte':
+                    showMapView();
+                    break;
+                case 'tarifs':
+                case 'tarifs-grille':
+                    showTarifsView('tarifs-grille');
+                    break;
+            }
+            // Nettoyer le hash après navigation
+            history.replaceState(null, '', window.location.pathname);
+        }
+    }
+    
+    // Écouter les changements de hash
+    window.addEventListener('hashchange', handleHashNavigation);
+    
+    // Gérer le hash initial au chargement
+    if (window.location.hash) {
+        setTimeout(handleHashNavigation, 100);
+    }
+
     document.querySelectorAll('.service-card[data-view]').forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
