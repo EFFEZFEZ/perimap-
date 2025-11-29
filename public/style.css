@@ -5768,23 +5768,16 @@ body:not(.view-is-locked) {
 
 /* Container des items - masqué par défaut */
 .mobile-menu-items {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.25s ease;
+    max-height: 0;
     overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease;
+    opacity: 0;
 }
 
 .mobile-menu-items.is-expanded {
-    grid-template-rows: 1fr;
-}
-
-.mobile-menu-items > * {
-    min-height: 0;
-}
-
-/* Wrapper interne pour le collapse */
-.mobile-menu-items::before {
-    content: none;
+    max-height: 500px; /* Assez grand pour le contenu */
+    opacity: 1;
+    transition: max-height 0.3s ease-in, opacity 0.2s ease;
 }
 
 /* === BLOCAGE DU SCROLL === */
