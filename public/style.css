@@ -6268,7 +6268,7 @@ body:not(.view-is-locked) {
     align-items: center;
     gap: 0.5rem;
     padding: 0.85rem 1rem;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     text-decoration: none;
     border-radius: var(--radius-md);
     font-size: 0.95rem;
@@ -6323,7 +6323,7 @@ body:not(.view-is-locked) {
     box-shadow: none !important;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     cursor: pointer;
@@ -6332,6 +6332,12 @@ body:not(.view-is-locked) {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+}
+
+.mobile-menu-category span,
+.mobile-menu-category svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF;
 }
 
 .mobile-menu-category:focus,
@@ -6347,11 +6353,18 @@ button.mobile-menu-category:active {
     outline-width: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    color: #FFFFFF !important;
     -webkit-tap-highlight-color: transparent !important;
 }
 
 .mobile-menu-category:hover {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+}
+
+.mobile-menu-category:hover span,
+.mobile-menu-category:hover svg {
+    color: #FFFFFF !important;
+    stroke: #FFFFFF;
 }
 
 .mobile-menu-category:active {
