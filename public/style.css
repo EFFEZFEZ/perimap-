@@ -1132,6 +1132,7 @@ body.view-is-locked #legal-strip {
         rgba(30, 58, 95, 0.25) 40%,
         rgba(255, 255, 255, 0.85) 75%, 
         #ffffff 100%);
+    pointer-events: none;
 }
 
 #dashboard-hall {
