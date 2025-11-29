@@ -1,0 +1,206 @@
+/**
+ * trafficInfo.js - Affichage des infos trafic et fiches horaires
+ * 
+ * Ce module gère le rendu des informations de trafic réseau
+ * et la liste des fiches horaires.
+ */
+
+import { getCategoryForRoute, PDF_FILENAME_MAP, ROUTE_LONG_NAME_MAP } from '../config/routes.js';
+
+/**
+ * Rend la carte d'info trafic avec l'état des lignes
+ * @param {Object} dataManager - Instance du DataManager
+ * @param {Object} lineStatuses - État des lignes {route_id: {status, message}}
+ * @param {HTMLElement} container - Conteneur pour les lignes
+ * @param {HTMLElement} countElement - Élément pour afficher le nombre d'alertes
+ */
+export function renderInfoTraficCard(dataManager, lineStatuses, container, countElement) {
+    if (!dataManager || !container) return;
+    container.innerHTML = '';
+    let alertCount = 0;
+    
+    const groupedRoutes = {
+        'majeures': { name: 'Lignes majeures', routes: [] },
+        'express': { name: 'Lignes express', routes: [] },
+        'quartier': { name: 'Lignes de quartier', routes: [] },
+        'navettes': { name: 'Navettes', routes: [] }
+    };
+    const allowedCategories = ['majeures', 'express', 'quartier', 'navettes'];
+
+    dataManager.routes.forEach(route => {
+        const category = getCategoryForRoute(route.route_short_name);
+        if (allowedCategories.includes(category)) {
+            groupedRoutes[category].routes.push(route);
+        }
+    });
+
+    for (const [categoryId, categoryData] of Object.entries(groupedRoutes)) {
+        if (categoryData.routes.length === 0) continue;
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'trafic-group';
+        
+        let badgesHtml = '';
+        categoryData.routes.sort((a, b) => {
+            return a.route_short_name.localeCompare(b.route_short_name, undefined, { numeric: true });
+        });
+
+        categoryData.routes.forEach(route => {
+            const state = lineStatuses[route.route_id] || { status: 'normal', message: '' };
+            const routeColor = route.route_color ? `#${route.route_color}` : '#3388ff';
+            const textColor = route.route_text_color ? `#${route.route_text_color}` : '#ffffff';
+            let statusIcon = '';
+            let statusColor = 'transparent';
+            
+            if (state.status !== 'normal') {
+                alertCount++;
+                if (state.status === 'annulation') statusColor = 'var(--color-red)';
+                else if (state.status === 'retard') statusColor = 'var(--color-yellow)';
+                else statusColor = 'var(--color-orange)';
+                statusIcon = `<div class="status-indicator-triangle type-${state.status}" style="border-bottom-color: ${statusColor};"></div>`;
+            }
+            
+            badgesHtml += `
+                <div class="trafic-badge-item status-${state.status}">
+                    <span class="line-badge" style="background-color: ${routeColor}; color: ${textColor};">
+                        ${route.route_short_name}
+                    </span>
+                    ${statusIcon}
+                </div>
+            `;
+        });
+
+        groupDiv.innerHTML = `
+            <h4>${categoryData.name}</h4>
+            <div class="trafic-badge-list">
+                ${badgesHtml}
+            </div>
+        `;
+        container.appendChild(groupDiv);
+    }
+    
+    if (countElement) {
+        countElement.textContent = alertCount;
+        countElement.classList.toggle('hidden', alertCount === 0);
+    }
+    
+    return alertCount;
+}
+
+/**
+ * Construit la liste des fiches horaires
+ * @param {Object} dataManager - Instance du DataManager
+ * @param {HTMLElement} container - Conteneur pour les fiches
+ */
+export function buildFicheHoraireList(dataManager, container) {
+    if (!dataManager || !container) return;
+    container.innerHTML = '';
+
+    const groupedRoutes = {
+        'Lignes A, B, C et D': [],
+        'Lignes e': [],
+        'Lignes K': [],
+        'Lignes N': [],
+        'Lignes R': []
+    };
+
+    dataManager.routes.forEach(route => {
+        const name = route.route_short_name;
+        if (['A', 'B', 'C', 'D'].includes(name)) groupedRoutes['Lignes A, B, C et D'].push(route);
+        else if (name.startsWith('e')) groupedRoutes['Lignes e'].push(route);
+        else if (name.startsWith('K')) groupedRoutes['Lignes K'].push(route);
+        else if (name.startsWith('N')) groupedRoutes['Lignes N'].push(route);
+        else if (name.startsWith('R')) groupedRoutes['Lignes R'].push(route);
+    });
+
+    for (const [groupName, routes] of Object.entries(groupedRoutes)) {
+        if (routes.length === 0) continue;
+        
+        const accordionGroup = document.createElement('div');
+        accordionGroup.className = 'accordion-group';
+        let linksHtml = '';
+        
+        if (groupName === 'Lignes R') {
+            linksHtml = buildRLinesHtml();
+        } else {
+            routes.sort((a, b) => a.route_short_name.localeCompare(b.route_short_name, undefined, { numeric: true }));
+            routes.forEach(route => {
+                const pdfPath = getPdfPathForRoute(route.route_short_name);
+                const longName = ROUTE_LONG_NAME_MAP[route.route_short_name] || route.route_long_name || '';
+                if (pdfPath) {
+                    linksHtml += `<a href="${pdfPath}" target="_blank" rel="noopener noreferrer">Ligne ${route.route_short_name} ${longName}</a>`;
+                }
+            });
+        }
+        
+        accordionGroup.innerHTML = `
+            <button class="accordion-header" aria-expanded="false">
+                <span>${groupName}</span>
+                <svg class="accordion-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div class="accordion-content">
+                ${linksHtml}
+            </div>
+        `;
+        
+        container.appendChild(accordionGroup);
+    }
+
+    // Attacher les event listeners aux accordéons
+    setupAccordionListeners(container);
+}
+
+/**
+ * Configure les listeners pour les accordéons
+ */
+function setupAccordionListeners(container) {
+    container.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const isExpanded = header.getAttribute('aria-expanded') === 'true';
+            // Fermer tous les autres
+            container.querySelectorAll('.accordion-header').forEach(h => {
+                h.setAttribute('aria-expanded', 'false');
+                h.nextElementSibling?.classList.remove('open');
+            });
+            // Basculer celui-ci
+            if (!isExpanded) {
+                header.setAttribute('aria-expanded', 'true');
+                header.nextElementSibling?.classList.add('open');
+            }
+        });
+    });
+}
+
+/**
+ * Obtient le chemin PDF pour une ligne
+ */
+function getPdfPathForRoute(routeShortName) {
+    const fileName = PDF_FILENAME_MAP[routeShortName];
+    if (fileName) {
+        return `/data/fichehoraire/${fileName}`;
+    }
+    return null;
+}
+
+/**
+ * Construit le HTML pour les lignes R (cas spécial avec groupement)
+ */
+function buildRLinesHtml() {
+    return `
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R1, R2, R3 La Feuilleraie <> ESAT / Les Gourdoux <> Trélissac Les Garennes / Les Pinots <> P+R Aquacap</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R4, R5 Route de Payenché <> Collège Jean Moulin / Les Mondines / Clément Laval <> Collège Jean Moulin</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R6, R7 Maison des Compagnons <> Gour de l'Arche poste / Le Charpe <> Gour de l'Arche poste</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R8, R9 Jaunour <> Boulazac centre commercial / Stèle de Lesparat <> Place du 8 mai</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R10, R11 Notre Dame de Sanilhac poste <> Centre de la communication / Héliodore <> Place du 8 mai</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R12 Le Change <> Boulazac centre commercial</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R13, R14 Coursac <> Razac sur l'Isle / La Chapelle Gonaguet <> Razac sur l'Isle</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R15 Boulazac Isle Manoire <> Halte ferroviaire Niversac</a>
+    `;
+}
+
+export default {
+    renderInfoTraficCard,
+    buildFicheHoraireList
+};
