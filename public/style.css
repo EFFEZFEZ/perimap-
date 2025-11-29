@@ -2563,12 +2563,15 @@ details[open] .accordion-content {
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
     }
     .header-content {
         display: flex;
         justify-content: flex-start; /* logo + title aligned to the left */
         align-items: center;
-        height: 56px;
+        height: 100%;
+        width: 100%;
         max-width: 1300px;
         margin: 0 auto;
         padding: 0 1rem;
@@ -2585,7 +2588,7 @@ details[open] .accordion-content {
         font-weight: 800;
     }
     .header-logo-img {
-        height: 42px;
+        height: 38px;
         width: auto;
         object-fit: contain;
     }
@@ -2602,14 +2605,14 @@ details[open] .accordion-content {
         margin-left: auto;
     }
     .brand-name {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
         margin: 0;
         display: block;
         font-weight: 800;
     }
     .brand-sub {
-        font-size: 0.8rem;
-        margin-top: 2px;
+        font-size: 0.75rem;
+        margin-top: 1px;
         display: block;
         color: var(--text-secondary);
         font-weight: 600;
