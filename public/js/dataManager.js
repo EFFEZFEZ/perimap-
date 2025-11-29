@@ -1226,4 +1226,150 @@ export class DataManager {
 
         return null;
     }
+
+    /**
+     * ============================================
+     * CROWDSOURCING: Méthodes pour le module GO
+     * ============================================
+     */
+
+    /**
+     * Trouve les arrêts proches d'une position GPS
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude  
+     * @param {number} radiusMeters - Rayon de recherche en mètres (défaut: 300)
+     * @returns {Array} Liste des arrêts proches triés par distance
+     */
+    findNearbyStops(lat, lng, radiusMeters = 300) {
+        if (!this.stops || this.stops.length === 0) {
+            console.warn('findNearbyStops: aucun arrêt chargé');
+            return [];
+        }
+
+        const nearbyStops = [];
+
+        for (const stop of this.stops) {
+            const stopLat = parseFloat(stop.stop_lat);
+            const stopLon = parseFloat(stop.stop_lon);
+            
+            if (isNaN(stopLat) || isNaN(stopLon)) continue;
+
+            const distance = this.calculateDistance(lat, lng, stopLat, stopLon);
+            
+            if (distance <= radiusMeters) {
+                nearbyStops.push({
+                    id: stop.stop_id,
+                    name: stop.stop_name,
+                    lat: stopLat,
+                    lng: stopLon,
+                    distance: Math.round(distance)
+                });
+            }
+        }
+
+        // Trier par distance
+        nearbyStops.sort((a, b) => a.distance - b.distance);
+
+        return nearbyStops;
+    }
+
+    /**
+     * Obtient les prochains départs pour un arrêt donné
+     * @param {string} stopId - ID de l'arrêt
+     * @param {number} limit - Nombre max de départs (défaut: 5)
+     * @returns {Array} Liste des prochains départs
+     */
+    getNextDeparturesForStop(stopId, limit = 5) {
+        if (!stopId) return [];
+
+        const now = new Date();
+        const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const serviceIds = this.getServiceIds(now);
+
+        if (serviceIds.size === 0) {
+            return [];
+        }
+
+        // Récupérer tous les stop_times pour cet arrêt
+        const stopTimes = this.stopTimesByStop[stopId] || [];
+        
+        if (stopTimes.length === 0) {
+            // Essayer avec les arrêts groupés
+            const masterStop = this.groupedStopMap[stopId];
+            if (masterStop && masterStop.members) {
+                const allStopTimes = [];
+                for (const memberId of masterStop.members) {
+                    const memberStops = this.stopTimesByStop[memberId] || [];
+                    allStopTimes.push(...memberStops);
+                }
+                if (allStopTimes.length === 0) return [];
+                return this._processStopTimesForDepartures(allStopTimes, currentSeconds, serviceIds, limit);
+            }
+            return [];
+        }
+
+        return this._processStopTimesForDepartures(stopTimes, currentSeconds, serviceIds, limit);
+    }
+
+    /**
+     * Traite les stop_times pour extraire les prochains départs
+     * @private
+     */
+    _processStopTimesForDepartures(stopTimes, currentSeconds, serviceIds, limit) {
+        const departures = [];
+
+        for (const st of stopTimes) {
+            const trip = this.tripsByTripId[st.trip_id];
+            if (!trip) continue;
+
+            // Vérifier si le service est actif
+            const isServiceActive = Array.from(serviceIds).some(activeServiceId => {
+                return this.serviceIdsMatch(trip.service_id, activeServiceId);
+            });
+
+            if (!isServiceActive) continue;
+
+            const departureSeconds = this.timeToSeconds(st.departure_time);
+            
+            // Seulement les départs futurs (dans les 2 prochaines heures)
+            if (departureSeconds >= currentSeconds && departureSeconds <= currentSeconds + 7200) {
+                const route = this.routesById[trip.route_id];
+                if (!route) continue;
+
+                // Obtenir la destination (dernier arrêt du trip)
+                const tripStopTimes = this.stopTimesByTrip[trip.trip_id] || [];
+                const lastStopTime = tripStopTimes[tripStopTimes.length - 1];
+                const lastStop = lastStopTime ? this.stopsById[lastStopTime.stop_id] : null;
+                const headsign = trip.trip_headsign || lastStop?.stop_name || 'Terminus';
+
+                departures.push({
+                    tripId: trip.trip_id,
+                    routeId: route.route_id,
+                    routeName: route.route_short_name || route.route_long_name || 'Bus',
+                    routeColor: route.route_color ? `#${route.route_color}` : '#1976D2',
+                    routeTextColor: route.route_text_color ? `#${route.route_text_color}` : '#FFFFFF',
+                    headsign: headsign,
+                    direction: headsign,
+                    departureTime: this.formatTime(departureSeconds),
+                    departureSeconds: departureSeconds,
+                    stopSequence: parseInt(st.stop_sequence, 10) || 0
+                });
+            }
+        }
+
+        // Trier par heure de départ
+        departures.sort((a, b) => a.departureSeconds - b.departureSeconds);
+
+        // Dédupliquer par tripId (garder le premier)
+        const seen = new Set();
+        const unique = [];
+        for (const dep of departures) {
+            if (!seen.has(dep.tripId)) {
+                seen.add(dep.tripId);
+                unique.push(dep);
+            }
+        }
+
+        return unique.slice(0, limit);
+    }
 }

@@ -2,6 +2,8 @@
  * Crowdsourcing Module - Système de partage de position des bus
  * Inspiré de Transit App "GO" mode
  * 
+ * V61 - Version fonctionnelle complète
+ * 
  * Permet aux utilisateurs de partager leur position GPS quand ils sont dans un bus,
  * ce qui améliore le suivi en temps réel pour tous les autres utilisateurs.
  */
@@ -39,12 +41,15 @@ const CrowdsourcingManager = (function() {
         isActive: false,
         currentTrip: null,
         currentRoute: null,
+        currentRouteName: '',
+        currentDirection: '',
         watchId: null,
         intervalId: null,
         sessionStart: null,
         lastPosition: null,
         positionHistory: [],
         contributors: new Map(), // tripId -> [{lat, lng, timestamp, accuracy}]
+        animationFrameId: null,
         userStats: {
             totalMinutes: 0,
             totalTrips: 0,
@@ -52,6 +57,9 @@ const CrowdsourcingManager = (function() {
             level: 1
         }
     };
+
+    // Référence au dataManager (sera injectée)
+    let dataManagerRef = null;
 
     // Niveaux de contribution
     const LEVELS = [
@@ -68,8 +76,20 @@ const CrowdsourcingManager = (function() {
      */
     function init() {
         loadUserStats();
-        setupUI();
+        
+        // Essayer de récupérer le dataManager global
+        if (typeof window !== 'undefined' && window.dataManager) {
+            dataManagerRef = window.dataManager;
+        }
+        
         console.log('🚌 Crowdsourcing initialisé. Niveau:', getUserLevel().name);
+    }
+
+    /**
+     * Injecte la référence au dataManager
+     */
+    function setDataManager(dm) {
+        dataManagerRef = dm;
     }
 
     /**
@@ -79,7 +99,7 @@ const CrowdsourcingManager = (function() {
         try {
             const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
             if (saved) {
-                state.userStats = JSON.parse(saved);
+                state.userStats = { ...state.userStats, ...JSON.parse(saved) };
             }
         } catch (e) {
             console.warn('Erreur chargement stats crowdsourcing:', e);
@@ -112,259 +132,50 @@ const CrowdsourcingManager = (function() {
     }
 
     /**
-     * Configure l'interface utilisateur
-     * V60: Suppression du bouton GO flottant - maintenant intégré dans le bottom sheet
-     */
-    function setupUI() {
-        // Plus de bouton flottant - le GO est maintenant dans le bottom sheet
-        console.log('🚌 Crowdsourcing UI initialisé (mode intégré au bottom sheet)');
-    }
-
-    /**
      * Démarre le partage depuis un itinéraire affiché
-     * V60: Nouvelle fonction pour démarrer depuis le bottom sheet
+     * Appelé depuis le bouton GO dans le detail panel
      */
-    async function startSharingFromItinerary(itinerary) {
+    function startSharingFromItinerary(itinerary) {
         if (!itinerary || !itinerary.steps) {
-            console.warn('Itinéraire invalide pour le partage');
-            return;
+            console.warn('❌ Crowdsourcing: Itinéraire invalide pour le partage');
+            showToast('Impossible de démarrer le partage', 'error');
+            return false;
         }
 
         // Trouver le premier step de type BUS
         const busStep = itinerary.steps.find(step => step.type === 'BUS');
         if (!busStep) {
-            console.warn('Aucune étape bus trouvée dans cet itinéraire');
-            return;
+            console.warn('❌ Crowdsourcing: Aucune étape bus trouvée');
+            showToast('Aucun trajet bus dans cet itinéraire', 'warning');
+            return false;
         }
 
         // Extraire les infos du bus
         const tripId = busStep.tripId || busStep.trip?.trip_id || `trip_${Date.now()}`;
         const routeId = busStep.routeId || busStep.route?.route_id || '';
-        const routeName = busStep.routeShortName || busStep.routeName || 'Bus';
-        const direction = busStep.headsign || busStep.direction || busStep.instruction || '';
+        const routeName = busStep.routeShortName || busStep.routeName || busStep.line || 'Bus';
+        const direction = busStep.headsign || busStep.direction || busStep.instruction || 'Direction inconnue';
+        const routeColor = busStep.routeColor || busStep.route?.route_color || '#1976D2';
 
         console.log('🚌 Démarrage GO depuis itinéraire:', { tripId, routeId, routeName, direction });
 
         // Démarrer le partage
-        startSharing(tripId, routeId, routeName, direction);
-    }
-
-    /**
-     * Gère le clic sur le bouton GO
-     */
-    async function handleGoButtonClick() {
-        if (state.isActive) {
-            stopSharing();
-        } else {
-            // Demander à l'utilisateur de sélectionner son bus
-            const tripInfo = await promptTripSelection();
-            if (tripInfo) {
-                startSharing(tripInfo.tripId, tripInfo.routeId, tripInfo.routeName, tripInfo.direction);
-            }
-        }
-    }
-
-    /**
-     * Affiche une boîte de dialogue pour sélectionner le bus
-     */
-    async function promptTripSelection() {
-        return new Promise((resolve) => {
-            // Supprimer tout modal existant d'abord
-            const existingModal = document.getElementById('go-trip-modal');
-            if (existingModal) existingModal.remove();
-
-            // Créer la modal de sélection
-            const modalHTML = `
-                <div id="go-trip-modal" class="go-modal">
-                    <div class="go-modal-content">
-                        <h3>🚌 Quel bus prenez-vous ?</h3>
-                        <p class="go-modal-subtitle">Aidez les autres usagers en partageant votre position</p>
-                        <div id="go-trip-list" class="go-trip-list">
-                            <div class="go-loading">Recherche des bus à proximité...</div>
-                        </div>
-                        <button id="go-modal-cancel" class="go-modal-cancel">Annuler</button>
-                    </div>
-                </div>
-            `;
-
-            const modal = document.createElement('div');
-            modal.innerHTML = modalHTML;
-            document.body.appendChild(modal.firstElementChild);
-
-            const modalEl = document.getElementById('go-trip-modal');
-            const listEl = document.getElementById('go-trip-list');
-
-            // Fermer la modal en cliquant sur le backdrop
-            modalEl?.addEventListener('click', (e) => {
-                if (e.target === modalEl) {
-                    modalEl?.remove();
-                    resolve(null);
-                }
-            });
-
-            // Fermer la modal
-            document.getElementById('go-modal-cancel')?.addEventListener('click', () => {
-                modalEl?.remove();
-                resolve(null);
-            });
-
-            // Charger les bus à proximité
-            loadNearbyTrips().then(trips => {
-                if (trips.length === 0) {
-                    listEl.innerHTML = `
-                        <div class="go-no-trips">
-                            <p>Aucun bus détecté à proximité.</p>
-                            <p class="go-hint">Assurez-vous d'être près d'un arrêt de bus.</p>
-                        </div>
-                    `;
-                } else {
-                    listEl.innerHTML = trips.map(trip => `
-                        <button class="go-trip-option" data-trip='${JSON.stringify(trip)}'>
-                            <span class="go-trip-route" style="background-color: ${trip.routeColor || '#1976D2'}">
-                                ${trip.routeName}
-                            </span>
-                            <span class="go-trip-direction">${trip.direction}</span>
-                            <span class="go-trip-time">${trip.nextDeparture || ''}</span>
-                        </button>
-                    `).join('');
-
-                    // Event listeners pour la sélection
-                    listEl.querySelectorAll('.go-trip-option').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const tripData = JSON.parse(btn.dataset.trip);
-                            modalEl?.remove();
-                            resolve(tripData);
-                        });
-                    });
-                }
-            });
-        });
-    }
-
-    /**
-     * Charge les bus à proximité de l'utilisateur
-     */
-    async function loadNearbyTrips() {
-        try {
-            // Obtenir la position actuelle
-            const position = await getCurrentPosition();
-            if (!position) return [];
-
-            // Chercher les arrêts proches
-            const nearbyStops = await findNearbyStops(position.coords.latitude, position.coords.longitude);
-            
-            // Obtenir les prochains départs pour ces arrêts
-            const trips = [];
-            for (const stop of nearbyStops.slice(0, 5)) { // Max 5 arrêts
-                const departures = await getNextDepartures(stop.id);
-                for (const dep of departures.slice(0, 3)) { // Max 3 départs par arrêt
-                    trips.push({
-                        tripId: dep.tripId,
-                        routeId: dep.routeId,
-                        routeName: dep.routeName,
-                        routeColor: dep.routeColor,
-                        direction: dep.headsign || dep.direction,
-                        nextDeparture: dep.departureTime,
-                        stopId: stop.id,
-                        stopName: stop.name
-                    });
-                }
-            }
-
-            // Dédupliquer par tripId
-            const unique = [];
-            const seen = new Set();
-            for (const trip of trips) {
-                if (!seen.has(trip.tripId)) {
-                    seen.add(trip.tripId);
-                    unique.push(trip);
-                }
-            }
-
-            return unique.slice(0, 10); // Max 10 options
-        } catch (e) {
-            console.error('Erreur chargement bus à proximité:', e);
-            return [];
-        }
-    }
-
-    /**
-     * Obtient la position GPS actuelle
-     */
-    function getCurrentPosition() {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error('Géolocalisation non supportée'));
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                resolve,
-                reject,
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        });
-    }
-
-    /**
-     * Trouve les arrêts proches d'une position
-     */
-    async function findNearbyStops(lat, lng, radiusMeters = 300) {
-        // Utiliser le dataManager existant
-        if (typeof dataManager !== 'undefined' && dataManager.findNearbyStops) {
-            return dataManager.findNearbyStops(lat, lng, radiusMeters);
-        }
-        
-        // Fallback: chercher dans les stops chargés
-        if (typeof window.stopsData !== 'undefined') {
-            return window.stopsData
-                .filter(stop => {
-                    const dist = haversineDistance(lat, lng, stop.stop_lat, stop.stop_lon);
-                    return dist <= radiusMeters;
-                })
-                .sort((a, b) => {
-                    const distA = haversineDistance(lat, lng, a.stop_lat, a.stop_lon);
-                    const distB = haversineDistance(lat, lng, b.stop_lat, b.stop_lon);
-                    return distA - distB;
-                })
-                .map(s => ({ id: s.stop_id, name: s.stop_name, lat: s.stop_lat, lng: s.stop_lon }));
-        }
-
-        return [];
-    }
-
-    /**
-     * Calcule la distance entre deux points GPS (formule de Haversine)
-     */
-    function haversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371000; // Rayon de la Terre en mètres
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    /**
-     * Obtient les prochains départs pour un arrêt
-     */
-    async function getNextDepartures(stopId) {
-        // Utiliser le dataManager existant
-        if (typeof dataManager !== 'undefined' && dataManager.getNextDeparturesForStop) {
-            return dataManager.getNextDeparturesForStop(stopId);
-        }
-        return [];
+        return startSharing(tripId, routeId, routeName, direction, routeColor);
     }
 
     /**
      * Démarre le partage de position
      */
-    function startSharing(tripId, routeId, routeName, direction) {
+    function startSharing(tripId, routeId, routeName, direction, routeColor = '#1976D2') {
         if (state.isActive) {
-            console.warn('Partage déjà actif');
-            return;
+            console.warn('⚠️ Partage déjà actif');
+            return false;
+        }
+
+        // Vérifier la géolocalisation
+        if (!navigator.geolocation) {
+            showToast('Géolocalisation non disponible', 'error');
+            return false;
         }
 
         console.log(`🚌 GO Mode activé: ${routeName} → ${direction}`);
@@ -372,24 +183,25 @@ const CrowdsourcingManager = (function() {
         state.isActive = true;
         state.currentTrip = tripId;
         state.currentRoute = routeId;
+        state.currentRouteName = routeName;
+        state.currentDirection = direction;
         state.sessionStart = Date.now();
         state.positionHistory = [];
+        state.lastPosition = null;
 
-        // Mettre à jour l'UI
-        updateGoUI(true, routeName, direction);
+        // Mettre à jour l'UI du bouton
+        updateButtonUI(true, routeName, direction, routeColor);
 
         // Démarrer le suivi GPS
-        if (navigator.geolocation) {
-            state.watchId = navigator.geolocation.watchPosition(
-                handlePositionUpdate,
-                handlePositionError,
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 3000,
-                    timeout: 10000
-                }
-            );
-        }
+        state.watchId = navigator.geolocation.watchPosition(
+            handlePositionUpdate,
+            handlePositionError,
+            {
+                enableHighAccuracy: true,
+                maximumAge: 3000,
+                timeout: 10000
+            }
+        );
 
         // Démarrer l'envoi périodique
         state.intervalId = setInterval(sendPositionToServer, CONFIG.POSITION_INTERVAL);
@@ -403,7 +215,9 @@ const CrowdsourcingManager = (function() {
         }, CONFIG.MAX_SESSION_DURATION);
 
         // Notification
-        showNotification('GO Mode activé', `Vous partagez votre position sur la ligne ${routeName}`);
+        showToast(`GO activé sur ligne ${routeName}`, 'success');
+
+        return true;
     }
 
     /**
@@ -413,6 +227,12 @@ const CrowdsourcingManager = (function() {
         if (!state.isActive) return;
 
         console.log('🛑 GO Mode désactivé');
+
+        // Arrêter l'animation
+        if (state.animationFrameId) {
+            cancelAnimationFrame(state.animationFrameId);
+            state.animationFrameId = null;
+        }
 
         // Calculer les points gagnés
         const durationMinutes = Math.floor((Date.now() - state.sessionStart) / 60000);
@@ -427,7 +247,7 @@ const CrowdsourcingManager = (function() {
         saveUserStats();
 
         // Arrêter le suivi GPS
-        if (state.watchId) {
+        if (state.watchId !== null) {
             navigator.geolocation.clearWatch(state.watchId);
             state.watchId = null;
         }
@@ -439,18 +259,73 @@ const CrowdsourcingManager = (function() {
         }
 
         // Réinitialiser l'état
+        const routeName = state.currentRouteName;
         state.isActive = false;
         state.currentTrip = null;
         state.currentRoute = null;
+        state.currentRouteName = '';
+        state.currentDirection = '';
         state.sessionStart = null;
         state.lastPosition = null;
         state.positionHistory = [];
 
-        // Mettre à jour l'UI
-        updateGoUI(false);
+        // Mettre à jour l'UI du bouton
+        updateButtonUI(false);
 
         // Notification
-        showNotification('Merci !', `+${pointsEarned} points gagnés. Total: ${state.userStats.totalPoints} pts`);
+        if (pointsEarned > 0) {
+            showToast(`Merci ! +${pointsEarned} points (Total: ${state.userStats.totalPoints})`, 'success');
+        } else {
+            showToast('Partage arrêté', 'info');
+        }
+    }
+
+    /**
+     * Met à jour l'UI du bouton GO dans le detail panel
+     */
+    function updateButtonUI(isActive, routeName = '', direction = '', routeColor = '#4CAF50') {
+        const btn = document.getElementById('go-start-sharing-btn');
+        const container = btn?.closest('.go-contribution-content');
+        
+        if (!btn) return;
+
+        if (isActive) {
+            btn.innerHTML = `
+                <span class="go-btn-icon" style="background: #f44336;">✕</span>
+                <span>Arrêter</span>
+            `;
+            btn.style.background = 'linear-gradient(135deg, #f44336, #d32f2f)';
+            btn.onclick = () => stopSharing();
+
+            // Ajouter indicateur de durée
+            const textDiv = container?.querySelector('.go-contribution-text');
+            if (textDiv) {
+                textDiv.innerHTML = `
+                    <strong style="color: #4CAF50;">🟢 GO actif - Ligne ${routeName}</strong>
+                    <span class="go-active-info">
+                        <span class="go-duration">0:00</span> • 
+                        <span class="go-points">+0 pts</span>
+                    </span>
+                `;
+                startDurationCounter();
+            }
+        } else {
+            btn.innerHTML = `
+                <span class="go-btn-icon">GO</span>
+                <span>Partager</span>
+            `;
+            btn.style.background = 'linear-gradient(135deg, #4CAF50, #43A047)';
+            // Le onclick sera réattaché par main.js lors du prochain rendu
+
+            // Restaurer le texte original
+            const textDiv = container?.querySelector('.go-contribution-text');
+            if (textDiv) {
+                textDiv.innerHTML = `
+                    <strong>Vous êtes dans ce bus ?</strong>
+                    <span>Aidez les autres usagers en partageant votre position en temps réel</span>
+                `;
+            }
+        }
     }
 
     /**
@@ -471,7 +346,7 @@ const CrowdsourcingManager = (function() {
 
         // Ignorer les positions trop imprécises
         if (accuracy > CONFIG.MIN_ACCURACY) {
-            console.log(`📍 Position ignorée (précision: ${accuracy}m)`);
+            console.log(`📍 Position ignorée (précision: ${Math.round(accuracy)}m > ${CONFIG.MIN_ACCURACY}m)`);
             return;
         }
 
@@ -489,7 +364,7 @@ const CrowdsourcingManager = (function() {
         const positionData = {
             lat: latitude,
             lng: longitude,
-            accuracy,
+            accuracy: Math.round(accuracy),
             speed: speed || 0,
             heading: heading || 0,
             timestamp: Date.now()
@@ -503,7 +378,7 @@ const CrowdsourcingManager = (function() {
             state.positionHistory.shift();
         }
 
-        console.log(`📍 Position: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} (±${accuracy}m)`);
+        console.log(`📍 Position: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} (±${Math.round(accuracy)}m)`);
     }
 
     /**
@@ -513,8 +388,12 @@ const CrowdsourcingManager = (function() {
         console.error('❌ Erreur GPS:', error.message);
         
         if (error.code === 1) { // Permission refusée
-            showNotification('Erreur', 'Permission GPS refusée. Impossible de partager votre position.');
+            showToast('Permission GPS refusée', 'error');
             stopSharing();
+        } else if (error.code === 2) { // Position indisponible
+            console.warn('⚠️ Position GPS temporairement indisponible');
+        } else if (error.code === 3) { // Timeout
+            console.warn('⚠️ Timeout GPS');
         }
     }
 
@@ -527,23 +406,26 @@ const CrowdsourcingManager = (function() {
         const payload = {
             tripId: state.currentTrip,
             routeId: state.currentRoute,
+            routeName: state.currentRouteName,
             position: state.lastPosition,
-            sessionId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            sessionId: `session_${state.sessionStart}`,
             userLevel: getUserLevel().name
         };
 
         try {
-            // En mode production, envoyer au serveur
-            // await fetch(CONFIG.SERVER_URL, {
+            // Stocker localement (simulation sans serveur backend)
+            storeLocalPosition(payload);
+            
+            console.log('📤 Position stockée:', payload.position.lat.toFixed(5), payload.position.lng.toFixed(5));
+
+            // TODO: Activer quand le backend sera prêt
+            // const response = await fetch(CONFIG.SERVER_URL, {
             //     method: 'POST',
             //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify(payload)
             // });
+            // if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-            // Pour l'instant, stocker localement pour simulation
-            storeLocalPosition(payload);
-            
-            console.log('📤 Position envoyée:', payload.position.lat.toFixed(5), payload.position.lng.toFixed(5));
         } catch (e) {
             console.warn('Erreur envoi position:', e);
         }
@@ -559,10 +441,13 @@ const CrowdsourcingManager = (function() {
         try {
             const saved = sessionStorage.getItem(key);
             if (saved) tripData = JSON.parse(saved);
-        } catch (e) {}
+        } catch (e) {
+            tripData = [];
+        }
 
         tripData.push({
             ...payload.position,
+            routeName: payload.routeName,
             receivedAt: Date.now()
         });
 
@@ -570,7 +455,11 @@ const CrowdsourcingManager = (function() {
         const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
         tripData = tripData.filter(p => p.timestamp > fiveMinutesAgo);
 
-        sessionStorage.setItem(key, JSON.stringify(tripData));
+        try {
+            sessionStorage.setItem(key, JSON.stringify(tripData));
+        } catch (e) {
+            console.warn('Erreur stockage sessionStorage:', e);
+        }
 
         // Mettre à jour la map des contributeurs
         state.contributors.set(payload.tripId, tripData);
@@ -593,7 +482,9 @@ const CrowdsourcingManager = (function() {
                 state.contributors.set(tripId, positions);
                 return positions;
             }
-        } catch (e) {}
+        } catch (e) {
+            console.warn('Erreur lecture crowdsource:', e);
+        }
 
         return [];
     }
@@ -612,43 +503,25 @@ const CrowdsourcingManager = (function() {
     }
 
     /**
-     * Met à jour l'interface GO
-     */
-    function updateGoUI(isActive, routeName = '', direction = '') {
-        const container = document.getElementById('go-crowdsource-container');
-        const button = document.getElementById('go-button');
-        const panel = document.getElementById('go-active-panel');
-        const routeBadge = container?.querySelector('.go-route-badge');
-        const directionEl = container?.querySelector('.go-direction');
-
-        if (!container) return;
-
-        if (isActive) {
-            button?.classList.add('hidden');
-            panel?.classList.remove('hidden');
-            container.classList.add('active');
-            
-            if (routeBadge) routeBadge.textContent = routeName;
-            if (directionEl) directionEl.textContent = `→ ${direction}`;
-
-            // Démarrer le compteur de durée
-            startDurationCounter();
-        } else {
-            button?.classList.remove('hidden');
-            panel?.classList.add('hidden');
-            container.classList.remove('active');
-        }
-    }
-
-    /**
      * Démarre le compteur de durée affiché
      */
     function startDurationCounter() {
-        const durationEl = document.querySelector('.go-duration');
-        const pointsEl = document.querySelector('.go-points');
+        // Annuler l'animation précédente si elle existe
+        if (state.animationFrameId) {
+            cancelAnimationFrame(state.animationFrameId);
+        }
 
         const updateCounter = () => {
-            if (!state.isActive || !state.sessionStart) return;
+            if (!state.isActive || !state.sessionStart) {
+                return; // Arrêter la boucle
+            }
+
+            const durationEl = document.querySelector('.go-duration');
+            const pointsEl = document.querySelector('.go-points');
+
+            if (!durationEl && !pointsEl) {
+                return; // Éléments non trouvés, arrêter
+            }
 
             const elapsed = Date.now() - state.sessionStart;
             const minutes = Math.floor(elapsed / 60000);
@@ -664,47 +537,65 @@ const CrowdsourcingManager = (function() {
                 pointsEl.textContent = `+${points} pts${isPeak ? ' 🔥' : ''}`;
             }
 
-            requestAnimationFrame(updateCounter);
+            state.animationFrameId = requestAnimationFrame(updateCounter);
         };
 
-        updateCounter();
+        state.animationFrameId = requestAnimationFrame(updateCounter);
     }
 
     /**
-     * Affiche le bouton GO (appelé quand l'utilisateur est sur un itinéraire)
+     * Calcule la distance entre deux points GPS (formule de Haversine)
      */
-    function showGoButton() {
-        const container = document.getElementById('go-crowdsource-container');
-        if (container) {
-            container.classList.remove('hidden');
-        }
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Rayon de la Terre en mètres
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
 
     /**
-     * Cache le bouton GO
+     * Affiche une notification toast
      */
-    function hideGoButton() {
-        const container = document.getElementById('go-crowdsource-container');
-        if (container && !state.isActive) {
-            container.classList.add('hidden');
-        }
-    }
-
-    /**
-     * Affiche une notification
-     */
-    function showNotification(title, message) {
-        // Utiliser l'API Notification si disponible
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(title, { body: message, icon: '/icons/icon-192x192.png' });
+    function showToast(message, type = 'info') {
+        // Utiliser le uiManager si disponible
+        if (typeof window !== 'undefined' && window.uiManager?.showToast) {
+            window.uiManager.showToast(message);
+            return;
         }
 
-        // Aussi afficher un toast dans l'app
-        if (typeof uiManager !== 'undefined' && uiManager.showToast) {
-            uiManager.showToast(`${title}: ${message}`);
-        } else {
-            console.log(`📢 ${title}: ${message}`);
-        }
+        // Fallback: créer un toast simple
+        const existingToast = document.querySelector('.go-toast');
+        if (existingToast) existingToast.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `go-toast go-toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#333'};
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.3s ease;
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     /**
@@ -715,13 +606,15 @@ const CrowdsourcingManager = (function() {
             ...state.userStats,
             level: getUserLevel(),
             isActive: state.isActive,
-            currentTrip: state.currentTrip
+            currentTrip: state.currentTrip,
+            currentRouteName: state.currentRouteName
         };
     }
 
     // API publique
     return {
         init,
+        setDataManager,
         startSharing,
         stopSharing,
         startSharingFromItinerary,
@@ -730,15 +623,19 @@ const CrowdsourcingManager = (function() {
         getLatestPosition,
         getCrowdsourcedPositions,
         isActive: () => state.isActive,
-        getState: () => state,
+        getState: () => ({ ...state }),
         haversineDistance
     };
 })();
 
-// Auto-initialisation
-document.addEventListener('DOMContentLoaded', () => {
-    CrowdsourcingManager.init();
-});
+// Auto-initialisation après chargement du DOM
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => CrowdsourcingManager.init());
+    } else {
+        CrowdsourcingManager.init();
+    }
+}
 
 // Export pour utilisation dans d'autres modules
 if (typeof window !== 'undefined') {

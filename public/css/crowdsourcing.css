@@ -1032,3 +1032,104 @@
         box-shadow: 0 4px 25px rgba(183, 28, 28, 0.8);
     }
 }
+
+/* ============================================
+   GO MODE ACTIF - Styles
+   ============================================ */
+
+.go-active-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.go-duration {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: rgba(76, 175, 80, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.go-points {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+/* Toast notifications */
+.go-toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: goToastIn 0.3s ease;
+}
+
+.go-toast-success {
+    background: #4CAF50;
+    color: white;
+}
+
+.go-toast-error {
+    background: #f44336;
+    color: white;
+}
+
+.go-toast-warning {
+    background: #ff9800;
+    color: white;
+}
+
+.go-toast-info {
+    background: #333;
+    color: white;
+}
+
+@keyframes goToastIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Contribution button active state */
+.go-contribution-button.active {
+    background: linear-gradient(135deg, #f44336, #d32f2f) !important;
+}
+
+.go-contribution-button.active:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828) !important;
+}
+
+/* Dark mode adjustments */
+body.dark-theme .go-duration {
+    background: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+}
+
+body.dark-theme .go-toast-info {
+    background: #424242;
+}
+

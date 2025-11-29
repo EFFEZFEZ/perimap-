@@ -422,8 +422,15 @@ async function initializeApp() {
         const locateError = geolocationManager?.handleGeolocationError || (() => {});
         mapRenderer.addLocateControl(locateSuccess, locateError);
 
-        // Exposer mapRenderer globalement pour le système de retards
+        // Exposer mapRenderer et dataManager globalement pour le système de retards et crowdsourcing
         window.mapRenderer = mapRenderer;
+        window.dataManager = dataManager;
+        
+        // Injecter dataManager dans le CrowdsourcingManager
+        if (typeof CrowdsourcingManager !== 'undefined' && CrowdsourcingManager.setDataManager) {
+            CrowdsourcingManager.setDataManager(dataManager);
+        }
+        
         window.addDelayedBusMarker = (delayInfo) => {
             if (mapRenderer && typeof mapRenderer.addDelayedBusMarker === 'function') {
                 mapRenderer.addDelayedBusMarker(delayInfo);
