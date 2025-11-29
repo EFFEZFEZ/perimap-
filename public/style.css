@@ -5757,12 +5757,19 @@ body:not(.view-is-locked) {
 }
 
 .mobile-menu-category:focus,
+.mobile-menu-category:focus-visible,
+.mobile-menu-category:focus-within,
 .mobile-menu-category:active,
-.mobile-menu-category:hover {
+.mobile-menu-category:hover,
+button.mobile-menu-category:focus,
+button.mobile-menu-category:active {
     background: transparent !important;
     background-color: transparent !important;
     outline: none !important;
+    outline-width: 0 !important;
     box-shadow: none !important;
+    border: none !important;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 .mobile-menu-category:hover {
