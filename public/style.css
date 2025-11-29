@@ -6804,80 +6804,80 @@ body.dark-theme .tarifs-choice {
     /* --- DASHBOARD MAIN --- */
     #dashboard-main {
         padding: 0;
-        background: var(--bg-light);
     }
     
-    /* --- HERO SECTION STYLE IDFM SIMPLE --- */
+    /* --- HERO SECTION IDFM --- */
     .hero-section {
         border-radius: 0;
-        padding: 0;
+        padding: 1.5rem 1rem 0;
         margin: 0;
-        background: var(--bg-light);
-        min-height: auto;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Image de fond en tant que pseudo-élément */
-    .hero-section::before {
-        content: '';
-        display: block;
-        width: 100%;
-        height: 130px;
         background-image: 
-            linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 100%),
-            url('https://www.vie-economique.com/wp-content/uploads/sites/13/2025/09/shutterstock_2314621975-scaled-760x396-c-default.jpg');
-        background-size: cover;
-        background-position: center;
+            linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.35)),
+            url('https://www.vie-economique.com/wp-content/uploads/sites/13/2024/12/shutterstock_2365894285-scaled.jpg');
+        min-height: auto;
     }
     
     /* --- HERO HEADLINE COMPACT --- */
     .hero-headline {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 1rem;
-        z-index: 5;
-        text-align: center;
+        margin-bottom: 1rem;
+        padding-top: 0.25rem;
+        animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
     
     .hero-headline h1 {
-        font-size: 1.1rem;
-        margin-bottom: 0;
-        line-height: 1.4;
-        color: #fff;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-    
-    .hero-headline h1 .highlight {
-        color: #4ade80;
+        font-size: 1.35rem;
+        margin-bottom: 0.4rem;
+        line-height: 1.3;
     }
     
     .hero-subtitle {
-        display: none;
+        font-size: 0.85rem;
+        opacity: 0.9;
     }
     
-    /* --- PLANNER BLOCK STYLE IDFM --- */
+    /* --- PLANNER BLOCK IDFM (BLANC) --- */
     .hero-section .planner-block-wrapper {
-        margin: 0 1rem;
-        margin-top: -40px;
+        margin: 0 -1rem;
         padding: 0;
-        position: relative;
-        z-index: 10;
     }
     
     .hero-section .planner-block {
-        background: var(--bg-main);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 1.25rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        position: relative;
+        background: #fff;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border: none;
+        border-radius: 24px 24px 0 0;
+        padding: 1.5rem 1.25rem 1.75rem;
+        box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+        margin-top: 1rem;
+        animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
-    /* Dark theme gère automatiquement via les variables CSS */
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    body.dark-theme .hero-section .planner-block {
+        background: var(--bg-main);
+    }
     
     /* --- PLANNER TITLE BAR IDFM --- */
     .planner-block .planner-title-bar {
@@ -7082,32 +7082,16 @@ body.dark-theme .tarifs-choice {
         transform: translateY(0) scale(0.98);
     }
     
-    /* --- SERVICES SECTION SIMPLE --- */
+    /* --- SERVICES SECTION IDFM --- */
     .services-section {
-        margin-top: 1rem;
-        padding: 1.25rem 1rem;
+        margin-top: 0;
+        padding: 1.5rem 1rem 1rem;
         background: var(--bg-light);
-        position: relative;
-    }
-    
-    /* Ligne d'accroche style IDFM */
-    .services-section::before {
-        content: '';
-        position: absolute;
-        top: 1.25rem;
-        left: 1rem;
-        width: 4px;
-        height: 24px;
-        background: var(--primary);
-        border-radius: 2px;
     }
     
     .section-title {
         font-size: 1.1rem;
-        font-weight: 700;
         margin-bottom: 1rem;
-        color: var(--text-primary);
-        padding-left: 1rem;
     }
     
     .services-grid {
@@ -7115,12 +7099,11 @@ body.dark-theme .tarifs-choice {
     }
     
     .service-card {
-        padding: 1rem;
-        border-radius: 12px;
-        gap: 0.875rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-        border: 1px solid var(--border);
-        background: var(--bg-main);
+        padding: 1rem 1.25rem;
+        border-radius: 16px;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.06);
     }
     
     .service-card:hover {
@@ -7284,307 +7267,6 @@ body.dark-theme .tarifs-choice {
     /* --- FOOTER MOBILE --- */
     #site-footer {
         margin-top: 0;
-    }
-}
-
-/* =========================================
- * 🍔 MENU DRAWER MOBILE IDFM-STYLE
- * ========================================= */
-
-/* Overlay sombre */
-.mobile-menu-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9998;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-
-.mobile-menu-overlay.is-active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Le drawer lui-même */
-.mobile-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 85%;
-    max-width: 320px;
-    background: linear-gradient(180deg, #1a2744 0%, #0d1526 100%);
-    z-index: 9999;
-    transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-}
-
-.mobile-menu.is-active {
-    transform: translateX(0);
-}
-
-/* Header du menu */
-.mobile-menu-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0;
-}
-
-.mobile-menu-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-    color: #fff;
-}
-
-.mobile-menu-logo-img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-}
-
-.mobile-menu-logo span {
-    font-size: 1.25rem;
-    font-weight: 800;
-    background: linear-gradient(120deg, #4ade80, #22d3ee);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.mobile-menu-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 50%;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.mobile-menu-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: rotate(90deg);
-}
-
-/* Contenu scrollable */
-.mobile-menu-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.75rem 0;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Accordion sections */
-.mobile-menu-accordion {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.mobile-menu-accordion-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 1rem 1.25rem;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
-    text-align: left;
-}
-
-.mobile-menu-accordion-trigger:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.mobile-menu-accordion-trigger .accordion-chevron {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    opacity: 0.6;
-}
-
-.mobile-menu-accordion-trigger.is-open .accordion-chevron {
-    transform: rotate(180deg);
-    opacity: 1;
-}
-
-/* Contenu de l'accordion */
-.mobile-menu-accordion-content {
-    max-height: 0;
-    overflow: hidden;
-    background: rgba(0, 0, 0, 0.2);
-    transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobile-menu-accordion-content.is-open {
-    max-height: 400px;
-}
-
-/* Items du menu */
-.mobile-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1.25rem 0.875rem 2.5rem;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.mobile-menu-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--primary);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.mobile-menu-item:hover,
-.mobile-menu-item:active {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-
-.mobile-menu-item:hover::before {
-    opacity: 1;
-}
-
-.mobile-menu-item svg {
-    flex-shrink: 0;
-    opacity: 0.7;
-}
-
-.mobile-menu-item:hover svg {
-    opacity: 1;
-}
-
-.mobile-menu-item--disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.mobile-menu-badge {
-    margin-left: auto;
-    padding: 0.2rem 0.5rem;
-    background: rgba(37, 99, 235, 0.3);
-    color: #60a5fa;
-    font-size: 0.7rem;
-    font-weight: 600;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-/* Footer du menu */
-.mobile-menu-footer {
-    padding: 1rem 1.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    gap: 0.75rem;
-    flex-shrink: 0;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.mobile-menu-footer-link {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: rgba(255, 255, 255, 0.85);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-}
-
-.mobile-menu-footer-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-}
-
-/* Animation du burger */
-.mobile-menu-toggle {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    z-index: 100;
-}
-
-.mobile-menu-toggle span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--text-primary);
-    border-radius: 2px;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobile-menu-toggle.is-active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.mobile-menu-toggle.is-active span:nth-child(2) {
-    opacity: 0;
-    transform: translateX(-10px);
-}
-
-.mobile-menu-toggle.is-active span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-}
-
-@media (max-width: 768px) {
-    .mobile-menu-toggle {
-        display: flex;
-    }
-    
-    .header-nav-main {
-        display: none;
-    }
-    
-    /* Cacher l'ancien menu */
-    .mobile-menu.hidden {
-        transform: translateX(100%);
-    }
-    
-    .mobile-menu-overlay.hidden {
-        opacity: 0;
-        visibility: hidden;
     }
 }
 
