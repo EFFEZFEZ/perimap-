@@ -1,6 +1,10 @@
 /**
- * apiManager.js - VERSION V47 (Fix FieldMask 400 Error)
+ * apiManager.js - VERSION V48 (Alias Campus/Grenadière)
  * Gère tous les appels aux API externes (Google Places & Google Routes).
+ *
+ * *** MODIFICATION V48 (Alias Campus) ***
+ * 1. Ajout d'un système d'alias pour fusionner des lieux équivalents.
+ * 2. "Campus" et "Pôle Universitaire Grenadière" pointent vers le même lieu.
  *
  * *** MODIFICATION V47 (Fix FieldMask 400 Error) ***
  * 1. L'erreur 400 était causée par une demande de champ invalide
@@ -44,6 +48,18 @@ export class ApiManager {
         this.googleAuthFailed = false;
         this.googleAuthFailureMessage = '';
         this.clientOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
+        
+        // ✅ V48: Alias de lieux - Fusion d'arrêts équivalents
+        // Quand l'utilisateur cherche un de ces termes, on lui propose le lieu canonique
+        this.placeAliases = {
+            // Campus universitaire de Périgueux
+            'campus': {
+                canonicalName: 'Pôle Universitaire Grenadière, Périgueux',
+                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'université périgueux', 'iut', 'iut périgueux', 'grenadière', 'pole universitaire', 'pôle universitaire'],
+                coordinates: { lat: 45.194477, lng: 0.720215 },
+                description: 'Campus universitaire (Pôle Grenadière)'
+            }
+        };
     }
 
     /**
@@ -199,6 +215,8 @@ export class ApiManager {
      * Récupère les suggestions d'autocomplétion avec la NOUVELLE API
      * Basé sur la documentation officielle Google :
      * https://developers.google.com/maps/documentation/javascript/place-autocomplete-data
+     * 
+     * ✅ V48: Intègre les alias de lieux (Campus = Pôle Universitaire Grenadière)
      */
     async getPlaceAutocomplete(inputString) {
         if (!this.sessionToken) {
@@ -215,7 +233,12 @@ export class ApiManager {
             }
         }
 
+        // ✅ V48: Vérifier si l'entrée correspond à un alias
+        const aliasMatch = this._checkPlaceAlias(inputString);
+        
         try {
+            let results = [];
+            
             // Vérifier si la nouvelle API est disponible
             if (google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions) {
                 // ✅ NOUVELLE API (recommandée depuis mars 2025)
@@ -235,17 +258,15 @@ export class ApiManager {
                 const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
                 console.log(`✅ ${suggestions.length} suggestions trouvées`);
                 
-                const results = suggestions.map(s => ({
+                results = suggestions.map(s => ({
                     description: s.placePrediction.text.text,
                     placeId: s.placePrediction.placeId,
                 }));
-                
-                return results;
             } else {
                 // ❌ FALLBACK : Ancienne API (dépréciée mais fonctionnelle)
                 console.warn("⚠️ Utilisation de l'ancienne API AutocompleteService (dépréciée)");
                 
-                return new Promise((resolve, reject) => {
+                results = await new Promise((resolve, reject) => {
                     const request = {
                         input: inputString,
                         sessionToken: this.sessionToken,
@@ -263,19 +284,97 @@ export class ApiManager {
                             resolve([]);
                         } else {
                             console.log(`✅ ${predictions.length} suggestions trouvées (ancienne API)`);
-                            const results = predictions.map(p => ({
+                            resolve(predictions.map(p => ({
                                 description: p.description,
                                 placeId: p.place_id,
-                            }));
-                            resolve(results);
+                            })));
                         }
                     });
                 });
             }
+            
+            // ✅ V48: Injecter l'alias en première position si trouvé
+            if (aliasMatch) {
+                // Vérifier si le résultat n'est pas déjà dans la liste
+                const alreadyInList = results.some(r => 
+                    r.description.toLowerCase().includes('grenadière') || 
+                    r.description.toLowerCase().includes('universitaire')
+                );
+                
+                if (!alreadyInList) {
+                    results.unshift({
+                        description: `🎓 ${aliasMatch.canonicalName}`,
+                        placeId: `ALIAS_CAMPUS`, // Marqueur spécial
+                        isAlias: true,
+                        coordinates: aliasMatch.coordinates,
+                        aliasDescription: aliasMatch.description
+                    });
+                    console.log(`🎓 Alias injecté: ${aliasMatch.canonicalName}`);
+                }
+            }
+            
+            return results;
         } catch (error) {
             console.error("❌ Erreur lors de l'autocomplétion:", error);
+            
+            // ✅ V48: Même en cas d'erreur, proposer l'alias si trouvé
+            if (aliasMatch) {
+                return [{
+                    description: `🎓 ${aliasMatch.canonicalName}`,
+                    placeId: `ALIAS_CAMPUS`,
+                    isAlias: true,
+                    coordinates: aliasMatch.coordinates,
+                    aliasDescription: aliasMatch.description
+                }];
+            }
+            
             return [];
         }
+    }
+    
+    /**
+     * ✅ V48: Vérifie si l'entrée correspond à un alias de lieu
+     * @private
+     */
+    _checkPlaceAlias(inputString) {
+        if (!inputString || inputString.length < 3) return null;
+        
+        const normalizedInput = inputString.toLowerCase().trim();
+        
+        for (const [key, aliasData] of Object.entries(this.placeAliases)) {
+            // Vérifier si l'entrée correspond à un des alias
+            const matchesAlias = aliasData.aliases.some(alias => {
+                // Match exact ou partiel (l'alias commence par l'entrée)
+                return alias.startsWith(normalizedInput) || normalizedInput.startsWith(alias);
+            });
+            
+            if (matchesAlias) {
+                console.log(`🎓 Alias trouvé: "${inputString}" → "${aliasData.canonicalName}"`);
+                return aliasData;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * ✅ V48: Résout un placeId d'alias en coordonnées
+     * @param {string} placeId - Le placeId (peut être un alias comme ALIAS_CAMPUS)
+     * @returns {Promise<{lat:number, lng:number}|null>}
+     */
+    async resolveAliasOrPlaceId(placeId) {
+        // Vérifier si c'est un alias
+        if (placeId && placeId.startsWith('ALIAS_')) {
+            const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
+            const aliasData = this.placeAliases[aliasKey];
+            if (aliasData && aliasData.coordinates) {
+                console.log(`🎓 Résolution alias: ${placeId} → ${JSON.stringify(aliasData.coordinates)}`);
+                return aliasData.coordinates;
+            }
+        }
+        
+        // Sinon, utiliser le geocoder normal
+        return this.getPlaceCoords(placeId);
     }
 
     /**
@@ -322,10 +421,21 @@ export class ApiManager {
 
     /**
      * Récupère les coordonnées {lat,lng} pour un place_id en utilisant le Geocoder
+     * ✅ V48: Gère aussi les alias (ALIAS_CAMPUS, etc.)
      * @param {string} placeId
      * @returns {Promise<{lat:number,lng:number}|null>}
      */
     async getPlaceCoords(placeId) {
+        // ✅ V48: Vérifier si c'est un alias
+        if (placeId && placeId.startsWith('ALIAS_')) {
+            const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
+            const aliasData = this.placeAliases[aliasKey];
+            if (aliasData && aliasData.coordinates) {
+                console.log(`🎓 Résolution alias coords: ${placeId} → ${JSON.stringify(aliasData.coordinates)}`);
+                return aliasData.coordinates;
+            }
+        }
+        
         if (!this.geocoder) {
             console.warn("⚠️ Service Geocoder non initialisé. Tentative de chargement...");
             try {
@@ -362,10 +472,26 @@ export class ApiManager {
 
     /**
      * ✨ NOUVELLE VERSION V39: Calcul intelligent d'itinéraire
-     * (INCHANGÉ - utilise la V55)
+     * ✅ V48: Gère les alias de lieux (ALIAS_CAMPUS, etc.)
      */
     async fetchItinerary(fromPlaceId, toPlaceId, searchTime = null) {
         console.log(`🧠 CALCUL INTELLIGENT: ${fromPlaceId} → ${toPlaceId}`);
+        
+        // ✅ V48: Convertir les alias en coordonnées
+        const fromIsAlias = fromPlaceId && fromPlaceId.startsWith('ALIAS_');
+        const toIsAlias = toPlaceId && toPlaceId.startsWith('ALIAS_');
+        
+        let fromCoords = null;
+        let toCoords = null;
+        
+        if (fromIsAlias) {
+            fromCoords = await this.getPlaceCoords(fromPlaceId);
+            console.log(`🎓 Origine alias résolu: ${JSON.stringify(fromCoords)}`);
+        }
+        if (toIsAlias) {
+            toCoords = await this.getPlaceCoords(toPlaceId);
+            console.log(`🎓 Destination alias résolu: ${JSON.stringify(toCoords)}`);
+        }
 
         const results = {
             bus: null,
@@ -378,7 +504,7 @@ export class ApiManager {
         // 1️⃣ ESSAYER LE BUS D'ABORD
         // ========================================
         try {
-            const busData = await this._fetchBusRoute(fromPlaceId, toPlaceId, searchTime);
+            const busData = await this._fetchBusRoute(fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords);
             
             if (busData?.routes?.length > 0) {
                 const bestRoute = busData.routes[0];
@@ -443,7 +569,7 @@ export class ApiManager {
         // 2️⃣ CALCULER VÉLO EN PARALLÈLE
         // ========================================
         try {
-            const bikeData = await this.fetchBicycleRoute(fromPlaceId, toPlaceId);
+            const bikeData = await this.fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords, toCoords);
             
             if (bikeData?.routes?.length > 0) {
                 const route = bikeData.routes[0];
@@ -491,7 +617,7 @@ export class ApiManager {
         // 3️⃣ CALCULER MARCHE
         // ========================================
         try {
-            const walkData = await this.fetchWalkingRoute(fromPlaceId, toPlaceId);
+            const walkData = await this.fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords, toCoords);
             
             if (walkData?.routes?.length > 0) {
                 const route = walkData.routes[0];
@@ -559,14 +685,23 @@ export class ApiManager {
 
     /**
      * Méthode privée pour calculer uniquement le bus
+     * ✅ V48: Gère les alias via coordonnées
      * @private
      */
-    async _fetchBusRoute(fromPlaceId, toPlaceId, searchTime = null) {
+    async _fetchBusRoute(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
         const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
+        // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
+        const origin = fromCoords 
+            ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
+            : { placeId: fromPlaceId };
+        const destination = toCoords
+            ? { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } }
+            : { placeId: toPlaceId };
+
         const body = {
-            origin: { placeId: fromPlaceId },
-            destination: { placeId: toPlaceId },
+            origin,
+            destination,
             travelMode: "TRANSIT",
             computeAlternativeRoutes: true,
             transitPreferences: {
@@ -647,15 +782,24 @@ export class ApiManager {
 
     /**
      * Calcule un itinéraire à vélo
+     * ✅ V48: Gère les alias via coordonnées
      */
-    async fetchBicycleRoute(fromPlaceId, toPlaceId) {
+    async fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
         console.log(`🚴 API Google Routes (VÉLO): ${fromPlaceId} → ${toPlaceId}`);
 
         const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
+        // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
+        const origin = fromCoords 
+            ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
+            : { placeId: fromPlaceId };
+        const destination = toCoords
+            ? { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } }
+            : { placeId: toPlaceId };
+
         const body = {
-            origin: { placeId: fromPlaceId },
-            destination: { placeId: toPlaceId },
+            origin,
+            destination,
             travelMode: "BICYCLE",
             languageCode: "fr",
             units: "METRIC"
@@ -685,15 +829,24 @@ export class ApiManager {
     
     /**
      * Calcule un itinéraire à pied
+     * ✅ V48: Gère les alias via coordonnées
      */
-    async fetchWalkingRoute(fromPlaceId, toPlaceId) {
+    async fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
         console.log(`🚶 API Google Routes (MARCHE): ${fromPlaceId} → ${toPlaceId}`);
 
         const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
+        // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
+        const origin = fromCoords 
+            ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
+            : { placeId: fromPlaceId };
+        const destination = toCoords
+            ? { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } }
+            : { placeId: toPlaceId };
+
         const body = {
-            origin: { placeId: fromPlaceId },
-            destination: { placeId: toPlaceId },
+            origin,
+            destination,
             travelMode: "WALK",
             languageCode: "fr",
             units: "METRIC"
