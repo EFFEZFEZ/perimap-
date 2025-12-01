@@ -620,10 +620,8 @@ export class ApiManager {
                 routingPreference: "FEWER_TRANSFERS"  // V63: Prioriser moins de correspondances
             },
             languageCode: "fr",
-            units: "METRIC",
-            // V63: Explicitement interdire la voiture/taxi pour les alternatives
-            // Google comprend ainsi qu'on cherche des options sans véhicule personnel
-            requestedReferenceRoutes: ["FUEL_EFFICIENT"]  // Suggère des options écologiques
+            units: "METRIC"
+            // Note: requestedReferenceRoutes n'est PAS supporté pour TRANSIT
         };
 
         // Ajout du temps de départ/arrivée
