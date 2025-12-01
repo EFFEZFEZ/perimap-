@@ -1496,38 +1496,34 @@ async function executeItinerarySearch(source, sourceElements) {
             restants: allFetchedItineraries?.length || 0
         });
 
-        // Dédupliquer (même trajet avec horaires différents → garder le meilleur)
-        const searchMode = searchTime.type || 'partir';
-        allFetchedItineraries = deduplicateItineraries(allFetchedItineraries, searchMode);
+        // V63: On ne déduplique PLUS - Google gère le ranking, on garde tous les horaires
+        // const searchMode = searchTime.type || 'partir';
+        // allFetchedItineraries = deduplicateItineraries(allFetchedItineraries, searchMode);
         
-        console.log('🎯 Après déduplication:', allFetchedItineraries?.length || 0, 'itinéraires uniques');
+        console.log('📊 Itinéraires disponibles:', allFetchedItineraries?.length || 0);
 
-        // Trier les itinéraires selon le mode
+        // V63: On garde l'ordre de Google qui est déjà optimisé
+        // Le re-tri manuel causait des sauts d'horaires (8h → 9h en sautant 8h15, 8h30...)
         const heureDemandee = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
+        
         if (searchTime.type === 'arriver') {
-            console.log(`🎯 Mode ARRIVER: on veut arriver AVANT ou À ${heureDemandee}`);
-            arrivalRankedAll = rankArrivalItineraries(allFetchedItineraries, searchTime);
+            console.log(`🎯 Mode ARRIVER: Google a trié pour arriver avant ${heureDemandee}`);
+            // Garder l'ordre de Google, juste initialiser pour la pagination
+            arrivalRankedAll = [...allFetchedItineraries];
             arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
-            allFetchedItineraries = arrivalRankedAll; // Utiliser la liste triée
-            console.log('📊 Tri mode ARRIVER (arrivée <= ' + heureDemandee + '):', 
-                allFetchedItineraries.slice(0, 5).map(it => ({
-                    dep: it.departureTime,
-                    arr: it.arrivalTime,
-                    dur: it.duration
-                })));
         } else {
-            console.log(`🎯 Mode PARTIR: on veut partir APRÈS ou À ${heureDemandee}`);
-            // Mode "partir" : trier par premier départ, moins de correspondances
-            allFetchedItineraries = rankDepartureItineraries(allFetchedItineraries);
-            console.log('📊 Tri mode PARTIR (départ >= ' + heureDemandee + '):', 
-                allFetchedItineraries.slice(0, 5).map(it => ({
-                    dep: it.departureTime,
-                    arr: it.arrivalTime,
-                    dur: it.duration
-                })));
+            console.log(`🎯 Mode PARTIR: Google a trié à partir de ${heureDemandee}`);
+            // Garder l'ordre de Google tel quel
             arrivalRankedAll = [];
             arrivalRenderedCount = 0;
         }
+        
+        console.log('📊 Itinéraires (ordre Google conservé):', 
+            allFetchedItineraries.slice(0, 5).map(it => ({
+                dep: it.departureTime,
+                arr: it.arrivalTime,
+                dur: it.duration
+            })));
         
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
@@ -1613,8 +1609,8 @@ async function loadMoreDepartures() {
         // Ajouter les nouveaux itinéraires
         allFetchedItineraries = [...allFetchedItineraries, ...newItineraries];
         
-        // Re-trier
-        allFetchedItineraries = rankDepartureItineraries(allFetchedItineraries);
+        // V63: NE PAS re-trier, garder l'ordre chronologique naturel
+        // Les nouveaux départs sont déjà plus tardifs
         
         // Re-rendre
         setupResultTabs(allFetchedItineraries);

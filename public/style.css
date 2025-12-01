@@ -4360,6 +4360,37 @@ body.dark-theme .real-select option {
     width: 16px;
     height: 16px;
 }
+
+/* *** V63 : Prochains départs groupés *** */
+.route-next-departures {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+.next-departures-label {
+    font-weight: 500;
+    color: var(--primary);
+}
+.next-departures-more {
+    color: var(--text-secondary);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Dark theme pour prochains départs */
+body.dark-theme .route-next-departures {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+body.dark-theme .next-departures-label {
+    color: var(--primary);
+}
+
 /* *** FIN DES NOUVEAUX STYLES (V40) *** */
 
 

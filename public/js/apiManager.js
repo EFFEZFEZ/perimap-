@@ -614,13 +614,16 @@ export class ApiManager {
             origin,
             destination,
             travelMode: "TRANSIT",
-            computeAlternativeRoutes: true,
+            computeAlternativeRoutes: true,  // Demander plusieurs alternatives
             transitPreferences: {
-                allowedTravelModes: ["BUS"],
-                routingPreference: "LESS_WALKING"
+                allowedTravelModes: ["BUS"],  // Uniquement bus (pas train, métro, tram)
+                routingPreference: "FEWER_TRANSFERS"  // V63: Prioriser moins de correspondances
             },
             languageCode: "fr",
-            units: "METRIC"
+            units: "METRIC",
+            // V63: Explicitement interdire la voiture/taxi pour les alternatives
+            // Google comprend ainsi qu'on cherche des options sans véhicule personnel
+            requestedReferenceRoutes: ["FUEL_EFFICIENT"]  // Suggère des options écologiques
         };
 
         // Ajout du temps de départ/arrivée

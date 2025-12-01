@@ -1,6 +1,7 @@
 /**
  * resultsRenderer.js
  * Rendu des itinéraires + pagination arrivée.
+ * V63: Regroupement des trajets identiques avec affichage des prochains départs
  */
 import { ICONS } from '../config/icons.js';
 
@@ -17,29 +18,138 @@ export function createResultsRenderer(deps) {
   }
 
   /**
+   * V63: Crée une signature de trajet pour regrouper les horaires
+   * Deux trajets avec les mêmes bus/arrêts mais horaires différents ont la même signature
+   */
+  function createRouteSignature(itinerary) {
+    if (!itinerary) return 'null';
+    const type = getItineraryType(itinerary);
+    
+    if (type === 'BIKE' || type === 'WALK') {
+      // Vélo et marche : pas de regroupement, toujours unique
+      return `${type}_${itinerary.duration}_${Math.random()}`;
+    }
+    
+    const segments = (itinerary.summarySegments || [])
+      .map(s => s.name || s.routeShortName || 'X')
+      .join('>');
+    
+    const steps = (itinerary.steps || [])
+      .filter(s => s.type === 'BUS')
+      .map(s => {
+        const route = s.routeShortName || s.route?.route_short_name || '';
+        const from = normalizeStopName(s.departureStop);
+        const to = normalizeStopName(s.arrivalStop);
+        return `${route}:${from}-${to}`;
+      })
+      .join('|');
+    
+    return `${type}::${segments}::${steps}`;
+  }
+
+  function normalizeStopName(name) {
+    if (!name) return '';
+    return name.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '')
+      .slice(0, 20);
+  }
+
+  /**
+   * V63: Parse l'heure "HH:MM" en minutes depuis minuit
+   */
+  function parseTimeToMinutes(timeStr) {
+    if (!timeStr || typeof timeStr !== 'string') return null;
+    const match = timeStr.match(/(\d{1,2}):(\d{2})/);
+    if (!match) return null;
+    return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  }
+
+  /**
+   * V63: Regroupe les itinéraires identiques et collecte leurs horaires
+   */
+  function groupItinerariesByRoute(list) {
+    const groups = new Map();
+    
+    list.forEach(itinerary => {
+      const signature = createRouteSignature(itinerary);
+      
+      if (!groups.has(signature)) {
+        groups.set(signature, {
+          mainItinerary: itinerary,
+          allDepartures: []
+        });
+      }
+      
+      const group = groups.get(signature);
+      const depMinutes = parseTimeToMinutes(itinerary.departureTime);
+      
+      if (depMinutes !== null) {
+        group.allDepartures.push({
+          departureTime: itinerary.departureTime,
+          arrivalTime: itinerary.arrivalTime,
+          depMinutes: depMinutes,
+          itinerary: itinerary
+        });
+      }
+    });
+    
+    // Trier les départs de chaque groupe et garder le premier comme principal
+    groups.forEach((group) => {
+      group.allDepartures.sort((a, b) => a.depMinutes - b.depMinutes);
+      if (group.allDepartures.length > 0) {
+        group.mainItinerary = group.allDepartures[0].itinerary;
+      }
+    });
+    
+    return Array.from(groups.values());
+  }
+
+  /**
+   * V63: Formate les prochains départs en "+Xmin"
+   */
+  function formatNextDepartures(allDepartures, maxShow = 4) {
+    if (allDepartures.length <= 1) return '';
+    
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    const nextOnes = allDepartures.slice(1, maxShow + 1);
+    if (nextOnes.length === 0) return '';
+    
+    const formatted = nextOnes.map(dep => {
+      const diffFromFirst = dep.depMinutes - allDepartures[0].depMinutes;
+      if (diffFromFirst <= 0) return null;
+      return `+${diffFromFirst}min`;
+    }).filter(Boolean);
+    
+    if (formatted.length === 0) return '';
+    
+    const moreCount = allDepartures.length - 1 - nextOnes.length;
+    let html = formatted.join(' • ');
+    if (moreCount > 0) {
+      html += ` <span class="next-departures-more">+${moreCount} autres</span>`;
+    }
+    
+    return html;
+  }
+
+  /**
    * V60: Vérifie si l'itinéraire a de la marche significative
-   * (pas juste entre arrêts du même nom ou très courte)
    */
   function hasSignificantWalk(itinerary) {
     if (!itinerary?.steps) return false;
     
     for (const step of itinerary.steps) {
       if (step.type === 'WALK' || step._isWalk) {
-        // Extraire la durée en minutes
         const durationMatch = (step.duration || '').match(/(\d+)/);
         const durationMin = durationMatch ? parseInt(durationMatch[1], 10) : 0;
+        if (durationMin > 2) return true;
         
-        // Considérer comme significatif si > 2 minutes
-        if (durationMin > 2) {
-          return true;
-        }
-        
-        // Ou si la distance est > 100m
         const distanceMatch = (step.distance || '').match(/(\d+)/);
         const distanceM = distanceMatch ? parseInt(distanceMatch[1], 10) : 0;
-        if (distanceM > 100) {
-          return true;
-        }
+        if (distanceM > 100) return true;
       }
     }
     return false;
@@ -65,39 +175,41 @@ export function createResultsRenderer(deps) {
       return;
     }
 
-    // Regroupement seulement pour mode départ
-    // On garde l'ordre de tri pour les BUS (par heure de départ)
-    if (!isArrival && mode === 'ALL' && list.length > 1) {
-      const suggested = list[0];
-      const rest = list.slice(1);
-      const buckets = { BUS: [], BIKE: [], WALK: [], OTHER: [] };
-      rest.forEach(it => {
-        const t = getItineraryType(it);
-        if (t === 'BUS') buckets.BUS.push(it);
-        else if (t === 'BIKE') buckets.BIKE.push(it);
-        else if (t === 'WALK') buckets.WALK.push(it);
-        else buckets.OTHER.push(it);
-      });
-      // Note: les BUS sont déjà triés par heure de départ, on les garde dans l'ordre
-      list = [suggested, ...buckets.BUS, ...buckets.BIKE, ...buckets.WALK, ...buckets.OTHER];
-    }
+    // V63: Regrouper les trajets identiques (même structure, horaires différents)
+    const groupedList = groupItinerariesByRoute(list);
+    
+    // Séparer par type pour l'affichage
+    const busGroups = [];
+    const bikeGroups = [];
+    const walkGroups = [];
+    
+    groupedList.forEach(group => {
+      const type = getItineraryType(group.mainItinerary);
+      if (type === 'BUS') busGroups.push(group);
+      else if (type === 'BIKE') bikeGroups.push(group);
+      else if (type === 'WALK') walkGroups.push(group);
+    });
 
     let hasBusTitle = false, hasBikeTitle = false, hasWalkTitle = false;
+    let globalIndex = 0;
 
-    list.forEach((itinerary, index) => {
+    // Fonction pour rendre un groupe
+    const renderGroup = (group, forceTitle = '') => {
+      const itinerary = group.mainItinerary;
+      const type = getItineraryType(itinerary);
+      
       const wrapper = document.createElement('div');
       wrapper.className = 'route-option-wrapper';
 
-      let title = '';
-      const type = getItineraryType(itinerary);
-      if (mode === 'ALL') {
-        if (!isArrival && index === 0) {
+      let title = forceTitle;
+      if (mode === 'ALL' && !isArrival) {
+        if (globalIndex === 0 && !forceTitle) {
           title = 'Suggéré';
           if (type === 'BUS') hasBusTitle = true;
           if (type === 'BIKE') hasBikeTitle = true;
           if (type === 'WALK') hasWalkTitle = true;
         }
-        if (!isArrival) {
+        if (!forceTitle) {
           if (type === 'BUS' && !hasBusTitle) { title = 'Itinéraires Bus'; hasBusTitle = true; }
           else if (type === 'BIKE' && !hasBikeTitle) { title = 'Itinéraires Vélo'; hasBikeTitle = true; }
           else if (type === 'WALK' && !hasWalkTitle) { title = 'Itinéraires Piéton'; hasWalkTitle = true; }
@@ -110,28 +222,26 @@ export function createResultsRenderer(deps) {
 
       let summaryHtml = '';
       if (type === 'BIKE') {
-        summaryHtml = `<div class='route-summary-bus-icon' style='color:#059669;border-color:#059669;'>${ICONS.BICYCLE}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à vélo (${itinerary.steps[0].distance})</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon' style='color:#059669;border-color:#059669;'>${ICONS.BICYCLE}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à vélo (${itinerary.steps[0]?.distance || ''})</span>`;
       } else if (type === 'WALK') {
-        summaryHtml = `<div class='route-summary-bus-icon' style='color:var(--secondary);border-color:var(--secondary);'>${ICONS.WALK}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à pied (${itinerary.steps[0].distance})</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon' style='color:var(--secondary);border-color:var(--secondary);'>${ICONS.WALK}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à pied (${itinerary.steps[0]?.distance || ''})</span>`;
       } else {
-        // V60: Ajouter icône marche si marche significative
         const hasWalk = hasSignificantWalk(itinerary);
         if (hasWalk) {
           summaryHtml = `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
         }
         summaryHtml += `<div class='route-summary-bus-icon' style='color:var(--primary);border-color:var(--primary);'>${ICONS.BUS}</div>`;
-        itinerary.summarySegments.forEach((seg, i) => {
+        (itinerary.summarySegments || []).forEach((seg, i) => {
           const label = seg.name || 'Route';
           summaryHtml += `<div class='route-line-badge' style='background-color:${seg.color};color:${seg.textColor};'>${label}</div>`;
           if (i < itinerary.summarySegments.length - 1) summaryHtml += `<span class='route-summary-dot'>•</span>`;
         });
-        // V60: Ajouter icône marche à la fin aussi si marche significative
         if (hasWalk) {
           summaryHtml += `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
         }
       }
 
-      const ecoHtml = (index === 0 && mode === 'ALL' && type === 'BUS')
+      const ecoHtml = (globalIndex === 0 && mode === 'ALL' && type === 'BUS')
         ? `<span class='route-duration-eco'>${ICONS.LEAF_ICON} ${itinerary.duration}</span>`
         : `<span>${itinerary.duration}</span>`;
 
@@ -139,7 +249,17 @@ export function createResultsRenderer(deps) {
         ? `<span class='route-time' style='color:var(--text-secondary);font-weight:500;'>(Trajet)</span>`
         : `<span class='route-time'>${itinerary.departureTime} &gt; ${itinerary.arrivalTime}</span>`;
 
-      card.innerHTML = `<div class='route-summary-line'>${summaryHtml}</div><div class='route-footer'>${timeHtml}<span class='route-duration'>${ecoHtml}</span></div>`;
+      // V63: Afficher les prochains départs si plusieurs horaires
+      const nextDeparturesHtml = formatNextDepartures(group.allDepartures);
+      const nextDeparturesLine = nextDeparturesHtml 
+        ? `<div class='route-next-departures'><span class='next-departures-label'>Aussi à :</span> ${nextDeparturesHtml}</div>`
+        : '';
+
+      card.innerHTML = `
+        <div class='route-summary-line'>${summaryHtml}</div>
+        <div class='route-footer'>${timeHtml}<span class='route-duration'>${ecoHtml}</span></div>
+        ${nextDeparturesLine}
+      `;
 
       card.addEventListener('click', () => deps.onSelectItinerary(itinerary, card));
 
@@ -148,8 +268,25 @@ export function createResultsRenderer(deps) {
       detailsDiv.className = 'route-details hidden';
       wrapper.appendChild(detailsDiv);
       resultsListContainer.appendChild(wrapper);
-    });
+      
+      globalIndex++;
+    };
 
+    // Rendre dans l'ordre : suggéré, puis BUS, puis Vélo, puis Marche
+    if (!isArrival && mode === 'ALL') {
+      // Premier élément = suggéré
+      if (busGroups.length > 0) {
+        renderGroup(busGroups[0]);
+        busGroups.slice(1).forEach(g => renderGroup(g));
+      }
+      bikeGroups.forEach(g => renderGroup(g));
+      walkGroups.forEach(g => renderGroup(g));
+    } else {
+      // Mode arrivée ou filtre spécifique : ordre simple
+      groupedList.forEach(g => renderGroup(g));
+    }
+
+    // Pagination mode arrivée
     if (isArrival && mode === 'ALL' && arrivalRenderedCount < arrivalRankedAll.length) {
       const moreWrapper = document.createElement('div');
       moreWrapper.className = 'load-more-wrapper';
@@ -164,26 +301,23 @@ export function createResultsRenderer(deps) {
       resultsListContainer.appendChild(moreWrapper);
     }
 
-    // V60: Bouton "Charger + de départs" pour le mode partir (BUS uniquement)
-    if (!isArrival && mode === 'ALL' && onLoadMoreDepartures) {
-      const busItineraries = list.filter(it => getItineraryType(it) === 'BUS');
-      if (busItineraries.length > 0) {
-        const moreWrapper = document.createElement('div');
-        moreWrapper.className = 'load-more-wrapper load-more-departures';
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-outline-primary';
-        btn.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Charger + de départs
-        `;
-        btn.addEventListener('click', () => {
-          btn.disabled = true;
-          btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
-          onLoadMoreDepartures();
-        });
-        moreWrapper.appendChild(btn);
-        resultsListContainer.appendChild(moreWrapper);
-      }
+    // Bouton "Charger + de départs" pour le mode partir
+    if (!isArrival && mode === 'ALL' && onLoadMoreDepartures && busGroups.length > 0) {
+      const moreWrapper = document.createElement('div');
+      moreWrapper.className = 'load-more-wrapper load-more-departures';
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline-primary';
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Charger + de départs
+      `;
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
+        onLoadMoreDepartures();
+      });
+      moreWrapper.appendChild(btn);
+      resultsListContainer.appendChild(moreWrapper);
     }
   }
 
