@@ -79,7 +79,7 @@ export function showMapView() {
     itineraryResultsContainer?.classList.add('hidden');
     resetDetailViewState();
     mapContainer?.classList.remove('hidden');
-    document.body.classList.add('view-is-locked');
+    document.body.classList.add('view-map-locked'); // V66: Classe spécifique pour la carte
     
     currentView = 'map';
     
@@ -99,6 +99,7 @@ export function showDashboardHall() {
     itineraryResultsContainer?.classList.add('hidden');
     resetDetailViewState();
     mapContainer?.classList.add('hidden');
+    document.body.classList.remove('view-map-locked'); // V66: Retirer la classe carte
     document.body.classList.remove('view-is-locked');
     
     currentView = 'hall';
@@ -124,7 +125,8 @@ export function showResultsView() {
     itineraryResultsContainer?.classList.remove('hidden');
     resetDetailViewState();
     mapContainer?.classList.add('hidden');
-    document.body.classList.add('view-is-locked');
+    // V66: Ne PAS bloquer le scroll pour la vue itinéraire - permet de scroller les résultats
+    document.body.classList.remove('view-map-locked');
     
     currentView = 'results';
     

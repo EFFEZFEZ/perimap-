@@ -1300,6 +1300,7 @@ async function reloadDashboardFromTarifs() {
             dashboardContentView.classList.remove('view-is-active');
         }
         
+        document.body.classList.remove('view-map-locked');
         document.body.classList.remove('view-is-locked');
         
         // Réafficher les alertes et infos trafic
@@ -3712,7 +3713,7 @@ function showMapView() {
     itineraryResultsContainer.classList.add('hidden');
     resetDetailViewState();
     mapContainer.classList.remove('hidden');
-    document.body.classList.add('view-is-locked'); 
+    document.body.classList.add('view-map-locked'); 
     if (mapRenderer && mapRenderer.map) {
         mapRenderer.map.invalidateSize();
     }
@@ -3723,6 +3724,7 @@ function showDashboardHall() {
     itineraryResultsContainer.classList.add('hidden');
     resetDetailViewState();
     mapContainer.classList.add('hidden');
+    document.body.classList.remove('view-map-locked');
     document.body.classList.remove('view-is-locked'); 
     
     if (dataManager) { 
@@ -3740,7 +3742,7 @@ function showResultsView() {
     itineraryResultsContainer.classList.remove('hidden');
     resetDetailViewState();
     mapContainer.classList.add('hidden');
-    document.body.classList.add('view-is-locked'); // Verrouille le scroll
+    // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
     if (resultsListContainer) {
         resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
@@ -3879,9 +3881,10 @@ function showDashboardView(viewName) {
 
     // V27/V28 : On scrolle le body, pas le dashboard-main
     window.scrollTo({ top: 0, behavior: 'auto' });
-    // Correctif: garantir que la classe 'view-is-locked' (utilisée pour les vues plein écran)
-    // est retirée quand on affiche une sous-vue interne (horaires, info-trafic) afin
+    // Correctif: garantir que les classes de verrouillage (utilisées pour les vues plein écran)
+    // sont retirées quand on affiche une sous-vue interne (horaires, info-trafic) afin
     // de préserver l'en-tête et le scroll.
+    document.body.classList.remove('view-map-locked');
     document.body.classList.remove('view-is-locked');
     try { if (typeof renderAlertBanner === 'function' && dataManager) renderAlertBanner(); } catch(e) { /* non bloquant */ }
 

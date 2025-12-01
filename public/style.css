@@ -989,15 +989,21 @@ body.detail-view-open {
 }
 
 /* *** CORRECTION IDFM-STYLE *** */
-/* Les conteneurs pleins écran sont gérés différemment */
-#map-container, #itinerary-results-container {
+/* La vue carte est plein écran, la vue itinéraire permet le scroll */
+#map-container {
     flex: 1 0 auto; 
     display: flex;
-    overflow: hidden; /* Ces vues plein écran ne scrollent pas */
+    overflow: hidden; /* Vue carte plein écran ne scrolle pas */
 }
 
-/* V64: Empêcher le scroll du body quand la vue carte est active */
-body.view-is-locked {
+#itinerary-results-container {
+    flex: 1 0 auto; 
+    display: flex;
+    /* V66: Permettre le scroll sur la vue itinéraire */
+}
+
+/* V66: Bloquer le scroll du body UNIQUEMENT pour la vue carte */
+body.view-map-locked {
     overflow: hidden !important;
     position: fixed !important;
     width: 100% !important;
@@ -4115,31 +4121,92 @@ body.dark-theme .real-select option {
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    padding-top: 0;
+    padding: 1rem 1.5rem;
 }
 
-/* V65: En-tête itinéraire - visible sur desktop, compacte sur mobile */
+/* V66: En-tête itinéraire - visible sur desktop uniquement */
 .itinerary-edit-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 1.5rem 0.25rem;
+    padding: 0 0 0.75rem 0;
 }
 
 .itinerary-edit-header h2 {
     font-size: 1.125rem;
     font-weight: 700;
     margin: 0;
+    color: var(--text-primary);
 }
+
+/* V66: Formulaire harmonisé avec le style du hall */
 .itinerary-edit-form {
-    padding: 0 1.5rem 1rem;
+    padding: 0;
     position: relative;
 }
+
 .itinerary-edit-form .form-group {
     margin-bottom: 0.75rem;
 }
+
 .itinerary-edit-form .form-group:last-of-type {
     margin-bottom: 1rem;
+}
+
+/* V66: Inputs harmonisés avec le style planner-block du hall */
+.itinerary-edit-form .form-group input[type="text"],
+#results-planner-from,
+#results-planner-to {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    width: 100%;
+    transition: all 0.2s ease;
+    min-height: 48px;
+    box-sizing: border-box;
+}
+
+.itinerary-edit-form .form-group input[type="text"]::placeholder {
+    color: #94a3b8;
+}
+
+.itinerary-edit-form .form-group input[type="text"]:focus,
+#results-planner-from:focus,
+#results-planner-to:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: none;
+}
+
+/* V66: Labels plus discrets comme dans le hall */
+.itinerary-edit-form .form-group label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.375rem;
+    display: block;
+}
+
+/* Dark theme pour les inputs itinéraire */
+body.dark-theme .itinerary-edit-form .form-group input[type="text"],
+body.dark-theme #results-planner-from,
+body.dark-theme #results-planner-to {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .itinerary-edit-form .form-group input[type="text"]:focus,
+body.dark-theme #results-planner-from:focus,
+body.dark-theme #results-planner-to:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
 }
 
 /* Bloc d'inputs pour la vue résultats */
@@ -4727,8 +4794,17 @@ body.dark-theme .next-departures-label {
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
     }
     
+    /* V66: Cacher l'en-tête "Itinéraires" sur mobile (gaspille de l'espace) */
+    .itinerary-edit-header {
+        display: none;
+    }
+    
     .itinerary-edit-form {
         padding: 0 0.75rem 1rem;
+    }
+    
+    #itinerary-edit-panel {
+        padding: 1rem 0.75rem;
     }
     
     .results-planner-inputs {
