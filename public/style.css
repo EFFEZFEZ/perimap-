@@ -956,6 +956,13 @@ body.detail-view-open {
     touch-action: none;
 }
 
+/* V67: Cacher header/footer Perimap sur la vue détail itinéraire */
+body.detail-view-open #main-header,
+body.detail-view-open #site-footer,
+body.detail-view-open #legal-strip {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     body.view-is-locked {
         position: relative; /* Laisse les sous-vues gérer leur propre scroll */
@@ -1057,6 +1064,13 @@ body.view-is-locked #main-header {
 }
 body.view-is-locked #legal-strip {
     display: none;
+}
+
+/* V67: Cacher header/footer sur la vue liste itinéraire */
+body.itinerary-view-active #main-header,
+body.itinerary-view-active #site-footer,
+body.itinerary-view-active #legal-strip {
+    display: none !important;
 }
 
 .header-content {
@@ -4742,6 +4756,40 @@ body.dark-theme .next-departures-label {
 
 #itinerary-detail-backdrop {
     display: none;
+}
+
+/* V67: Styles desktop pour le header de détail avec bouton retour */
+#detail-map-header {
+    display: none; /* Caché par défaut sur desktop car on utilise l'accordéon */
+}
+
+/* V67: Sur desktop, afficher le bouton retour quand la vue détail est active */
+#itinerary-detail-container.is-active #detail-map-header {
+    display: flex;
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1400;
+    gap: 1rem;
+    align-items: center;
+}
+#itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#itinerary-detail-container.is-active #detail-map-header #btn-back-to-results:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Styles mobiles pour la vue résultats (Étape 1: Liste) */

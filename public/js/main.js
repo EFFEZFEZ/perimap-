@@ -3725,7 +3725,8 @@ function showDashboardHall() {
     resetDetailViewState();
     mapContainer.classList.add('hidden');
     document.body.classList.remove('view-map-locked');
-    document.body.classList.remove('view-is-locked'); 
+    document.body.classList.remove('view-is-locked');
+    document.body.classList.remove('itinerary-view-active'); // V67
     
     if (dataManager) { 
         renderAlertBanner(); 
@@ -3742,6 +3743,8 @@ function showResultsView() {
     itineraryResultsContainer.classList.remove('hidden');
     resetDetailViewState();
     mapContainer.classList.add('hidden');
+    // V67: Cacher header/footer Perimap sur la vue itinéraire
+    document.body.classList.add('itinerary-view-active');
     // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
     if (resultsListContainer) {

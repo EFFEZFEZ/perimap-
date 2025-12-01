@@ -101,6 +101,7 @@ export function showDashboardHall() {
     mapContainer?.classList.add('hidden');
     document.body.classList.remove('view-map-locked'); // V66: Retirer la classe carte
     document.body.classList.remove('view-is-locked');
+    document.body.classList.remove('itinerary-view-active'); // V67
     
     currentView = 'hall';
     
@@ -127,6 +128,8 @@ export function showResultsView() {
     mapContainer?.classList.add('hidden');
     // V66: Ne PAS bloquer le scroll pour la vue itinéraire - permet de scroller les résultats
     document.body.classList.remove('view-map-locked');
+    // V67: Cacher header/footer Perimap sur la vue itinéraire
+    document.body.classList.add('itinerary-view-active');
     
     currentView = 'results';
     
