@@ -1,12 +1,12 @@
 /**
  * resultsRenderer.js
  * Rendu des itinéraires + pagination arrivée.
- * V63: Regroupement des trajets identiques avec affichage des prochains départs
+ * V64: Enrichissement GTFS - trouve les prochains départs réels depuis les données locales
  */
 import { ICONS } from '../config/icons.js';
 
 export function createResultsRenderer(deps) {
-  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount, onLoadMoreDepartures } = deps;
+  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount, onLoadMoreDepartures, getDataManager } = deps;
 
   function getItineraryType(itinerary) {
     if (!itinerary) return 'BUS';
@@ -107,13 +107,11 @@ export function createResultsRenderer(deps) {
   }
 
   /**
-   * V63: Formate les prochains départs en "+Xmin"
+   * V64: Formate les prochains départs en "+Xmin"
+   * Utilise les données GTFS locales pour enrichir
    */
   function formatNextDepartures(allDepartures, maxShow = 4) {
     if (allDepartures.length <= 1) return '';
-    
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
     
     const nextOnes = allDepartures.slice(1, maxShow + 1);
     if (nextOnes.length === 0) return '';
@@ -133,6 +131,97 @@ export function createResultsRenderer(deps) {
     }
     
     return html;
+  }
+
+  /**
+   * V64: Trouve les prochains départs GTFS pour un itinéraire bus
+   * @param {Object} itinerary - L'itinéraire principal
+   * @returns {Array} Liste des prochains départs avec {departureTime, depMinutes}
+   */
+  function findGtfsNextDepartures(itinerary) {
+    const dataManager = getDataManager ? getDataManager() : null;
+    if (!dataManager || !itinerary) return [];
+    
+    // Trouver le premier segment BUS
+    const busStep = (itinerary.steps || []).find(s => s.type === 'BUS');
+    if (!busStep) return [];
+    
+    const routeShortName = busStep.routeShortName || busStep.route?.route_short_name;
+    const departureStopName = busStep.departureStop;
+    const depTimeStr = itinerary.departureTime;
+    
+    if (!routeShortName || !departureStopName || !depTimeStr) return [];
+    
+    // Convertir l'heure de départ en minutes
+    const depMinutes = parseTimeToMinutes(depTimeStr);
+    if (depMinutes === null) return [];
+    
+    // Chercher l'arrêt de départ dans GTFS
+    const matchingStops = dataManager.findStopsByName(departureStopName, 10);
+    if (!matchingStops.length) return [];
+    
+    const stopIds = matchingStops.map(s => s.stop_id);
+    
+    // Trouver la route GTFS
+    const route = dataManager.routesByShortName[routeShortName];
+    if (!route) return [];
+    
+    // Calculer la fenêtre de temps (prochain 1h30 après le premier départ)
+    const windowStart = depMinutes * 60;
+    const windowEnd = (depMinutes + 90) * 60;
+    
+    // Récupérer les départs GTFS pour cet arrêt
+    const now = new Date();
+    const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60;
+    const serviceIds = dataManager.getServiceIds(now);
+    
+    if (serviceIds.size === 0) return [];
+    
+    const departures = [];
+    
+    for (const stopId of stopIds) {
+      const stopTimes = dataManager.stopTimesByStop[stopId] || [];
+      
+      for (const st of stopTimes) {
+        const trip = dataManager.tripsByTripId[st.trip_id];
+        if (!trip) continue;
+        
+        // Vérifier la même ligne
+        if (trip.route_id !== route.route_id) continue;
+        
+        // Vérifier service actif
+        const isActive = Array.from(serviceIds).some(sid => 
+          dataManager.serviceIdsMatch(trip.service_id, sid)
+        );
+        if (!isActive) continue;
+        
+        const depSeconds = dataManager.timeToSeconds(st.departure_time);
+        const depMins = Math.floor(depSeconds / 60);
+        
+        // Dans la fenêtre et après le premier départ affiché
+        if (depSeconds >= windowStart && depSeconds <= windowEnd && depMins > depMinutes) {
+          departures.push({
+            departureTime: dataManager.formatTime(depSeconds),
+            depMinutes: depMins,
+            tripId: st.trip_id
+          });
+        }
+      }
+    }
+    
+    // Trier et dédupliquer
+    departures.sort((a, b) => a.depMinutes - b.depMinutes);
+    
+    const uniqueDepartures = [];
+    const seenMinutes = new Set();
+    for (const dep of departures) {
+      if (!seenMinutes.has(dep.depMinutes)) {
+        seenMinutes.add(dep.depMinutes);
+        uniqueDepartures.push(dep);
+      }
+    }
+    
+    return uniqueDepartures.slice(0, 5); // Max 5 prochains départs
   }
 
   /**
@@ -249,11 +338,31 @@ export function createResultsRenderer(deps) {
         ? `<span class='route-time' style='color:var(--text-secondary);font-weight:500;'>(Trajet)</span>`
         : `<span class='route-time'>${itinerary.departureTime} &gt; ${itinerary.arrivalTime}</span>`;
 
-      // V63: Afficher les prochains départs si plusieurs horaires
-      const nextDeparturesHtml = formatNextDepartures(group.allDepartures);
-      const nextDeparturesLine = nextDeparturesHtml 
-        ? `<div class='route-next-departures'><span class='next-departures-label'>Aussi à :</span> ${nextDeparturesHtml}</div>`
-        : '';
+      // V64: Enrichir avec les prochains départs GTFS si c'est un bus
+      let nextDeparturesLine = '';
+      const dataManager = getDataManager ? getDataManager() : null;
+      if (type === 'BUS' && dataManager) {
+        // D'abord essayer les départs groupés depuis Google
+        let allDepartures = group.allDepartures || [];
+        
+        // Si pas assez de départs depuis Google, enrichir avec GTFS
+        if (allDepartures.length <= 1) {
+          const gtfsDepartures = findGtfsNextDepartures(itinerary);
+          if (gtfsDepartures.length > 0) {
+            // Ajouter le premier départ (celui de l'itinéraire)
+            const firstDepMinutes = parseTimeToMinutes(itinerary.departureTime);
+            allDepartures = [
+              { departureTime: itinerary.departureTime, depMinutes: firstDepMinutes },
+              ...gtfsDepartures
+            ];
+          }
+        }
+        
+        const nextDeparturesHtml = formatNextDepartures(allDepartures);
+        if (nextDeparturesHtml) {
+          nextDeparturesLine = `<div class='route-next-departures'><span class='next-departures-label'>Aussi à :</span> ${nextDeparturesHtml}</div>`;
+        }
+      }
 
       card.innerHTML = `
         <div class='route-summary-line'>${summaryHtml}</div>

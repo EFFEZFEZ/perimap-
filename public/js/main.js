@@ -383,7 +383,8 @@ async function initializeApp() {
         getArrivalState: () => ({ lastSearchMode, arrivalRankedAll, arrivalRenderedCount, pageSize: ARRIVAL_PAGE_SIZE }),
         setArrivalRenderedCount: (val) => { arrivalRenderedCount = val; },
         onSelectItinerary: (itinerary, cardEl) => onSelectItinerary(itinerary, cardEl),
-        onLoadMoreDepartures: () => loadMoreDepartures() // V60: Charger plus de départs
+        onLoadMoreDepartures: () => loadMoreDepartures(), // V60: Charger plus de départs
+        getDataManager: () => dataManager // V64: Accès aux données GTFS pour prochains départs
     });
 
     apiManager = new ApiManager(GOOGLE_API_KEY);
