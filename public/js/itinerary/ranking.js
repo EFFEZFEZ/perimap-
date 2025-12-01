@@ -95,18 +95,24 @@ function parseTimeToMinutes(timeStr) {
  * Filtre les itinéraires expirés (départ dans le passé).
  * Fonctionne pour les deux modes.
  * Si searchTime est fourni et la date est dans le futur, on ne filtre pas.
+ * V70: Amélioration - ne filtre que si la recherche est pour aujourd'hui ET l'heure est passée
  */
 export function filterExpiredDepartures(itineraries, searchTime = null) {
   if (!Array.isArray(itineraries)) return [];
   
+  // Si pas de searchTime, pas de filtrage
+  if (!searchTime) {
+    return itineraries;
+  }
+  
   // Si la recherche est pour une date future, ne pas filtrer
-  if (searchTime && searchTime.date) {
-    const searchDate = new Date(searchTime.date);
+  if (searchTime.date) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    searchDate.setHours(0, 0, 0, 0);
-    if (searchDate > today) {
-      // Recherche pour demain ou plus tard, pas de filtrage
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    // Si la date de recherche est différente d'aujourd'hui, ne pas filtrer
+    if (searchTime.date !== todayStr) {
+      console.log(`📅 Recherche pour ${searchTime.date} (pas aujourd'hui ${todayStr}), pas de filtrage horaire`);
       return itineraries;
     }
   }
@@ -114,16 +120,40 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   
-  return itineraries.filter(it => {
+  // V70: Si l'heure de recherche est dans le futur, utiliser cette heure comme référence
+  let refMinutes = nowMinutes;
+  if (searchTime.hour !== undefined) {
+    const searchHour = parseInt(searchTime.hour) || 0;
+    const searchMinute = parseInt(searchTime.minute) || 0;
+    const searchMinutes = searchHour * 60 + searchMinute;
+    
+    // Si l'heure de recherche est dans le futur, utiliser cette heure
+    if (searchMinutes > nowMinutes) {
+      // On cherche des trajets à partir de cette heure future, pas de filtrage nécessaire
+      console.log(`🕐 Recherche à ${searchHour}:${String(searchMinute).padStart(2,'0')} (futur), pas de filtrage`);
+      return itineraries;
+    }
+  }
+  
+  console.log(`🕐 Filtrage des trajets passés (maintenant: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')})`);
+  
+  const filtered = itineraries.filter(it => {
     const depTime = it?.departureTime;
     if (!depTime || depTime === '~' || depTime === '--:--') return true;
     
     const depMinutes = parseTimeToMinutes(depTime);
     if (depMinutes === Infinity) return true;
     
-    // Garder si départ >= maintenant
-    return depMinutes >= nowMinutes;
+    // Garder si départ >= maintenant (avec 2 min de marge)
+    return depMinutes >= (nowMinutes - 2);
   });
+  
+  const removed = itineraries.length - filtered.length;
+  if (removed > 0) {
+    console.log(`🚫 ${removed} trajet(s) passé(s) filtré(s)`);
+  }
+  
+  return filtered;
 }
 
 /**

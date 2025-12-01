@@ -4850,9 +4850,10 @@ body.dark-theme .next-departures-label {
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
     }
     
-    /* V66: Cacher l'en-tête "Itinéraires" sur mobile (gaspille de l'espace) */
+    /* V69: Garder l'en-tête "Itinéraires" visible sur mobile */
     .itinerary-edit-header {
-        display: none;
+        display: flex;
+        padding: 1rem 0.75rem 0.5rem;
     }
     
     .itinerary-edit-form {
