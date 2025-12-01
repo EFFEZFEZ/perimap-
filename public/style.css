@@ -349,8 +349,9 @@ body.dark-theme #detail-map-summary {
     box-shadow: 0 12px 30px rgba(0,0,0,0.55);
 }
 body.dark-theme #detail-map-header #btn-back-to-results {
-    background: rgba(8, 12, 18, 0.95);
-    color: var(--text-primary);
+    background: rgba(15, 23, 42, 0.95) !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 body.dark-theme input[type="text"],
 body.dark-theme input[type="search"],
@@ -4758,38 +4759,45 @@ body.dark-theme .next-departures-label {
     display: none;
 }
 
-/* V67: Styles desktop pour le header de détail avec bouton retour */
-#detail-map-header {
-    display: none; /* Caché par défaut sur desktop car on utilise l'accordéon */
-}
+/* V68: Styles desktop pour le header de détail avec bouton retour */
+@media (min-width: 769px) {
+    #detail-map-header {
+        display: none; /* Caché par défaut sur desktop car on utilise l'accordéon */
+    }
 
-/* V67: Sur desktop, afficher le bouton retour quand la vue détail est active */
-#itinerary-detail-container.is-active #detail-map-header {
-    display: flex;
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 1400;
-    gap: 1rem;
-    align-items: center;
-}
-#itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
-    background: rgba(255, 255, 255, 0.95);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-md);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-#itinerary-detail-container.is-active #detail-map-header #btn-back-to-results:hover {
-    transform: scale(1.05);
-    box-shadow: var(--shadow-lg);
+    /* Sur desktop, afficher le bouton retour quand la vue détail est active */
+    #itinerary-detail-container.is-active #detail-map-header {
+        display: flex;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1400;
+        gap: 1rem;
+        align-items: center;
+        background: none;
+    }
+    #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
+        background: rgba(255, 255, 255, 0.95);
+        color: #1e293b;
+        box-shadow: var(--shadow-md);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.dark-theme #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
+        background: rgba(15, 23, 42, 0.95);
+        color: #f1f5f9;
+    }
+    #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+    }
 }
 
 /* Styles mobiles pour la vue résultats (Étape 1: Liste) */
@@ -5032,15 +5040,32 @@ body.dark-theme .next-departures-label {
         display: flex;
         align-items: center;
         gap: 1rem;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0));
-        transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        background: none; /* V68: Pas de gradient pour éviter les conflits */
         pointer-events: none; /* Let drags pass through except on interactive children */
     }
     #detail-map-header #btn-back-to-results {
         background: rgba(255, 255, 255, 0.95);
-        color: var(--text-primary);
-        box-shadow: var(--shadow-md);
+        color: #1e293b; /* V68: Couleur fixe sombre pour le mode clair */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         pointer-events: auto;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        /* V68: Empêcher le mouvement au clic */
+        position: relative;
+        transform: none;
+        transition: box-shadow 0.2s ease;
+    }
+    #detail-map-header #btn-back-to-results:active {
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     }
     
     #detail-map-summary {

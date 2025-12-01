@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v68'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V68: Hide header/footer on itinerary + fix back button
+const CACHE_VERSION = 'v69'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V69: Fix back button dark mode + mobile styles
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
