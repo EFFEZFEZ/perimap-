@@ -2420,6 +2420,14 @@ details[open] .accordion-content {
     z-index: 10;
 }
 
+/* V74: Style de base du bouton Filtrer - Visible sur desktop dans le top-bar */
+#btn-toggle-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    order: 1; /* S'assure qu'il apparaît après le bouton Retour */
+}
+
 #map-container #btn-back-to-dashboard-from-map {
     padding-left: 0.75rem;
     padding-right: 1.25rem;
@@ -2540,19 +2548,19 @@ details[open] .accordion-content {
         pointer-events: none; /* Laisse passer les clics vers la carte */
     }
     
+    /* V74: Éléments du top-bar repositionnés en fixed sur mobile */
     #map-container #map-view #top-bar > #btn-back-to-dashboard-from-map,
     #map-container #map-view #top-bar > #clock,
-    #map-container #map-view #top-bar > #status-info,
-    #map-container #map-view #top-bar > #btn-toggle-filter {
+    #map-container #map-view #top-bar > #status-info {
         display: inline-flex !important; 
         position: fixed !important; 
         z-index: 1000;
-        background: rgba(255, 255, 255, 0.92); /* V64: Plus opaque pour meilleure visibilité */
+        background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         border: 1px solid var(--border);
         box-shadow: var(--shadow-md);
-        pointer-events: auto; /* V64: Réactive les clics sur ces éléments */
+        pointer-events: auto;
     }
     
     #map-container #map-view #top-bar > #btn-back-to-dashboard-from-map {
@@ -2589,28 +2597,37 @@ details[open] .accordion-content {
     }
     #map-container #map-view #top-bar > #status-info #data-status { display: none; }
     
-    #map-container #map-view #top-bar > #btn-toggle-filter {
-        /* V72: Fix position et visibilité du bouton filtrer */
+    /* V74: Bouton Filtrer - Position fixe en bas à gauche sur mobile */
+    #map-container #map-view #top-bar > #btn-toggle-filter,
+    #map-container #map-view #top-bar > button#btn-toggle-filter,
+    #map-view #top-bar #btn-toggle-filter,
+    #top-bar > #btn-toggle-filter,
+    #btn-toggle-filter.btn {
         display: flex !important;
         visibility: visible !important;
         opacity: 1 !important;
         position: fixed !important;
         top: auto !important;
-        bottom: calc(30px + env(safe-area-inset-bottom)) !important;
+        bottom: 100px !important; /* V74: Augmenté pour test */
         left: 20px !important;
         right: auto !important;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        padding: 0;
-        justify-content: center;
-        align-items: center;
-        color: var(--text-primary);
-        z-index: 9999 !important; /* Z-index très élevé pour être sûr */
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 1px solid var(--border) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        width: 56px !important;
+        height: 56px !important;
+        min-width: 56px !important;
+        min-height: 56px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        justify-content: center !important;
+        align-items: center !important;
+        color: white !important; /* V74: Couleur très visible pour test */
+        z-index: 99999 !important; /* V74: Z-index encore plus élevé */
+        background: #ff0000 !important; /* V74: Rouge vif pour test */
+        border: 3px solid #ffff00 !important; /* V74: Bordure jaune pour test */
+        box-shadow: 0 4px 20px rgba(255, 0, 0, 0.5) !important;
         pointer-events: auto !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        transform: none !important;
     }
     #map-container #map-view #top-bar > #btn-toggle-filter span { display: none; }
     #map-container #map-view #top-bar > #btn-toggle-filter svg { margin: 0; width: 20px; height: 20px; }
