@@ -61,6 +61,10 @@ let resultsRenderer = null; // instance du renderer des résultats
 // Feature flags
 let gtfsAvailable = true; // set to false if GTFS loading fails -> degraded API-only mode
 
+// ⚠️ V60: GTFS Router désactivé temporairement (performances insuffisantes)
+// TODO: Améliorer l'algorithme de pathfinding avant de réactiver
+const ENABLE_GTFS_ROUTER = false; // Mettre à true pour réactiver le routeur GTFS local
+
 // État global
 let lineStatuses = {}; 
 let currentDetailRouteLayer = null; // Tracé sur la carte détail mobile
@@ -452,17 +456,26 @@ async function initializeApp() {
         
         initializeRouteFilter();
 
-        try {
-            const geocodeProxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/geocode` : '/api/geocode';
-            routerWorkerClient = new RouterWorkerClient({
-                dataManager,
-                icons: ICONS,
-                googleApiKey: GOOGLE_API_KEY,
-                geocodeProxyUrl
-            });
-        } catch (error) {
-            console.warn('Router worker indisponible, fallback main thread.', error);
+        // ⚠️ V60: Router GTFS désactivé temporairement pour performances
+        // TODO: Réactiver quand l'algorithme sera optimisé
+        if (ENABLE_GTFS_ROUTER) {
+            try {
+                const geocodeProxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/geocode` : '/api/geocode';
+                routerWorkerClient = new RouterWorkerClient({
+                    dataManager,
+                    icons: ICONS,
+                    googleApiKey: GOOGLE_API_KEY,
+                    geocodeProxyUrl
+                });
+                console.log('🔧 Router GTFS local activé');
+            } catch (error) {
+                console.warn('Router worker indisponible, fallback main thread.', error);
+                routerWorkerClient = null;
+            }
+        } else {
+            console.log('⏸️ Router GTFS local désactivé (ENABLE_GTFS_ROUTER=false)');
             routerWorkerClient = null;
+            routerContext = null;
         }
 
         try {
@@ -1381,125 +1394,84 @@ async function executeItinerarySearch(source, sourceElements) {
         let fromGtfsStops = null; // V49: Arrêts GTFS forcés pour les pôles multimodaux (tableau de stop_id)
         let toGtfsStops = null;
         
-        try {
-            const fromResult = await apiManager.getPlaceCoords(fromPlaceId);
-            if (fromResult) {
-                fromCoords = { lat: fromResult.lat, lng: fromResult.lng };
-                // V49: Récupérer les arrêts du pôle si c'est un alias multimodal
-                if (fromResult.isMultiStop && fromResult.gtfsStops) {
-                    // Extraire uniquement les stopId pour le router
-                    fromGtfsStops = fromResult.gtfsStops.map(s => s.stopId);
-                    console.log(`🎓 Pôle multimodal origine: ${fromGtfsStops.length} arrêts -`, fromGtfsStops);
-                }
+        // 🚀 V60: Résolution des coordonnées EN PARALLÈLE
+        const coordsStart = performance.now();
+        const [fromResult, toResult] = await Promise.all([
+            apiManager.getPlaceCoords(fromPlaceId).catch(e => { console.warn('Coords départ:', e); return null; }),
+            apiManager.getPlaceCoords(toPlaceId).catch(e => { console.warn('Coords arrivée:', e); return null; })
+        ]);
+        
+        if (fromResult) {
+            fromCoords = { lat: fromResult.lat, lng: fromResult.lng };
+            if (fromResult.isMultiStop && fromResult.gtfsStops) {
+                fromGtfsStops = fromResult.gtfsStops.map(s => s.stopId);
+                console.log(`🎓 Pôle multimodal origine: ${fromGtfsStops.length} arrêts`);
             }
-        } catch (e) {
-            console.warn('Impossible de récupérer les coordonnées départ (place_id):', e);
         }
-        try {
-            const toResult = await apiManager.getPlaceCoords(toPlaceId);
-            if (toResult) {
-                toCoords = { lat: toResult.lat, lng: toResult.lng };
-                // V49: Récupérer les arrêts du pôle si c'est un alias multimodal
-                if (toResult.isMultiStop && toResult.gtfsStops) {
-                    // Extraire uniquement les stopId pour le router
-                    toGtfsStops = toResult.gtfsStops.map(s => s.stopId);
-                    console.log(`🎓 Pôle multimodal destination: ${toGtfsStops.length} arrêts -`, toGtfsStops);
-                }
+        if (toResult) {
+            toCoords = { lat: toResult.lat, lng: toResult.lng };
+            if (toResult.isMultiStop && toResult.gtfsStops) {
+                toGtfsStops = toResult.gtfsStops.map(s => s.stopId);
+                console.log(`🎓 Pôle multimodal destination: ${toGtfsStops.length} arrêts`);
             }
-        } catch (e) {
-            console.warn('Impossible de récupérer les coordonnées arrivée (place_id):', e);
         }
+        console.log(`⚡ Coords résolues en ${Math.round(performance.now() - coordsStart)}ms`);
 
         const fromLabel = sourceElements.fromInput?.value || '';
         const toLabel = sourceElements.toInput?.value || '';
 
+        // 🚀 V60: Routage optimisé - API Google uniquement
+        // ⚠️ Router GTFS local désactivé (ENABLE_GTFS_ROUTER=false)
+        const routingStart = performance.now();
+        
         let hybridItins = [];
-        const canUseHybridRouting = dataManager && dataManager.isLoaded && gtfsAvailable;
-        if (canUseHybridRouting) {
-            if (routerWorkerClient) {
-                try {
-                    hybridItins = await routerWorkerClient.computeHybridItinerary({
-                        fromCoords,
-                        toCoords,
-                        searchTime,
-                        labels: { fromLabel, toLabel },
-                        // V49: Passer les arrêts des pôles multimodaux
-                        forcedStops: {
-                            from: fromGtfsStops,
-                            to: toGtfsStops
-                        }
-                    });
-                } catch (error) {
-                    console.warn('Router worker indisponible, fallback main thread.', error);
-                    routerWorkerClient = null;
-                }
-            }
-
-            if ((!hybridItins || !hybridItins.length) && routerContext) {
-                try {
-                    hybridItins = await routerContext.computeHybridItinerary(
-                        fromCoords, 
-                        toCoords, 
-                        searchTime, 
-                        { fromLabel, toLabel },
-                        // V49: Passer les arrêts des pôles multimodaux
-                        { from: fromGtfsStops, to: toGtfsStops }
-                    );
-                } catch (e) {
-                    console.warn('Erreur lors de la construction hybride :', e);
-                }
+        
+        // GTFS Router (désactivé par défaut pour performances)
+        if (ENABLE_GTFS_ROUTER && routerWorkerClient) {
+            try {
+                hybridItins = await routerWorkerClient.computeHybridItinerary({
+                    fromCoords, toCoords, searchTime,
+                    labels: { fromLabel, toLabel },
+                    forcedStops: { from: fromGtfsStops, to: toGtfsStops }
+                });
+                console.log('🔍 GTFS local:', hybridItins?.length || 0, 'itinéraires');
+            } catch (e) {
+                console.warn('GTFS router error:', e);
             }
         }
 
-        // Debug: afficher ce qu'on a trouvé en local
-        console.log('🔍 Résultat routage GTFS local:', {
-            mode: searchTime.type || 'partir',
-            heureRecherche: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`,
-            itinerairesLocaux: hybridItins?.length || 0,
-            premiers: hybridItins?.slice(0, 3).map(it => ({
-                dep: it.departureTime,
-                arr: it.arrivalTime,
-                type: it.type
-            }))
-        });
+        // API Google (source principale)
+        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
+            .catch(e => { console.error('API Google error:', e); return null; });
         
+        console.log(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
+
+        // Traiter les résultats Google
+        if (intelligentResults) {
+            allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+            console.log('✅ API Google:', allFetchedItineraries?.length || 0, 'itinéraires');
+            
+            // Fusionner avec GTFS si disponible
+            if (hybridItins?.length) {
+                for (const gtfsIt of hybridItins) {
+                    const isDuplicate = allFetchedItineraries.some(googleIt => 
+                        googleIt.departureTime === gtfsIt.departureTime && 
+                        googleIt.arrivalTime === gtfsIt.arrivalTime
+                    );
+                    if (!isDuplicate) allFetchedItineraries.push(gtfsIt);
+                }
+            }
+        } else if (hybridItins?.length) {
+            console.log('🔄 Fallback GTFS:', hybridItins.length, 'itinéraires');
+            allFetchedItineraries = hybridItins;
+        } else {
+            allFetchedItineraries = [];
+        }
+
         // Debug: vérifier si l'heure demandée correspond
         const heureDemandeMin = parseInt(searchTime.hour) * 60 + parseInt(searchTime.minute);
-        console.log('📊 Heure demandée en minutes:', heureDemandeMin, `(${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')})`);
+        console.log('📊 Heure demandée:', `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`);
 
-        // STRATÉGIE: TOUJOURS utiliser l'API Google comme source principale
-        // Le GTFS local est trop peu fiable pour les correspondances
-        console.log('🌐 Appel API Google Transit (source principale)...');
-        try {
-            const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime); 
-            allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
-            console.log('✅ Résultat API Google:', allFetchedItineraries?.length || 0, 'itinéraires');
-            
-            // Si on a aussi des résultats GTFS locaux, les fusionner (pour enrichir)
-            if (hybridItins && hybridItins.length) {
-                console.log('🔄 Fusion avec', hybridItins.length, 'itinéraires GTFS locaux');
-                // Ajouter les itinéraires GTFS qui ne sont pas déjà dans les résultats Google
-                for (const gtfsIt of hybridItins) {
-                    const isDuplicate = allFetchedItineraries.some(googleIt => {
-                        const depMatch = googleIt.departureTime === gtfsIt.departureTime;
-                        const arrMatch = googleIt.arrivalTime === gtfsIt.arrivalTime;
-                        return depMatch && arrMatch;
-                    });
-                    if (!isDuplicate) {
-                        allFetchedItineraries.push(gtfsIt);
-                    }
-                }
-            }
-        } catch (apiError) {
-            console.error('❌ Erreur API Google Transit:', apiError);
-            // Fallback sur GTFS local si l'API échoue
-            if (hybridItins && hybridItins.length) {
-                console.log('🔄 Fallback sur GTFS local:', hybridItins.length, 'itinéraires');
-                allFetchedItineraries = hybridItins;
-            } else {
-                allFetchedItineraries = [];
-            }
-        }
         // Ensure every BUS step has a polyline (GTFS constructed or fallback)
         try {
             await ensureItineraryPolylines(allFetchedItineraries);

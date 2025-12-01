@@ -1,17 +1,17 @@
-﻿const GTFS_TRIPS_CACHE_TTL_MS = 60 * 1000; // 60s cache
+﻿const GTFS_TRIPS_CACHE_TTL_MS = 120 * 1000; // 120s cache (augmenté pour performance)
 
 export const HYBRID_ROUTING_CONFIG = Object.freeze({
-    STOP_SEARCH_RADIUS_M: 600,         // Augmenté de 500 à 600 pour inclure plus d'arrêts
-    STOP_SEARCH_LIMIT: 15,             // Augmenté de 12 à 15
-    MAX_ITINERARIES: 12,
-    WALK_DIRECT_MAX_METERS: 100,
+    STOP_SEARCH_RADIUS_M: 500,         // Réduit de 600 à 500 pour accélérer
+    STOP_SEARCH_LIMIT: 10,             // Réduit de 15 à 10 pour accélérer
+    MAX_ITINERARIES: 8,                // Réduit de 12 à 8
+    WALK_DIRECT_MAX_METERS: 150,       // Augmenté pour éviter appels API
     ENABLE_TRANSFERS: true,
-    TRANSFER_MAX_ITINERARIES: 6,       // Augmenté de 4 à 6
+    TRANSFER_MAX_ITINERARIES: 4,       // Réduit de 6 à 4
     TRANSFER_MIN_BUFFER_SECONDS: 180,
-    TRANSFER_MAX_WAIT_SECONDS: 2400,   // Augmenté de 1800 (30min) à 2400 (40min)
-    TRANSFER_MAX_FIRST_LEG_STOPS: 15,  // Augmenté de 8 à 15 pour atteindre les hubs de correspondance
-    TRANSFER_CANDIDATE_TRIPS_LIMIT: 40, // Augmenté de 20 à 40
-    TRANSFER_WALK_RADIUS_M: 250        // Augmenté de 200 à 250 pour mieux connecter les arrêts proches
+    TRANSFER_MAX_WAIT_SECONDS: 1800,   // Réduit de 2400 à 1800
+    TRANSFER_MAX_FIRST_LEG_STOPS: 8,   // Réduit de 15 à 8
+    TRANSFER_CANDIDATE_TRIPS_LIMIT: 20, // Réduit de 40 à 20
+    TRANSFER_WALK_RADIUS_M: 200        // Réduit de 250 à 200
 });
 
 const AVERAGE_WALK_SPEED_MPS = 1.35; // ~4.8 km/h
