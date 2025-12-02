@@ -676,81 +676,76 @@ export class MapRenderer {
 
     /**
      * Formate le contenu HTML pour le popup d'un arrêt
-     * V104: Design harmonisé avec la DA de l'app (dark mode)
+     * V105: Style SNCF Connect - une ligne par route avec destinations en dessous
      */
     createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures = false, firstDepartureTime = null) {
-        let html = `<div class="stop-popup-v104">`;
-        
-        // Header avec nom de l'arrêt
-        html += `<div class="popup-header">
-                    <span class="popup-title">${masterStop.stop_name}</span>
-                    ${isNextDayDepartures ? `<span class="popup-subtitle">Premiers départs</span>` : ''}
-                 </div>`;
-
         const lineKeys = Object.keys(departuresByLine);
         
-        if (lineKeys.length === 0) {
+        // Regrouper par ligne (route_short_name)
+        const lineGroups = {};
+        lineKeys.forEach(lineKey => {
+            const line = departuresByLine[lineKey];
+            const routeName = line.routeShortName;
+            if (!lineGroups[routeName]) {
+                lineGroups[routeName] = {
+                    routeShortName: line.routeShortName,
+                    routeColor: line.routeColor,
+                    routeTextColor: line.routeTextColor,
+                    destinations: []
+                };
+            }
+            lineGroups[routeName].destinations.push({
+                destination: line.destination,
+                departures: line.departures // Toutes les données, pas de limite
+            });
+        });
+
+        // Trier les lignes par nom
+        const sortedLines = Object.keys(lineGroups).sort((a, b) => 
+            a.localeCompare(b, undefined, {numeric: true})
+        );
+
+        let html = `<div class="stop-popup-v105">`;
+        
+        // Notice si premiers départs
+        if (isNextDayDepartures) {
+            html += `<div class="popup-notice">Ces horaires sont prévisionnels et peuvent changer en cas de perturbation.</div>`;
+        }
+
+        if (sortedLines.length === 0) {
             html += `<div class="popup-empty">
                         <span class="popup-empty-icon">🌙</span>
                         <span>Aucun passage prévu</span>
                      </div>`;
         } else {
-            // Regrouper par ligne (route_short_name)
-            const lineGroups = {};
-            lineKeys.forEach(lineKey => {
-                const line = departuresByLine[lineKey];
-                const routeName = line.routeShortName;
-                if (!lineGroups[routeName]) {
-                    lineGroups[routeName] = {
-                        routeShortName: line.routeShortName,
-                        routeColor: line.routeColor,
-                        routeTextColor: line.routeTextColor,
-                        destinations: []
-                    };
-                }
-                lineGroups[routeName].destinations.push({
-                    destination: line.destination,
-                    departures: line.departures
-                });
-            });
-
-            // Trier les lignes par nom
-            const sortedLines = Object.keys(lineGroups).sort((a, b) => 
-                a.localeCompare(b, undefined, {numeric: true})
-            );
-
-            html += `<div class="popup-lines">`;
-            
+            // Chaque ligne
             sortedLines.forEach(routeName => {
                 const lineGroup = lineGroups[routeName];
                 
-                // Carte par ligne
-                html += `<div class="popup-line-card">`;
+                html += `<div class="popup-line-block">`;
                 
-                // Liste des destinations pour cette ligne
+                // Header de la ligne : badge + nom arrêt (comme SNCF)
+                html += `<div class="popup-line-header">
+                            <span class="popup-badge" style="background:#${lineGroup.routeColor};color:#${lineGroup.routeTextColor};">${lineGroup.routeShortName}</span>
+                            <span class="popup-stop-name">${masterStop.stop_name}</span>
+                         </div>`;
+                
+                // Destinations avec leurs horaires
                 lineGroup.destinations.forEach(dest => {
-                    html += `<div class="popup-destination">`;
+                    html += `<div class="popup-dest-row">
+                                <div class="popup-dest-name">${dest.destination}</div>
+                                <div class="popup-times">`;
                     
-                    // Header : badge + destination
-                    html += `<div class="popup-dest-header">
-                                <span class="popup-badge" style="background:#${lineGroup.routeColor};color:#${lineGroup.routeTextColor};">${lineGroup.routeShortName}</span>
-                                <span class="popup-dest-name">${dest.destination}</span>
-                             </div>`;
-                    
-                    // Horaires en ligne
-                    html += `<div class="popup-times">`;
-                    dest.departures.slice(0, 4).forEach(dep => {
+                    // Tous les horaires (pas de slice)
+                    dest.departures.forEach(dep => {
                         html += `<span class="popup-time">${dep.time.substring(0, 5)}</span>`;
                     });
-                    html += `</div>`;
                     
-                    html += `</div>`;
+                    html += `</div></div>`;
                 });
                 
                 html += `</div>`;
             });
-            
-            html += `</div>`;
         }
 
         html += `</div>`;

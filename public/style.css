@@ -3647,7 +3647,7 @@ body.dark-theme .install-tip-steps section {
 }
 
 /* =========================================
- * POPUP ARRÊT V104 - Harmonisé avec la DA
+ * POPUP ARRÊT V105 - Style SNCF Connect
  * ========================================= */
 .stop-schedule-popup .leaflet-popup-content-wrapper {
     background: var(--bg-primary) !important;
@@ -3665,119 +3665,121 @@ body.dark-theme .install-tip-steps section {
 .stop-schedule-popup .leaflet-popup-content {
     margin: 0;
     min-width: 280px;
-    max-width: 340px;
+    max-width: 380px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 .stop-schedule-popup .leaflet-popup-close-button {
     color: var(--text-secondary) !important;
     font-size: 20px !important;
-    top: 10px !important;
-    right: 12px !important;
-    width: 24px !important;
-    height: 24px !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+    top: 8px !important;
+    right: 10px !important;
+    z-index: 10;
 }
 .stop-schedule-popup .leaflet-popup-close-button:hover {
     color: var(--text-primary) !important;
 }
 
-/* Structure V104 */
-.stop-popup-v104 {
+/* Scrollbar unique sur le content */
+.stop-schedule-popup .leaflet-popup-content::-webkit-scrollbar {
+    width: 6px;
+}
+.stop-schedule-popup .leaflet-popup-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.stop-schedule-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+.stop-schedule-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Structure V105 */
+.stop-popup-v105 {
     color: var(--text-primary);
 }
 
-/* Header */
-.stop-popup-v104 .popup-header {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-secondary);
-}
-.stop-popup-v104 .popup-title {
-    display: block;
-    font-size: 1.0625rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-.stop-popup-v104 .popup-subtitle {
-    display: block;
-    font-size: 0.75rem;
+/* Notice en haut */
+.stop-popup-v105 .popup-notice {
+    padding: 0.75rem 1rem;
+    background: rgba(99, 102, 241, 0.1);
     color: var(--primary-color);
-    font-weight: 500;
-    margin-top: 2px;
-}
-
-/* Liste des lignes */
-.stop-popup-v104 .popup-lines {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* Carte par ligne */
-.stop-popup-v104 .popup-line-card {
+    font-size: 0.75rem;
+    line-height: 1.4;
     border-bottom: 1px solid var(--border);
 }
-.stop-popup-v104 .popup-line-card:last-child {
+
+/* Bloc par ligne */
+.stop-popup-v105 .popup-line-block {
+    border-bottom: 1px solid var(--border);
+}
+.stop-popup-v105 .popup-line-block:last-child {
     border-bottom: none;
 }
 
-/* Destination */
-.stop-popup-v104 .popup-destination {
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.05));
-}
-.stop-popup-v104 .popup-destination:last-child {
-    border-bottom: none;
-}
-
-/* Header destination : badge + nom */
-.stop-popup-v104 .popup-dest-header {
+/* Header ligne : badge + nom arrêt */
+.stop-popup-v105 .popup-line-header {
     display: flex;
     align-items: center;
     gap: 0.625rem;
-    margin-bottom: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
 }
-.stop-popup-v104 .popup-badge {
+.stop-popup-v105 .popup-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 36px;
-    height: 24px;
+    min-width: 32px;
+    height: 22px;
     padding: 0 0.5rem;
     font-size: 0.8125rem;
     font-weight: 700;
     border-radius: var(--radius-sm);
     flex-shrink: 0;
 }
-.stop-popup-v104 .popup-dest-name {
+.stop-popup-v105 .popup-stop-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Destination row */
+.stop-popup-v105 .popup-dest-row {
+    padding: 0.75rem 1rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-light, rgba(128,128,128,0.1));
+}
+.stop-popup-v105 .popup-dest-row:last-child {
+    border-bottom: none;
+}
+.stop-popup-v105 .popup-dest-name {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 0.5rem;
 }
 
 /* Horaires */
-.stop-popup-v104 .popup-times {
+.stop-popup-v105 .popup-times {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.375rem;
 }
-.stop-popup-v104 .popup-time {
+.stop-popup-v105 .popup-time {
     display: inline-block;
-    padding: 0.375rem 0.75rem;
+    padding: 0.25rem 0.5rem;
     background: var(--bg-tertiary);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: var(--text-primary);
     font-variant-numeric: tabular-nums;
 }
 
 /* Empty state */
-.stop-popup-v104 .popup-empty {
+.stop-popup-v105 .popup-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3787,29 +3789,14 @@ body.dark-theme .install-tip-steps section {
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
-.stop-popup-v104 .popup-empty-icon {
+.stop-popup-v105 .popup-empty-icon {
     font-size: 2rem;
-}
-
-/* Scrollbar */
-.stop-popup-v104 .popup-lines::-webkit-scrollbar {
-    width: 5px;
-}
-.stop-popup-v104 .popup-lines::-webkit-scrollbar-track {
-    background: transparent;
-}
-.stop-popup-v104 .popup-lines::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-}
-.stop-popup-v104 .popup-lines::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
 }
 
 
 /* =========================================
  * STYLES PLANIFICATEUR (GÉNÉRAL)
- * ========================================= */ */
+ * ========================================= */
 .planner-block .form-group label,
 .itinerary-edit-form .form-group label {
     font-size: 0.75rem; 
