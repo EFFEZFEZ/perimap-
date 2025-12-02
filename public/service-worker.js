@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v80'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V80: Menu mobile position absolute corrigé
+const CACHE_VERSION = 'v81'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V81: Menu mobile compact
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
