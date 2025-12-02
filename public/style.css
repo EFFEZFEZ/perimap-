@@ -6545,7 +6545,10 @@ body:not(.view-is-locked) {
 }
 
 .mobile-menu-section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 0.25rem;
 }
 
 .mobile-menu-section:last-child {
@@ -6614,13 +6617,13 @@ body:not(.view-is-locked) {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 0.75rem 0.5rem;
+    padding: 0.85rem 0.75rem;
     background: transparent !important;
     background-color: transparent !important;
     border: none;
     outline: none !important;
     box-shadow: none !important;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #FFFFFF !important;
     opacity: 1 !important;
@@ -6632,6 +6635,7 @@ body:not(.view-is-locked) {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    border-radius: var(--radius-md);
 }
 
 .mobile-menu-category *,
