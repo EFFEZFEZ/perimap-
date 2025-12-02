@@ -179,7 +179,7 @@ export class UIManager {
                 });
             });
             popoverSubmitBtn.addEventListener('click', () => {
-                const dateText = dateSelect.options[dateSelect.selectedIndex]?.text || '';
+                let dateText = dateSelect.options[dateSelect.selectedIndex]?.text || '';
                 const tab = popover.querySelector('.popover-tab.active')?.dataset?.tab || 'partir';
 
                 if (tab === 'partir' && !userAdjustedTime) {
@@ -198,6 +198,39 @@ export class UIManager {
                         this.syncEnhancedTimeSelect(hourSelect);
                         this.syncEnhancedTimeSelect(minuteSelect);
                     } catch (e) {}
+                }
+
+                // V92: Auto-ajustement de la date si l'heure est passée
+                // Si la date sélectionnée est "Aujourd'hui" et l'heure est déjà passée,
+                // on bascule automatiquement sur "Demain"
+                const selectedDateValue = dateSelect.value;
+                const todayIso = new Date().toISOString().split('T')[0];
+                
+                if (selectedDateValue === todayIso) {
+                    const now = new Date();
+                    const selectedHour = parseInt(hourSelect.value) || 0;
+                    const selectedMinute = parseInt(minuteSelect.value) || 0;
+                    
+                    // Créer un objet Date pour l'heure sélectionnée aujourd'hui
+                    const selectedTime = new Date();
+                    selectedTime.setHours(selectedHour, selectedMinute, 0, 0);
+                    
+                    // Si l'heure sélectionnée est passée, basculer sur demain
+                    if (selectedTime < now) {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        const tomorrowIso = tomorrow.toISOString().split('T')[0];
+                        
+                        // Trouver l'option "Demain" dans le select et l'activer
+                        for (let i = 0; i < dateSelect.options.length; i++) {
+                            if (dateSelect.options[i].value === tomorrowIso) {
+                                dateSelect.value = tomorrowIso;
+                                dateText = dateSelect.options[i].text;
+                                console.log(`⏰ Heure passée (${selectedHour}h${String(selectedMinute).padStart(2,'0')}) → Basculement automatique sur Demain`);
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 const hourText = String(hourSelect.value).padStart(2, '0');

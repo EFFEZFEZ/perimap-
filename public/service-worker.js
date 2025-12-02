@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v91'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V91: Redesign itinéraires style TBM/SNCF/IDFM épuré
+const CACHE_VERSION = 'v93'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V93: Redesign interface épurée + icônes modernes
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
