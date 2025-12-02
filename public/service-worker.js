@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v81'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V81: Menu mobile compact
+const CACHE_VERSION = 'v82'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V82: Fix marge vue itinéraire
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

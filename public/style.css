@@ -1079,6 +1079,11 @@ body.itinerary-view-active #legal-strip {
     display: none !important;
 }
 
+/* V81: Retirer le padding-top quand le header est caché */
+body.itinerary-view-active {
+    padding-top: 0 !important;
+}
+
 .header-content {
     display: flex;
     justify-content: space-between;
