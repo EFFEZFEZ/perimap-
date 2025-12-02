@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v78'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V78: Menu mobile accordéons uniformes
+const CACHE_VERSION = 'v79'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V79: Menu mobile fond opaque
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
