@@ -1616,7 +1616,7 @@ async function executeItinerarySearch(source, sourceElements) {
 
 /**
  * V60: Charge plus de départs en décalant l'heure de recherche
- * Ajoute les nouveaux itinéraires à la liste existante
+ * V95: Cache les itinéraires existants pour éviter les doublons + ne charge que des bus
  */
 async function loadMoreDepartures() {
     if (!lastSearchTime || !fromPlaceId || !toPlaceId) {
@@ -1624,19 +1624,33 @@ async function loadMoreDepartures() {
         return;
     }
 
+    // V95: Créer un cache des signatures d'itinéraires existants pour éviter les doublons
+    const existingSignatures = new Set();
+    const existingDepartures = new Set();
+    
+    allFetchedItineraries.forEach(it => {
+        // Signature basée sur la structure du trajet
+        const sig = createItinerarySignature(it);
+        existingSignatures.add(sig);
+        // Aussi garder les heures de départ exactes
+        if (it.departureTime && it.departureTime !== '~') {
+            existingDepartures.add(it.departureTime);
+        }
+    });
+
     // Trouver le dernier départ bus pour commencer après
     const busItineraries = allFetchedItineraries.filter(it => it.type === 'BUS' || it.type === 'TRANSIT');
     let startHour, startMinute;
     
     if (busItineraries.length > 0) {
-        // Prendre le dernier départ + 1 minute
+        // Prendre le dernier départ + 5 minutes pour avoir de vrais nouveaux horaires
         const lastDep = busItineraries[busItineraries.length - 1].departureTime;
         const match = lastDep?.match(/(\d{1,2}):(\d{2})/);
         if (match) {
             startHour = parseInt(match[1], 10);
-            startMinute = parseInt(match[2], 10) + 1;
+            startMinute = parseInt(match[2], 10) + 5; // +5 min au lieu de +1
             if (startMinute >= 60) {
-                startMinute = 0;
+                startMinute = startMinute - 60;
                 startHour = (startHour + 1) % 24;
             }
         }
@@ -1657,15 +1671,38 @@ async function loadMoreDepartures() {
     };
 
     console.log(`🔄 Chargement + de départs à partir de ${offsetSearchTime.hour}:${offsetSearchTime.minute}`);
+    console.log(`📦 Cache: ${existingSignatures.size} signatures, ${existingDepartures.size} heures de départ`);
 
     try {
         // Appeler l'API avec le nouvel horaire
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
         let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
         
-        // Filtrer les doublons (même heure de départ)
-        const existingDepartures = new Set(allFetchedItineraries.map(it => it.departureTime));
-        newItineraries = newItineraries.filter(it => !existingDepartures.has(it.departureTime));
+        // V95: Filtrer strictement les nouveaux itinéraires
+        const beforeFilter = newItineraries.length;
+        newItineraries = newItineraries.filter(it => {
+            // 1. Exclure TOUS les vélo et piéton (on les a déjà de la première recherche)
+            if (it.type === 'BIKE' || it.type === 'WALK' || it._isBike || it._isWalk) {
+                return false;
+            }
+            
+            // 2. Exclure les heures de départ déjà connues
+            if (it.departureTime && existingDepartures.has(it.departureTime)) {
+                return false;
+            }
+            
+            // 3. Exclure les trajets avec la même signature (même structure)
+            const sig = createItinerarySignature(it);
+            if (existingSignatures.has(sig)) {
+                // Même structure mais peut-être horaire différent - vérifier l'heure
+                // Si c'est vraiment le même trajet à la même heure, exclure
+                return false;
+            }
+            
+            return true;
+        });
+        
+        console.log(`🔍 Filtrage: ${beforeFilter} → ${newItineraries.length} (${beforeFilter - newItineraries.length} doublons/vélo/piéton exclus)`);
         
         if (newItineraries.length === 0) {
             console.log('Aucun nouveau départ trouvé');
@@ -1678,9 +1715,15 @@ async function loadMoreDepartures() {
             return;
         }
 
-        console.log(`✅ ${newItineraries.length} nouveaux départs ajoutés`);
+        console.log(`✅ ${newItineraries.length} nouveaux départs bus ajoutés`);
         
-        // Ajouter les nouveaux itinéraires
+        // Ajouter les nouveaux itinéraires et mettre à jour le cache
+        newItineraries.forEach(it => {
+            const sig = createItinerarySignature(it);
+            existingSignatures.add(sig);
+            if (it.departureTime) existingDepartures.add(it.departureTime);
+        });
+        
         allFetchedItineraries = [...allFetchedItineraries, ...newItineraries];
         
         // V63: NE PAS re-trier, garder l'ordre chronologique naturel
@@ -1690,6 +1733,16 @@ async function loadMoreDepartures() {
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         
+        // Réactiver le bouton
+        const btn = document.querySelector('.load-more-departures button');
+        if (btn) {
+            btn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Charger + de départs
+            `;
+            btn.disabled = false;
+        }
+        
     } catch (error) {
         console.error('Erreur chargement + de départs:', error);
         const btn = document.querySelector('.load-more-departures button');
@@ -1698,6 +1751,41 @@ async function loadMoreDepartures() {
             btn.disabled = false;
         }
     }
+}
+
+/**
+ * V95: Crée une signature unique pour un itinéraire basée sur sa structure
+ * Permet de détecter les doublons même avec des horaires différents
+ */
+function createItinerarySignature(it) {
+    if (!it) return 'null';
+    
+    const type = it.type || 'BUS';
+    
+    // Pour vélo/piéton, signature simple par type
+    if (type === 'BIKE' || type === 'WALK') {
+        return `${type}_only`;
+    }
+    
+    // Pour les bus, signature basée sur les lignes et arrêts
+    const segments = (it.summarySegments || [])
+        .map(s => s.name || s.routeShortName || 'X')
+        .join('>');
+    
+    const steps = (it.steps || [])
+        .filter(s => s.type === 'BUS')
+        .map(s => {
+            const route = s.routeShortName || s.route?.route_short_name || '';
+            const from = (s.departureStop || '').toLowerCase().slice(0, 15);
+            const to = (s.arrivalStop || '').toLowerCase().slice(0, 15);
+            return `${route}:${from}-${to}`;
+        })
+        .join('|');
+    
+    // Inclure l'heure de départ pour distinguer les mêmes trajets à des heures différentes
+    const depTime = it.departureTime || '';
+    
+    return `${type}::${segments}::${steps}::${depTime}`;
 }
 
 function prefillOtherPlanner(sourceFormName, sourceElements) {
