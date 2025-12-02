@@ -2597,7 +2597,7 @@ details[open] .accordion-content {
     }
     #map-container #map-view #top-bar > #status-info #data-status { display: none; }
     
-    /* V74: Bouton Filtrer - Position fixe en bas à gauche sur mobile */
+    /* V75: Bouton Filtrer - Position fixe en bas à DROITE sur mobile */
     #map-container #map-view #top-bar > #btn-toggle-filter,
     #map-container #map-view #top-bar > button#btn-toggle-filter,
     #map-view #top-bar #btn-toggle-filter,
@@ -2608,9 +2608,9 @@ details[open] .accordion-content {
         opacity: 1 !important;
         position: fixed !important;
         top: auto !important;
-        bottom: 100px !important; /* V74: Augmenté pour test */
-        left: 20px !important;
-        right: auto !important;
+        bottom: calc(30px + env(safe-area-inset-bottom)) !important;
+        left: auto !important;
+        right: 20px !important;
         width: 56px !important;
         height: 56px !important;
         min-width: 56px !important;
@@ -2619,14 +2619,14 @@ details[open] .accordion-content {
         padding: 0 !important;
         justify-content: center !important;
         align-items: center !important;
-        color: white !important; /* V74: Couleur très visible pour test */
-        z-index: 99999 !important; /* V74: Z-index encore plus élevé */
-        background: #ff0000 !important; /* V74: Rouge vif pour test */
-        border: 3px solid #ffff00 !important; /* V74: Bordure jaune pour test */
-        box-shadow: 0 4px 20px rgba(255, 0, 0, 0.5) !important;
+        color: white !important;
+        z-index: 1100 !important;
+        background: var(--primary) !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
         pointer-events: auto !important;
-        backdrop-filter: blur(8px) !important;
-        -webkit-backdrop-filter: blur(8px) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         transform: none !important;
     }
     #map-container #map-view #top-bar > #btn-toggle-filter span { display: none; }

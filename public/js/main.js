@@ -1197,12 +1197,33 @@ function setupNavigationDropdowns() {
     });
 }
 
+// V75: Vérifie si le dashboard est chargé et le recharge si nécessaire
+async function ensureDashboardLoaded() {
+    // Vérifier si les éléments clés du dashboard existent
+    const dashboardExists = document.getElementById('dashboard-container');
+    if (!dashboardExists) {
+        console.log('[Navigation] Dashboard non chargé, rechargement...');
+        await reloadDashboardFromTarifs();
+        return true; // Indique qu'on a rechargé
+    }
+    return false;
+}
+
 // Gérer les actions de navigation
-function handleNavigationAction(action) {
+async function handleNavigationAction(action) {
+    // V75: Pour les actions qui nécessitent le dashboard, s'assurer qu'il est chargé
+    const needsDashboard = ['itineraire', 'horaires', 'info-trafic', 'carte'].includes(action);
+    
+    if (needsDashboard) {
+        await ensureDashboardLoaded();
+        // Réinitialiser les références DOM après rechargement potentiel
+        initializeDomElements();
+    }
+    
     switch(action) {
         case 'itineraire':
             // Aller à la vue résultats d'itinéraire (sans recherche préalable)
-            showItineraryResultsView();
+            showResultsView();
             break;
         case 'horaires':
             showDashboardView('horaires');
