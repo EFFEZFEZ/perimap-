@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v97'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V97: Debug horaires arrêts détaillé
+const CACHE_VERSION = 'v98'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V98: Debug bug timeManager + correction temporaire
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -651,7 +651,24 @@ export class MapRenderer {
      * Appelé lorsqu'un marqueur d'arrêt est cliqué
      */
     onStopClick(masterStop) {
-        const currentSeconds = this.timeManager.getCurrentSeconds();
+        // V98: Debug plus détaillé pour comprendre le bug de l'heure
+        const rawSeconds = this.timeManager.getCurrentSeconds();
+        const realTimeNow = new Date();
+        const expectedSeconds = realTimeNow.getHours() * 3600 + realTimeNow.getMinutes() * 60 + realTimeNow.getSeconds();
+        
+        console.log(`⏰ V98 DEBUG timeManager:`);
+        console.log(`   - getCurrentSeconds() retourne: ${rawSeconds} (= ${Math.floor(rawSeconds/3600)}:${String(Math.floor((rawSeconds%3600)/60)).padStart(2,'0')})`);
+        console.log(`   - Heure réelle (new Date()): ${realTimeNow.toLocaleTimeString()} = ${expectedSeconds} secondes`);
+        console.log(`   - timeManager.mode: ${this.timeManager.mode}`);
+        console.log(`   - timeManager.isRunning: ${this.timeManager.isRunning}`);
+        console.log(`   - timeManager.simulatedSeconds: ${this.timeManager.simulatedSeconds}`);
+        
+        // Utiliser l'heure RÉELLE si le timeManager semble buggé
+        const currentSeconds = (rawSeconds < 3600 && expectedSeconds > 18000) ? expectedSeconds : rawSeconds;
+        if (rawSeconds !== currentSeconds) {
+            console.warn(`⚠️ V98: Correction appliquée! Utilise ${currentSeconds} au lieu de ${rawSeconds}`);
+        }
+        
         const currentDate = this.timeManager.getCurrentDate();
 
         // V96: Debug pour comprendre pourquoi les horaires ne s'affichent pas
