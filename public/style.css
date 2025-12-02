@@ -6515,12 +6515,12 @@ body:not(.view-is-locked) {
 
 /* Mobile menu */
 .mobile-menu {
-    position: fixed;
-    top: 56px; /* Hauteur du header */
+    position: absolute;
+    top: 100%; /* Juste en dessous du header */
     left: 0;
     right: 0;
-    bottom: 0;
-    background: #0f172a; /* Fond solide, pas de transparence */
+    height: calc(100vh - 56px); /* Hauteur totale moins le header */
+    background: #0f172a; /* Fond solide bleu foncé */
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     padding: 1rem;
@@ -6711,25 +6711,6 @@ body.mobile-menu-open {
     height: 100%;
 }
 
-/* Overlay semi-transparent quand menu ouvert */
-.mobile-menu::before {
-    content: '';
-    position: fixed;
-    top: 56px; /* Hauteur du header */
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.mobile-menu:not(.hidden)::before {
-    opacity: 1;
-}
-
 /* Dark mode */
 body.dark-theme .nav-dropdown-menu {
     background: rgba(15, 23, 42, 0.98);
@@ -6738,7 +6719,7 @@ body.dark-theme .nav-dropdown-menu {
 }
 
 body.dark-theme .mobile-menu {
-    background: rgba(15, 23, 42, 0.98);
+    background: #0f172a; /* Fond solide en dark mode aussi */
     border-color: rgba(255, 255, 255, 0.1);
 }
 
