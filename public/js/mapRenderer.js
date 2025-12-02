@@ -731,16 +731,19 @@ export class MapRenderer {
                     if (waitMinutes <= 0) {
                         timeClass = 'imminent';
                         waitLabel = 'Imm.';
-                    } else if (waitMinutes <= 5) {
-                        timeClass = 'soon';
-                        waitLabel = `${waitMinutes}'`;
+                    } else if (waitMinutes < 60) {
+                        timeClass = waitMinutes <= 5 ? 'soon' : '';
+                        waitLabel = `${waitMinutes} min`;
                     } else {
-                        waitLabel = `${waitMinutes}'`;
+                        // Format heures + minutes (ex: 2h40)
+                        const hours = Math.floor(waitMinutes / 60);
+                        const mins = waitMinutes % 60;
+                        waitLabel = mins > 0 ? `${hours}h${String(mins).padStart(2, '0')}` : `${hours}h`;
                     }
                     
-                    html += `<span class="departure-time-chip ${timeClass}" title="Dans ${waitMinutes} min">
-                                ${dep.time.substring(0, 5)}
-                                <small>${waitLabel}</small>
+                    html += `<span class="departure-time-chip ${timeClass}">
+                                <span class="chip-time">${dep.time.substring(0, 5)}</span>
+                                <span class="chip-wait">${waitLabel}</span>
                              </span>`;
                 });
                 html += `</div>`;
