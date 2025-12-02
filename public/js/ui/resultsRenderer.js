@@ -311,21 +311,28 @@ export function createResultsRenderer(deps) {
 
       let summaryHtml = '';
       if (type === 'BIKE') {
-        summaryHtml = `<div class='route-summary-bus-icon' style='color:#059669;border-color:#059669;'>${ICONS.BICYCLE}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à vélo (${itinerary.steps[0]?.distance || ''})</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon route-summary-bike-icon'>${ICONS.BICYCLE}</div><span class='route-type-label'>Trajet à vélo</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
       } else if (type === 'WALK') {
-        summaryHtml = `<div class='route-summary-bus-icon' style='color:var(--secondary);border-color:var(--secondary);'>${ICONS.WALK}</div><span style='font-weight:600;font-size:0.9rem;'>Trajet à pied (${itinerary.steps[0]?.distance || ''})</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon route-summary-walk-only-icon'>${ICONS.WALK}</div><span class='route-type-label'>Trajet à pied</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
       } else {
-        const hasWalk = hasSignificantWalk(itinerary);
-        if (hasWalk) {
-          summaryHtml = `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
-        }
-        summaryHtml += `<div class='route-summary-bus-icon' style='color:var(--primary);border-color:var(--primary);'>${ICONS.BUS}</div>`;
-        (itinerary.summarySegments || []).forEach((seg, i) => {
+        // V94: Style IDFM - Points entre les étapes, pas de marche au début dans l'aperçu
+        const segments = itinerary.summarySegments || [];
+        const hasWalkAtEnd = hasSignificantWalk(itinerary);
+        
+        // Construire le résumé style IDFM : Ligne • Ligne • (marche)
+        segments.forEach((seg, i) => {
           const label = seg.name || 'Route';
           summaryHtml += `<div class='route-line-badge' style='background-color:${seg.color};color:${seg.textColor};'>${label}</div>`;
-          if (i < itinerary.summarySegments.length - 1) summaryHtml += `<span class='route-summary-dot'>•</span>`;
+          
+          // Ajouter un point séparateur entre les lignes (pas après la dernière)
+          if (i < segments.length - 1) {
+            summaryHtml += `<span class='route-summary-dot'>•</span>`;
+          }
         });
-        if (hasWalk) {
+        
+        // Si marche significative à la fin, ajouter l'icône marche après les lignes
+        if (hasWalkAtEnd) {
+          summaryHtml += `<span class='route-summary-dot'>•</span>`;
           summaryHtml += `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
         }
       }
