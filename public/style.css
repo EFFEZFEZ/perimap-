@@ -7058,6 +7058,96 @@ body.view-is-locked #site-footer {
     margin: 0;
 }
 
+/* === FOOTER SOCIAL LINKS === */
+.footer-social-column {
+    min-width: 120px;
+}
+
+.footer-social-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.footer-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-social-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Instagram gradient */
+.footer-social-btn[aria-label*="Instagram"]:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Facebook blue */
+.footer-social-btn[aria-label*="Facebook"]:hover {
+    background: #1877f2;
+    color: white;
+    border-color: transparent;
+}
+
+/* Footer bottom social (mobile) */
+.footer-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-social-mobile {
+    display: none;
+}
+
+.footer-social-btn-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.footer-social-btn-sm svg {
+    width: 16px;
+    height: 16px;
+}
+
+.footer-social-btn-sm:hover {
+    transform: scale(1.1);
+}
+
+.footer-social-btn-sm[aria-label*="Instagram"]:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+}
+
+.footer-social-btn-sm[aria-label*="Facebook"]:hover {
+    background: #1877f2;
+    color: white;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
     .footer-main {
@@ -7080,6 +7170,14 @@ body.view-is-locked #site-footer {
         margin-bottom: 0.75rem;
     }
     
+    .footer-social-links {
+        justify-content: center;
+    }
+    
+    .footer-social-column {
+        order: -1; /* Social en premier sur mobile */
+    }
+
     .footer-data-info {
         justify-content: center;
     }
@@ -7087,6 +7185,17 @@ body.view-is-locked #site-footer {
     .footer-bottom {
         flex-direction: column;
         text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .footer-bottom-right {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .footer-social-mobile {
+        display: flex;
+        gap: 0.5rem;
     }
 }
 

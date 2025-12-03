@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v118'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V118: SEO ultra-puissant - Schema.org, OpenGraph, sitemap, robots.txt
+const CACHE_VERSION = 'v119'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V119: SEO keywords renforcés + icônes réseaux sociaux footer
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
