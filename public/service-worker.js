@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v120'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V120: Mentions légales + fix footer PC alignement
+const CACHE_VERSION = 'v121'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V121: Corrections mentions légales - One.com Suède + email perimapfr@gmail.com
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
