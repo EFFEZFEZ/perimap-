@@ -1,872 +1,845 @@
 <!DOCTYPE html>
-<html lang="fr" prefix="og: http://ogp.me/ns#">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    
-    <!-- ═══════════════════════════════════════════════════════════════
-         🎯 SEO ABOUT PAGE - PÉRIMAP
-         Application officieuse Péribus Périgueux
-    ═══════════════════════════════════════════════════════════════ -->
-    
-    <title>À propos de PériMap | Application Bus Périgueux Gratuite | Open Source</title>
-    <meta name="description" content="🚍 Découvrez PériMap : l'application gratuite et open source pour les bus Péribus à Périgueux. Horaires temps réel, calcul d'itinéraires, données officielles GTFS du Grand Périgueux. Sans pub, sans compte !">
-    
-    <!-- SEO Meta Tags -->
-    <meta name="keywords" content="périmap, application péribus, bus périgueux gratuit, horaires péribus, transport dordogne, open source transport, gtfs périgueux, application bus gratuite, péribus horaires, grand périgueux transport, mobilité périgueux">
-    <meta name="author" content="PériMap - Projet Open Source">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="googlebot" content="index, follow">
-    <meta name="revisit-after" content="7 days">
-    <meta name="rating" content="general">
-    <meta name="distribution" content="global">
-    
-    <!-- Canonical & Alternate -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos - Périmap | L'app qui simplifie vos trajets en bus à Périgueux</title>
+    <meta name="description" content="Découvrez Périmap, l'application moderne pour les transports en commun de Périgueux. Une solution innovante pour le Grand Périgueux.">
+    <meta name="keywords" content="Périmap, à propos, application bus Périgueux, Péribus, transport Grand Périgueux">
     <link rel="canonical" href="https://perimap.fr/about.html">
-    <link rel="alternate" hreflang="fr" href="https://perimap.fr/about.html">
-    <link rel="alternate" hreflang="x-default" href="https://perimap.fr/about.html">
+    <link rel="icon" type="image/png" href="icons/logo.png">
+    <link rel="manifest" href="manifest.json">
     
     <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="PériMap">
-    <meta property="og:title" content="À propos de PériMap | Application Bus Périgueux Open Source">
-    <meta property="og:description" content="🚍 PériMap : votre assistant mobilité gratuit pour le réseau Péribus. Horaires en temps réel, itinéraires optimisés, données ouvertes. Projet indépendant et sans pub.">
+    <meta property="og:title" content="À propos - Périmap">
+    <meta property="og:description" content="Découvrez l'histoire et la mission de Périmap, votre compagnon de transport à Périgueux.">
+    <meta property="og:image" content="https://perimap.fr/icons/logo.png">
     <meta property="og:url" content="https://perimap.fr/about.html">
-    <meta property="og:image" content="https://perimap.fr/icons/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:locale" content="fr_FR">
+    <meta property="og:type" content="website">
     
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="À propos de PériMap | Application Bus Périgueux">
-    <meta name="twitter:description" content="🚍 Application gratuite et open source pour les bus Péribus. Horaires temps réel, itinéraires, sans pub ni compte !">
-    <meta name="twitter:image" content="https://perimap.fr/icons/og-image.png">
-    
-    <!-- Geo Tags -->
-    <meta name="geo.region" content="FR-NAQ">
-    <meta name="geo.placename" content="Périgueux, Dordogne">
-    <meta name="geo.position" content="45.1849;0.7214">
-    <meta name="ICBM" content="45.1849, 0.7214">
-    
-    <!-- PWA -->
-    <meta name="theme-color" content="#22c55e">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="PériMap">
-    <meta name="application-name" content="PériMap">
-    <meta name="msapplication-TileColor" content="#22c55e">
-    <meta name="msapplication-config" content="/browserconfig.xml">
-    
-    <!-- Links -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
-    <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
-    
-    <!-- Preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="//api.github.com">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Schema.org - About Page -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="À propos - Périmap">
+    <meta name="twitter:description" content="Découvrez l'histoire et la mission de Périmap.">
+
+    <!-- Schema.org -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "AboutPage",
-        "name": "À propos de PériMap",
-        "description": "PériMap est une application web progressive gratuite et open source pour consulter les horaires et itinéraires du réseau Péribus à Périgueux.",
+        "name": "À propos de Périmap",
+        "description": "Découvrez Périmap, l'application moderne pour les transports en commun de Périgueux.",
         "url": "https://perimap.fr/about.html",
         "mainEntity": {
-            "@type": "SoftwareApplication",
-            "name": "PériMap",
-            "applicationCategory": "TravelApplication",
-            "operatingSystem": "Web, Android, iOS",
-            "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "EUR"
-            },
-            "isAccessibleForFree": true,
-            "license": "https://opensource.org/licenses/MIT"
-        },
-        "breadcrumb": {
-            "@type": "BreadcrumbList",
-            "itemListElement": [
-                {
-                    "@type": "ListItem",
-                    "position": 1,
-                    "name": "Accueil PériMap",
-                    "item": "https://perimap.fr/"
-                },
-                {
-                    "@type": "ListItem",
-                    "position": 2,
-                    "name": "À propos",
-                    "item": "https://perimap.fr/about.html"
-                }
-            ]
+            "@type": "Organization",
+            "name": "Périmap",
+            "url": "https://perimap.fr",
+            "logo": "https://perimap.fr/icons/logo.png",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "perimapfr@gmail.com",
+                "contactType": "customer service"
+            }
         }
     }
     </script>
-    
-    <!-- Schema.org - Organization -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "PériMap",
-        "alternateName": "Péribus Horaires App",
-        "url": "https://perimap.fr",
-        "logo": "https://perimap.fr/icons/icon-512.png",
-        "description": "Application citoyenne gratuite pour le réseau de bus Péribus du Grand Périgueux",
-        "foundingDate": "2024",
-        "areaServed": {
-            "@type": "Place",
-            "name": "Grand Périgueux",
-            "address": {
-                "@type": "PostalAddress",
-                "addressLocality": "Périgueux",
-                "addressRegion": "Dordogne",
-                "addressCountry": "FR"
-            }
-        },
-        "sameAs": [
-            "https://github.com/EFFEZFEZ/p-rimap-sans-api-"
-        ]
-    }
-    </script>
-    
-    <!-- Schema.org - FAQ -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "PériMap est-il gratuit ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Oui, PériMap est 100% gratuit, sans publicité et sans création de compte. C'est un projet open source indépendant."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "PériMap est-il officiel ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Non, PériMap est un projet indépendant non affilié au Grand Périgueux ou à Péribus. Il utilise les données ouvertes officielles (GTFS) sous licence ODbL."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "D'où viennent les données de PériMap ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Les horaires proviennent des données GTFS officielles du Grand Périgueux publiées en open data. Les itinéraires sont calculés via l'API Google Routes pour plus de précision."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Comment installer PériMap sur mon téléphone ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "PériMap est une Progressive Web App (PWA). Sur Android, cliquez sur 'Ajouter à l'écran d'accueil' dans Chrome. Sur iPhone, utilisez Safari et 'Sur l'écran d'accueil' dans le menu partage."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Puis-je utiliser PériMap hors connexion ?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Oui, une fois installé, PériMap fonctionne hors ligne pour consulter les horaires. Seul le calcul d'itinéraire nécessite une connexion internet."
-                }
-            }
-        ]
-    }
-    </script>
+
     <style>
-        /* === ADMIN PANEL STYLES === */
-        .tile-admin {
-            background: transparent !important;
-            box-shadow: none !important;
-            padding: 0.5rem !important;
-            text-align: center;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .admin-login-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-md);
-            font-size: 0.8rem;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: all 0.2s;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
         }
-        .admin-login-btn:hover {
-            opacity: 1;
-            background: var(--bg-tertiary);
-        }
-        
-        .admin-modal {
+
+        /* Animated background particles */
+        .particles {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 200, 255, 0.3);
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .logo span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00c8ff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00c8ff, #00ff88);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Main content */
+        main {
+            position: relative;
+            z-index: 1;
+            padding-top: 120px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.2s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px 30px;
+            transition: all 0.4s ease;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.3s; }
+        .feature-card:nth-child(2) { animation-delay: 0.5s; }
+        .feature-card:nth-child(3) { animation-delay: 0.7s; }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(0, 200, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 200, 255, 0.15);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.2), rgba(0, 255, 136, 0.2));
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            font-size: 28px;
+            margin-bottom: 20px;
         }
-        .admin-modal.hidden { display: none; }
-        
-        .admin-modal-content {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.7;
+        }
+
+        /* Mission Section */
+        .mission {
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .mission-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 200, 255, 0.05);
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            border-radius: 30px;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.1) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .mission h2 {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            color: #0a0a1a;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 200, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 200, 255, 0.4);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #00c8ff;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            transform: translateY(-3px);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.7);
+            transition: fill 0.3s ease;
+        }
+
+        .social-links a:hover svg {
+            fill: #0a0a1a;
+        }
+
+        .copyright {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .mission-content {
+                padding: 40px 25px;
+            }
+
+            .feature-card {
+                padding: 30px 25px;
+            }
+        }
+
+        /* Admin Panel - Hidden */
+        .admin-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+
+        .admin-trigger:hover {
+            opacity: 1;
+        }
+
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-modal.active {
+            display: flex;
+        }
+
+        .admin-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
             width: 100%;
-            max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
-            padding: 1.5rem;
-            position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
         }
-        
-        .admin-close-btn {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: var(--bg-secondary);
-            border-radius: 50%;
-            font-size: 1.25rem;
-            cursor: pointer;
-            color: var(--text-muted);
+
+        .admin-content h2 {
+            margin-bottom: 20px;
+            color: #00c8ff;
         }
-        .admin-close-btn:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+
+        .admin-login {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 300px;
         }
-        
-        .admin-screen h2 {
-            margin-bottom: 0.5rem;
-            font-size: 1.25rem;
-        }
-        .admin-screen > p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        
-        #admin-password {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-md);
+
+        .admin-login input {
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
             font-size: 1rem;
-            margin-bottom: 1rem;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
         }
-        #admin-password:focus {
-            outline: none;
-            border-color: var(--primary);
+
+        .admin-login button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a1a;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        
-        .admin-error {
-            color: var(--color-red);
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+
+        .admin-login button:hover {
+            transform: scale(1.02);
         }
-        .admin-error.hidden { display: none; }
-        
-        .admin-subtitle {
-            font-size: 0.85rem !important;
-            margin-bottom: 1rem !important;
+
+        .admin-panel {
+            display: none;
         }
-        
-        .admin-table-wrapper {
-            overflow-x: auto;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
+
+        .admin-panel.active {
+            display: block;
         }
-        
+
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            margin: 20px 0;
         }
-        .admin-table th {
-            background: var(--bg-secondary);
-            padding: 0.6rem 0.4rem;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.75rem;
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-        .admin-table th:first-child {
-            text-align: left;
-            padding-left: 0.75rem;
-        }
+
+        .admin-table th,
         .admin-table td {
-            padding: 0.5rem 0.4rem;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-        }
-        .admin-table td:first-child {
+            padding: 12px;
             text-align: left;
-            padding-left: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .admin-table tr:last-child td {
-            border-bottom: none;
+
+        .admin-table th {
+            color: #00c8ff;
+            font-weight: 600;
         }
-        .admin-table tbody tr:hover {
-            background: var(--bg-secondary);
+
+        .admin-table select,
+        .admin-table input {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            width: 100%;
         }
-        
-        .admin-line-badge {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: white;
-            min-width: 32px;
-            text-align: center;
-        }
-        
-        .admin-table input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-        
+
         .admin-actions {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: 10px;
+            margin-top: 20px;
         }
-        .admin-actions .btn {
-            flex: 1;
-            padding: 0.75rem;
-            font-size: 0.9rem;
-        }
-        
-        .admin-status {
-            text-align: center;
-            margin-top: 0.75rem;
-            font-size: 0.85rem;
-            min-height: 1.2em;
-        }
-        .admin-status.success { color: var(--primary); }
-        .admin-status.error { color: var(--color-red); }
-        .admin-status.loading { color: var(--text-muted); }
-        
-        /* Category headers in table */
-        .admin-table .category-row td {
-            background: var(--bg-tertiary);
+
+        .admin-actions button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            color: #0a0a1a;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .admin-status {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .admin-status.success {
+            display: block;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+        }
+
+        .admin-status.error {
+            display: block;
+            background: rgba(255, 100, 100, 0.1);
+            color: #ff6464;
         }
     </style>
 </head>
-<body class="about-page">
-    <header id="main-header" class="about-header">
-        <div class="header-content about-header-content">
-            <div class="logo">
-                <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Logo PériMap" class="header-logo-img">
-                <div class="header-title-group">
-                    <span class="brand-name">PériMap</span>
-                    <span class="brand-sub">Assistant mobilité Grand Périgueux</span>
-                </div>
-            </div>
-            <nav class="header-nav">
-                <button id="theme-toggle-btn" class="btn-icon-round" aria-label="Basculer thème sombre" title="Thème clair" aria-pressed="true">
-                    <span id="theme-toggle-icon">☀️</span>
-                </button>
-            </nav>
-        </div>
+<body>
+    <!-- Animated particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">
+            <img src="icons/logo.png" alt="Périmap">
+            <span>Périmap</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/#itineraire">Itinéraire</a>
+            <a href="/#horaires">Horaires</a>
+            <a href="/mentions-legales.html">Mentions légales</a>
+        </nav>
     </header>
 
-    <main class="about-main">
-        <div class="about-back-row">
-            <a href="/" class="btn btn-secondary about-back-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                <span>Retour au menu</span>
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Une app créée pour <span>simplifier</span> vos trajets</h1>
+            <p>Périmap est née d'une envie simple : rendre les transports en commun de Périgueux accessibles, modernes et agréables à utiliser. Une solution 100% gratuite pour tous les usagers.</p>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚍</div>
+                    <h3>Temps réel</h3>
+                    <p>Suivez vos bus en direct sur la carte et consultez les horaires de passage actualisés à chaque arrêt.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Itinéraires optimisés</h3>
+                    <p>Trouvez le meilleur trajet grâce à notre moteur de calcul intégré, combinant marche et transport en commun.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Hors-ligne</h3>
+                    <p>Installez l'app sur votre téléphone et accédez aux horaires même sans connexion internet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission Section -->
+        <section class="mission">
+            <div class="mission-content">
+                <h2>Notre mission</h2>
+                <p>Périmap est un projet indépendant et bénévole, développé avec passion pour améliorer la mobilité quotidienne des habitants du Grand Périgueux. L'application utilise les données GTFS officielles du réseau Péribus pour vous offrir des informations fiables et à jour.</p>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <a href="/" class="cta-button">
+                <span>Découvrir l'application</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
             </a>
-        </div>
-
-        <div class="tile-layout">
-        <section class="about-tile tile-primary" data-animate>
-            <div>
-                <div class="hero-badge">Open data • PWA</div>
-                <h1>PériMap en clair</h1>
-                <p class="hero-lede">Une carte rapide et légère pour préparer vos trajets dans le Grand Périgueux sans prise de tête.</p>
-            </div>
-            <ul class="tile-points">
-                <li><span>Trajets fiables</span><small>Horaires officiels du Grand Périgueux + calcul Google Routes.</small></li>
-                <li><span>Projet personnel</span><small>Fait par un passionné, pas par Péribus. Attribution ODbL respectée et base <code>gtfs.bundle.json</code> publique.</small></li>
-                <li><span>Sans bruit</span><small>Pas de compte, pas de pub : juste l'info nécessaire pour partir.</small></li>
-            </ul>
-            <a class="hero-link" href="https://github.com/EFFEZFEZ/p-rimap-sans-api-" target="_blank" rel="noopener">Voir le code source →</a>
         </section>
-
-        <section class="about-tile tile-secondary" data-animate>
-            <div class="install-heading">
-                <h2>Installer PériMap</h2>
-                <p class="install-blurb">Pensez à ajouter PériMap à votre écran d'accueil 😉 ça ne prend aucune place !</p>
-            </div>
-            <p id="install-helper" class="install-helper"></p>
-            <button id="install-pwa-btn" class="install-btn" disabled>Installer PériMap</button>
-        </section>
-
-        <!-- Bouton connexion personnel (discret) -->
-        <section class="about-tile tile-admin" data-animate>
-            <button id="admin-login-btn" class="admin-login-btn">🔐 Connexion personnel</button>
-        </section>
-        </div>
-
-        <!-- Modal Admin -->
-        <div id="admin-modal" class="admin-modal hidden">
-            <div class="admin-modal-content">
-                <button id="admin-close-btn" class="admin-close-btn">×</button>
-                
-                <!-- Écran de connexion -->
-                <div id="admin-login-screen" class="admin-screen">
-                    <h2>🔐 Accès Personnel</h2>
-                    <p>Entrez le mot de passe pour accéder à la gestion du trafic.</p>
-                    <input type="password" id="admin-password" placeholder="Mot de passe" autocomplete="off">
-                    <button id="admin-submit-pwd" class="btn btn-primary">Connexion</button>
-                    <p id="admin-error" class="admin-error hidden">Mot de passe incorrect</p>
-                </div>
-                
-                <!-- Tableau de gestion -->
-                <div id="admin-panel" class="admin-screen hidden">
-                    <h2>📊 Gestion Trafic</h2>
-                    <p class="admin-subtitle">Cochez les cases pour modifier l'état des lignes</p>
-                    
-                    <div class="admin-table-wrapper">
-                        <table id="admin-table" class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Ligne</th>
-                                    <th>Normal</th>
-                                    <th>Retard</th>
-                                    <th>Perturbation</th>
-                                    <th>Annulation</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-table-body"></tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="admin-actions">
-                        <button id="admin-save-btn" class="btn btn-primary">💾 Enregistrer sur GitHub</button>
-                        <button id="admin-reset-btn" class="btn btn-secondary">🔄 Tout réinitialiser</button>
-                    </div>
-                    <p id="admin-status" class="admin-status"></p>
-                </div>
-            </div>
-        </div>
     </main>
 
-    <footer id="legal-strip">
-        <div class="legal-strip-content">
-            <span class="legal-pill">Application indépendante, non affiliée au Grand Périgueux.</span>
-            <span>Données © Grand Périgueux / Péribus — licence ODbL.</span>
-            <span>
-                Base dérivée <code>gtfs.bundle.json</code> partagée sur
-                <a href="https://github.com/EFFEZFEZ/p-rimap-sans-api-/tree/main/public/data/gtfs" target="_blank" rel="noopener">GitHub</a>.
-            </span>
-            <a class="legal-about-btn" href="/mentions-legales.html">Mentions légales</a>
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="https://www.instagram.com/perimap.fr" target="_blank" rel="noopener" title="Instagram">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/perimap.fr" target="_blank" rel="noopener" title="Facebook">
+                <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
         </div>
+        <div class="footer-links">
+            <a href="/">Accueil</a>
+            <a href="/mentions-legales.html">Mentions légales</a>
+            <a href="mailto:perimapfr@gmail.com">Contact</a>
+        </div>
+        <p class="copyright">© 2025 Périmap. Projet indépendant.</p>
     </footer>
 
+    <!-- Admin Trigger (invisible) -->
+    <div class="admin-trigger" id="adminTrigger"></div>
+
+    <!-- Admin Modal -->
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-content">
+            <div class="admin-login" id="adminLogin">
+                <h2>🔐 Administration</h2>
+                <input type="password" id="adminPassword" placeholder="Mot de passe">
+                <input type="text" id="githubToken" placeholder="Token GitHub (optionnel)">
+                <button onclick="loginAdmin()">Connexion</button>
+            </div>
+            <div class="admin-panel" id="adminPanelContent">
+                <h2>📊 Gestion du trafic</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ligne</th>
+                            <th>Statut</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trafficTable"></tbody>
+                </table>
+                <div class="admin-actions">
+                    <button class="btn-save" onclick="saveTraffic()">💾 Sauvegarder</button>
+                    <button class="btn-close" onclick="closeAdmin()">Fermer</button>
+                </div>
+                <div class="admin-status" id="adminStatus"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-    (function themeSetup() {
-        const body = document.body;
-        const toggle = document.getElementById('theme-toggle-btn');
-        if (!toggle) return;
-        const icon = document.getElementById('theme-toggle-icon');
-        const applyTheme = (isDark) => {
-            body.classList.toggle('dark-theme', isDark);
-            toggle?.setAttribute('aria-pressed', String(isDark));
-            if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-        };
-        let saved = null;
-        try { saved = localStorage.getItem('ui-theme'); } catch (_) {}
-        const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(saved ? saved === 'dark' : prefers);
-        toggle?.addEventListener('click', () => {
-            const next = !body.classList.contains('dark-theme');
-            applyTheme(next);
-            try { localStorage.setItem('ui-theme', next ? 'dark' : 'light'); } catch (_) {}
-        });
-    })();
-
-    (function installCTA() {
-        const installBtn = document.getElementById('install-pwa-btn');
-        if (!installBtn) return;
-        const helper = document.getElementById('install-helper');
-        const ua = navigator.userAgent.toLowerCase();
-        const isIOS = /iphone|ipad|ipod/.test(ua);
-        const isAndroid = !isIOS && ua.includes('android');
-
-        const setHelper = (text) => { if (helper) helper.textContent = text; };
-        const redirectToHallForInstall = () => {
-            try { sessionStorage.setItem('perimapInstallTip', 'true'); } catch (_) {}
-            window.location.href = '/';
-        };
-
-        if (isAndroid) {
-            setHelper('Android détecté : appuyez sur Installer, vous serez redirigé vers le hall avec la procédure.');
-        } else if (isIOS) {
-            setHelper('iOS détecté : Safari vous proposera Sur l\'écran d\'accueil une fois de retour sur le hall.');
-        } else {
-            setHelper('Navigateur compatible : cliquez sur Installer pour revenir au hall avec les explications.');
+        // Generate particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
         }
 
-        installBtn.disabled = false;
-        installBtn.textContent = 'Installer PériMap';
-        installBtn.addEventListener('click', redirectToHallForInstall);
-    })();
-
-    (function tileObserver() {
-        const tiles = document.querySelectorAll('[data-animate]');
-        if (!tiles.length) return;
-
-        const reveal = (tile) => tile.classList.add('is-visible');
-
-        if (!('IntersectionObserver' in window)) {
-            tiles.forEach(reveal);
-            return;
-        }
-
-        const observer = new IntersectionObserver((entries, obs) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) return;
-                reveal(entry.target);
-                obs.unobserve(entry.target);
-            });
-        }, { threshold: 0.35 });
-
-        tiles.forEach(tile => observer.observe(tile));
-    })();
-
-    (function ensureServiceWorker() {
-        if (!('serviceWorker' in navigator)) return;
-        navigator.serviceWorker.getRegistration('/').then((registration) => {
-            if (registration) return;
-            navigator.serviceWorker.register('/service-worker.js').catch(() => {
-                console.warn('Impossible d\'enregistrer le service worker depuis la page À propos.');
-            });
-        }).catch(() => {
-            navigator.serviceWorker.register('/service-worker.js').catch(() => {
-                console.warn('Impossible d\'enregistrer le service worker depuis la page À propos.');
-            });
-        });
-    })();
-
-    // === ADMIN PANEL ===
-    (function adminPanel() {
-        // Config - MOT DE PASSE (change-le !)
+        // Admin functionality
         const ADMIN_PASSWORD = 'perimap2024';
-        
-        // GitHub config
-        const GITHUB_OWNER = 'EFFEZFEZ';
-        const GITHUB_REPO = 'p-rimap-sans-api-';
-        const GITHUB_FILE_PATH = 'public/data/line-status.json';
-        const GITHUB_BRANCH = 'main';
-        
-        // Token GitHub stocké localement après première connexion
-        let githubToken = null;
-        try { githubToken = localStorage.getItem('perimap-gh-token'); } catch(_) {}
-        
-        // Lignes à gérer
-        const LINES = {
-            'Majeures': [
-                { id: 'A', color: '#E30613' },
-                { id: 'B', color: '#009EE0' },
-                { id: 'C', color: '#FFD500', text: '#000' },
-                { id: 'D', color: '#00A650' }
-            ],
-            'Express': [
-                { id: 'e1', color: '#8B4513' },
-                { id: 'e2', color: '#8B4513' },
-                { id: 'e4', color: '#8B4513' },
-                { id: 'e5', color: '#8B4513' },
-                { id: 'e6', color: '#8B4513' },
-                { id: 'e7', color: '#8B4513' }
-            ],
-            'Quartier': [
-                { id: 'K1A', color: '#9C27B0' },
-                { id: 'K1B', color: '#9C27B0' },
-                { id: 'K2', color: '#9C27B0' },
-                { id: 'K3A', color: '#9C27B0' },
-                { id: 'K3B', color: '#9C27B0' },
-                { id: 'K4A', color: '#9C27B0' },
-                { id: 'K4B', color: '#9C27B0' },
-                { id: 'K5', color: '#9C27B0' },
-                { id: 'K6', color: '#9C27B0' }
-            ],
-            'Navettes': [
-                { id: 'N', color: '#607D8B' },
-                { id: 'N1', color: '#607D8B' }
-            ]
-        };
-        
-        const STATUSES = ['normal', 'retard', 'perturbation', 'annulation'];
-        
-        // Elements
-        const loginBtn = document.getElementById('admin-login-btn');
-        const modal = document.getElementById('admin-modal');
-        const closeBtn = document.getElementById('admin-close-btn');
-        const loginScreen = document.getElementById('admin-login-screen');
-        const panel = document.getElementById('admin-panel');
-        const passwordInput = document.getElementById('admin-password');
-        const submitPwd = document.getElementById('admin-submit-pwd');
-        const errorMsg = document.getElementById('admin-error');
-        const tableBody = document.getElementById('admin-table-body');
-        const saveBtn = document.getElementById('admin-save-btn');
-        const resetBtn = document.getElementById('admin-reset-btn');
-        const statusEl = document.getElementById('admin-status');
-        
-        if (!loginBtn || !modal) return;
-        
-        let currentStatuses = {};
-        let fileSha = null; // SHA du fichier pour update GitHub
-        
-        // Ouvrir modal
-        loginBtn.addEventListener('click', () => {
-            modal.classList.remove('hidden');
-            // Si déjà authentifié, aller direct au panel
-            try {
-                if (sessionStorage.getItem('perimap-admin-auth') === 'true') {
-                    showPanel();
+        let savedToken = localStorage.getItem('github_token') || '';
+        let trafficData = {};
+
+        document.getElementById('adminTrigger').addEventListener('click', () => {
+            document.getElementById('adminModal').classList.add('active');
+            document.getElementById('githubToken').value = savedToken;
+        });
+
+        document.getElementById('adminModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeAdmin();
+        });
+
+        function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            const token = document.getElementById('githubToken').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                if (token) {
+                    savedToken = token;
+                    localStorage.setItem('github_token', token);
                 }
-            } catch(_) {}
-        });
-        
-        // Fermer modal
-        closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.add('hidden');
-        });
-        
-        // Soumettre mot de passe
-        submitPwd.addEventListener('click', checkPassword);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
-        
-        function checkPassword() {
-            const pwd = passwordInput.value.trim();
-            if (pwd === ADMIN_PASSWORD) {
-                errorMsg.classList.add('hidden');
-                try { sessionStorage.setItem('perimap-admin-auth', 'true'); } catch(_) {}
-                
-                // Demander le token GitHub si pas déjà enregistré
-                if (!githubToken) {
-                    githubToken = prompt('Token GitHub (avec accès repo) pour pouvoir sauvegarder :\n\nCréez-en un sur github.com/settings/tokens');
-                    if (githubToken) {
-                        try { localStorage.setItem('perimap-gh-token', githubToken); } catch(_) {}
-                    }
-                }
-                
-                showPanel();
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminPanelContent').classList.add('active');
+                loadTrafficData();
             } else {
-                errorMsg.classList.remove('hidden');
-                passwordInput.value = '';
-                passwordInput.focus();
+                alert('Mot de passe incorrect');
             }
         }
-        
-        async function showPanel() {
-            loginScreen.classList.add('hidden');
-            panel.classList.remove('hidden');
-            
-            // Charger les statuts actuels
-            await loadCurrentStatuses();
-            buildTable();
-        }
-        
-        async function loadCurrentStatuses() {
-            setStatus('Chargement...', 'loading');
+
+        async function loadTrafficData() {
             try {
-                const response = await fetch('/data/line-status.json?t=' + Date.now());
-                if (response.ok) {
-                    const data = await response.json();
-                    currentStatuses = {};
-                    if (data.lines) {
-                        for (const [lineId, info] of Object.entries(data.lines)) {
-                            if (!lineId.startsWith('_')) {
-                                currentStatuses[lineId] = info.status || 'normal';
-                            }
-                        }
-                    }
-                }
-                setStatus('');
+                const response = await fetch('data/line-status.json');
+                trafficData = await response.json();
+                renderTrafficTable();
             } catch (e) {
-                setStatus('Erreur chargement', 'error');
+                console.error('Erreur chargement données:', e);
             }
         }
-        
-        function buildTable() {
-            tableBody.innerHTML = '';
-            
-            for (const [category, lines] of Object.entries(LINES)) {
-                // Ligne de catégorie
-                const catRow = document.createElement('tr');
-                catRow.className = 'category-row';
-                catRow.innerHTML = `<td colspan="5">${category}</td>`;
-                tableBody.appendChild(catRow);
-                
-                // Lignes
-                lines.forEach(line => {
-                    const status = currentStatuses[line.id] || 'normal';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>
-                            <span class="admin-line-badge" style="background:${line.color};color:${line.text||'#fff'}">
-                                ${line.id}
-                            </span>
-                        </td>
-                        ${STATUSES.map(s => `
-                            <td>
-                                <input type="radio" name="status-${line.id}" value="${s}" ${status === s ? 'checked' : ''}>
-                            </td>
-                        `).join('')}
-                    `;
-                    tableBody.appendChild(row);
-                });
-            }
+
+        function renderTrafficTable() {
+            const lines = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'N', 'TAD'];
+            const statuses = ['normal', 'perturbé', 'interrompu'];
+            const tbody = document.getElementById('trafficTable');
+            tbody.innerHTML = '';
+
+            lines.forEach(line => {
+                const data = trafficData[line] || { status: 'normal', message: '' };
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>Ligne ${line}</strong></td>
+                    <td>
+                        <select id="status-${line}">
+                            ${statuses.map(s => `<option value="${s}" ${data.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" id="message-${line}" value="${data.message || ''}" placeholder="Message (optionnel)">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
-        
-        // Réinitialiser tout
-        resetBtn.addEventListener('click', () => {
-            if (confirm('Remettre toutes les lignes en "normal" ?')) {
-                document.querySelectorAll('input[value="normal"]').forEach(r => r.checked = true);
-                setStatus('Tout réinitialisé (cliquez Enregistrer)', 'success');
+
+        async function saveTraffic() {
+            const lines = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'N', 'TAD'];
+            const newData = {};
+
+            lines.forEach(line => {
+                newData[line] = {
+                    status: document.getElementById(`status-${line}`).value,
+                    message: document.getElementById(`message-${line}`).value
+                };
+            });
+
+            const statusEl = document.getElementById('adminStatus');
+            
+            if (!savedToken) {
+                statusEl.className = 'admin-status error';
+                statusEl.textContent = 'Token GitHub requis pour sauvegarder';
+                return;
             }
-        });
-        
-        // Sauvegarder sur GitHub
-        saveBtn.addEventListener('click', saveToGitHub);
-        
-        async function saveToGitHub() {
-            if (!githubToken) {
-                githubToken = prompt('Token GitHub requis :');
-                if (!githubToken) return;
-                try { localStorage.setItem('perimap-gh-token', githubToken); } catch(_) {}
-            }
-            
-            setStatus('Sauvegarde en cours...', 'loading');
-            
-            // Collecter les statuts depuis le tableau
-            const newStatuses = {};
-            for (const [category, lines] of Object.entries(LINES)) {
-                lines.forEach(line => {
-                    const radio = document.querySelector(`input[name="status-${line.id}"]:checked`);
-                    newStatuses[line.id] = { 
-                        status: radio ? radio.value : 'normal',
-                        message: ''
-                    };
-                });
-            }
-            
-            // Construire le JSON complet
-            const jsonContent = {
-                lastUpdate: new Date().toISOString(),
-                globalMessage: '',
-                lines: newStatuses,
-                _documentation: {
-                    status_values: [
-                        'normal - Trafic normal',
-                        'retard - Retards sur la ligne',
-                        'perturbation - Perturbation en cours',
-                        'annulation - Service annulé'
-                    ]
-                }
-            };
-            
+
             try {
-                // 1. Récupérer le SHA actuel du fichier
-                const getResponse = await fetch(
-                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}?ref=${GITHUB_BRANCH}`,
-                    { headers: { 'Authorization': `token ${githubToken}` } }
-                );
-                
-                if (getResponse.ok) {
-                    const fileData = await getResponse.json();
-                    fileSha = fileData.sha;
-                }
-                
-                // 2. Mettre à jour le fichier
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(jsonContent, null, 2))));
-                
-                const updateResponse = await fetch(
-                    `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${githubToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: `[Admin] Mise à jour trafic - ${new Date().toLocaleString('fr-FR')}`,
-                            content: content,
-                            sha: fileSha,
-                            branch: GITHUB_BRANCH
-                        })
-                    }
-                );
-                
-                if (updateResponse.ok) {
-                    setStatus('✅ Sauvegardé sur GitHub !', 'success');
-                    // Mettre à jour les statuts locaux
-                    for (const [id, info] of Object.entries(newStatuses)) {
-                        currentStatuses[id] = info.status;
-                    }
-                } else {
-                    const err = await updateResponse.json();
-                    throw new Error(err.message || 'Erreur GitHub');
-                }
-                
-            } catch (error) {
-                console.error('Erreur GitHub:', error);
-                setStatus('❌ Erreur: ' + error.message, 'error');
-                
-                // Si erreur de token, proposer de le re-saisir
-                if (error.message.includes('401') || error.message.includes('Bad credentials')) {
-                    githubToken = null;
-                    try { localStorage.removeItem('perimap-gh-token'); } catch(_) {}
-                }
+                const content = btoa(JSON.stringify(newData, null, 2));
+                const getFile = await fetch('https://api.github.com/repos/EFFEZFEZ/p-rimap-sans-api-/contents/public/data/line-status.json', {
+                    headers: { Authorization: `token ${savedToken}` }
+                });
+                const fileData = await getFile.json();
+
+                await fetch('https://api.github.com/repos/EFFEZFEZ/p-rimap-sans-api-/contents/public/data/line-status.json', {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `token ${savedToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Mise à jour trafic via admin',
+                        content: content,
+                        sha: fileData.sha
+                    })
+                });
+
+                statusEl.className = 'admin-status success';
+                statusEl.textContent = '✓ Données sauvegardées avec succès';
+            } catch (e) {
+                statusEl.className = 'admin-status error';
+                statusEl.textContent = 'Erreur: ' + e.message;
             }
         }
-        
-        function setStatus(msg, type = '') {
-            statusEl.textContent = msg;
-            statusEl.className = 'admin-status ' + type;
+
+        function closeAdmin() {
+            document.getElementById('adminModal').classList.remove('active');
+            document.getElementById('adminLogin').style.display = 'flex';
+            document.getElementById('adminPanelContent').classList.remove('active');
+            document.getElementById('adminPassword').value = '';
         }
-    })();
     </script>
 </body>
 </html>

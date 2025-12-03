@@ -2,332 +2,419 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    
-    <title>Mentions légales | PériMap - Application Bus Périgueux</title>
-    <meta name="description" content="Mentions légales de PériMap, application gratuite de consultation des horaires et itinéraires du réseau Péribus à Périgueux. Conformité RGPD et droit français.">
-    <meta name="robots" content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentions légales - Périmap | Informations juridiques</title>
+    <meta name="description" content="Mentions légales de Périmap, application gratuite de transport en commun pour Périgueux. Éditeur, hébergement, RGPD et propriété intellectuelle.">
+    <meta name="keywords" content="mentions légales, Périmap, RGPD, conditions utilisation, Périgueux">
     <link rel="canonical" href="https://perimap.fr/mentions-legales.html">
-    
-    <!-- PWA -->
-    <meta name="theme-color" content="#22c55e">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="PériMap">
-    
-    <!-- Links -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
-    <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link rel="icon" type="image/png" href="icons/logo.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Mentions légales - Périmap">
+    <meta property="og:description" content="Informations juridiques et mentions légales de l'application Périmap.">
+    <meta property="og:image" content="https://perimap.fr/icons/logo.png">
+    <meta property="og:url" content="https://perimap.fr/mentions-legales.html">
+    <meta property="og:type" content="website">
+
     <style>
-        .legal-page {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
             min-height: 100vh;
-            background: var(--bg-main);
+            color: #fff;
         }
-        .legal-main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 4rem;
-        }
-        .legal-back-row {
-            margin-bottom: 2rem;
-        }
-        .legal-back-btn {
-            display: inline-flex;
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
+            z-index: 100;
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .legal-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-        .legal-update {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 2rem;
-        }
-        .legal-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .legal-section h2 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0 0 1rem 0;
+
+        .logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-        .legal-section h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin: 1.25rem 0 0.5rem 0;
-        }
-        .legal-section p, .legal-section li {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.65;
-            margin: 0.5rem 0;
-        }
-        .legal-section ul {
-            margin: 0.5rem 0;
-            padding-left: 1.25rem;
-        }
-        .legal-section a {
-            color: var(--primary);
+            gap: 12px;
             text-decoration: none;
+            color: #fff;
         }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .logo span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #00c8ff;
+        }
+
+        /* Main content */
+        main {
+            padding-top: 100px;
+            padding-bottom: 80px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        /* Hero */
+        .page-hero {
+            text-align: center;
+            padding: 60px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .page-hero h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .page-hero p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            animation: fadeIn 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Legal sections */
+        .legal-section {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.6s ease both;
+        }
+
+        .legal-section:nth-child(1) { animation-delay: 0.1s; }
+        .legal-section:nth-child(2) { animation-delay: 0.15s; }
+        .legal-section:nth-child(3) { animation-delay: 0.2s; }
+        .legal-section:nth-child(4) { animation-delay: 0.25s; }
+        .legal-section:nth-child(5) { animation-delay: 0.3s; }
+        .legal-section:nth-child(6) { animation-delay: 0.35s; }
+        .legal-section:nth-child(7) { animation-delay: 0.4s; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .legal-section:hover {
+            border-color: rgba(0, 200, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .legal-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+        }
+
+        .legal-section h2 .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.2), rgba(0, 255, 136, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .legal-section p,
+        .legal-section li {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .legal-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .legal-section li::before {
+            content: '→';
+            color: #00c8ff;
+            margin-right: 10px;
+        }
+
+        .legal-section a {
+            color: #00c8ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
         .legal-section a:hover {
-            text-decoration: underline;
+            color: #00ff88;
         }
-        .legal-highlight {
-            background: rgba(34, 197, 94, 0.1);
-            border-left: 3px solid var(--primary);
-            padding: 1rem;
-            border-radius: 0 var(--radius-md) var(--radius-md) 0;
-            margin: 1rem 0;
+
+        .info-box {
+            background: rgba(0, 200, 255, 0.05);
+            border-left: 3px solid #00c8ff;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
         }
-        .legal-highlight p {
-            margin: 0;
+
+        .info-box strong {
+            color: #00c8ff;
         }
-        .legal-contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+
+        /* Footer */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(10, 10, 26, 0.5);
         }
-        .legal-contact-item {
-            background: var(--bg-secondary);
-            padding: 1rem;
-            border-radius: var(--radius-md);
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        .legal-contact-item strong {
-            display: block;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
-        @media (max-width: 600px) {
-            .legal-title {
-                font-size: 1.5rem;
+
+        .footer-links a:hover {
+            color: #00c8ff;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .social-links a {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: linear-gradient(135deg, #00c8ff, #00ff88);
+            transform: translateY(-3px);
+        }
+
+        .social-links svg {
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.7);
+            transition: fill 0.3s ease;
+        }
+
+        .social-links a:hover svg {
+            fill: #0a0a1a;
+        }
+
+        .copyright {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
             }
+
+            .nav-links {
+                display: none;
+            }
+
+            main {
+                padding-top: 80px;
+            }
+
+            .page-hero {
+                padding: 40px 0;
+            }
+
             .legal-section {
-                padding: 1.25rem;
+                padding: 25px 20px;
             }
         }
     </style>
 </head>
-<body class="legal-page">
-    <header id="main-header" class="about-header">
-        <div class="header-content about-header-content">
-            <div class="logo">
-                <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Logo PériMap" class="header-logo-img">
-                <div class="header-title-group">
-                    <span class="brand-name">PériMap</span>
-                    <span class="brand-sub">Assistant mobilité Grand Périgueux</span>
-                </div>
-            </div>
-            <nav class="header-nav">
-                <button id="theme-toggle-btn" class="btn-icon-round" aria-label="Basculer thème sombre" title="Thème clair" aria-pressed="true">
-                    <span id="theme-toggle-icon">☀️</span>
-                </button>
-            </nav>
-        </div>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <a href="/" class="logo">
+            <img src="icons/logo.png" alt="Périmap">
+            <span>Périmap</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/">Accueil</a>
+            <a href="/#itineraire">Itinéraire</a>
+            <a href="/about.html">À propos</a>
+        </nav>
     </header>
 
-    <main class="legal-main">
-        <div class="legal-back-row">
-            <a href="/" class="btn btn-secondary legal-back-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                <span>Retour à l'accueil</span>
-            </a>
-        </div>
-
-        <h1 class="legal-title">📜 Mentions légales</h1>
-        <p class="legal-update">Dernière mise à jour : 3 décembre 2025</p>
-
-        <!-- Éditeur du site -->
-        <section class="legal-section">
-            <h2>🏠 Éditeur du site</h2>
-            <p>Le site <strong>PériMap</strong> (accessible à l'adresse <a href="https://perimap.fr">https://perimap.fr</a>) est un projet personnel à but non lucratif.</p>
-            
-            <div class="legal-contact-grid">
-                <div class="legal-contact-item">
-                    <strong>Responsable de publication</strong>
-                    Projet indépendant PériMap
-                </div>
-                <div class="legal-contact-item">
-                    <strong>Contact</strong>
-                    <a href="mailto:perimapfr@gmail.com">perimapfr@gmail.com</a>
-                </div>
-            </div>
-            
-            <div class="legal-highlight">
-                <p>⚠️ <strong>Projet indépendant</strong> : PériMap n'est pas affilié, approuvé ou sponsorisé par le Grand Périgueux, Péribus ou tout autre organisme officiel de transport.</p>
-            </div>
+    <!-- Main Content -->
+    <main>
+        <section class="page-hero">
+            <h1>Mentions légales</h1>
+            <p>Informations juridiques conformément à la législation française</p>
         </section>
 
-        <!-- Hébergement -->
-        <section class="legal-section">
-            <h2>🖥️ Hébergement</h2>
-            <p>Ce site est hébergé par :</p>
-            <div class="legal-contact-item" style="margin-top: 1rem;">
-                <strong>One.com Group AB</strong>
-                N° d'organisation : 559205-2400<br>
-                Carlsgatan 3<br>
-                211 20 Malmö<br>
-                Suède 🇸🇪<br>
-                <a href="https://www.one.com" target="_blank" rel="noopener">www.one.com</a>
+        <article class="legal-section">
+            <h2><span class="icon">👤</span> Éditeur du site</h2>
+            <div class="info-box">
+                <strong>Périmap</strong> est un projet personnel à but non lucratif.<br>
+                Éditeur : Personne physique (particulier)<br>
+                Email : <a href="mailto:perimapfr@gmail.com">perimapfr@gmail.com</a>
             </div>
-        </section>
+            <p>Ce site est édité à titre personnel dans un cadre non commercial. Conformément à l'article 6-III-2 de la loi pour la confiance dans l'économie numérique, l'éditeur personne physique peut conserver l'anonymat.</p>
+        </article>
 
-        <!-- Propriété intellectuelle -->
-        <section class="legal-section">
-            <h2>©️ Propriété intellectuelle</h2>
-            
-            <h3>Code source</h3>
-            <p>Le code source de PériMap est disponible en open source sur <a href="https://github.com/EFFEZFEZ/p-rimap-sans-api-" target="_blank" rel="noopener">GitHub</a> sous licence MIT.</p>
-            
-            <h3>Données de transport</h3>
-            <p>Les données horaires et de lignes proviennent des données ouvertes GTFS publiées par le <strong>Grand Périgueux</strong> sous licence <strong>Open Database License (ODbL)</strong>.</p>
+        <article class="legal-section">
+            <h2><span class="icon">🌐</span> Hébergement</h2>
+            <div class="info-box">
+                <strong>Vercel Inc.</strong><br>
+                340 S Lemon Ave #4133<br>
+                Walnut, CA 91789, États-Unis<br>
+                <a href="https://vercel.com" target="_blank" rel="noopener">https://vercel.com</a>
+            </div>
+            <p><strong>Fournisseur du nom de domaine :</strong> One.com Group AB</p>
+        </article>
+
+        <article class="legal-section">
+            <h2><span class="icon">©</span> Propriété intellectuelle</h2>
+            <p>L'ensemble du contenu de ce site (textes, images, code source, design) est protégé par le droit de la propriété intellectuelle.</p>
             <ul>
-                <li>Source : <a href="https://www.grandperigueux.fr" target="_blank" rel="noopener">Grand Périgueux</a></li>
-                <li>Licence : ODbL v1.0</li>
-                <li>Attribution : © Grand Périgueux / Péribus</li>
+                <li>Le code source est disponible sous licence MIT sur GitHub</li>
+                <li>Les données de transport proviennent du GTFS officiel du réseau Péribus</li>
+                <li>Les icônes et logos appartiennent à leurs propriétaires respectifs</li>
             </ul>
-            
-            <h3>Calcul d'itinéraires</h3>
-            <p>Les itinéraires sont calculés via l'API Google Routes. Google et le logo Google sont des marques déposées de Google LLC.</p>
-            
-            <h3>Cartographie</h3>
-            <p>Les cartes sont fournies par <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> © contributeurs OpenStreetMap.</p>
-        </section>
+            <p>Toute reproduction ou utilisation non autorisée du contenu est interdite.</p>
+        </article>
 
-        <!-- RGPD et données personnelles -->
-        <section class="legal-section">
-            <h2>🔒 Protection des données (RGPD)</h2>
-            
-            <h3>Données collectées</h3>
-            <p>PériMap est conçu dans le respect de votre vie privée. Nous collectons le minimum de données nécessaires au fonctionnement :</p>
-            <ul>
-                <li><strong>Géolocalisation</strong> : uniquement si vous l'autorisez, pour vous localiser sur la carte. Cette donnée reste sur votre appareil.</li>
-                <li><strong>Préférences</strong> : thème (clair/sombre), arrêts favoris. Stockées localement sur votre navigateur (localStorage).</li>
-            </ul>
-            
-            <div class="legal-highlight">
-                <p>✅ <strong>Aucun compte utilisateur</strong> n'est requis.<br>
-                ✅ <strong>Aucune donnée personnelle</strong> n'est envoyée à nos serveurs.<br>
-                ✅ <strong>Aucun cookie publicitaire</strong> ou de tracking.</p>
+        <article class="legal-section">
+            <h2><span class="icon">🔒</span> Protection des données (RGPD)</h2>
+            <p>Périmap respecte votre vie privée et se conforme au Règlement Général sur la Protection des Données (RGPD).</p>
+            <div class="info-box">
+                <strong>Données collectées :</strong> Aucune donnée personnelle n'est collectée ni stockée sur nos serveurs.
             </div>
-            
-            <h3>Cookies techniques</h3>
-            <p>Seuls des cookies techniques essentiels au fonctionnement peuvent être utilisés (cache du Service Worker pour le mode hors-ligne).</p>
-            
-            <h3>Vos droits</h3>
-            <p>Conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi Informatique et Libertés, vous disposez des droits suivants :</p>
             <ul>
-                <li>Droit d'accès à vos données</li>
-                <li>Droit de rectification</li>
-                <li>Droit à l'effacement</li>
-                <li>Droit à la portabilité</li>
-                <li>Droit d'opposition</li>
+                <li><strong>Géolocalisation</strong> : utilisée uniquement sur votre appareil, jamais transmise</li>
+                <li><strong>Stockage local</strong> : les préférences sont sauvegardées localement (localStorage)</li>
+                <li><strong>Cookies</strong> : aucun cookie publicitaire ou de tracking</li>
+                <li><strong>Analyse</strong> : aucun outil d'analyse tiers n'est utilisé</li>
             </ul>
-            <p>Pour exercer ces droits : <a href="mailto:perimapfr@gmail.com">perimapfr@gmail.com</a></p>
-            
-            <h3>Autorité de contrôle</h3>
-            <p>En cas de réclamation, vous pouvez contacter la <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a> (Commission Nationale de l'Informatique et des Libertés).</p>
-        </section>
+            <p>Vous pouvez exercer vos droits (accès, rectification, suppression) en nous contactant par email.</p>
+        </article>
 
-        <!-- Responsabilité -->
-        <section class="legal-section">
-            <h2>⚖️ Limitation de responsabilité</h2>
-            
-            <p>PériMap s'efforce de fournir des informations exactes et à jour. Cependant :</p>
+        <article class="legal-section">
+            <h2><span class="icon">⚠️</span> Responsabilité</h2>
+            <p>Périmap est fourni "en l'état" sans garantie d'aucune sorte.</p>
             <ul>
-                <li>Les horaires affichés sont fournis à titre indicatif et peuvent différer des horaires réels en cas de perturbations, travaux ou modifications du réseau.</li>
-                <li>PériMap ne saurait être tenu responsable des retards, correspondances manquées ou tout préjudice résultant de l'utilisation des informations fournies.</li>
-                <li>Pour les informations officielles, veuillez consulter le site du <a href="https://www.grandperigueux.fr" target="_blank" rel="noopener">Grand Périgueux</a>.</li>
+                <li>Les informations de transport sont fournies à titre indicatif</li>
+                <li>Nous ne pouvons garantir l'exactitude ou la disponibilité des données</li>
+                <li>L'utilisateur reste responsable de vérifier les horaires officiels</li>
+                <li>Périmap n'est pas affilié au réseau Péribus ni à la communauté d'agglomération</li>
             </ul>
-            
-            <div class="legal-highlight">
-                <p>💡 En cas de doute, vérifiez toujours les horaires auprès des sources officielles ou aux arrêts de bus.</p>
-            </div>
-        </section>
+        </article>
 
-        <!-- Liens externes -->
-        <section class="legal-section">
-            <h2>🔗 Liens externes</h2>
-            <p>PériMap peut contenir des liens vers des sites tiers. Nous ne sommes pas responsables du contenu ou des pratiques de confidentialité de ces sites externes.</p>
-        </section>
-
-        <!-- Droit applicable -->
-        <section class="legal-section">
-            <h2>🇫🇷 Droit applicable</h2>
+        <article class="legal-section">
+            <h2><span class="icon">⚖️</span> Droit applicable</h2>
             <p>Les présentes mentions légales sont régies par le droit français. En cas de litige, les tribunaux français seront seuls compétents.</p>
-        </section>
+        </article>
 
-        <!-- Contact -->
-        <section class="legal-section">
-            <h2>📧 Contact</h2>
-            <p>Pour toute question concernant ces mentions légales ou le site PériMap :</p>
-            <div class="legal-contact-grid">
-                <div class="legal-contact-item">
-                    <strong>Email</strong>
-                    <a href="mailto:perimapfr@gmail.com">perimapfr@gmail.com</a>
-                </div>
-                <div class="legal-contact-item">
-                    <strong>Instagram</strong>
-                    <a href="https://www.instagram.com/perimap.fr/" target="_blank" rel="noopener">@perimap.fr</a>
-                </div>
+        <article class="legal-section">
+            <h2><span class="icon">📧</span> Contact</h2>
+            <p>Pour toute question concernant ce site ou les présentes mentions légales :</p>
+            <div class="info-box">
+                <strong>Email :</strong> <a href="mailto:perimapfr@gmail.com">perimapfr@gmail.com</a>
             </div>
-        </section>
+        </article>
     </main>
 
-    <footer id="legal-strip">
-        <div class="legal-strip-content">
-            <span class="legal-pill">Application indépendante, non affiliée au Grand Périgueux.</span>
-            <span>Données © Grand Périgueux / Péribus — licence ODbL.</span>
-            <a class="legal-about-btn" href="/">Retour à l'accueil</a>
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="https://www.instagram.com/perimap.fr" target="_blank" rel="noopener" title="Instagram">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/perimap.fr" target="_blank" rel="noopener" title="Facebook">
+                <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
         </div>
+        <div class="footer-links">
+            <a href="/">Accueil</a>
+            <a href="/about.html">À propos</a>
+            <a href="mailto:perimapfr@gmail.com">Contact</a>
+        </div>
+        <p class="copyright">© 2025 Périmap. Projet indépendant.</p>
     </footer>
-
-    <script>
-    (function themeSetup() {
-        const body = document.body;
-        const toggle = document.getElementById('theme-toggle-btn');
-        if (!toggle) return;
-        const icon = document.getElementById('theme-toggle-icon');
-        const applyTheme = (isDark) => {
-            body.classList.toggle('dark-theme', isDark);
-            toggle?.setAttribute('aria-pressed', String(isDark));
-            if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-        };
-        let saved = null;
-        try { saved = localStorage.getItem('ui-theme'); } catch (_) {}
-        const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(saved ? saved === 'dark' : prefers);
-        toggle?.addEventListener('click', () => {
-            const next = !body.classList.contains('dark-theme');
-            applyTheme(next);
-            try { localStorage.setItem('ui-theme', next ? 'dark' : 'light'); } catch (_) {}
-        });
-    })();
-    </script>
 </body>
 </html>
