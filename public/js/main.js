@@ -2557,8 +2557,9 @@ function processIntelligentResults(intelligentResults, searchTime) {
         console.warn('Erreur lors du filtrage par heure d\'arrivée:', e);
     }
 
-    // Deduplication commune
-    let finalList = deduplicateItineraries(itineraries);
+    // V115: Passer le searchMode à deduplicateItineraries pour garder les bons horaires
+    const searchMode = searchTime?.type || 'partir';
+    let finalList = deduplicateItineraries(itineraries, searchMode);
 
     // Tri + pagination spécifique au mode "arriver"
     if (searchTime && searchTime.type === 'arriver') {
@@ -2576,7 +2577,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
         let baseDate;
         if (!searchTime.date || searchTime.date === 'today' || searchTime.date === "Aujourd'hui") baseDate = new Date();
         else baseDate = new Date(searchTime.date);
-        baseDate.setHours(parseInt(searchTime.hour)||0, parseInt(searchTime.minute)||0, 0, 0);
+        const targetMs = baseDate.setHours(parseInt(searchTime.hour)||0, parseInt(searchTime.minute)||0, 0, 0);
 
         const scored = finalList.map(it => {
             const steps = Array.isArray(it.steps) ? it.steps : [];
@@ -2589,15 +2590,30 @@ function processIntelligentResults(intelligentResults, searchTime) {
             }, 0);
             const arrivalMs = parseArrivalMsGeneric(it.arrivalTime, baseDate);
             const durationRaw = it.durationRaw || 0;
-            return { it, arrivalMs, transfers, walkingDurationMin, durationRaw };
+            // V115: Calculer l'écart par rapport à l'heure demandée
+            // Plus l'écart est petit, mieux c'est (arrivée juste avant l'heure demandée = meilleur)
+            const gapMs = targetMs - arrivalMs; // Positif si arrive avant la cible
+            return { it, arrivalMs, gapMs, transfers, walkingDurationMin, durationRaw };
         });
 
+        // V115: Trier par arrivée DÉCROISSANTE (la plus proche de l'heure demandée en premier)
+        // En mode "arriver", on veut arriver le plus tard possible AVANT l'heure demandée
         scored.sort((a, b) => {
-            if (a.arrivalMs !== b.arrivalMs) return a.arrivalMs - b.arrivalMs; // plus tôt d'abord
-            if (a.transfers !== b.transfers) return a.transfers - b.transfers; // moins de correspondances
-            if (a.walkingDurationMin !== b.walkingDurationMin) return a.walkingDurationMin - b.walkingDurationMin; // moins de marche
-            return a.durationRaw - b.durationRaw; // plus rapide
+            // D'abord par arrivée décroissante (la plus proche de la cible en premier)
+            if (a.arrivalMs !== b.arrivalMs) return b.arrivalMs - a.arrivalMs;
+            // Puis par nombre de correspondances (moins = mieux)
+            if (a.transfers !== b.transfers) return a.transfers - b.transfers;
+            // Puis par temps de marche (moins = mieux)
+            if (a.walkingDurationMin !== b.walkingDurationMin) return a.walkingDurationMin - b.walkingDurationMin;
+            // Enfin par durée totale (plus court = mieux)
+            return a.durationRaw - b.durationRaw;
         });
+        
+        console.log('🎯 V115: Tri ARRIVER (du plus proche de la cible au plus éloigné):', scored.slice(0, 5).map(s => ({
+            arr: s.it.arrivalTime,
+            gap: Math.round(s.gapMs / 60000) + 'min avant cible',
+            transfers: s.transfers
+        })));
 
         arrivalRankedAll = scored.map(x => x.it);
         arrivalRenderedCount = ARRIVAL_PAGE_SIZE; // initial slice

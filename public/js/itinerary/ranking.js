@@ -7,8 +7,9 @@ import { parseTimeStringToMinutes } from '../utils/formatters.js';
 
 /**
  * Déduplique les itinéraires par structure de trajet (même séquence bus/arrêts).
- * En mode "partir", garde le premier départ.
- * En mode "arriver", garde le dernier départ qui arrive à temps.
+ * En mode "partir", garde le premier départ pour chaque structure.
+ * En mode "arriver", garde les 3 meilleurs horaires par structure (plus de choix).
+ * V115: Amélioration - en mode arriver, on garde plusieurs variantes horaires
  */
 export function deduplicateItineraries(list, searchMode = 'partir') {
   if (!Array.isArray(list)) return [];
@@ -24,7 +25,7 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
   });
   
   const result = [];
-  grouped.forEach((variants) => {
+  grouped.forEach((variants, key) => {
     if (variants.length === 1) {
       result.push(variants[0]);
       return;
@@ -38,13 +39,18 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
     });
     
     if (searchMode === 'arriver') {
-      // En mode arriver, on veut le départ le plus tardif possible
-      result.push(variants[variants.length - 1]);
+      // V115: En mode arriver, on garde les 3 derniers départs (les plus proches de l'heure demandée)
+      // Cela donne plus de choix à l'utilisateur
+      const MAX_VARIANTS_ARRIVER = 3;
+      const startIdx = Math.max(0, variants.length - MAX_VARIANTS_ARRIVER);
+      result.push(...variants.slice(startIdx));
     } else {
-      // En mode partir, on veut le premier départ
+      // En mode partir, on veut le premier départ seulement
       result.push(variants[0]);
     }
   });
+  
+  console.log(`🔄 Déduplication (${searchMode}): ${list.length} → ${result.length} itinéraires`);
   
   return result;
 }
