@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v106'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V106: Destinations cliquables avec tracé de ligne
+const CACHE_VERSION = 'v107'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V107: Fix affichage tracé ligne
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

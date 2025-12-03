@@ -786,7 +786,8 @@ export class MapRenderer {
      * V106: Affiche le tracé d'une ligne entre l'arrêt actuel et la destination
      */
     showRouteToDestination(routeId, routeName, routeColor, stopName, destination) {
-        console.log(`🚌 Afficher tracé: ${routeName} de ${stopName} vers ${destination}`);
+        console.log(`🚌 Afficher tracé: Ligne ${routeName} (${routeId}) de ${stopName} vers ${destination}`);
+        console.log(`📍 routeLayersById disponibles:`, Object.keys(this.routeLayersById || {}));
         
         // Fermer le popup
         this.map.closePopup();
@@ -796,6 +797,7 @@ export class MapRenderer {
         
         // Zoomer sur le tracé
         if (this.routeLayersById && this.routeLayersById[routeId]) {
+            console.log(`✅ Route trouvée: ${routeId} avec ${this.routeLayersById[routeId].length} layers`);
             const layers = this.routeLayersById[routeId];
             if (layers.length > 0) {
                 const group = L.featureGroup(layers);
@@ -804,6 +806,8 @@ export class MapRenderer {
                     this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
                 }
             }
+        } else {
+            console.warn(`❌ Route NON trouvée: ${routeId}`);
         }
         
         // Afficher une notification
@@ -814,27 +818,38 @@ export class MapRenderer {
      * V106: Met en surbrillance une seule ligne et estompe les autres
      */
     highlightSingleRoute(routeId, routeColor) {
-        if (!this.routeLayersById) return;
+        if (!this.routeLayersById) {
+            console.warn('❌ routeLayersById non disponible');
+            return;
+        }
+        
+        console.log(`🎨 Mise en surbrillance route: ${routeId}, couleur: ${routeColor}`);
+        let found = false;
         
         Object.entries(this.routeLayersById).forEach(([id, layers]) => {
             layers.forEach(layer => {
                 if (id === routeId) {
-                    // Ligne sélectionnée - pleine opacité et plus épaisse
+                    found = true;
+                    // Ligne sélectionnée - pleine opacité et BEAUCOUP plus épaisse
                     layer.setStyle({
                         opacity: 1,
-                        weight: 6,
+                        weight: 8,
                         color: '#' + routeColor
                     });
                     layer.bringToFront();
                 } else {
-                    // Autres lignes - très estompées
+                    // Autres lignes - MASQUÉES (opacity 0)
                     layer.setStyle({
-                        opacity: 0.15,
-                        weight: 3
+                        opacity: 0,
+                        weight: 0
                     });
                 }
             });
         });
+        
+        if (!found) {
+            console.warn(`❌ Aucune layer trouvée pour routeId: ${routeId}`);
+        }
         
         // Stocker l'ID de la ligne mise en avant
         this.highlightedRouteId = routeId;
@@ -876,9 +891,8 @@ export class MapRenderer {
             <button class="route-notif-close" title="Afficher toutes les lignes">✕</button>
         `;
         
-        // Ajouter au container de la carte
-        const mapContainer = this.map.getContainer();
-        mapContainer.appendChild(notification);
+        // Ajouter au BODY pour être au-dessus de tout
+        document.body.appendChild(notification);
         
         // Animation d'entrée
         requestAnimationFrame(() => notification.classList.add('visible'));
