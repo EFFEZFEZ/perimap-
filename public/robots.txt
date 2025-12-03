@@ -1,0 +1,33 @@
+# PériMap - Robots.txt optimisé SEO
+# https://perimap.app/
+
+User-agent: *
+Allow: /
+
+# Pages principales à indexer
+Allow: /index.html
+Allow: /about.html
+Allow: /views/
+Allow: /data/fichehoraire/
+
+# Ressources à ne pas indexer
+Disallow: /api/
+Disallow: /js/workers/
+Disallow: /*.json$
+Disallow: /data/gtfs/
+
+# Crawl-delay pour éviter la surcharge (optionnel)
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://perimap.app/sitemap.xml
+
+# Google specifique
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specifique  
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

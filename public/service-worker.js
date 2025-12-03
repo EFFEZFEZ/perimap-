@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v117'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V117: Fix carte itinéraires - invalidateSize avant dessin
+const CACHE_VERSION = 'v118'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V118: SEO ultra-puissant - Schema.org, OpenGraph, sitemap, robots.txt
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -18,9 +18,12 @@ const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
+  '/about.html',
   '/style.css',
   '/js/app.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/robots.txt',
+  '/sitemap.xml'
 ];
 
 // Assets secondaires (chargés en arrière-plan)

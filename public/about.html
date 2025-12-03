@@ -1,22 +1,197 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>À propos · PériMap</title>
-    <meta name="description" content="En savoir plus sur PériMap, application indépendante fondée sur les données ouvertes du réseau de bus du Grand Périgueux.">
-    <link rel="canonical" href="https://perimap.app/about.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         🎯 SEO ABOUT PAGE - PÉRIMAP
+         Application officieuse Péribus Périgueux
+    ═══════════════════════════════════════════════════════════════ -->
+    
+    <title>À propos de PériMap | Application Bus Périgueux Gratuite | Open Source</title>
+    <meta name="description" content="🚍 Découvrez PériMap : l'application gratuite et open source pour les bus Péribus à Périgueux. Horaires temps réel, calcul d'itinéraires, données officielles GTFS du Grand Périgueux. Sans pub, sans compte !">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="keywords" content="périmap, application péribus, bus périgueux gratuit, horaires péribus, transport dordogne, open source transport, gtfs périgueux, application bus gratuite, péribus horaires, grand périgueux transport, mobilité périgueux">
+    <meta name="author" content="PériMap - Projet Open Source">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="revisit-after" content="7 days">
+    <meta name="rating" content="general">
+    <meta name="distribution" content="global">
+    
+    <!-- Canonical & Alternate -->
+    <link rel="canonical" href="https://perimap.fr/about.html">
+    <link rel="alternate" hreflang="fr" href="https://perimap.fr/about.html">
+    <link rel="alternate" hreflang="x-default" href="https://perimap.fr/about.html">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PériMap">
+    <meta property="og:title" content="À propos de PériMap | Application Bus Périgueux Open Source">
+    <meta property="og:description" content="🚍 PériMap : votre assistant mobilité gratuit pour le réseau Péribus. Horaires en temps réel, itinéraires optimisés, données ouvertes. Projet indépendant et sans pub.">
+    <meta property="og:url" content="https://perimap.fr/about.html">
+    <meta property="og:image" content="https://perimap.fr/icons/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="À propos de PériMap | Application Bus Périgueux">
+    <meta name="twitter:description" content="🚍 Application gratuite et open source pour les bus Péribus. Horaires temps réel, itinéraires, sans pub ni compte !">
+    <meta name="twitter:image" content="https://perimap.fr/icons/og-image.png">
+    
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="FR-NAQ">
+    <meta name="geo.placename" content="Périgueux, Dordogne">
+    <meta name="geo.position" content="45.1849;0.7214">
+    <meta name="ICBM" content="45.1849, 0.7214">
+    
+    <!-- PWA -->
     <meta name="theme-color" content="#22c55e">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PériMap">
+    <meta name="application-name" content="PériMap">
+    <meta name="msapplication-TileColor" content="#22c55e">
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    
+    <!-- Links -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
     <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+    
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//api.github.com">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Schema.org - About Page -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "name": "À propos de PériMap",
+        "description": "PériMap est une application web progressive gratuite et open source pour consulter les horaires et itinéraires du réseau Péribus à Périgueux.",
+        "url": "https://perimap.fr/about.html",
+        "mainEntity": {
+            "@type": "SoftwareApplication",
+            "name": "PériMap",
+            "applicationCategory": "TravelApplication",
+            "operatingSystem": "Web, Android, iOS",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "EUR"
+            },
+            "isAccessibleForFree": true,
+            "license": "https://opensource.org/licenses/MIT"
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Accueil PériMap",
+                    "item": "https://perimap.fr/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "À propos",
+                    "item": "https://perimap.fr/about.html"
+                }
+            ]
+        }
+    }
+    </script>
+    
+    <!-- Schema.org - Organization -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "PériMap",
+        "alternateName": "Péribus Horaires App",
+        "url": "https://perimap.fr",
+        "logo": "https://perimap.fr/icons/icon-512.png",
+        "description": "Application citoyenne gratuite pour le réseau de bus Péribus du Grand Périgueux",
+        "foundingDate": "2024",
+        "areaServed": {
+            "@type": "Place",
+            "name": "Grand Périgueux",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Périgueux",
+                "addressRegion": "Dordogne",
+                "addressCountry": "FR"
+            }
+        },
+        "sameAs": [
+            "https://github.com/EFFEZFEZ/p-rimap-sans-api-"
+        ]
+    }
+    </script>
+    
+    <!-- Schema.org - FAQ -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "PériMap est-il gratuit ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui, PériMap est 100% gratuit, sans publicité et sans création de compte. C'est un projet open source indépendant."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "PériMap est-il officiel ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Non, PériMap est un projet indépendant non affilié au Grand Périgueux ou à Péribus. Il utilise les données ouvertes officielles (GTFS) sous licence ODbL."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "D'où viennent les données de PériMap ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Les horaires proviennent des données GTFS officielles du Grand Périgueux publiées en open data. Les itinéraires sont calculés via l'API Google Routes pour plus de précision."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Comment installer PériMap sur mon téléphone ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "PériMap est une Progressive Web App (PWA). Sur Android, cliquez sur 'Ajouter à l'écran d'accueil' dans Chrome. Sur iPhone, utilisez Safari et 'Sur l'écran d'accueil' dans le menu partage."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Puis-je utiliser PériMap hors connexion ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Oui, une fois installé, PériMap fonctionne hors ligne pour consulter les horaires. Seul le calcul d'itinéraire nécessite une connexion internet."
+                }
+            }
+        ]
+    }
+    </script>
     <style>
         /* === ADMIN PANEL STYLES === */
         .tile-admin {

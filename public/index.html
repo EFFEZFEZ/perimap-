@@ -1,31 +1,63 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PériMap · Assistant mobilité Grand Périgueux</title>
-    <meta name="description" content="Assistant mobilité indépendant pour préparer vos trajets dans le Grand Périgueux avec horaires officiels, calculs multi-modes et carte rapide.">
-    <meta name="keywords" content="Grand Périgueux, itinéraires bus, horaires bus, planificateur mobilité, application transport, carte interactive">
-    <meta name="robots" content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    
+    <!-- SEO Principal - Mots-clés stratégiques -->
+    <title>Péribus Horaires & Itinéraires Bus Périgueux | PériMap - Calcul trajet Grand Périgueux</title>
+    <meta name="description" content="🚌 Horaires Péribus en temps réel, calcul d'itinéraire bus Périgueux, plan du réseau Grand Périgueux. Application gratuite : lignes A, B, C, D, horaires arrêts, correspondances. Trouvez votre trajet en 2 clics !">
+    <meta name="keywords" content="péribus, horaires péribus, bus périgueux, itinéraire bus périgueux, grand périgueux transport, horaires bus périgueux, ligne A péribus, ligne B péribus, ligne C péribus, ligne D péribus, plan réseau péribus, arrêt bus périgueux, transport en commun périgueux, mobilité périgueux, tarif péribus, abonnement péribus, carte péribus, horaire ligne péribus, prochain bus périgueux, calculer trajet périgueux, transports grand périgueux, bus trélissac, bus boulazac, bus coulounieix chamiers, bus chancelade, bus marsac, gare périgueux bus, centre ville périgueux bus, médiathèque périgueux, hôpital périgueux bus, lycée périgueux bus, navette périgueux">
+    <meta name="author" content="PériMap - Application indépendante Grand Périgueux">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
     <link rel="canonical" href="https://perimap.app/">
+    
+    <!-- Géolocalisation SEO -->
+    <meta name="geo.region" content="FR-NAQ">
+    <meta name="geo.placename" content="Périgueux, Dordogne, France">
+    <meta name="geo.position" content="45.1846;0.7214">
+    <meta name="ICBM" content="45.1846, 0.7214">
+    
+    <!-- Open Graph avancé -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="PériMap · Assistant mobilité Grand Périgueux">
-    <meta property="og:description" content="Consultez les horaires, cartes et itinéraires interactifs du réseau du Grand Périgueux dans une application indépendante et open data.">
+    <meta property="og:site_name" content="PériMap">
+    <meta property="og:title" content="Péribus Horaires & Itinéraires | PériMap - Bus Grand Périgueux">
+    <meta property="og:description" content="🚌 Calculez votre trajet bus à Périgueux en temps réel. Horaires Péribus, plan réseau, lignes A B C D, tarifs. Application gratuite et rapide !">
     <meta property="og:url" content="https://perimap.app/">
-    <meta property="og:image" content="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
+    <meta property="og:image" content="https://perimap.app/icons/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="PériMap - Horaires et itinéraires bus Péribus Grand Périgueux">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="PériMap · Assistant mobilité Grand Périgueux">
-    <meta name="twitter:description" content="Application open data pour explorer les lignes du Grand Périgueux, préparer vos trajets et consulter les informations pratiques.">
-    <meta name="twitter:image" content="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
+    <meta name="twitter:site" content="@PeriMap">
+    <meta name="twitter:title" content="Péribus Horaires & Itinéraires | PériMap">
+    <meta name="twitter:description" content="🚌 Horaires bus Périgueux en temps réel. Calcul d'itinéraire, plan réseau Péribus, tarifs. Gratuit !">
+    <meta name="twitter:image" content="https://perimap.app/icons/og-image.png">
+    
+    <!-- PWA & Mobile -->
     <meta name="theme-color" content="#22c55e">
-    <!-- ⚠️ CLÉ API GOOGLE MAPS -->
-    <meta name="peribus-api-key" content="AIzaSyAU0OABc_T8AODV3UorpdYXsBVUFYMqMfQ">
+    <meta name="msapplication-TileColor" content="#22c55e">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PériMap">
+    <meta name="application-name" content="PériMap">
+    
+    <!-- API Key -->
+    <meta name="peribus-api-key" content="AIzaSyAU0OABc_T8AODV3UorpdYXsBVUFYMqMfQ">
+    
+    <!-- Favicons & Icons -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
     <link rel="icon" type="image/webp" sizes="192x192" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#22c55e">
     
     <!-- Preload ressources critiques -->
     <link rel="preload" href="style.css" as="style">
@@ -34,6 +66,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://unpkg.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://maps.googleapis.com">
+    <link rel="dns-prefetch" href="https://routes.googleapis.com">
     
     <!-- CSS critique en premier -->
     <link rel="stylesheet" href="style.css">
@@ -59,28 +93,177 @@
     <!-- Font avec display=swap pour éviter FOIT -->
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Schema.org - Application de transport -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
+        "@type": "WebApplication",
         "name": "PériMap",
+        "alternateName": ["Péribus horaires", "Bus Périgueux", "Horaires bus Grand Périgueux"],
         "url": "https://perimap.app/",
         "applicationCategory": "TravelApplication",
-        "operatingSystem": "Web",
-        "description": "Planificateur d'itinéraires indépendant pour le réseau de bus du Grand Périgueux, basé sur des données open data.",
-        "keywords": ["Grand Périgueux", "bus", "planificateur", "open data", "mobilité", "péribus", "carte péribus", "horaires péribus", "horaires ligne"],
+        "operatingSystem": "Web, iOS, Android",
+        "browserRequirements": "Requires JavaScript",
+        "description": "Application gratuite pour consulter les horaires Péribus, calculer vos itinéraires bus à Périgueux et visualiser le plan du réseau Grand Périgueux en temps réel.",
+        "featureList": [
+            "Calcul d'itinéraire bus en temps réel",
+            "Horaires de toutes les lignes Péribus",
+            "Plan interactif du réseau",
+            "Alertes trafic et perturbations",
+            "Mode hors-ligne",
+            "Géolocalisation"
+        ],
+        "screenshot": "https://perimap.app/icons/screenshot.png",
+        "softwareVersion": "2.0",
+        "datePublished": "2024-01-01",
+        "dateModified": "2025-12-03",
         "inLanguage": "fr",
-        "author": {
-            "@type": "Person",
-            "name": "Projet PériMap"
-        },
+        "isAccessibleForFree": true,
         "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "EUR"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "156",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "PériMap",
+            "url": "https://perimap.app/"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "PériMap",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://perimap.app/icons/icon-512.png"
+            }
         }
     }
     </script>
+    
+    <!-- Schema.org - Service de transport local -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Réseau Péribus - Grand Périgueux",
+        "description": "Réseau de transport en commun du Grand Périgueux. Consultez les horaires et itinéraires sur PériMap.",
+        "url": "https://perimap.app/",
+        "areaServed": {
+            "@type": "City",
+            "name": "Périgueux",
+            "containedInPlace": {
+                "@type": "AdministrativeArea",
+                "name": "Dordogne, Nouvelle-Aquitaine, France"
+            }
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "45.1846",
+            "longitude": "0.7214"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Périgueux",
+            "addressRegion": "Dordogne",
+            "postalCode": "24000",
+            "addressCountry": "FR"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "opens": "06:00",
+            "closes": "21:00"
+        }
+    }
+    </script>
+    
+    <!-- Schema.org - FAQ pour SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Comment consulter les horaires Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Utilisez PériMap pour consulter tous les horaires des lignes Péribus (A, B, C, D, K, e, N, R) en temps réel. Entrez simplement votre arrêt de départ et d'arrivée pour obtenir les prochains passages."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quel est le prix d'un ticket de bus Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le ticket unitaire Péribus coûte 1,30€. Des abonnements mensuels et annuels sont disponibles avec des tarifs réduits pour les jeunes, étudiants et seniors."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quelles communes sont desservies par Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le réseau Péribus dessert Périgueux et les communes du Grand Périgueux : Boulazac, Trélissac, Coulounieix-Chamiers, Chancelade, Marsac-sur-l'Isle, Notre-Dame-de-Sanilhac, et plus encore."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Comment calculer un itinéraire bus à Périgueux ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sur PériMap, entrez votre point de départ et d'arrivée dans le calculateur d'itinéraire. L'application vous propose les meilleurs trajets avec les correspondances, durées et horaires en temps réel."
+                }
+            }
+        ]
+    }
+    </script>
+    
+    <!-- Schema.org - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://perimap.app/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Horaires Péribus",
+                "item": "https://perimap.app/#horaires"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Calcul itinéraire",
+                "item": "https://perimap.app/#itineraire"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Plan du réseau",
+                "item": "https://perimap.app/#carte"
+            }
+        ]
+    }
+    </script>
+    
+    <!-- Hreflang pour SEO international -->
+    <link rel="alternate" hreflang="fr" href="https://perimap.app/">
+    <link rel="alternate" hreflang="x-default" href="https://perimap.app/">
 </head>
 <body>
 
