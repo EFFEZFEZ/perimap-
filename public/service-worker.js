@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v124'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V124: Documentation projet complète - README.md refait + suppression RESUME_PERIBUS.txt + DEVMAP.md
+const CACHE_VERSION = 'v125'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V125: Fix logo manquant - icons/logo.png → icons/icon-192.png
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
