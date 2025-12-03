@@ -233,9 +233,10 @@ function onSelectItinerary(itinerary, cardEl) {
         detailsDiv.classList.remove('hidden');
         cardEl.classList.add('is-active');
 
-        // Mettre à jour la carte avec l'itinéraire sélectionné
-        if (resultsMapRenderer) {
-            drawRouteOnResultsMap(itinerary);
+        // V117: Mettre à jour la carte avec l'itinéraire sélectionné
+        if (resultsMapRenderer && resultsMapRenderer.map) {
+            resultsMapRenderer.map.invalidateSize();
+            setTimeout(() => drawRouteOnResultsMap(itinerary), 50);
         }
 
         // Scroll vers la carte
@@ -1604,7 +1605,15 @@ async function executeItinerarySearch(source, sourceElements) {
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         if (allFetchedItineraries.length > 0) {
-            drawRouteOnResultsMap(allFetchedItineraries[0]);
+            // V117: S'assurer que la carte est bien dimensionnée avant de dessiner
+            if (resultsMapRenderer && resultsMapRenderer.map) {
+                setTimeout(() => {
+                    resultsMapRenderer.map.invalidateSize();
+                    drawRouteOnResultsMap(allFetchedItineraries[0]);
+                }, 100);
+            } else {
+                drawRouteOnResultsMap(allFetchedItineraries[0]);
+            }
             // V60: Le bouton GO est maintenant intégré dans le bottom sheet de chaque itinéraire
         }
     } catch (error) {
