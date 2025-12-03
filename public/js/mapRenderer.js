@@ -650,6 +650,7 @@ export class MapRenderer {
     /**
      * Appelé lorsqu'un marqueur d'arrêt est cliqué
      * V99: Affiche les premiers départs si rien dans l'heure
+     * V110: Sur mobile, décale la carte vers le haut pour mieux voir la popup
      */
     onStopClick(masterStop) {
         const currentSeconds = this.timeManager.getCurrentSeconds();
@@ -668,7 +669,31 @@ export class MapRenderer {
         
         const lat = parseFloat(masterStop.stop_lat);
         const lon = parseFloat(masterStop.stop_lon);
-        const popup = L.popup({ maxHeight: 350, className: 'stop-schedule-popup' })
+        
+        // V110: Sur mobile, décaler la vue vers le haut pour que la popup soit visible
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            // Calculer un offset pour que l'arrêt soit dans le tiers inférieur de l'écran
+            // Cela laisse de la place pour la popup au-dessus
+            const mapHeight = this.map.getSize().y;
+            const offsetY = mapHeight * 0.25; // Décaler de 25% vers le haut
+            
+            // Obtenir le point pixel de l'arrêt et l'ajuster
+            const point = this.map.latLngToContainerPoint([lat, lon]);
+            const newPoint = L.point(point.x, point.y - offsetY);
+            const newCenter = this.map.containerPointToLatLng(newPoint);
+            
+            // Déplacer la carte avec animation
+            this.map.panTo(newCenter, { animate: true, duration: 0.3 });
+        }
+        
+        const popup = L.popup({ 
+            maxHeight: 350, 
+            className: 'stop-schedule-popup',
+            autoPan: !isMobile, // V110: Désactiver l'autopan sur mobile car on gère manuellement
+            autoPanPaddingTopLeft: isMobile ? [0, 0] : [50, 50],
+            autoPanPaddingBottomRight: isMobile ? [0, 0] : [50, 50]
+        })
             .setLatLng([lat, lon])
             .setContent(popupContent)
             .openOn(this.map);

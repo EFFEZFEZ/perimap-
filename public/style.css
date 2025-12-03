@@ -8128,6 +8128,36 @@ body.dark-theme .tarifs-choice {
     .stop-schedule-popup .leaflet-popup-content {
         min-width: 260px;
         max-width: 300px;
+        max-height: 280px; /* V110: Réduit pour mieux voir sur mobile */
+    }
+    
+    /* V110: Réduire la taille des éléments pour gagner de la place */
+    .stop-popup-v105 .popup-line-header {
+        padding: 0.625rem 0.875rem;
+    }
+    
+    .stop-popup-v105 .popup-badge {
+        min-width: 28px;
+        height: 20px;
+        font-size: 0.75rem;
+    }
+    
+    .stop-popup-v105 .popup-stop-name {
+        font-size: 0.8125rem;
+    }
+    
+    .stop-popup-v105 .popup-dest-row {
+        padding: 0.5rem 0.875rem;
+    }
+    
+    .stop-popup-v105 .popup-dest-name {
+        font-size: 0.8125rem;
+        margin-bottom: 0.375rem;
+    }
+    
+    .stop-popup-v105 .popup-time {
+        padding: 0.1875rem 0.375rem;
+        font-size: 0.75rem;
     }
     
     .line-departures-group {
