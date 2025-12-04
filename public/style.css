@@ -4461,7 +4461,7 @@ body.dark-theme .install-tip-steps section {
 
 @media (min-width: 901px) {
     #itinerary-results-container .form-group.has-geolocate .btn-geolocate {
-        transform: translateY(-58%);
+        transform: translateY(-50%) !important;
     }
 }
 
@@ -8904,15 +8904,17 @@ body.dark-theme .tarifs-choice {
 }
 
 /* Boutons généraux - feedback tactile */
-.btn:active,
-.btn-icon-round:active:not(.btn-geolocate) {
+.btn:active {
     transform: scale(0.96);
     transition: transform 0.1s ease;
 }
 
-/* Bouton géoloc - pas de scale pour éviter le décalage */
-.btn-geolocate:active {
-    transform: translateY(-50%);
+/* Bouton géoloc - NE DOIT JAMAIS BOUGER */
+.btn-geolocate,
+.btn-geolocate:hover,
+.btn-geolocate:active,
+.btn-geolocate:focus {
+    transform: translateY(-50%) !important;
 }
 
 /* Onglets (tabs) - zone tactile */
