@@ -1,35 +1,32 @@
 /**
- * apiManager.js - VERSION V48 (Alias Campus/Grenadière)
+ * apiManager.js - VERSION V178 (Sécurisation API Key)
  * Gère tous les appels aux API externes (Google Places & Google Routes).
  *
- * *** MODIFICATION V48 (Alias Campus) ***
+ * ✅ V178: SECURISATION - La clé API n'est plus exposée côté client
+ * Tous les appels Google passent par les proxies Vercel:
+ * - /api/routes : Google Routes API (itinéraires bus/vélo/marche)
+ * - /api/places : Google Places API (autocomplétion)
+ * - /api/geocode : Google Geocoding API (reverse geocode)
+ *
+ * *** MODIFICATION V48 (Alias Campus/Grenadière) ***
  * 1. Ajout d'un système d'alias pour fusionner des lieux équivalents.
  * 2. "Campus" et "Pôle Universitaire Grenadière" pointent vers le même lieu.
  *
- * *** MODIFICATION V47 (Fix FieldMask 400 Error) ***
- * 1. L'erreur 400 était causée par une demande de champ invalide
- * ('routes.legs.steps.duration') dans le FieldMask.
- * 2. Le 'X-Goog-FieldMask' dans les 3 fonctions a été simplifié.
- * 3. En demandant 'routes.legs.steps', nous recevons
- * implicitement tous les sous-champs dont nous avons besoin
- * (staticDuration, polyline, navigationInstruction, etc.)
- * sans causer d'erreur.
- *
  * *** MODIFICATION V57 (Géolocalisation) ***
  * 1. Ajout de la fonction `reverseGeocode` pour convertir lat/lng en place_id.
- * 2. Ajout de la bibliothèque 'geocoding' au chargement de l'API.
- * 3. Ajout de `this.geocoder` à `initServices`.
- *
- * *** CORRECTION (Race Condition) ***
- * 1. Ajout de `this.apiLoadPromise` pour s'assurer que `loadGoogleMapsAPI`
- * n'est exécuté qu'une seule fois, même s'il est appelé
- * plusieurs fois en parallèle au démarrage.
  */
+
+import { getAppConfig, API_ENDPOINTS } from './config.js';
 
 export class ApiManager {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.sessionToken = null;
+        
+        // ✅ V178: Configuration proxy
+        const config = getAppConfig();
+        this.useProxy = config.useProxy;
+        this.apiEndpoints = config.apiEndpoints || API_ENDPOINTS;
 
         // Zone du Grand Périgueux / Dordogne
         this.perigueuxBounds = {
@@ -599,11 +596,15 @@ export class ApiManager {
 
     /**
      * Méthode privée pour calculer uniquement le bus
+     * ✅ V178: Utilise le proxy Vercel pour masquer la clé API
      * ✅ V48: Gère les alias via coordonnées
      * @private
      */
     async _fetchBusRoute(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
-        const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+        // ✅ V178: Utiliser le proxy Vercel
+        const API_URL = this.useProxy 
+            ? `${this.apiEndpoints.routes}?action=directions`
+            : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
         // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
         const origin = fromCoords 
@@ -637,14 +638,19 @@ export class ApiManager {
             }
         }
 
+        // ✅ V178: Headers différents selon mode proxy ou direct
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (!this.useProxy) {
+            headers['X-Goog-Api-Key'] = this.apiKey;
+            headers['X-Goog-FieldMask'] = 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps';
+        }
+
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Goog-Api-Key': this.apiKey,
-                // ✅ CORRECTION V47: Masque simplifié et valide
-                'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps'
-            },
+            headers,
             body: JSON.stringify(body)
         });
 
@@ -714,12 +720,16 @@ export class ApiManager {
 
     /**
      * Calcule un itinéraire à vélo
+     * ✅ V178: Utilise le proxy Vercel pour masquer la clé API
      * ✅ V48: Gère les alias via coordonnées
      */
     async fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
         console.log(`🚴 API Google Routes (VÉLO): ${fromPlaceId} → ${toPlaceId}`);
 
-        const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+        // ✅ V178: Utiliser le proxy Vercel
+        const API_URL = this.useProxy 
+            ? `${this.apiEndpoints.routes}?action=bicycle`
+            : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
         // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
         const origin = fromCoords 
@@ -737,14 +747,19 @@ export class ApiManager {
             units: "METRIC"
         };
 
+        // ✅ V178: Headers différents selon mode proxy ou direct
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (!this.useProxy) {
+            headers['X-Goog-Api-Key'] = this.apiKey;
+            headers['X-Goog-FieldMask'] = 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps';
+        }
+
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Goog-Api-Key': this.apiKey,
-                // ✅ CORRECTION V4T: Masque simplifié et valide
-                'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps'
-            },
+            headers,
             body: JSON.stringify(body)
         });
 
@@ -761,12 +776,16 @@ export class ApiManager {
     
     /**
      * Calcule un itinéraire à pied
+     * ✅ V178: Utilise le proxy Vercel pour masquer la clé API
      * ✅ V48: Gère les alias via coordonnées
      */
     async fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
         console.log(`🚶 API Google Routes (MARCHE): ${fromPlaceId} → ${toPlaceId}`);
 
-        const API_URL = 'https://routes.googleapis.com/directions/v2:computeRoutes';
+        // ✅ V178: Utiliser le proxy Vercel
+        const API_URL = this.useProxy 
+            ? `${this.apiEndpoints.routes}?action=walking`
+            : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
         // ✅ V48: Utiliser les coordonnées pour les alias, sinon placeId
         const origin = fromCoords 
@@ -784,14 +803,19 @@ export class ApiManager {
             units: "METRIC"
         };
 
+        // ✅ V178: Headers différents selon mode proxy ou direct
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (!this.useProxy) {
+            headers['X-Goog-Api-Key'] = this.apiKey;
+            headers['X-Goog-FieldMask'] = 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps';
+        }
+
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Goog-Api-Key': this.apiKey,
-                // ✅ CORRECTION V47: Masque simplifié et valide
-                'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps'
-            },
+            headers,
             body: JSON.stringify(body)
         });
 

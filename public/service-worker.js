@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v177'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V177: fix footer admin button placement
+const CACHE_VERSION = 'v178'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V178: Sécurisation clé API (proxy Vercel)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
