@@ -664,33 +664,27 @@ export class ApiManager {
                     return depA.localeCompare(depB);
                 });
                 
-                // Garder les 5 premiers pour l'affichage, mettre le reste en cache
-                const displayRoutes = allBusRoutes.slice(0, 5);
-                const cachedRoutes = allBusRoutes.slice(5);
+                // V198: Nettoyage - On renvoie TOUT sans pagination ni cache
+                // Le filtrage final se fera dans main.js
+                const busData = { routes: allBusRoutes, hasMore: false };
                 
-                // Stocker en cache pour "Voir plus"
-                this._cachedBusRoutes = cachedRoutes;
-                this._lastSearchParams = { fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords };
-                
-                const busData = { routes: displayRoutes, hasMore: cachedRoutes.length > 0 };
-                const bestRoute = displayRoutes[0];
+                // Calculs pour le "meilleur" trajet (pour le score)
+                const bestRoute = allBusRoutes[0];
                 const durationSeconds = parseInt(bestRoute.duration?.replace('s', '')) || 0;
                 const durationMinutes = Math.round(durationSeconds / 60);
                 const transitSteps = bestRoute.legs?.[0]?.steps?.filter(s => s.travelMode === 'TRANSIT') || [];
                 const transferCount = Math.max(0, transitSteps.length - 1);
                 
                 results.bus = { data: busData, duration: durationMinutes, transfers: transferCount };
-                console.log(`🚍 V197: ${displayRoutes.length} trajets affichés, ${cachedRoutes.length} en cache`);
+                console.log(`🚍 V198: ${allBusRoutes.length} trajets trouvés (tous renvoyés)`);
                 
                 // Log des heures pour vérification
-                const heures = displayRoutes.map(r => r.legs?.[0]?.localizedValues?.departureTime?.time?.text).join(', ');
+                const heures = allBusRoutes.map(r => r.legs?.[0]?.localizedValues?.departureTime?.time?.text).join(', ');
                 console.log(`📋 Horaires: ${heures}`);
                 
-                let score = durationMinutes > 90 || transferCount > 2 ? 20 :
-                            durationMinutes > 60 ? 50 :
-                            durationMinutes > 30 ? 75 : 100;
+                // Score simplifié
                 results.recommendations.push({
-                    mode: 'bus', score,
+                    mode: 'bus', score: 100, // Bus toujours prioritaire
                     reason: `${durationMinutes}min${transferCount ? ` (${transferCount} corresp.)` : ''}`
                 });
             } else {
