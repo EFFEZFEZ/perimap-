@@ -1107,11 +1107,11 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     if (searchTime?.type === 'arriver') {
         // Mode ARRIVER: chercher les bus qui arrivent AVANT l'heure demandée
         windowEndSec = reqSeconds;  // Arrivée max = heure demandée
-        windowStartSec = Math.max(0, reqSeconds - SEARCH_WINDOW);
+        windowStartSec = reqSeconds - SEARCH_WINDOW; // peut être négatif (prise en charge veille)
     } else {
         // Mode PARTIR: chercher les bus qui partent APRÈS l'heure demandée
         // V190: Inclure aussi 30min AVANT pour montrer l'option précédente
-        windowStartSec = Math.max(0, reqSeconds - BEFORE_MARGIN);
+        windowStartSec = reqSeconds - BEFORE_MARGIN; // peut être négatif (veille)
         windowEndSec = reqSeconds + SEARCH_WINDOW;
     }
     

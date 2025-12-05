@@ -886,14 +886,17 @@ export class DataManager {
         if (Number.isNaN(totalSeconds)) {
             return '--:--';
         }
-        const clamped = Math.max(0, Math.floor(totalSeconds));
-        const hours = Math.floor(clamped / 3600) % 24;
-        const minutes = Math.floor((clamped % 3600) / 60);
+
+        // Normalise l'heure sur 24h sans écraser les valeurs négatives (trajets veille ↦ 23hxx)
+        const normalized = ((Math.floor(totalSeconds) % 86400) + 86400) % 86400;
+        const hours = Math.floor(normalized / 3600);
+        const minutes = Math.floor((normalized % 3600) / 60);
         const pad = (value) => String(value).padStart(2, '0');
+
         if (!withSeconds) {
             return `${pad(hours)}:${pad(minutes)}`;
         }
-        const secs = clamped % 60;
+        const secs = normalized % 60;
         return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
     }
 
@@ -1136,7 +1139,32 @@ export class DataManager {
     getTripsBetweenStops(startStopIds, endStopIds, date, windowStartSeconds = 0, windowEndSeconds = 86400, searchMode = 'partir') {
         const startSet = new Set(Array.isArray(startStopIds) ? startStopIds : Array.from(startStopIds || []));
         const endSet = new Set(Array.isArray(endStopIds) ? endStopIds : Array.from(endStopIds || []));
-        const serviceSet = this.getServiceIds(date instanceof Date ? date : new Date(date));
+
+        // Normalise la date demandée et prépare les jours voisins (veille/len lendemain)
+        const reqDate = (date instanceof Date) ? new Date(date) : new Date(date);
+        const prevDate = new Date(reqDate); prevDate.setDate(reqDate.getDate() - 1);
+        const nextDate = new Date(reqDate); nextDate.setDate(reqDate.getDate() + 1);
+
+        // Récupère les services pour chaque jour utile (gestion fenêtre qui chevauche minuit)
+        const serviceSetCurrent = this.getServiceIds(reqDate);
+        const serviceSetPrev = this.getServiceIds(prevDate);
+        const serviceSetNext = this.getServiceIds(nextDate);
+
+        // Fenêtre brute (peut chevaucher minuit, on conserve la valeur négative/>
+        const windowStart = windowStartSeconds;
+        const windowEnd = windowEndSeconds;
+
+        // Prépare les fenêtres de service (veille / jour J / lendemain)
+        const serviceWindows = [];
+        if (windowStart < 0 && serviceSetPrev.size) {
+            serviceWindows.push({ label: 'prev', offset: -86400, serviceSet: serviceSetPrev });
+        }
+        if (serviceSetCurrent.size) {
+            serviceWindows.push({ label: 'current', offset: 0, serviceSet: serviceSetCurrent });
+        }
+        if (windowEnd > 86400 && serviceSetNext.size) {
+            serviceWindows.push({ label: 'next', offset: 86400, serviceSet: serviceSetNext });
+        }
 
         // DEBUG: Log uniquement pour la première recherche directe
         if (!globalThis._gtfsDebugLogged) {
@@ -1153,7 +1181,10 @@ export class DataManager {
             console.log('🔬 Recherche GTFS directe:');
             console.log(`   Départ: ${startFound.length}/${startSet.size} IDs valides`, startFound.slice(0, 2));
             console.log(`   Arrivée: ${endFound.length}/${endSet.size} IDs valides`, endFound.slice(0, 2));
-            console.log(`   Services actifs: ${Array.from(serviceSet).join(', ')}`);
+            console.log(`   Services veille (${prevDate.toISOString().slice(0,10)}):`, Array.from(serviceSetPrev));
+            console.log(`   Services jour J (${reqDate.toISOString().slice(0,10)}):`, Array.from(serviceSetCurrent));
+            console.log(`   Services lendemain (${nextDate.toISOString().slice(0,10)}):`, Array.from(serviceSetNext));
+            console.log(`   Fenêtre brute: ${windowStart}s → ${windowEnd}s`);
             
             // Sauvegarder les IDs valides pour comparaison ultérieure
             globalThis._validEndIds = endFound;
@@ -1164,10 +1195,6 @@ export class DataManager {
 
         // Iterate over all trips (could be optimized later)
         for (const trip of this.trips) {
-            // Check service active
-            const isServiceActive = Array.from(serviceSet).some(activeServiceId => this.serviceIdsMatch(trip.service_id, activeServiceId));
-            if (!isServiceActive) { debugStats.serviceRejected++; continue; }
-
             const stopTimes = this.stopTimesByTrip[trip.trip_id];
             if (!stopTimes || stopTimes.length < 2) { debugStats.noStopTimes++; continue; }
 
@@ -1195,28 +1222,53 @@ export class DataManager {
             const depSec = this.timeToSeconds(boardingST.departure_time || boardingST.arrival_time);
             const arrSec = this.timeToSeconds(alightST.arrival_time || alightST.departure_time);
 
-            // ✅ FIX: En mode "arriver", filtrer sur l'heure d'arrivée, sinon sur l'heure de départ
-            if (searchMode === 'arriver') {
-                // Mode arriver: l'arrivée doit être dans la fenêtre (et <= heure demandée)
-                if (arrSec < windowStartSeconds || arrSec > windowEndSeconds) { debugStats.outOfWindow++; continue; }
-            } else {
-                // Mode partir: le départ doit être dans la fenêtre (et >= heure demandée)
-                if (depSec < windowStartSeconds || depSec > windowEndSeconds) { debugStats.outOfWindow++; continue; }
+            // Vérifie sur quelle journée le service est actif (veille / jour J / lendemain)
+            let serviceMatched = false;
+            let accepted = false;
+
+            for (const svcWindow of serviceWindows) {
+                const isServiceActive = Array.from(svcWindow.serviceSet).some(activeServiceId => this.serviceIdsMatch(trip.service_id, activeServiceId));
+                if (!isServiceActive) {
+                    continue;
+                }
+
+                serviceMatched = true;
+
+                // Repositionne les secondes par rapport à la date demandée
+                const depShifted = depSec + svcWindow.offset;
+                const arrShifted = arrSec + svcWindow.offset;
+
+                const inWindow = (searchMode === 'arriver')
+                    ? (arrShifted >= windowStart && arrShifted <= windowEnd)
+                    : (depShifted >= windowStart && depShifted <= windowEnd);
+
+                if (!inWindow) {
+                    debugStats.outOfWindow++;
+                    continue;
+                }
+
+                accepted = true;
+                debugStats.accepted++;
+                results.push({
+                    tripId: trip.trip_id,
+                    routeId: trip.route_id,
+                    shapeId: trip.shape_id || null,
+                    boardingStopId: boardingST.stop_id,
+                    alightingStopId: alightST.stop_id,
+                    // On conserve l'heure décalée pour garder l'ordre chronologique à cheval sur minuit
+                    departureSeconds: depShifted,
+                    arrivalSeconds: arrShifted,
+                    stopTimes: stopTimes.slice(boardingIndex, alightIndex + 1),
+                    trip: trip,
+                    route: this.getRoute(trip.route_id)
+                });
+                break; // éviter les doublons si le trip matche plusieurs fenêtres
             }
 
-            debugStats.accepted++;
-            results.push({
-                tripId: trip.trip_id,
-                routeId: trip.route_id,
-                shapeId: trip.shape_id || null,
-                boardingStopId: boardingST.stop_id,
-                alightingStopId: alightST.stop_id,
-                departureSeconds: depSec,
-                arrivalSeconds: arrSec,
-                stopTimes: stopTimes.slice(boardingIndex, alightIndex + 1),
-                trip: trip,
-                route: this.getRoute(trip.route_id)
-            });
+            if (!serviceMatched) {
+                debugStats.serviceRejected++;
+            }
+            // Si serviceMatched mais pas accepted, l'itinéraire est juste hors fenêtre (déjà compté outOfWindow)
         }
 
         // Sort by departure time
