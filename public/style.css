@@ -5376,9 +5376,11 @@ body.dark-theme #results-planner-to:focus {
 /* La CARTE prend le reste de l'espace */
 #results-map {
     flex: 1; /* Prend tout l'espace restant à droite */
+    min-width: 0; /* V151: Permet au flex de fonctionner correctement */
     height: 100%;
     background: #e5e5e5;
     touch-action: pan-x pan-y;
+    position: relative; /* V151: Nécessaire pour Leaflet */
 }
 
 

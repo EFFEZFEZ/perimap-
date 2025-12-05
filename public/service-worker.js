@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v151'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V151: Retour 1 seul appel API (économique)
+const CACHE_VERSION = 'v152'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V152: Fix carte PC (invalidateSize + CSS)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

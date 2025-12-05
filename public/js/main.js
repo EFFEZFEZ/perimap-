@@ -4023,11 +4023,17 @@ function showResultsView() {
         resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
     }
     
-    // *** NOUVEAU V35: Invalide la carte PC ***
+    // V151: Invalider la carte PC avec plusieurs délais pour s'assurer qu'elle s'affiche
     if (resultsMapRenderer && resultsMapRenderer.map) {
+        // Délai immédiat
         setTimeout(() => {
-             resultsMapRenderer.map.invalidateSize();
-        }, 10);
+            resultsMapRenderer.map.invalidateSize();
+        }, 50);
+        // Délai après le rendu complet
+        setTimeout(() => {
+            resultsMapRenderer.map.invalidateSize();
+            console.log('🗺️ Carte PC invalidée (300ms)');
+        }, 300);
     }
 }
 
