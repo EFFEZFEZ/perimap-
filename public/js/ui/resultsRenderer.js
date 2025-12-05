@@ -251,12 +251,15 @@ export function createResultsRenderer(deps) {
     const isArrival = lastSearchMode === 'arriver';
 
     resultsListContainer.innerHTML = '';
+    
+    // V142: Utiliser TOUTE la liste, pas de pagination
     let list;
     if (isArrival) {
-      const base = arrivalRankedAll.slice(0, arrivalRenderedCount || pageSize);
-      list = (mode === 'ALL') ? base : base.filter(i => i.type === mode);
+      // Mode ARRIVER: utiliser arrivalRankedAll complet (déjà trié par arrivée décroissante)
+      list = (mode === 'ALL') ? [...arrivalRankedAll] : arrivalRankedAll.filter(i => i.type === mode);
     } else {
-      list = (mode === 'ALL') ? allFetched : allFetched.filter(i => i.type === mode);
+      // Mode PARTIR: allFetched est déjà trié par départ croissant
+      list = (mode === 'ALL') ? [...allFetched] : allFetched.filter(i => i.type === mode);
     }
 
     if (!list.length) {
@@ -264,10 +267,19 @@ export function createResultsRenderer(deps) {
       return;
     }
 
-    // V63: Regrouper les trajets identiques (même structure, horaires différents)
-    const groupedList = groupItinerariesByRoute(list);
+    // V142: FORCER l'ordre BUS → BIKE → WALK toujours
+    // Mais PRÉSERVER l'ordre de tri au sein de chaque catégorie
+    const busItins = list.filter(i => getItineraryType(i) === 'BUS');
+    const bikeItins = list.filter(i => getItineraryType(i) === 'BIKE');
+    const walkItins = list.filter(i => getItineraryType(i) === 'WALK');
     
-    // Séparer par type pour l'affichage
+    // Recomposer la liste ordonnée: BUS en premier, puis les autres
+    const orderedList = [...busItins, ...bikeItins, ...walkItins];
+    
+    // Grouper par structure de trajet (mêmes lignes/arrêts, horaires différents)
+    const groupedList = groupItinerariesByRoute(orderedList);
+    
+    // V142: Re-séparer les groupes pour garder l'ordre BUS → BIKE → WALK
     const busGroups = [];
     const bikeGroups = [];
     const walkGroups = [];
@@ -278,6 +290,23 @@ export function createResultsRenderer(deps) {
       else if (type === 'BIKE') bikeGroups.push(group);
       else if (type === 'WALK') walkGroups.push(group);
     });
+    
+    // V142: Trier les groupes bus par heure de départ/arrivée du mainItinerary
+    if (isArrival) {
+      // Tri arrivée décroissante (plus tard → plus tôt)
+      busGroups.sort((a, b) => {
+        const arrA = parseTimeToMinutes(a.mainItinerary.arrivalTime);
+        const arrB = parseTimeToMinutes(b.mainItinerary.arrivalTime);
+        return arrB - arrA;
+      });
+    } else {
+      // Tri départ croissant (plus tôt → plus tard)
+      busGroups.sort((a, b) => {
+        const depA = parseTimeToMinutes(a.mainItinerary.departureTime);
+        const depB = parseTimeToMinutes(b.mainItinerary.departureTime);
+        return depA - depB;
+      });
+    }
 
     let hasBusTitle = false, hasBikeTitle = false, hasWalkTitle = false;
     let globalIndex = 0;

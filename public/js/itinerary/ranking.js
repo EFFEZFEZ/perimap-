@@ -187,8 +187,8 @@ export function filterLateArrivals(itineraries, targetHour, targetMinute) {
 
 /**
  * Trie et classe les itinéraires pour le mode "arriver".
- * TRI SIMPLE: par heure d'arrivée DÉCROISSANTE (15h55, 15h45, 15h30...)
- * L'utilisateur veut arriver à 16h -> les trajets les plus proches de 16h en premier
+ * V142: Tri par type (BUS d'abord) puis par heure d'arrivée DÉCROISSANTE
+ * L'utilisateur veut arriver à 16h -> les trajets BUS les plus proches de 16h en premier
  */
 export function rankArrivalItineraries(itineraries, searchTime) {
   if (!searchTime || searchTime.type !== 'arriver') return itineraries;
@@ -200,8 +200,13 @@ export function rankArrivalItineraries(itineraries, searchTime) {
   
   console.log(`🎯 rankArrivalItineraries: cible ${String(targetHour).padStart(2,'0')}:${String(targetMinute).padStart(2,'0')} (${targetMinutes}min), ${itineraries.length} itinéraires`);
   
-  // V134: Tri SIMPLE par heure d'arrivée DÉCROISSANTE
-  const sorted = [...itineraries].sort((a, b) => {
+  // V142: Séparer par type pour garder BUS en premier
+  const busItins = itineraries.filter(it => it.type !== 'BIKE' && it.type !== 'WALK' && !it._isBike && !it._isWalk);
+  const bikeItins = itineraries.filter(it => it.type === 'BIKE' || it._isBike);
+  const walkItins = itineraries.filter(it => it.type === 'WALK' || it._isWalk);
+  
+  // Trier les bus par arrivée DÉCROISSANTE (plus proche de l'heure cible en premier)
+  busItins.sort((a, b) => {
     const arrA = parseTimeToMinutes(a.arrivalTime);
     const arrB = parseTimeToMinutes(b.arrivalTime);
     
@@ -214,7 +219,10 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     return arrB - arrA;
   });
 
-  console.log('📋 Tri ARRIVER (arrivée décroissante):', sorted.slice(0, 5).map(it => it.arrivalTime).join(', '));
+  // Recomposer: BUS triés, puis BIKE, puis WALK
+  const sorted = [...busItins, ...bikeItins, ...walkItins];
+
+  console.log('📋 Tri ARRIVER (BUS d\'abord, arrivée décroissante):', sorted.slice(0, 5).map(it => `${it.type}:${it.arrivalTime}`).join(', '));
 
   return sorted;
 }

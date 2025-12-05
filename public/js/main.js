@@ -1815,9 +1815,19 @@ function createItinerarySignature(it) {
         return h * 3600 + m * 60;
     }
 
-    // V137b: Garantit un ordre chronologique croissant (proche → lointain)
+    // V142: Garantit un ordre chronologique croissant (proche → lointain)
+    // MAIS conserve les groupes par type: BUS d'abord, puis BIKE, puis WALK
     function sortItinerariesByDeparture(list) {
-        return [...list].sort((a, b) => parseDepartureMinutes(a?.departureTime) - parseDepartureMinutes(b?.departureTime));
+        // Séparer par type
+        const busItins = list.filter(it => it.type !== 'BIKE' && it.type !== 'WALK' && !it._isBike && !it._isWalk);
+        const bikeItins = list.filter(it => it.type === 'BIKE' || it._isBike);
+        const walkItins = list.filter(it => it.type === 'WALK' || it._isWalk);
+        
+        // Trier seulement les bus par heure de départ
+        busItins.sort((a, b) => parseDepartureMinutes(a?.departureTime) - parseDepartureMinutes(b?.departureTime));
+        
+        // Recomposer: BUS triés, puis BIKE, puis WALK
+        return [...busItins, ...bikeItins, ...walkItins];
     }
 
 /**
