@@ -890,13 +890,20 @@ export class ApiManager {
     _buildDateTime(searchTime) {
         const { date, hour, minute } = searchTime;
         
-        let dateObj;
-        if (!date || date === 'today' || date === "Aujourd'hui") {
-            dateObj = new Date();
-        } else {
-            dateObj = new Date(date);
-        }
-        
+        const toLocalDate = (value) => {
+            if (!value || value === 'today' || value === "Aujourd'hui") {
+                return new Date();
+            }
+            // Parse en local pour éviter le décalage d'un jour lié au fuseau
+            const parts = String(value).split(/[-/]/).map(Number);
+            if (parts.length >= 3 && parts.every(n => Number.isFinite(n))) {
+                const [y, m, d] = parts;
+                return new Date(y, m - 1, d);
+            }
+            return new Date(value);
+        };
+
+        let dateObj = toLocalDate(date);
         if (isNaN(dateObj.getTime())) {
             console.warn("⚠️ Date invalide, utilisation de la date actuelle");
             dateObj = new Date();

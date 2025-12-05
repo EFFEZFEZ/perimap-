@@ -1171,9 +1171,14 @@ export class DataManager {
         const windowStart = windowStartSeconds;
         const windowEnd = windowEndSeconds;
 
-        // Prépare les fenêtres de service (veille / jour J / lendemain) UNIQUEMENT si la fenêtre chevauche
+        // Inclure la veille si la recherche est très tôt le matin même si windowStart > 0
+        // (les services avec horaires 24:xx appartiennent à la veille et doivent être décalés)
+        const EARLY_MORNING_CUTOFF = 5 * 3600; // 05:00 local
+        const includePrevDay = (windowStart < 0) || (windowStart < EARLY_MORNING_CUTOFF);
+
+        // Prépare les fenêtres de service (veille / jour J / lendemain)
         const serviceWindows = [];
-        if (windowStart < 0 && serviceSetPrev.size) {
+        if (includePrevDay && serviceSetPrev.size) {
             serviceWindows.push({ label: 'prev', offset: -86400, serviceSet: serviceSetPrev });
         }
         // Toujours inclure la journée demandée
@@ -1199,9 +1204,10 @@ export class DataManager {
             console.log('🔬 Recherche GTFS directe:');
             console.log(`   Départ: ${startFound.length}/${startSet.size} IDs valides`, startFound.slice(0, 2));
             console.log(`   Arrivée: ${endFound.length}/${endSet.size} IDs valides`, endFound.slice(0, 2));
-            console.log(`   Services veille (${prevDate.toISOString().slice(0,10)}):`, Array.from(serviceSetPrev));
-            console.log(`   Services jour J (${reqDate.toISOString().slice(0,10)}):`, Array.from(serviceSetCurrent));
-            console.log(`   Services lendemain (${nextDate.toISOString().slice(0,10)}):`, Array.from(serviceSetNext));
+            const fmt = (d) => d.toLocaleDateString('fr-CA'); // YYYY-MM-DD en local
+            console.log(`   Services veille (${fmt(prevDate)}):`, Array.from(serviceSetPrev));
+            console.log(`   Services jour J (${fmt(reqDate)}):`, Array.from(serviceSetCurrent));
+            console.log(`   Services lendemain (${fmt(nextDate)}):`, Array.from(serviceSetNext));
             console.log(`   Fenêtre brute: ${windowStart}s → ${windowEnd}s`);
             
             // Sauvegarder les IDs valides pour comparaison ultérieure

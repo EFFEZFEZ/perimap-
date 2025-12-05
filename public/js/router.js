@@ -369,13 +369,21 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     };
 
     const buildRequestedDate = () => {
-        try {
-            let baseDate;
-            if (!searchTime?.date || searchTime.date === 'today' || searchTime.date === "Aujourd'hui") {
-                baseDate = new Date();
-            } else {
-                baseDate = new Date(searchTime.date);
+        const toLocalDate = (value) => {
+            if (!value || value === 'today' || value === "Aujourd'hui") {
+                return new Date();
             }
+            // Parse en local pour éviter les décalages de fuseau (new Date('YYYY-MM-DD') est UTC)
+            const parts = String(value).split(/[-/]/).map(Number);
+            if (parts.length >= 3 && parts.every(n => Number.isFinite(n))) {
+                const [y, m, d] = parts;
+                return new Date(y, m - 1, d);
+            }
+            return new Date(value);
+        };
+
+        try {
+            const baseDate = toLocalDate(searchTime?.date);
             const hour = parseInt(searchTime?.hour, 10) || 0;
             const minute = parseInt(searchTime?.minute, 10) || 0;
             baseDate.setHours(hour, minute, 0, 0);
