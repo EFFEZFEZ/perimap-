@@ -667,6 +667,7 @@ export class ApiManager {
 
     /**
      * Construit un objet DateTime ISO 8601 pour l'API Google Routes
+     * V142: Correction fuseau horaire - on envoie l'heure LOCALE avec offset timezone
      * @private
      */
     _buildDateTime(searchTime) {
@@ -688,8 +689,24 @@ export class ApiManager {
         const minuteInt = parseInt(minute) || 0;
         dateObj.setHours(hourInt, minuteInt, 0, 0);
         
-        console.log("🕒 DateTime construit:", dateObj.toISOString());
-        return dateObj.toISOString();
+        // V142: Construire ISO string avec offset timezone local au lieu de UTC
+        // Cela évite que 13:20 local devienne 12:20 UTC
+        const tzOffset = -dateObj.getTimezoneOffset();
+        const sign = tzOffset >= 0 ? '+' : '-';
+        const offsetHours = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, '0');
+        const offsetMinutes = String(Math.abs(tzOffset) % 60).padStart(2, '0');
+        
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const hours = String(dateObj.getHours()).padStart(2, '0');
+        const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+        const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+        
+        const isoWithTz = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetHours}:${offsetMinutes}`;
+        
+        console.log("🕒 DateTime construit (local):", isoWithTz);
+        return isoWithTz;
     }
 
     /**

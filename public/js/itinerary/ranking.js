@@ -147,6 +147,12 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   console.log(`🕐 Filtrage des trajets passés (maintenant: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')})`);
   
   const filtered = itineraries.filter(it => {
+    // V142: Ne jamais filtrer vélo/marche - ils n'ont pas d'horaire fixe
+    const type = it?.type;
+    if (type === 'BIKE' || type === 'WALK' || it?._isBike || it?._isWalk) {
+      return true;
+    }
+    
     const depTime = it?.departureTime;
     if (!depTime || depTime === '~' || depTime === '--:--') return true;
     
