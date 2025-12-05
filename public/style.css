@@ -5121,8 +5121,8 @@ body.dark-theme .real-select option {
     flex-direction: row; /* Panneau à gauche, carte à droite */
     flex: 1; /* Prend toute la hauteur restante sous le header */
     background: var(--bg-light);
-    /* V129: Forcer la hauteur pour que la carte s'affiche */
-    height: calc(100vh - 64px); /* 64px = hauteur du header */
+    /* V147: Hauteur 100vh car le header est caché en mode itinéraire */
+    height: 100vh;
     min-height: 0;
 }
 

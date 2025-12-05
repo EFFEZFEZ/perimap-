@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v147'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V147: Système SIMPLE - 1 appel API par mode
+const CACHE_VERSION = 'v148'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V148: Fix hauteur carte PC
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
