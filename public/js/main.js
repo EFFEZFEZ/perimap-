@@ -265,8 +265,7 @@ function initTheme() {
     uiManager.initTheme([mapRenderer, detailMapRenderer, resultsMapRenderer]);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Wire all theme toggles (header + carte)
+function wireThemeToggles() {
     const themeToggles = Array.from(document.querySelectorAll('[data-theme-toggle]'));
     themeToggles.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -275,10 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try { localStorage.setItem('ui-theme', nextIsDark ? 'dark' : 'light'); } catch (e) { /* ignore */ }
         }, { passive: true });
     });
-
-    // Initialize UI theme immediately (no preloader)
-    initTheme();
-});
+}
 
 // Service Worker est enregistré dans app.js
 
@@ -454,6 +450,10 @@ async function initializeApp() {
         resultsMapRenderer.initializeMap(false);
         currentResultsMarkerLayer = L.layerGroup().addTo(resultsMapRenderer.map);
         resultsMapRenderer.addLocateControl(locateSuccess, locateError);
+
+        // Wire theme toggles now that fragments sont chargés, puis applique le thème initial
+        wireThemeToggles();
+        initTheme();
         
         tripScheduler = new TripScheduler(dataManager);
         busPositionCalculator = new BusPositionCalculator(dataManager);
