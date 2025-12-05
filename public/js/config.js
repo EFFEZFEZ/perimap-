@@ -25,11 +25,35 @@ export function getGoogleApiKey() {
   return '';
 }
 
+  /**
+   * Récupère le token admin (fourni par Vercel via variable d'environnement ou injection runtime).
+   * Priorité:
+   * 1. window.__APP_CONFIG.adminToken (injection runtime côté client)
+   * 2. <meta name="peribus-admin-token" content="..."> (optionnel)
+   * 3. Variable d'env build-time (Vercel) exposée côté client: NEXT_PUBLIC_ADMIN_TOKEN ou VITE_ADMIN_TOKEN
+   */
+  export function getAdminToken() {
+    if (typeof window !== 'undefined' && window.__APP_CONFIG && window.__APP_CONFIG.adminToken) {
+      return window.__APP_CONFIG.adminToken;
+    }
+    if (typeof document !== 'undefined') {
+      const meta = document.querySelector('meta[name="peribus-admin-token"]');
+      if (meta && meta.content && meta.content.trim()) {
+        return meta.content.trim();
+      }
+    }
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.NEXT_PUBLIC_ADMIN_TOKEN || process.env.VITE_ADMIN_TOKEN || '';
+    }
+    return '';
+  }
+
 export function getAppConfig() {
   return {
     googleApiKey: getGoogleApiKey(),
     arrivalPageSize: 6,  // V120: Augmenté pour plus d'options
-    minBusItineraries: 3, // V120: Minimum 3 itinéraires bus
-    maxBottomSheetLevels: 3
+      minBusItineraries: 3, // V120: Minimum 3 itinéraires bus
+      maxBottomSheetLevels: 3,
+      adminToken: getAdminToken()
   };
 }

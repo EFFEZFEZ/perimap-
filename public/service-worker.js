@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v165'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V165: release 3.17.2 + fix wire toggle carte
+const CACHE_VERSION = 'v166'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V166: release 3.17.3 + admin token config
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
