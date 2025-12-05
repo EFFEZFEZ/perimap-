@@ -3093,16 +3093,17 @@ details[open] .accordion-content {
 }
 
 #top-bar {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(34, 197, 94, 0.12);
+    padding: 0.9rem 1.25rem;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.15rem;
     flex-wrap: nowrap; 
     z-index: 10;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* V135: Bouton Filtrer visible (desktop = badge en haut à droite, mobile = FAB) */
@@ -3217,11 +3218,15 @@ details[open] .accordion-content {
     white-space: nowrap;
 }
 #bus-count {
-    font-weight: 600;
-    color: var(--primary);
+    font-weight: 700;
+    color: var(--pm-green, var(--primary));
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-full, 9999px);
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.18);
 }
 #data-status { color: var(--text-secondary); }
 #data-status.loaded { color: #059669; }
@@ -3259,6 +3264,42 @@ details[open] .accordion-content {
         position: relative;
         z-index: 1000;
         flex-shrink: 0;
+    }
+
+    /* V137: Top-bar centré et plus premium sur desktop */
+    #map-view #top-bar {
+        max-width: min(1024px, calc(100% - 32px));
+        margin: 12px auto 0;
+        border-radius: var(--radius-lg);
+        padding: 0.85rem 1.35rem;
+        align-items: center;
+    }
+    #map-view #top-bar #btn-back-to-dashboard-from-map {
+        background: rgba(34, 197, 94, 0.12);
+        color: var(--pm-green, var(--primary));
+        border: 1px solid rgba(34, 197, 94, 0.18);
+        border-radius: var(--radius-full);
+        padding: 0.55rem 0.95rem;
+        font-weight: 700;
+        box-shadow: var(--pm-shadow-sm, var(--shadow-sm));
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    #map-view #top-bar #btn-back-to-dashboard-from-map:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--pm-shadow-md, var(--shadow-md));
+    }
+    #map-view #top-bar #clock,
+    #map-view #top-bar #status-info {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        padding: 0.55rem 0.85rem;
+        box-shadow: var(--pm-shadow-sm, var(--shadow-sm));
+    }
+    #map-view #top-bar #clock svg { opacity: 0.65; }
+    #map-view #top-bar #status-info {
+        gap: 0.75rem;
+        margin-left: auto;
     }
 }
 

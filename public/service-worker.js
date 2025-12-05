@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v136'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V136: Restaure contrôles carte (header masqué, filtre desktop)
+const CACHE_VERSION = 'v137'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V137: UI carte alignée charte (top-bar premium)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
