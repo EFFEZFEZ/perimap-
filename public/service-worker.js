@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v155'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V155: Barre contrôles carte moderne (zoom + localisation)
+const CACHE_VERSION = 'v156'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V156: Top-bar unifié - pills cohérentes
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
