@@ -1121,6 +1121,18 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     
     // Debug: afficher la fenêtre de recherche
     const formatSec = (s) => `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor((s%3600)/60).toString().padStart(2,'0')}`;
+    
+    // V191: Log date et services actifs pour debug
+    const dateStr = `${reqDate.getFullYear()}-${String(reqDate.getMonth()+1).padStart(2,'0')}-${String(reqDate.getDate()).padStart(2,'0')}`;
+    const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    const dayOfWeek = dayNames[reqDate.getDay()];
+    const activeServices = dataManager.getServiceIds(reqDate);
+    
+    console.log(`📅 V191 Date: ${dateStr} (${dayOfWeek}) - ${activeServices.size} service(s) actif(s)`);
+    if (activeServices.size === 0) {
+        console.warn(`⚠️ AUCUN SERVICE ACTIF pour ${dateStr} - Les bus ne circulent peut-être pas ce jour`);
+    }
+    
     console.log(`⏰ Fenêtre de recherche (${searchTime?.type || 'partir'}):`, {
         demandé: formatSec(reqSeconds),
         fenêtre: `${formatSec(windowStartSec)} - ${formatSec(windowEndSec)}`,
