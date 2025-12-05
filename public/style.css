@@ -3482,17 +3482,19 @@ details[open] .accordion-content {
     transform: scale(0.97);
 }
 
-/* Desktop : badge fixe en haut à droite (sous le header masqué) avec libellé visible */
+/* Desktop : badge fixe en haut à droite - V156: Décalé pour ne pas chevaucher status-info */
 @media (min-width: 769px) {
     #map-container #btn-toggle-filter {
         position: absolute;
-        top: 14px;
+        top: 60px;
         right: 16px;
         width: auto;
-        height: auto;
-        border-radius: var(--radius-full);
-        padding: 0.65rem 1rem;
+        height: 36px;
+        border-radius: 20px;
+        padding: 0 16px;
         z-index: 1200;
+        font-size: 13px;
+        font-weight: 600;
     }
     #map-container #btn-toggle-filter span { display: inline; }
 }
