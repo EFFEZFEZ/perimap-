@@ -1151,6 +1151,16 @@ export class DataManager {
                 if (Array.isArray(grouped)) {
                     grouped.forEach(gid => extra.push(gid));
                 }
+
+                // Fallback: si c'est un StopPlace sans mapping groupé, ajouter ses enfants connus via stopsById
+                const stop = this.stopsById[id];
+                if (stop && stop.location_type === '1') { // StopPlace
+                    Object.values(this.stopsById).forEach(s => {
+                        if (s.parent_station === id) {
+                            extra.push(s.stop_id);
+                        }
+                    });
+                }
             });
             extra.forEach(x => idSet.add(x));
         };
