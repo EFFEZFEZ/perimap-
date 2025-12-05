@@ -51,6 +51,14 @@
     <!-- API Key -->
     <meta name="peribus-api-key" content="AIzaSyAU0OABc_T8AODV3UorpdYXsBVUFYMqMfQ">
     
+    <!-- Admin Token (injected from Vercel env at build time) -->
+    <script>
+        window.__ADMIN_TOKEN = '__VITE_ADMIN_TOKEN__';
+        if (window.__ADMIN_TOKEN === '__VITE_ADMIN_TOKEN__') {
+            window.__ADMIN_TOKEN = '';
+        }
+    </script>
+    
     <!-- Favicons & Icons -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192.png">
@@ -115,7 +123,7 @@
             "Géolocalisation"
         ],
         "screenshot": "https://perimap.app/icons/screenshot.png",
-        "softwareVersion": "3.17.5",
+        "softwareVersion": "3.17.6",
         "datePublished": "2024-01-01",
         "dateModified": "2025-12-05",
         "inLanguage": "fr",
