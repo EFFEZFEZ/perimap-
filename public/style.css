@@ -3569,11 +3569,11 @@ details[open] .accordion-content {
         pointer-events: auto;
     }
 
-    /* Desktop: Controls en haut à droite du map */
+    /* Desktop: Controls en haut à droite du map - espacé du status-info */
     #map-container #map-view #top-bar > .top-bar-controls {
         position: absolute !important;
         z-index: 1000;
-        right: 16px;
+        right: 180px;
         top: 14px;
         display: flex;
         gap: 10px;
@@ -3704,11 +3704,11 @@ details[open] .accordion-content {
         border: none;
     }
 
-    /* Contrôles du top-bar (thème) - droite */
+    /* Contrôles du top-bar (thème) - à gauche du status-info sur mobile */
     #map-container #map-view #top-bar > .top-bar-controls {
         position: fixed !important;
         z-index: 1000;
-        right: 20px;
+        right: 130px;
         top: 12px;
         display: flex;
         gap: 10px;
