@@ -3583,6 +3583,36 @@ details[open] .accordion-content {
     to { transform: rotate(360deg); }
 }
 
+/* V149: Bouton "Générer + de trajets" */
+.btn-load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: calc(100% - 2rem);
+    margin: 1rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-load-more:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+}
+.btn-load-more:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+.btn-load-more svg {
+    flex-shrink: 0;
+}
+
 
 /* =========================================
  * STYLES COMMUNS

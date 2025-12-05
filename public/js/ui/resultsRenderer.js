@@ -417,15 +417,43 @@ export function createResultsRenderer(deps) {
       globalIndex++;
     };
 
-    // V147: Afficher les groupes dans l'ordre BUS → BIKE → WALK
+    // V149: Afficher les groupes dans l'ordre BUS → BIKE → WALK
     if (busGroups.length > 0) {
       busGroups.forEach(g => renderGroup(g));
     }
     bikeGroups.forEach(g => renderGroup(g));
     walkGroups.forEach(g => renderGroup(g));
     
-    // V147: Système simple - pas de bouton générer plus
-    // L'API Google renvoie déjà les meilleures alternatives
+    // V149: Bouton "Générer + de trajets" pour charger plus de bus
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'btn btn-secondary btn-load-more';
+    loadMoreBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+      Générer + de trajets
+    `;
+    loadMoreBtn.addEventListener('click', () => {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.innerHTML = `<span class="spinner-small"></span> Recherche...`;
+      
+      if (isArrival && typeof deps.onLoadMoreArrivals === 'function') {
+        deps.onLoadMoreArrivals().finally(() => {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            Générer + de trajets
+          `;
+        });
+      } else if (typeof deps.onLoadMoreDepartures === 'function') {
+        deps.onLoadMoreDepartures().finally(() => {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            Générer + de trajets
+          `;
+        });
+      }
+    });
+    resultsListContainer.appendChild(loadMoreBtn);
   }
 
   return { render };
