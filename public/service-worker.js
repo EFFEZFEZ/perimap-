@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v201'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V201: Fix date incorrecte dans les appels API multiples
+const CACHE_VERSION = 'v202'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V202: Audit complet planification (Arriver/Partir + Dates)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

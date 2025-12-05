@@ -618,14 +618,28 @@ export class ApiManager {
         // ========================================
         // V197: 4 APPELS DÉCALÉS = ~8-10 HORAIRES
         // Pour compenser les trajets TER/322 rejetés
+        // V202: Adaptation selon le mode (partir/arriver)
         // ========================================
         
-        const searchTimes = [
-            searchTime,                              // T+0 min
-            this._offsetSearchTime(searchTime, 15), // T+15 min
-            this._offsetSearchTime(searchTime, 30), // T+30 min
-            this._offsetSearchTime(searchTime, 50), // T+50 min
-        ];
+        let searchTimes;
+        if (searchTime && searchTime.type === 'arriver') {
+            // Pour "Arriver à", on cherche dans le PASSÉ pour avoir des options plus tôt
+            // Ex: Arriver à 10h -> on cherche aussi arriver à 9h45, 9h30, 9h10
+            searchTimes = [
+                searchTime,                              // T-0 min
+                this._offsetSearchTime(searchTime, -15), // T-15 min
+                this._offsetSearchTime(searchTime, -30), // T-30 min
+                this._offsetSearchTime(searchTime, -50), // T-50 min
+            ];
+        } else {
+            // Pour "Partir à", on cherche dans le FUTUR
+            searchTimes = [
+                searchTime,                              // T+0 min
+                this._offsetSearchTime(searchTime, 15), // T+15 min
+                this._offsetSearchTime(searchTime, 30), // T+30 min
+                this._offsetSearchTime(searchTime, 50), // T+50 min
+            ];
+        }
         
         const [busResults, bikeResult, walkResult] = await Promise.allSettled([
             // 4 appels bus en parallèle
@@ -761,11 +775,22 @@ export class ApiManager {
         let minute = parseInt(baseSearchTime.minute) || 0;
         
         minute += offsetMinutes;
+        
+        // Gestion de l'addition (futur)
         while (minute >= 60) {
             minute -= 60;
             hour++;
         }
-        hour = hour % 24;
+        
+        // V202: Gestion de la soustraction (passé)
+        while (minute < 0) {
+            minute += 60;
+            hour--;
+        }
+        
+        // Gestion du passage de minuit
+        if (hour >= 24) hour = hour % 24;
+        if (hour < 0) hour = (hour + 24) % 24;
         
         // V201: Correction critique - Conserver la date d'origine !
         // Sinon _buildDateTime utilise "Aujourd'hui" par défaut
