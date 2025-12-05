@@ -1,12 +1,13 @@
 /**
- * apiManager.js - VERSION V178 (Sécurisation API Key)
+ * apiManager.js - VERSION V181 (Proxy complet - Autocomplétion + Géocodage)
  * Gère tous les appels aux API externes (Google Places & Google Routes).
  *
- * ✅ V178: SECURISATION - La clé API n'est plus exposée côté client
- * Tous les appels Google passent par les proxies Vercel:
+ * ✅ V181: PROXY COMPLET - Tout passe par les proxies Vercel en production
  * - /api/routes : Google Routes API (itinéraires bus/vélo/marche)
- * - /api/places : Google Places API (autocomplétion)
- * - /api/geocode : Google Geocoding API (reverse geocode)
+ * - /api/places : Google Places API (autocomplétion + geocoding placeId→coords)
+ * - /api/geocode : Google Geocoding API (reverse geocode lat/lng→placeId)
+ * 
+ * Le SDK Google Maps JavaScript n'est PAS chargé en mode proxy.
  *
  * *** MODIFICATION V48 (Alias Campus/Grenadière) ***
  * 1. Ajout d'un système d'alias pour fusionner des lieux équivalents.
@@ -42,6 +43,7 @@ export class ApiManager {
         this.geocoder = null;
         this.autocompleteService = null;
         this.apiLoadPromise = null; // <-- CORRECTION: Ajout du verrou
+        this.proxyReady = false; // ✅ V181: Flag pour mode proxy
         this.googleAuthFailed = false;
         this.googleAuthFailureMessage = '';
         this.clientOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
@@ -71,8 +73,18 @@ export class ApiManager {
 
     /**
      * Initialise le chargeur de l'API Google Maps.
+     * ✅ V181: En mode proxy, on n'a PAS besoin du SDK Google Maps côté client
+     * L'autocomplétion et le géocodage passent par les proxies Vercel
      */
     async loadGoogleMapsAPI() {
+        // ✅ V181: En mode proxy, ne pas charger le SDK Google Maps
+        // On utilise les endpoints /api/places et /api/geocode
+        if (this.useProxy) {
+            console.log("✅ Mode proxy activé - SDK Google Maps non requis");
+            this.proxyReady = true;
+            return Promise.resolve();
+        }
+
         if (this.googleAuthFailed) {
             return Promise.reject(new Error(this.buildAuthFailureMessage()));
         }
@@ -219,85 +231,108 @@ export class ApiManager {
     }
 
     /**
-     * Récupère les suggestions d'autocomplétion avec la NOUVELLE API
-     * Basé sur la documentation officielle Google :
-     * https://developers.google.com/maps/documentation/javascript/place-autocomplete-data
-     * 
+     * Récupère les suggestions d'autocomplétion
+     * ✅ V181: Utilise le proxy Vercel /api/places en production
      * ✅ V48: Intègre les alias de lieux (Campus = Pôle Universitaire Grenadière)
      */
     async getPlaceAutocomplete(inputString) {
-        if (!this.sessionToken) {
-            console.warn("⚠️ Service d'autocomplétion non initialisé. Tentative de chargement...");
-            try {
-                await this.loadGoogleMapsAPI();
-            } catch (error) {
-                console.error("❌ Impossible d'initialiser le service d'autocomplétion:", error.message);
-                return [];
-            }
-            if (!this.sessionToken) {
-                console.error("❌ Impossible d'initialiser le service d'autocomplétion");
-                return [];
-            }
-        }
-
         // ✅ V48: Vérifier si l'entrée correspond à un alias
         const aliasMatch = this._checkPlaceAlias(inputString);
         
         try {
             let results = [];
             
-            // Vérifier si la nouvelle API est disponible
-            if (google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions) {
-                // ✅ NOUVELLE API (recommandée depuis mars 2025)
-                const request = {
-                    input: inputString,
-                    locationRestriction: {
-                        west: this.perigueuxBounds.west,
-                        north: this.perigueuxBounds.north,
-                        east: this.perigueuxBounds.east,
-                        south: this.perigueuxBounds.south
-                    },
-                    region: "fr",
-                    sessionToken: this.sessionToken,
-                };
-
-                console.log("🔍 Recherche autocomplétion (nouvelle API):", inputString);
-                const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
-                console.log(`✅ ${suggestions.length} suggestions trouvées`);
+            // ✅ V181: Mode proxy - utiliser l'endpoint Vercel
+            if (this.useProxy) {
+                console.log("🔍 Recherche autocomplétion (proxy):", inputString);
                 
-                results = suggestions.map(s => ({
-                    description: s.placePrediction.text.text,
-                    placeId: s.placePrediction.placeId,
+                const url = new URL(this.apiEndpoints.places, window.location.origin);
+                url.searchParams.set('input', inputString);
+                
+                const response = await fetch(url.toString());
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erreur proxy: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                results = (data.predictions || []).map(p => ({
+                    description: p.description,
+                    placeId: p.placeId
                 }));
-            } else {
-                // ❌ FALLBACK : Ancienne API (dépréciée mais fonctionnelle)
-                console.warn("⚠️ Utilisation de l'ancienne API AutocompleteService (dépréciée)");
                 
-                results = await new Promise((resolve, reject) => {
+                console.log(`✅ ${results.length} suggestions trouvées (proxy)`);
+            } 
+            // Mode SDK Google Maps (dev local avec clé API)
+            else {
+                if (!this.sessionToken) {
+                    console.warn("⚠️ Service d'autocomplétion non initialisé. Tentative de chargement...");
+                    try {
+                        await this.loadGoogleMapsAPI();
+                    } catch (error) {
+                        console.error("❌ Impossible d'initialiser le service d'autocomplétion:", error.message);
+                        return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
+                    }
+                    if (!this.sessionToken) {
+                        console.error("❌ Impossible d'initialiser le service d'autocomplétion");
+                        return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
+                    }
+                }
+                
+                // Vérifier si la nouvelle API est disponible
+                if (google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions) {
+                    // ✅ NOUVELLE API (recommandée depuis mars 2025)
                     const request = {
                         input: inputString,
+                        locationRestriction: {
+                            west: this.perigueuxBounds.west,
+                            north: this.perigueuxBounds.north,
+                            east: this.perigueuxBounds.east,
+                            south: this.perigueuxBounds.south
+                        },
+                        region: "fr",
                         sessionToken: this.sessionToken,
-                        componentRestrictions: { country: 'fr' },
-                        bounds: new google.maps.LatLngBounds(
-                            new google.maps.LatLng(this.perigueuxBounds.south, this.perigueuxBounds.west),
-                            new google.maps.LatLng(this.perigueuxBounds.north, this.perigueuxBounds.east)
-                        ),
-                        strictBounds: true,
                     };
 
-                    this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
-                        if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-                            console.warn("⚠️ Échec de l'autocomplétion Places:", status);
-                            resolve([]);
-                        } else {
-                            console.log(`✅ ${predictions.length} suggestions trouvées (ancienne API)`);
-                            resolve(predictions.map(p => ({
-                                description: p.description,
-                                placeId: p.place_id,
-                            })));
-                        }
+                    console.log("🔍 Recherche autocomplétion (SDK):", inputString);
+                    const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+                    console.log(`✅ ${suggestions.length} suggestions trouvées`);
+                    
+                    results = suggestions.map(s => ({
+                        description: s.placePrediction.text.text,
+                        placeId: s.placePrediction.placeId,
+                    }));
+                } else {
+                    // ❌ FALLBACK : Ancienne API (dépréciée mais fonctionnelle)
+                    console.warn("⚠️ Utilisation de l'ancienne API AutocompleteService (dépréciée)");
+                    
+                    results = await new Promise((resolve, reject) => {
+                        const request = {
+                            input: inputString,
+                            sessionToken: this.sessionToken,
+                            componentRestrictions: { country: 'fr' },
+                            bounds: new google.maps.LatLngBounds(
+                                new google.maps.LatLng(this.perigueuxBounds.south, this.perigueuxBounds.west),
+                                new google.maps.LatLng(this.perigueuxBounds.north, this.perigueuxBounds.east)
+                            ),
+                            strictBounds: true,
+                        };
+
+                        this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
+                            if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+                                console.warn("⚠️ Échec de l'autocomplétion Places:", status);
+                                resolve([]);
+                            } else {
+                                console.log(`✅ ${predictions.length} suggestions trouvées (ancienne API)`);
+                                resolve(predictions.map(p => ({
+                                    description: p.description,
+                                    placeId: p.place_id,
+                                })));
+                            }
+                        });
                     });
-                });
+                }
             }
             
             // ✅ V48: Injecter l'alias en première position si trouvé
@@ -309,13 +344,7 @@ export class ApiManager {
                 );
                 
                 if (!alreadyInList) {
-                    results.unshift({
-                        description: `🎓 ${aliasMatch.canonicalName}`,
-                        placeId: `ALIAS_CAMPUS`, // Marqueur spécial
-                        isAlias: true,
-                        coordinates: aliasMatch.coordinates,
-                        aliasDescription: aliasMatch.description
-                    });
+                    results.unshift(this._createAliasResult(aliasMatch));
                     console.log(`🎓 Alias injecté: ${aliasMatch.canonicalName}`);
                 }
             }
@@ -326,17 +355,25 @@ export class ApiManager {
             
             // ✅ V48: Même en cas d'erreur, proposer l'alias si trouvé
             if (aliasMatch) {
-                return [{
-                    description: `🎓 ${aliasMatch.canonicalName}`,
-                    placeId: `ALIAS_CAMPUS`,
-                    isAlias: true,
-                    coordinates: aliasMatch.coordinates,
-                    aliasDescription: aliasMatch.description
-                }];
+                return [this._createAliasResult(aliasMatch)];
             }
             
             return [];
         }
+    }
+    
+    /**
+     * ✅ V181: Helper pour créer un résultat d'alias
+     * @private
+     */
+    _createAliasResult(aliasMatch) {
+        return {
+            description: `🎓 ${aliasMatch.canonicalName}`,
+            placeId: `ALIAS_CAMPUS`,
+            isAlias: true,
+            coordinates: aliasMatch.coordinates,
+            aliasDescription: aliasMatch.description
+        };
     }
     
     /**
@@ -385,13 +422,44 @@ export class ApiManager {
     }
 
     /**
-     * ✅ V57: NOUVELLE FONCTION
-     * Convertit les coordonnées (lat, lng) en le place_id le plus proche.
+     * ✅ V57: Convertit les coordonnées (lat, lng) en le place_id le plus proche.
+     * ✅ V181: Utilise le proxy Vercel /api/geocode en production
      * @param {number} lat
      * @param {number} lng
      * @returns {Promise<string|null>} Le place_id ou null
      */
     async reverseGeocode(lat, lng) {
+        // ✅ V181: Mode proxy - utiliser l'endpoint Vercel
+        if (this.useProxy) {
+            try {
+                const url = new URL(this.apiEndpoints.geocode, window.location.origin);
+                url.searchParams.set('lat', lat);
+                url.searchParams.set('lng', lng);
+                
+                const response = await fetch(url.toString());
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erreur geocode proxy: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.results && data.results.length > 0) {
+                    const placeId = data.results[0].place_id;
+                    console.log(`✅ Géocodage inversé réussi (proxy): ${placeId}`);
+                    return placeId;
+                }
+                
+                console.warn("Géocodage inversé: Aucun résultat trouvé.");
+                return null;
+            } catch (error) {
+                console.error("❌ Erreur géocodage inversé (proxy):", error);
+                return null;
+            }
+        }
+        
+        // Mode SDK Google Maps (dev local)
         if (!this.geocoder) {
             console.warn("⚠️ Service Geocoder non initialisé. Tentative de chargement...");
             try {
@@ -429,6 +497,7 @@ export class ApiManager {
     /**
      * Récupère les coordonnées {lat,lng} pour un place_id en utilisant le Geocoder
      * ✅ V49: Gère les alias avec pôles multimodaux (retourne aussi les arrêts GTFS)
+     * ✅ V181: Utilise le proxy Vercel /api/places?placeId=... en production
      * @param {string} placeId
      * @returns {Promise<{lat:number, lng:number, gtfsStops?:Array, searchRadius?:number}|null>}
      */
@@ -450,6 +519,36 @@ export class ApiManager {
             }
         }
         
+        // ✅ V181: Mode proxy - utiliser l'endpoint Vercel
+        if (this.useProxy) {
+            try {
+                const url = new URL(this.apiEndpoints.places, window.location.origin);
+                url.searchParams.set('placeId', placeId);
+                
+                const response = await fetch(url.toString());
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.warn('getPlaceCoords (proxy): erreur', errorData.error || response.status);
+                    return null;
+                }
+                
+                const data = await response.json();
+                
+                if (data.lat && data.lng) {
+                    console.log(`✅ Coordonnées obtenues (proxy): ${placeId} → ${data.lat}, ${data.lng}`);
+                    return { lat: data.lat, lng: data.lng };
+                }
+                
+                console.warn('getPlaceCoords (proxy): pas de coordonnées pour', placeId);
+                return null;
+            } catch (error) {
+                console.error('getPlaceCoords (proxy): erreur', error);
+                return null;
+            }
+        }
+        
+        // Mode SDK Google Maps (dev local)
         if (!this.geocoder) {
             console.warn("⚠️ Service Geocoder non initialisé. Tentative de chargement...");
             try {
