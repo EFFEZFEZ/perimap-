@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v173'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V173: fix typeof import syntax error
+const CACHE_VERSION = 'v174'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V174: config.js audit complet
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
