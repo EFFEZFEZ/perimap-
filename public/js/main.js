@@ -64,7 +64,7 @@ let gtfsAvailable = true; // set to false if GTFS loading fails -> degraded API-
 
 // ⚠️ V60: GTFS Router désactivé temporairement (performances insuffisantes)
 // TODO: Améliorer l'algorithme de pathfinding avant de réactiver
-const ENABLE_GTFS_ROUTER = false; // Mettre à true pour réactiver le routeur GTFS local
+const ENABLE_GTFS_ROUTER = true; // V189: ACTIVÉ pour avoir TOUS les horaires (comme SNCF Connect)
 
 // État global
 let lineStatuses = {}; 
