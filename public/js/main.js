@@ -1583,8 +1583,9 @@ async function executeItinerarySearch(source, sourceElements) {
         // V137b: Forcer un ordre croissant clair (départs les plus proches → plus éloignés)
         const heureDemandee = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
         if (searchTime.type === 'arriver') {
-            console.log(`🎯 Mode ARRIVER: Google a trié pour arriver avant ${heureDemandee}`);
-            arrivalRankedAll = [...allFetchedItineraries];
+            console.log(`🎯 Mode ARRIVER: tri cible ${heureDemandee} (arrivée décroissante)`);
+            const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
+            arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], searchTime);
             arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
         } else {
             console.log(`🎯 Mode PARTIR: tri chrono croissant appliqué (base ${heureDemandee})`);
@@ -1802,6 +1803,16 @@ function createItinerarySignature(it) {
         const m = parseInt(match[2], 10);
         if (Number.isNaN(h) || Number.isNaN(m)) return Infinity;
         return h * 60 + m;
+    }
+
+    // V139: Parse HH:MM to seconds (Infinity if invalid)
+    function parseTimeToSeconds(timeStr) {
+        const match = timeStr?.match?.(/(\d{1,2}):(\d{2})/);
+        if (!match) return Infinity;
+        const h = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10);
+        if (Number.isNaN(h) || Number.isNaN(m)) return Infinity;
+        return h * 3600 + m * 60;
     }
 
     // V137b: Garantit un ordre chronologique croissant (proche → lointain)
