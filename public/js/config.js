@@ -46,13 +46,13 @@ export function getAdminToken() {
       return meta.content.trim();
     }
   }
-  // Try import.meta.env for Vite builds
+  // Try import.meta.env for Vite builds (safely check if import.meta exists)
   try {
-    if (typeof import !== 'undefined' && import.meta && import.meta.env) {
-      return import.meta.env.VITE_ADMIN_TOKEN || '';
+    if (import.meta && import.meta.env && import.meta.env.VITE_ADMIN_TOKEN) {
+      return import.meta.env.VITE_ADMIN_TOKEN;
     }
   } catch (e) {
-    // Fallback silently
+    // import.meta not available - fallback silently
   }
   return '';
 }
