@@ -46,13 +46,18 @@ export function getAdminToken() {
       return meta.content.trim();
     }
   }
-  if (typeof import !== 'undefined') {
-    try {
+  // Try import.meta.env for Vite builds
+  try {
+    if (typeof import !== 'undefined' && import.meta && import.meta.env) {
       return import.meta.env.VITE_ADMIN_TOKEN || '';
-    } catch (e) {}
+    }
+  } catch (e) {
+    // Fallback silently
   }
   return '';
-}export function getAppConfig() {
+}
+
+export function getAppConfig() {
   return {
     googleApiKey: getGoogleApiKey(),
     arrivalPageSize: 6,  // V120: Augmenté pour plus d'options
