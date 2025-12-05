@@ -45,56 +45,6 @@ body.dark-theme .leaflet-control-attribution {
     margin-right: 14px;
 }
 
-/* Bouton générique carte */
-.map-control-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-.map-control-btn::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 8px;
-    right: 8px;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.08);
-}
-
-.map-control-btn:last-child::after {
-    display: none;
-}
-
-.map-control-btn:hover {
-    background: rgba(0, 0, 0, 0.04);
-}
-
-.map-control-btn:active {
-    background: rgba(0, 0, 0, 0.08);
-    transform: scale(0.96);
-}
-
-.map-control-btn svg {
-    width: 20px;
-    height: 20px;
-    color: #333;
-    transition: color 0.15s ease;
-}
-
-.map-control-btn:hover svg {
-    color: #000;
-}
-
 /* =========================================
  * BOUTON LOCALISATION - STYLE PREMIUM
  * ========================================= */
@@ -170,58 +120,6 @@ body.dark-theme .leaflet-control-attribution {
 }
 
 /* =========================================
- * BOUTONS ZOOM CUSTOM (optionnel)
- * ========================================= */
-.map-btn-zoom-in,
-.map-btn-zoom-out {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 46px;
-    height: 46px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-.map-btn-zoom-in::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 8px;
-    right: 8px;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.08);
-}
-
-.map-btn-zoom-in:hover,
-.map-btn-zoom-out:hover {
-    background: rgba(0, 0, 0, 0.04);
-}
-
-.map-btn-zoom-in:active,
-.map-btn-zoom-out:active {
-    background: rgba(0, 0, 0, 0.08);
-}
-
-.map-btn-zoom-in svg,
-.map-btn-zoom-out svg {
-    width: 18px;
-    height: 18px;
-    color: #555;
-    stroke-width: 2.5;
-}
-
-.map-btn-zoom-in:hover svg,
-.map-btn-zoom-out:hover svg {
-    color: #222;
-}
-
-/* =========================================
  * DARK THEME
  * ========================================= */
 body.dark-theme .map-floating-controls {
@@ -232,34 +130,7 @@ body.dark-theme .map-floating-controls {
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-body.dark-theme .map-control-btn::after,
-body.dark-theme .map-btn-zoom-in::after {
-    background: rgba(255, 255, 255, 0.08);
-}
 
-body.dark-theme .map-control-btn:hover,
-body.dark-theme .map-btn-zoom-in:hover,
-body.dark-theme .map-btn-zoom-out:hover {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-body.dark-theme .map-control-btn:active,
-body.dark-theme .map-btn-zoom-in:active,
-body.dark-theme .map-btn-zoom-out:active {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-body.dark-theme .map-control-btn svg,
-body.dark-theme .map-btn-zoom-in svg,
-body.dark-theme .map-btn-zoom-out svg {
-    color: #e2e8f0;
-}
-
-body.dark-theme .map-control-btn:hover svg,
-body.dark-theme .map-btn-zoom-in:hover svg,
-body.dark-theme .map-btn-zoom-out:hover svg {
-    color: #fff;
-}
 
 body.dark-theme .map-btn-locate:hover {
     background: rgba(34, 197, 94, 0.12);
@@ -290,10 +161,7 @@ body.dark-theme .map-btn-locate.has-error {
         border-radius: 12px;
     }
     
-    .map-btn-locate,
-    .map-btn-zoom-in,
-    .map-btn-zoom-out,
-    .map-control-btn {
+    .map-btn-locate {
         width: 44px;
         height: 44px;
     }
@@ -301,12 +169,6 @@ body.dark-theme .map-btn-locate.has-error {
     .map-btn-locate svg {
         width: 20px;
         height: 20px;
-    }
-    
-    .map-btn-zoom-in svg,
-    .map-btn-zoom-out svg {
-        width: 16px;
-        height: 16px;
     }
 }
 
@@ -325,10 +187,6 @@ body.dark-theme .map-btn-locate.has-error {
     }
 }
 
-@keyframes locate-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
 /* =========================================
  * CHARTE GRAPHIQUE PÉRIMAP - IDENTITÉ VISUELLE
  * =========================================
@@ -4661,7 +4519,6 @@ body.dark-theme .install-tip-steps section {
     color: var(--primary);
 }
 
-.leaflet-custom-locate svg,
 .bus-icon-rect svg {
     width: 18px;
     height: 18px;
@@ -4774,22 +4631,6 @@ body.dark-theme .install-tip-steps section {
 .wait-time.imminent {
     color: #059669; 
     font-weight: 600;
-}
-
-/* =========================================
- * POPUP HORAIRES ARRÊT STYLE TBM - V100
- * ========================================= */
-.stop-schedule-popup .leaflet-popup-content-wrapper {
-    background: var(--bg-primary) !important;
-    border-radius: var(--radius-lg) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid var(--border) !important;
-}
-.stop-schedule-popup .leaflet-popup-tip {
-    background: var(--bg-primary) !important;
-    border: 1px solid var(--border) !important;
-    border-top: none !important;
-    border-left: none !important;
 }
 
 /* =========================================

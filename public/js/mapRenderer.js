@@ -43,23 +43,11 @@ const DARK_TILE_CONFIG = Object.freeze({
     }
 });
 
-// ✅ V155 - Icônes SVG pour les contrôles carte (style Google Maps)
-const ICONS = {
-    locate: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
-    </svg>`,
-    zoomIn: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>`,
-    zoomOut: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>`
-};
-
-// Ancienne variable pour compatibilité
-const LOCATE_BUTTON_ICON = ICONS.locate;
+// V161 - Icône localisation
+const LOCATE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+</svg>`;
 
 export class MapRenderer {
     /**
@@ -936,7 +924,7 @@ export class MapRenderer {
                 btnLocate.type = 'button';
                 btnLocate.setAttribute('aria-label', 'Me localiser');
                 btnLocate.title = 'Me localiser';
-                btnLocate.innerHTML = ICONS.locate;
+                btnLocate.innerHTML = LOCATE_ICON;
                 renderer.locateButtonElement = btnLocate;
                 renderer.setLocateButtonState('idle');
                 

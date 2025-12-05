@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v160'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V160: Menu heure/minute s'ouvre vers le haut
+const CACHE_VERSION = 'v161'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V161: Nettoyage code mort (zoom, styles obsolètes)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
