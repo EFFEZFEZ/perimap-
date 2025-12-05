@@ -420,22 +420,19 @@ export function createResultsRenderer(deps) {
     // Bus en premier, puis vélo, puis marche (y compris en mode arrivée)
     const orderedGroups = [...busGroups, ...bikeGroups, ...walkGroups];
 
-    // Exiger au moins 5 propositions bus si disponibles ; sinon message "derniers départs/arrivées"
-    const MIN_BUS = 5;
+    // V143: Afficher les groupes dans l'ordre BUS → BIKE → WALK
     if (busGroups.length > 0) {
       busGroups.forEach(g => renderGroup(g));
     }
     bikeGroups.forEach(g => renderGroup(g));
     walkGroups.forEach(g => renderGroup(g));
 
-    if (busGroups.length < MIN_BUS) {
+    // V143: Message informatif si peu de bus affichés (mais pas alarmiste)
+    // L'API Google ne renvoie que quelques alternatives proches de l'heure demandée
+    if (busGroups.length > 0 && busGroups.length < 3) {
       const info = document.createElement('div');
       info.className = 'results-message notice';
-      if (isArrival) {
-        info.textContent = "Derniers trajets disponibles avant l'heure demandée (moins de 5 bus trouvés).";
-      } else {
-        info.textContent = "Derniers départs disponibles à partir de l'heure demandée (moins de 5 bus trouvés).";
-      }
+      info.innerHTML = `<small>💡 Consultez les <a href="#" onclick="event.preventDefault(); document.querySelector('[data-view=\\'horaires\\']')?.click();">fiches horaires</a> pour voir tous les départs.</small>`;
       resultsListContainer.appendChild(info);
     }
   }

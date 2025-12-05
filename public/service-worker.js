@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v143'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V143: Fix fuseau horaire UTC, vélo/marche non filtrés
+const CACHE_VERSION = 'v144'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V144: Message moins alarmiste pour peu de bus
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
