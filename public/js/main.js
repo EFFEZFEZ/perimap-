@@ -2129,10 +2129,15 @@ function processGoogleRoutesResponse(data) {
                 const line = transit.transitLine;
                 if (line) {
                     const shortName = line.nameShort || 'BUS';
-                    if (dataManager && dataManager.isLoaded && !dataManager.routesByShortName[shortName]) {
-                        console.warn(`[Filtre] Trajet rejeté: Ligne non-locale ("${shortName}") détectée.`);
-                        isRegionalRoute = true;
+                    // V199: Désactivation du filtrage strict "Ligne non-locale"
+                    // On accepte tout ce que Google renvoie, sauf si c'est explicitement TER ou 322
+                    if (shortName === 'TER' || shortName === '322') {
+                         console.warn(`[Filtre] Trajet rejeté: Ligne interdite ("${shortName}") détectée.`);
+                         isRegionalRoute = true;
+                    } else if (dataManager && dataManager.isLoaded && !dataManager.routesByShortName[shortName]) {
+                        console.log(`⚠️ V199: Ligne inconnue du GTFS ("${shortName}") mais conservée.`);
                     }
+                    
                     const color = line.color || '#3388ff';
                     const textColor = line.textColor || '#ffffff';
                     const departureStop = stopDetails.departureStop || {};
@@ -2358,15 +2363,9 @@ function processIntelligentResults(intelligentResults, searchTime) {
         console.log(`📅 V194: Services actifs:`, Array.from(activeServiceIds));
         
         if (activeServiceIds.size === 0) {
-            console.warn(`⚠️ V194: AUCUN SERVICE ACTIF pour ${dayName} - Les bus ne circulent peut-être pas`);
-            // Supprimer tous les itinéraires bus
-            const busCount = itineraries.filter(it => it.type === 'BUS').length;
-            if (busCount > 0) {
-                console.log(`❌ V194: Suppression de ${busCount} itinéraire(s) bus car aucun service actif`);
-                const nonBusItins = itineraries.filter(it => it.type !== 'BUS');
-                itineraries.length = 0;
-                itineraries.push(...nonBusItins);
-            }
+            console.warn(`⚠️ V194: AUCUN SERVICE ACTIF pour ${dayName} - Les bus ne circulent peut-être pas (GTFS local)`);
+            // V199: On ne supprime plus les bus, on fait confiance à Google
+            console.log(`⚠️ V199: Conservation des itinéraires Google malgré l'absence de services locaux`);
         } else {
             // Construire un Set des lignes actives ce jour-là
             const activeLinesThisDay = new Set();
@@ -2417,8 +2416,8 @@ function processIntelligentResults(intelligentResults, searchTime) {
                 const hasActiveLine = Array.from(lineNames).some(name => activeLinesThisDay.has(name));
                 
                 if (!hasActiveLine && lineNames.size > 0) {
-                    console.log(`❌ V194: Rejeté - lignes [${Array.from(lineNames).join(', ')}] non actives ${dayName}`);
-                    return false;
+                    console.log(`⚠️ V199: Lignes [${Array.from(lineNames).join(', ')}] non trouvées dans GTFS local pour ${dayName}, mais conservées (Google First)`);
+                    // return false; // V199: On ne filtre plus
                 }
                 
                 // Si pas de nom de ligne trouvé, on garde par prudence

@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v198'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V198: Nettoyage apiManager (plus de pagination/cache interne)
+const CACHE_VERSION = 'v199'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V199: Google First - Désactivation filtrage strict GTFS
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
