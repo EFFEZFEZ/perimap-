@@ -1696,10 +1696,8 @@ async function loadMoreDepartures() {
                 return false;
             }
             
-            // 2. Exclure les heures de départ déjà connues
-            if (it.departureTime && existingDepartures.has(it.departureTime)) {
-                return false;
-            }
+            // V199: Suppression du filtrage par heure exacte (existingDepartures)
+            // Cela bloquait les trajets différents partant à la même heure
             
             // 3. Exclure les trajets avec la même signature (même structure)
             const sig = createItinerarySignature(it);
@@ -1904,10 +1902,7 @@ async function loadMoreArrivals() {
                 return false;
             }
             
-            // Exclure les heures d'arrivée déjà connues
-            if (it.arrivalTime && existingArrivals.has(it.arrivalTime)) {
-                return false;
-            }
+            // V199: Suppression du filtrage par heure exacte (existingArrivals)
             
             // Exclure les trajets avec la même signature
             const sig = createItinerarySignature(it);
