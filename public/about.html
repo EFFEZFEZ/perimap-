@@ -685,6 +685,8 @@
             document.getElementById('adminPanel').classList.add('active');
             loadData();
         }
+        window.login = login;
+        window.login = login;
 
         async function loadData() {
             try {
@@ -781,6 +783,7 @@
                 el.textContent = 'Erreur: ' + e.message; 
             }
         }
+        window.save = save;
 
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
@@ -790,6 +793,8 @@
             document.getElementById('status').style.display = 'none';
             document.getElementById('loginStatus').style.display = 'none';
         }
+        window.closeModal = closeModal;
+        window.closeModal = closeModal;
     </script>
 </body>
 </html>

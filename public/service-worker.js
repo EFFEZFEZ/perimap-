@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v167'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V167: release 3.17.4 + admin UI updates
+const CACHE_VERSION = 'v168'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V168: release 3.17.5 + fix admin module scope
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
