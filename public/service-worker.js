@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v132'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V132: Fix top-bar carte + clic lignes trafic
+const CACHE_VERSION = 'v133'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V133: Fix status lignes, modal, tri arrivées, bouton + trajets
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

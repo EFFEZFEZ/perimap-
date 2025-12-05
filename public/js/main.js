@@ -386,6 +386,7 @@ async function initializeApp() {
         setArrivalRenderedCount: (val) => { arrivalRenderedCount = val; },
         onSelectItinerary: (itinerary, cardEl) => onSelectItinerary(itinerary, cardEl),
         onLoadMoreDepartures: () => loadMoreDepartures(), // V60: Charger plus de départs
+        onLoadMoreArrivals: () => loadMoreArrivals(), // V132: Charger plus d'arrivées
         getDataManager: () => dataManager // V64: Accès aux données GTFS pour prochains départs
     });
 
@@ -1799,6 +1800,146 @@ function createItinerarySignature(it) {
     return `${type}::${segments}::${steps}::${depTime}`;
 }
 
+/**
+ * V132: Charge plus de trajets pour le mode "arriver"
+ * Recherche des trajets arrivant plus tôt que ceux déjà affichés
+ */
+async function loadMoreArrivals() {
+    if (!lastSearchTime || !fromPlaceId || !toPlaceId || lastSearchTime.type !== 'arriver') {
+        console.warn('loadMoreArrivals: pas de recherche arriver précédente');
+        return;
+    }
+
+    // Créer un cache des signatures d'itinéraires existants
+    const existingSignatures = new Set();
+    const existingArrivals = new Set();
+    
+    allFetchedItineraries.forEach(it => {
+        const sig = createItinerarySignature(it);
+        existingSignatures.add(sig);
+        if (it.arrivalTime && it.arrivalTime !== '~') {
+            existingArrivals.add(it.arrivalTime);
+        }
+    });
+
+    // Trouver l'arrivée la plus tôt parmi les bus pour chercher encore plus tôt
+    const busItineraries = allFetchedItineraries.filter(it => it.type === 'BUS' || it.type === 'TRANSIT');
+    let targetHour, targetMinute;
+    
+    if (busItineraries.length > 0) {
+        // Prendre l'arrivée la plus tôt et demander d'arriver à cette heure - 5 min
+        // Cela forcera l'API à trouver des trajets encore plus tôt
+        let earliestArrival = Infinity;
+        busItineraries.forEach(it => {
+            const match = it.arrivalTime?.match(/(\d{1,2}):(\d{2})/);
+            if (match) {
+                const mins = parseInt(match[1]) * 60 + parseInt(match[2]);
+                if (mins < earliestArrival) earliestArrival = mins;
+            }
+        });
+        
+        if (earliestArrival !== Infinity) {
+            earliestArrival -= 30; // Demander d'arriver 30 min plus tôt
+            if (earliestArrival < 0) earliestArrival = 0;
+            targetHour = Math.floor(earliestArrival / 60);
+            targetMinute = earliestArrival % 60;
+        }
+    }
+    
+    if (targetHour === undefined) {
+        // Fallback: décaler de 1h en arrière
+        targetHour = parseInt(lastSearchTime.hour) - 1;
+        targetMinute = parseInt(lastSearchTime.minute);
+        if (targetHour < 0) targetHour = 0;
+    }
+
+    const offsetSearchTime = {
+        ...lastSearchTime,
+        hour: String(targetHour).padStart(2, '0'),
+        minute: String(targetMinute).padStart(2, '0')
+    };
+
+    console.log(`🔄 Chargement + d'arrivées (cible ${offsetSearchTime.hour}:${offsetSearchTime.minute})`);
+    console.log(`📦 Cache: ${existingSignatures.size} signatures, ${existingArrivals.size} heures d'arrivée`);
+
+    try {
+        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
+        let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+        
+        // Filtrer les nouveaux itinéraires
+        const beforeFilter = newItineraries.length;
+        newItineraries = newItineraries.filter(it => {
+            // Exclure vélo et piéton
+            if (it.type === 'BIKE' || it.type === 'WALK' || it._isBike || it._isWalk) {
+                return false;
+            }
+            
+            // Exclure les heures d'arrivée déjà connues
+            if (it.arrivalTime && existingArrivals.has(it.arrivalTime)) {
+                return false;
+            }
+            
+            // Exclure les trajets avec la même signature
+            const sig = createItinerarySignature(it);
+            if (existingSignatures.has(sig)) {
+                return false;
+            }
+            
+            return true;
+        });
+        
+        console.log(`🔍 Filtrage: ${beforeFilter} → ${newItineraries.length} nouveaux trajets`);
+        
+        if (newItineraries.length === 0) {
+            console.log('Aucun nouveau trajet arrivée trouvé');
+            const btn = document.querySelector('.load-more-arrivals button');
+            if (btn) {
+                btn.innerHTML = 'Plus de trajets disponibles';
+                btn.disabled = true;
+            }
+            return;
+        }
+
+        console.log(`✅ ${newItineraries.length} nouveaux trajets arrivée ajoutés`);
+        
+        // Ajouter les nouveaux itinéraires
+        newItineraries.forEach(it => {
+            const sig = createItinerarySignature(it);
+            existingSignatures.add(sig);
+            if (it.arrivalTime) existingArrivals.add(it.arrivalTime);
+        });
+        
+        allFetchedItineraries = [...allFetchedItineraries, ...newItineraries];
+        
+        // Re-trier et mettre à jour arrivalRankedAll
+        const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
+        arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], lastSearchTime);
+        arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
+        
+        // Re-rendre
+        setupResultTabs(allFetchedItineraries);
+        if (resultsRenderer) resultsRenderer.render('ALL');
+        
+        // Réactiver le bouton
+        const btn = document.querySelector('.load-more-arrivals button');
+        if (btn) {
+            btn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Générer + de trajets
+            `;
+            btn.disabled = false;
+        }
+        
+    } catch (error) {
+        console.error('Erreur chargement + d\'arrivées:', error);
+        const btn = document.querySelector('.load-more-arrivals button');
+        if (btn) {
+            btn.innerHTML = 'Erreur - Réessayer';
+            btn.disabled = false;
+        }
+    }
+}
+
 function prefillOtherPlanner(sourceFormName, sourceElements) {
     let targetElements;
     if (sourceFormName === 'hall') {
@@ -2605,11 +2746,14 @@ function processIntelligentResults(intelligentResults, searchTime) {
             return { it, arrivalMs, gapMs, transfers, walkingDurationMin, durationRaw };
         });
 
-        // V115: Trier par arrivée DÉCROISSANTE (la plus proche de l'heure demandée en premier)
-        // En mode "arriver", on veut arriver le plus tard possible AVANT l'heure demandée
+        // V132: Trier par écart à la cible CROISSANT (plus petit = meilleur = plus proche de l'heure voulue)
+        // En mode "arriver", on veut arriver le plus proche possible de l'heure demandée
         scored.sort((a, b) => {
-            // D'abord par arrivée décroissante (la plus proche de la cible en premier)
-            if (a.arrivalMs !== b.arrivalMs) return b.arrivalMs - a.arrivalMs;
+            // D'abord par gap croissant (le plus proche de la cible en premier)
+            // gapMs = targetMs - arrivalMs : plus petit = arrivée plus proche de la cible
+            const aGap = a.gapMs >= 0 ? a.gapMs : Infinity; // Pénaliser les arrivées tardives
+            const bGap = b.gapMs >= 0 ? b.gapMs : Infinity;
+            if (aGap !== bGap) return aGap - bGap;
             // Puis par nombre de correspondances (moins = mieux)
             if (a.transfers !== b.transfers) return a.transfers - b.transfers;
             // Puis par temps de marche (moins = mieux)
@@ -2618,7 +2762,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
             return a.durationRaw - b.durationRaw;
         });
         
-        console.log('🎯 V115: Tri ARRIVER (du plus proche de la cible au plus éloigné):', scored.slice(0, 5).map(s => ({
+        console.log('🎯 V132: Tri ARRIVER (du plus proche au plus loin de la cible):', scored.slice(0, 5).map(s => ({
             arr: s.it.arrivalTime,
             gap: Math.round(s.gapMs / 60000) + 'min avant cible',
             transfers: s.transfers

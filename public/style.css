@@ -1088,6 +1088,13 @@ body.view-map-locked #map {
     height: 100% !important;
 }
 
+/* V132: Assurer que le top-bar reste visible sur la carte (PC et mobile) */
+body.view-map-locked #top-bar {
+    position: relative;
+    z-index: 1000;
+    flex-shrink: 0;
+}
+
 /* V64: Cacher la scrollbar sur la vue carte */
 #map-container,
 #map-view,
@@ -2647,9 +2654,9 @@ details[open] .accordion-content {
 .line-detail-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .line-detail-content {
@@ -2658,8 +2665,9 @@ details[open] .accordion-content {
     max-width: 420px;
     max-height: 85vh;
     background: var(--bg-primary);
+    border: 2px solid var(--border);
     border-radius: var(--radius-xl);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
     overflow: hidden;
     transform: scale(0.95) translateY(20px);
     transition: transform 0.25s ease;

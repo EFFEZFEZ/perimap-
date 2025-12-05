@@ -6,7 +6,7 @@
 import { ICONS } from '../config/icons.js';
 
 export function createResultsRenderer(deps) {
-  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount, onLoadMoreDepartures, getDataManager } = deps;
+  const { resultsListContainer, resultsModeTabs, getAllItineraries, getArrivalState, setArrivalRenderedCount, onLoadMoreDepartures, onLoadMoreArrivals, getDataManager } = deps;
 
   function getItineraryType(itinerary) {
     if (!itinerary) return 'BUS';
@@ -402,16 +402,35 @@ export function createResultsRenderer(deps) {
       groupedList.forEach(g => renderGroup(g));
     }
 
-    // Pagination mode arrivée
+    // Pagination mode arrivée - "Voir plus" pour les résultats existants
     if (isArrival && mode === 'ALL' && arrivalRenderedCount < arrivalRankedAll.length) {
       const moreWrapper = document.createElement('div');
       moreWrapper.className = 'load-more-wrapper';
       const btn = document.createElement('button');
       btn.className = 'btn btn-secondary';
-      btn.textContent = 'Charger plus';
+      btn.textContent = `Voir ${Math.min(pageSize, arrivalRankedAll.length - arrivalRenderedCount)} de plus`;
       btn.addEventListener('click', () => {
         setArrivalRenderedCount(Math.min(arrivalRenderedCount + pageSize, arrivalRankedAll.length));
         render('ALL');
+      });
+      moreWrapper.appendChild(btn);
+      resultsListContainer.appendChild(moreWrapper);
+    }
+
+    // V132: Bouton "Charger + de trajets" pour générer plus d'arrivées (appel API)
+    if (isArrival && mode === 'ALL' && onLoadMoreArrivals && busGroups.length > 0) {
+      const moreWrapper = document.createElement('div');
+      moreWrapper.className = 'load-more-wrapper load-more-arrivals';
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline-primary';
+      btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Générer + de trajets
+      `;
+      btn.addEventListener('click', () => {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
+        onLoadMoreArrivals();
       });
       moreWrapper.appendChild(btn);
       resultsListContainer.appendChild(moreWrapper);

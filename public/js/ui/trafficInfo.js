@@ -54,15 +54,10 @@ export function renderInfoTraficCard(dataManager, lineStatuses, container, count
             const state = lineStatuses[route.route_id] || { status: 'normal', message: '' };
             const routeColor = route.route_color ? `#${route.route_color}` : '#3388ff';
             const textColor = route.route_text_color ? `#${route.route_text_color}` : '#ffffff';
-            let statusIcon = '';
-            let statusColor = 'transparent';
             
+            // Comptabiliser les alertes
             if (state.status !== 'normal') {
                 alertCount++;
-                if (state.status === 'annulation') statusColor = 'var(--color-red)';
-                else if (state.status === 'retard') statusColor = 'var(--color-yellow)';
-                else statusColor = 'var(--color-orange)';
-                statusIcon = `<div class="status-indicator-triangle type-${state.status}" style="border-bottom-color: ${statusColor};"></div>`;
             }
             
             // Stocker les données de la ligne pour le modal
@@ -77,6 +72,9 @@ export function renderInfoTraficCard(dataManager, lineStatuses, container, count
                 message: state.message,
                 category: categoryData.name
             };
+            
+            // Icône de statut - affichée uniquement si pas normal (utilise .status-icon du CSS)
+            const statusIcon = state.status !== 'normal' ? '<span class="status-icon"></span>' : '';
             
             badgesHtml += `
                 <div class="trafic-badge-item status-${state.status}" data-line="${lineKey}">

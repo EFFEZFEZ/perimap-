@@ -231,21 +231,20 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     };
   });
 
-  // V120: Trier par heure d'arrivée DÉCROISSANTE (du plus tard au plus tôt)
+  // V132: Trier par écart à l'heure cible CROISSANT (du plus proche au plus loin)
   // Ainsi on affiche d'abord l'arrivée la plus proche de l'heure demandée (ex: 15h50 pour une demande à 16h)
-  // puis les alternatives plus tôt dans l'ordre chronologique inverse (15h30, 15h00, 14h30...)
-  // Cela évite les "sauts temporels" où on passerait de 15h50 à 14h00 directement
+  // puis les alternatives plus éloignées (15h30, 15h00, 14h30...)
   scored.sort((a, b) => {
     // Filtrer d'abord les arrivées valides (avant ou à l'heure cible) vs tardives
     const aValid = a.arrivalDiff !== Infinity;
     const bValid = b.arrivalDiff !== Infinity;
     if (aValid !== bValid) return aValid ? -1 : 1; // Valides en premier
     
-    // Pour les arrivées valides, trier par heure d'arrivée DÉCROISSANTE (du plus tard au plus tôt)
-    // Cela donne: 15h50, 15h30, 15h00, 14h30... (ordre logique pour l'utilisateur)
-    if (a.arrMinutes !== b.arrMinutes) return b.arrMinutes - a.arrMinutes;
+    // Pour les arrivées valides, trier par écart CROISSANT (plus petit écart = plus proche de la cible = meilleur)
+    // Cela donne: arrivée à 15h50 (10min avant) > 15h30 (30min avant) > 15h00 (60min avant)
+    if (a.arrivalDiff !== b.arrivalDiff) return a.arrivalDiff - b.arrivalDiff;
     
-    // À heure égale, moins de correspondances = mieux
+    // À écart égal, moins de correspondances = mieux
     if (a.transfers !== b.transfers) return a.transfers - b.transfers;
     // Puis par temps de marche
     if (a.walkingDurationMin !== b.walkingDurationMin) return a.walkingDurationMin - b.walkingDurationMin;
@@ -253,7 +252,7 @@ export function rankArrivalItineraries(itineraries, searchTime) {
     return a.durationRaw - b.durationRaw;
   });
 
-  console.log('📋 Après tri ARRIVER (arrivée la plus proche de la cible en premier):', scored.slice(0, 8).map(s => ({
+  console.log('📋 Après tri ARRIVER (du plus proche au plus loin de la cible):', scored.slice(0, 8).map(s => ({
     arr: s.arrTime,
     arrMin: s.arrMinutes,
     diff: s.arrivalDiff === Infinity ? '∞ (trop tard!)' : s.arrivalDiff + 'min avant cible',
