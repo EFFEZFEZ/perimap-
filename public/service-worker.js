@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v145'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V145: Minimum 5 trajets bus via appels décalés
+const CACHE_VERSION = 'v146'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V146: Bouton "Générer + de trajets" + mode arriver corrigé
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -519,24 +519,28 @@ export class ApiManager {
         // 🚀 V145: APPELS API EN PARALLÈLE + APPELS DÉCALÉS POUR PLUS DE BUS
         // ========================================
         
-        // Créer des heures décalées pour obtenir plus de trajets bus
+        // V146: Créer des heures décalées pour obtenir plus de trajets bus
         const MIN_BUS_ITINERARIES = 5;
         const busPromises = [
             this._fetchBusRoute(fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords)
         ];
         
-        // Si mode "partir", ajouter des recherches décalées (+30min, +60min, +90min)
-        if (!searchTime || searchTime.type !== 'arriver') {
-            const baseHour = parseInt(searchTime?.hour) || new Date().getHours();
-            const baseMinute = parseInt(searchTime?.minute) || new Date().getMinutes();
-            
-            // Créer des heures décalées
-            const offsets = [30, 60, 90]; // minutes de décalage
+        const baseHour = parseInt(searchTime?.hour) || new Date().getHours();
+        const baseMinute = parseInt(searchTime?.minute) || new Date().getMinutes();
+        
+        if (searchTime?.type === 'arriver') {
+            // Mode ARRIVER: chercher des trajets qui arrivent AVANT l'heure demandée
+            // On décale l'heure d'arrivée vers l'arrière (-30, -60, -90 min)
+            const offsets = [-30, -60, -90];
             offsets.forEach(offset => {
                 let newMinute = baseMinute + offset;
                 let newHour = baseHour + Math.floor(newMinute / 60);
-                newMinute = newMinute % 60;
-                if (newHour >= 24) return; // Pas de recherche après minuit
+                newMinute = ((newMinute % 60) + 60) % 60; // Gère les minutes négatives
+                if (newMinute < 0) {
+                    newMinute += 60;
+                    newHour -= 1;
+                }
+                if (newHour < 0 || newHour >= 24) return;
                 
                 const offsetSearchTime = {
                     ...searchTime,
@@ -545,7 +549,26 @@ export class ApiManager {
                 };
                 busPromises.push(
                     this._fetchBusRoute(fromPlaceId, toPlaceId, offsetSearchTime, fromCoords, toCoords)
-                        .catch(() => ({ routes: [] })) // Ignorer les erreurs
+                        .catch(() => ({ routes: [] }))
+                );
+            });
+        } else {
+            // Mode PARTIR: chercher des trajets qui partent APRÈS l'heure demandée
+            const offsets = [30, 60, 90];
+            offsets.forEach(offset => {
+                let newMinute = baseMinute + offset;
+                let newHour = baseHour + Math.floor(newMinute / 60);
+                newMinute = newMinute % 60;
+                if (newHour >= 24) return;
+                
+                const offsetSearchTime = {
+                    ...searchTime,
+                    hour: String(newHour).padStart(2, '0'),
+                    minute: String(newMinute).padStart(2, '0')
+                };
+                busPromises.push(
+                    this._fetchBusRoute(fromPlaceId, toPlaceId, offsetSearchTime, fromCoords, toCoords)
+                        .catch(() => ({ routes: [] }))
                 );
             });
         }
