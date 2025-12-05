@@ -1099,13 +1099,22 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     };
 
     const reqSeconds = (reqDate.getHours() * 3600) + (reqDate.getMinutes() * 60);
-    const SEARCH_WINDOW = 4 * 3600; // FIX BUG 8: 2h -> 4h
-    let windowStartSec = reqSeconds;
-    let windowEndSec = reqSeconds + SEARCH_WINDOW; // FIX BUG 4: Remove 24h cap
+    const SEARCH_WINDOW = 4 * 3600; // 4h de fenêtre de recherche
+    const BEFORE_MARGIN = 30 * 60;  // V190: 30 min avant pour montrer l'option précédente
+    
+    let windowStartSec, windowEndSec;
+    
     if (searchTime?.type === 'arriver') {
-        windowEndSec = reqSeconds;
+        // Mode ARRIVER: chercher les bus qui arrivent AVANT l'heure demandée
+        windowEndSec = reqSeconds;  // Arrivée max = heure demandée
         windowStartSec = Math.max(0, reqSeconds - SEARCH_WINDOW);
+    } else {
+        // Mode PARTIR: chercher les bus qui partent APRÈS l'heure demandée
+        // V190: Inclure aussi 30min AVANT pour montrer l'option précédente
+        windowStartSec = Math.max(0, reqSeconds - BEFORE_MARGIN);
+        windowEndSec = reqSeconds + SEARCH_WINDOW;
     }
+    
     if (windowEndSec <= windowStartSec) {
         windowEndSec = windowStartSec + SEARCH_WINDOW;
     }
@@ -1287,10 +1296,21 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
     });
     
-    console.log(`📊 Itinéraires triés (${isArriveMode ? 'ARRIVER' : 'PARTIR'}):`, itineraries.slice(0, 3).map(it => ({
+    // V190: Marquer les itinéraires "précédents" (départ avant l'heure demandée en mode PARTIR)
+    if (!isArriveMode) {
+        itineraries.forEach(it => {
+            const depSec = it._departureSeconds !== undefined ? it._departureSeconds : (dataManager.timeToSeconds ? dataManager.timeToSeconds(it.departureTime) : 0);
+            if (depSec < reqSeconds) {
+                it._isPreviousDeparture = true;  // Marqueur pour l'UI
+            }
+        });
+    }
+    
+    console.log(`📊 V190 Itinéraires (${isArriveMode ? 'ARRIVER' : 'PARTIR'}):`, itineraries.slice(0, 5).map(it => ({
         dep: it.departureTime,
         arr: it.arrivalTime,
-        type: it.type
+        type: it.type,
+        avant: it._isPreviousDeparture ? '⬅️' : ''
     })));
 
     if (!itineraries.length) {
