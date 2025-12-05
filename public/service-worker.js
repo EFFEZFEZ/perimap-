@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v152'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V152: Fix carte PC (invalidateSize + CSS)
+const CACHE_VERSION = 'v153'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V153: Fix carte PC position fixed
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
