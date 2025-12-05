@@ -79,6 +79,7 @@
   "share_target": {
     "action": "/#itineraire",
     "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "title": "title",
       "text": "text",

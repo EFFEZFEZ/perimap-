@@ -61,8 +61,8 @@ export function getAppConfig() {
   return {
     googleApiKey: getGoogleApiKey(),
     arrivalPageSize: 6,  // V120: Augmenté pour plus d'options
-      minBusItineraries: 3, // V120: Minimum 3 itinéraires bus
-      maxBottomSheetLevels: 3,
-      adminToken: getAdminToken()
+    minBusItineraries: 3, // V120: Minimum 3 itinéraires bus
+    maxBottomSheetLevels: 3,
+    adminToken: getAdminToken()
   };
 }
