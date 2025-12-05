@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v178'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V178: Sécurisation clé API (proxy Vercel)
+const CACHE_VERSION = 'v179'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V179: Configuration clé API frontend
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
