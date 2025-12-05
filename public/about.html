@@ -642,11 +642,8 @@
     </div>
 
     <script type="module">
-        import { getAdminToken } from './js/config.js';
-
         const PASS = 'lou23';
-        let token = getAdminToken();
-        console.log('[Admin] Token loaded:', token ? 'YES (length=' + token.length + ')' : 'NO');
+        let token = null; // Token récupéré via API
         let data = {};
         
         // Toutes les lignes du réseau groupées par catégorie
@@ -666,27 +663,48 @@
             if (e.target === e.currentTarget) closeModal();
         };
 
-        function login() {
+        async function login() {
             const statusEl = document.getElementById('loginStatus');
-            const ok = document.getElementById('pwd').value === PASS;
-            if (!ok) {
+            const pwd = document.getElementById('pwd').value;
+            
+            if (pwd !== PASS) {
                 statusEl.style.display = 'block';
                 statusEl.className = 'status-msg error';
                 statusEl.textContent = 'Mot de passe incorrect';
                 return;
             }
-            if (!token) {
+            
+            // Récupérer le token via l'API serverless
+            statusEl.style.display = 'block';
+            statusEl.className = 'status-msg';
+            statusEl.textContent = 'Connexion...';
+            
+            try {
+                const res = await fetch('/api/admin-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'Erreur serveur');
+                }
+                
+                const { token: t } = await res.json();
+                token = t;
+                console.log('[Admin] Token received via API');
+                
+                statusEl.style.display = 'none';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminPanel').classList.add('active');
+                loadData();
+            } catch (e) {
                 statusEl.style.display = 'block';
                 statusEl.className = 'status-msg error';
-                statusEl.textContent = 'Token admin manquant (variable env)';
-                return;
+                statusEl.textContent = e.message || 'Erreur de connexion';
             }
-            statusEl.style.display = 'none';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('adminPanel').classList.add('active');
-            loadData();
         }
-        window.login = login;
         window.login = login;
 
         async function loadData() {

@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v174'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V174: config.js audit complet
+const CACHE_VERSION = 'v175'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V175: API serverless pour admin token
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
