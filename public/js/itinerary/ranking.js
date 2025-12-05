@@ -6,7 +6,7 @@
 import { parseTimeStringToMinutes } from '../utils/formatters.js';
 
 // V120: Configuration minimum d'itinéraires bus
-const MIN_BUS_ITINERARIES = 3;
+const MIN_BUS_ITINERARIES = 5;
 
 /**
  * Déduplique les itinéraires par structure de trajet (même séquence bus/arrêts).

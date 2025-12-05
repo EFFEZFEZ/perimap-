@@ -388,71 +388,26 @@ export function createResultsRenderer(deps) {
       globalIndex++;
     };
 
-    // Rendre dans l'ordre : suggéré, puis BUS, puis Vélo, puis Marche
-    if (!isArrival && mode === 'ALL') {
-      // Premier élément = suggéré
-      if (busGroups.length > 0) {
-        renderGroup(busGroups[0]);
-        busGroups.slice(1).forEach(g => renderGroup(g));
+    // Bus en premier, puis vélo, puis marche (y compris en mode arrivée)
+    const orderedGroups = [...busGroups, ...bikeGroups, ...walkGroups];
+
+    // Exiger au moins 5 propositions bus si disponibles ; sinon message "derniers départs/arrivées"
+    const MIN_BUS = 5;
+    if (busGroups.length > 0) {
+      busGroups.forEach(g => renderGroup(g));
+    }
+    bikeGroups.forEach(g => renderGroup(g));
+    walkGroups.forEach(g => renderGroup(g));
+
+    if (busGroups.length < MIN_BUS) {
+      const info = document.createElement('div');
+      info.className = 'results-message notice';
+      if (isArrival) {
+        info.textContent = "Derniers trajets disponibles avant l'heure demandée (moins de 5 bus trouvés).";
+      } else {
+        info.textContent = "Derniers départs disponibles à partir de l'heure demandée (moins de 5 bus trouvés).";
       }
-      bikeGroups.forEach(g => renderGroup(g));
-      walkGroups.forEach(g => renderGroup(g));
-    } else {
-      // Mode arrivée ou filtre spécifique : ordre simple
-      groupedList.forEach(g => renderGroup(g));
-    }
-
-    // Pagination mode arrivée - "Voir plus" pour les résultats existants
-    if (isArrival && mode === 'ALL' && arrivalRenderedCount < arrivalRankedAll.length) {
-      const moreWrapper = document.createElement('div');
-      moreWrapper.className = 'load-more-wrapper';
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-secondary';
-      btn.textContent = `Voir ${Math.min(pageSize, arrivalRankedAll.length - arrivalRenderedCount)} de plus`;
-      btn.addEventListener('click', () => {
-        setArrivalRenderedCount(Math.min(arrivalRenderedCount + pageSize, arrivalRankedAll.length));
-        render('ALL');
-      });
-      moreWrapper.appendChild(btn);
-      resultsListContainer.appendChild(moreWrapper);
-    }
-
-    // V132: Bouton "Charger + de trajets" pour générer plus d'arrivées (appel API)
-    if (isArrival && mode === 'ALL' && onLoadMoreArrivals && busGroups.length > 0) {
-      const moreWrapper = document.createElement('div');
-      moreWrapper.className = 'load-more-wrapper load-more-arrivals';
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-outline-primary';
-      btn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Générer + de trajets
-      `;
-      btn.addEventListener('click', () => {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
-        onLoadMoreArrivals();
-      });
-      moreWrapper.appendChild(btn);
-      resultsListContainer.appendChild(moreWrapper);
-    }
-
-    // Bouton "Charger + de départs" pour le mode partir
-    if (!isArrival && mode === 'ALL' && onLoadMoreDepartures && busGroups.length > 0) {
-      const moreWrapper = document.createElement('div');
-      moreWrapper.className = 'load-more-wrapper load-more-departures';
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-outline-primary';
-      btn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        Charger + de départs
-      `;
-      btn.addEventListener('click', () => {
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner-small"></span> Chargement...`;
-        onLoadMoreDepartures();
-      });
-      moreWrapper.appendChild(btn);
-      resultsListContainer.appendChild(moreWrapper);
+      resultsListContainer.appendChild(info);
     }
   }
 

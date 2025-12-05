@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v140'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V140: Debug simulate tri depart/arriver
+const CACHE_VERSION = 'v141'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V141: Bus prioritaire, sans pagination, min 5 bus
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

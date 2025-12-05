@@ -1586,7 +1586,7 @@ async function executeItinerarySearch(source, sourceElements) {
             console.log(`🎯 Mode ARRIVER: tri cible ${heureDemandee} (arrivée décroissante)`);
             const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
             arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], searchTime);
-            arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
+            arrivalRenderedCount = arrivalRankedAll.length; // Montrer tout, pas de pagination
         } else {
             console.log(`🎯 Mode PARTIR: tri chrono croissant appliqué (base ${heureDemandee})`);
             allFetchedItineraries = sortItinerariesByDeparture(allFetchedItineraries);
@@ -1934,7 +1934,7 @@ async function loadMoreArrivals() {
         // Re-trier et mettre à jour arrivalRankedAll
         const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
         arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], lastSearchTime);
-        arrivalRenderedCount = Math.min(ARRIVAL_PAGE_SIZE, arrivalRankedAll.length);
+        arrivalRenderedCount = arrivalRankedAll.length; // Montrer tout, pas de pagination
         
         // Re-rendre
         setupResultTabs(allFetchedItineraries);
