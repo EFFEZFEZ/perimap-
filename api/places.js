@@ -101,9 +101,11 @@ export default async function handler(req, res) {
 
         // Mode 2: Place Details pour obtenir les coordonnées (NEW API)
         if (placeId) {
-            const url = `https://places.googleapis.com/v1/places/${placeId}`;
+            // La nouvelle API Places attend le format "places/{placeId}"
+            const placeName = placeId.startsWith('places/') ? placeId : `places/${placeId}`;
+            const url = `https://places.googleapis.com/v1/${placeName}`;
             
-            console.log('[places proxy] Place details request:', placeId);
+            console.log('[places proxy] Place details request:', placeName);
             
             const response = await fetch(url, {
                 method: 'GET',

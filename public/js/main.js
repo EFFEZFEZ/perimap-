@@ -2974,7 +2974,7 @@ async function ensureItineraryPolylines(itineraries) {
 function processSimpleRoute(data, mode, modeInfo, searchTime) { 
     if (!data || !data.routes || data.routes.length === 0 || !modeInfo) return null;
     const route = data.routes[0];
-    const leg = route.legs[0];
+    const leg = route.legs?.[0];
     const durationMinutes = modeInfo.duration;
     const distanceKm = modeInfo.distance;
     const durationRawSeconds = durationMinutes * 60;
@@ -3024,14 +3024,17 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
         durationRaw: durationRawSeconds
     };
 
-    leg.steps.forEach(step => {
-        const distanceText = step.localizedValues?.distance?.text || '';
-        const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer à vélo" : "Marcher");
-        const duration = formatGoogleDuration(step.staticDuration); 
-        const maneuver = step.navigationInstruction?.maneuver || 'DEFAULT';
-        aggregatedStep.subSteps.push({ instruction, distance: distanceText, duration, maneuver });
-        aggregatedStep.polylines.push(step.polyline);
-    });
+    // V184: Protection contre leg ou leg.steps undefined
+    if (leg?.steps) {
+        leg.steps.forEach(step => {
+            const distanceText = step.localizedValues?.distance?.text || '';
+            const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer à vélo" : "Marcher");
+            const duration = formatGoogleDuration(step.staticDuration); 
+            const maneuver = step.navigationInstruction?.maneuver || 'DEFAULT';
+            aggregatedStep.subSteps.push({ instruction, distance: distanceText, duration, maneuver });
+            aggregatedStep.polylines.push(step.polyline);
+        });
+    }
     
     return {
         type: type, departureTime: departureTimeStr, arrivalTime: arrivalTimeStr,

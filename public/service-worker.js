@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v184'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V184: Fix restriction zone Grand Périgueux
+const CACHE_VERSION = 'v185'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V185: Fix placeId format + protection leg.steps
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
