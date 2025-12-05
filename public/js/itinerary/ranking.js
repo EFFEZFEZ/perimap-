@@ -136,29 +136,19 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const searchDateStr = `${searchDate.getFullYear()}-${String(searchDate.getMonth() + 1).padStart(2, '0')}-${String(searchDate.getDate()).padStart(2, '0')}`;
   
-  // V195: Si la recherche est pour une date FUTURE, ne pas filtrer les trajets passés
+  // V205: Filtrer par rapport à l'heure demandée (pas l'heure courante)
+  // Objectif: montrer une liste croissante à partir de l'heure choisie, même si la requête est faite après minuit
+  
+  // Si date FUTURE, on ne filtre rien (on suppose tous les horaires valides pour ce jour)
   if (searchDateStr !== todayStr) {
-    console.log(`📅 V195: Recherche pour ${searchDateStr} (≠ aujourd'hui ${todayStr}) → pas de filtrage horaire`);
+    console.log(`📅 V205: Recherche pour ${searchDateStr} (≠ aujourd'hui ${todayStr}) → pas de filtrage horaire`);
     return itineraries;
   }
   
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  
-  // V70: Si l'heure de recherche est dans le futur, utiliser cette heure comme référence
-  if (searchTime.hour !== undefined) {
-    const searchHour = parseInt(searchTime.hour) || 0;
-    const searchMinute = parseInt(searchTime.minute) || 0;
-    const searchMinutes = searchHour * 60 + searchMinute;
-    
-    // Si l'heure de recherche est dans le futur, ne pas filtrer
-    if (searchMinutes > nowMinutes) {
-      console.log(`🕐 V195: Recherche à ${searchHour}:${String(searchMinute).padStart(2,'0')} (futur) → pas de filtrage`);
-      return itineraries;
-    }
-  }
-  
-  console.log(`🕐 Filtrage des trajets passés (maintenant: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')})`);
+  const reqHour = parseInt(searchTime.hour) || 0;
+  const reqMinute = parseInt(searchTime.minute) || 0;
+  const requestMinutes = reqHour * 60 + reqMinute;
+  console.log(`🕐 V205: Filtrage des trajets avant ${reqHour}:${String(reqMinute).padStart(2,'0')} (heure demandée)`);
   
   const filtered = itineraries.filter(it => {
     // V142: Ne jamais filtrer vélo/marche - ils n'ont pas d'horaire fixe
@@ -173,17 +163,8 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
     const depMinutes = parseTimeToMinutes(depTime);
     if (depMinutes === Infinity) return true;
     
-    // V185: Détection des trajets du lendemain
-    // Si l'heure de départ est très inférieure à maintenant (plus de 6h de différence),
-    // c'est probablement un trajet du lendemain matin -> on le filtre
-    const timeDiff = nowMinutes - depMinutes;
-    if (timeDiff > 360) { // Plus de 6h d'écart (ex: 23:00 vs 06:00)
-      console.log(`🚫 Trajet ${depTime} filtré (probablement lendemain, diff: ${timeDiff}min)`);
-      return false;
-    }
-    
-    // Garder si départ >= maintenant (avec 2 min de marge)
-    return depMinutes >= (nowMinutes - 2);
+    // Garder si départ >= heure demandée (avec 2 min de marge négative)
+    return depMinutes >= (requestMinutes - 2);
   });
   
   const removed = itineraries.length - filtered.length;

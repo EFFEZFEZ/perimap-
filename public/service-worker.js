@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v204'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V204: Forcer la date min = aujourd'hui pour éviter les jours erronés
+const CACHE_VERSION = 'v205'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V205: Filtrer sur l'heure demandée (liste croissante)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
