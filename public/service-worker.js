@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v182'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V182: Fix proxy autocomplete
+const CACHE_VERSION = 'v183'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V183: Proxy utilise Places API (New)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -1,6 +1,8 @@
 /**
- * Proxy API pour Google Places Autocomplete
+ * Proxy API pour Google Places Autocomplete (NEW API)
  * Masque la clé API côté serveur (Vercel Edge Function)
+ * 
+ * Utilise la NOUVELLE API Places (places.googleapis.com)
  * 
  * Endpoints supportés:
  * - GET /api/places?input=... : Autocomplétion
@@ -32,30 +34,49 @@ export default async function handler(req, res) {
     const { input, placeId, sessionToken } = req.query;
 
     try {
-        // Mode 1: Autocomplétion
+        // Mode 1: Autocomplétion avec la NOUVELLE API Places
         if (input) {
-            const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
-            url.searchParams.set('input', input);
-            url.searchParams.set('key', apiKey);
-            url.searchParams.set('language', 'fr');
-            url.searchParams.set('components', 'country:fr');
-            // Zone Grand Périgueux - bias vers Périgueux sans strictbounds
-            url.searchParams.set('location', '45.184029,0.7211149');
-            url.searchParams.set('radius', '25000'); // 25km pour couvrir tout le Grand Périgueux
-            // Pas de strictbounds pour permettre les résultats proches
+            const url = 'https://places.googleapis.com/v1/places:autocomplete';
             
-            if (sessionToken) {
-                url.searchParams.set('sessiontoken', sessionToken);
-            }
+            const requestBody = {
+                input: input,
+                languageCode: 'fr',
+                regionCode: 'FR',
+                includedRegionCodes: ['FR'],
+                locationBias: {
+                    circle: {
+                        center: {
+                            latitude: 45.184029,
+                            longitude: 0.7211149
+                        },
+                        radius: 25000.0  // 25km autour de Périgueux
+                    }
+                }
+            };
 
-            console.log('[places proxy] Autocomplete request:', input);
-            const response = await fetch(url.toString());
+            console.log('[places proxy] Autocomplete request (NEW API):', input);
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': apiKey,
+                    'X-Goog-FieldMask': 'suggestions.placePrediction.placeId,suggestions.placePrediction.text'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
             const data = await response.json();
 
             // Log pour debug
-            console.log('[places proxy] Google response status:', data.status);
-            if (data.error_message) {
-                console.error('[places proxy] Google error:', data.error_message);
+            console.log('[places proxy] Google response status:', response.status);
+            if (data.error) {
+                console.error('[places proxy] Google error:', data.error);
+                res.status(response.status).json({ 
+                    error: data.error.message || 'Google API error',
+                    details: data.error
+                });
+                return;
             }
 
             if (!response.ok) {
@@ -63,52 +84,56 @@ export default async function handler(req, res) {
                 return;
             }
 
-            // Vérifier le status Google
-            if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-                console.error('[places proxy] Google API error:', data.status, data.error_message);
-                res.status(500).json({ 
-                    error: `Google API error: ${data.status}`,
-                    details: data.error_message 
-                });
-                return;
-            }
-
             // Transformer la réponse pour le frontend
-            const predictions = (data.predictions || []).map(p => ({
-                description: p.description,
-                placeId: p.place_id
-            }));
+            const predictions = (data.suggestions || [])
+                .filter(s => s.placePrediction)
+                .map(s => ({
+                    description: s.placePrediction.text?.text || '',
+                    placeId: s.placePrediction.placeId
+                }));
 
             console.log('[places proxy] Returning', predictions.length, 'predictions');
             res.status(200).json({ predictions });
             return;
         }
 
-        // Mode 2: Geocoding (placeId -> coords)
+        // Mode 2: Place Details pour obtenir les coordonnées (NEW API)
         if (placeId) {
-            const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
-            url.searchParams.set('place_id', placeId);
-            url.searchParams.set('key', apiKey);
-            url.searchParams.set('language', 'fr');
+            const url = `https://places.googleapis.com/v1/places/${placeId}`;
+            
+            console.log('[places proxy] Place details request:', placeId);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Goog-Api-Key': apiKey,
+                    'X-Goog-FieldMask': 'location,formattedAddress'
+                }
+            });
 
-            const response = await fetch(url.toString());
             const data = await response.json();
+
+            if (data.error) {
+                console.error('[places proxy] Google error:', data.error);
+                res.status(response.status).json({ 
+                    error: data.error.message || 'Google API error',
+                    details: data.error
+                });
+                return;
+            }
 
             if (!response.ok) {
                 res.status(response.status).json(data);
                 return;
             }
 
-            if (data.results && data.results.length > 0) {
-                const location = data.results[0].geometry?.location;
-                if (location) {
-                    res.status(200).json({ 
-                        lat: location.lat, 
-                        lng: location.lng,
-                        formattedAddress: data.results[0].formatted_address
-                    });
-                    return;
-                }
+            if (data.location) {
+                res.status(200).json({ 
+                    lat: data.location.latitude, 
+                    lng: data.location.longitude,
+                    formattedAddress: data.formattedAddress || ''
+                });
+                return;
             }
 
             res.status(404).json({ error: 'Lieu non trouvé' });
