@@ -4,55 +4,393 @@
 
 ---
 
-## Table des matières
+# 🔍 ANALYSE COMPLÈTE DU PROJET
 
-1. [Résumé du projet](#1-résumé-du-projet)
-2. [Architecture technique](#2-architecture-technique)
-3. [Flux de données critiques](#3-flux-de-données-critiques)
-4. [Fichiers critiques](#4-fichiers-critiques)
-5. [Bugs majeurs corrigés](#5-bugs-majeurs-corrigés)
-6. [API Google Routes](#6-api-google-routes)
-7. [Refactorisation V221](#7-refactorisation-v221)
-8. [Guide de debug](#8-guide-de-debug)
-9. [Analyse business](#9-analyse-business)
+## 1. DESCRIPTION DU PROJET
 
----
+### Ce que c'est RÉELLEMENT
 
-## 1. Résumé du projet
+**Périmap** est un **wrapper/surcouche** aux données publiques GTFS de Péribus (Grand Périgueux), enrichi par l'API Google Routes pour le calcul d'itinéraires.
 
-### Qu'est-ce que Périmap ?
+**Ce n'est PAS** :
+- Une application officielle de Péribus/Transdev
+- Un système avec accès aux données GPS temps réel des bus
+- Une startup avec un modèle économique validé
 
-Périmap est une **Progressive Web App (PWA) non-officielle** pour le réseau de bus Péribus du Grand Périgueux.
+**Ce que ça fait concrètement aujourd'hui** :
+- Affiche les horaires théoriques des bus (données GTFS statiques)
+- Calcule des itinéraires bus/marche/vélo via Google Routes API
+- Estime les positions des bus (calcul mathématique, PAS de GPS réel)
+- Fonctionne hors-ligne (PWA avec Service Worker)
+- Propose une carte interactive (Leaflet)
 
-**Fonctionnalités principales :**
-- Consultation des horaires en temps réel (basés sur données GTFS)
-- Calcul d'itinéraires multimodaux (bus, marche, vélo) via Google Routes API
-- Carte interactive avec positions des bus (estimées, pas GPS réel)
-- Mode hors-ligne via Service Worker
-- Interface moderne dark/light mode
-
-**Stack technique :**
-| Composant | Technologie |
-|-----------|-------------|
-| Frontend | Vanilla JS (ES Modules), Leaflet, CSS Grid/Flexbox |
-| Backend | Proxies Vercel (Node.js) - `/api/routes`, `/api/places`, `/api/geocode` |
-| Données | GTFS statiques + Google Routes API |
-| Cache | IndexedDB + Service Worker |
-
-### État du projet
-
-| Critère | Évaluation |
-|---------|------------|
-| Architecture code | ✓ Propre, modulaire, bien structurée |
-| PWA | ✓ Complète (manifest, SW, offline) |
-| SEO | ✓ Très bien optimisé |
-| Design | ✓ Moderne, cohérent |
-| Fonctionnalités | ⚠ Partielles (temps réel simulé) |
-| Tests | ✗ Absents |
+**Problème résolu** : Offre une alternative plus moderne/rapide à Google Maps pour les transports locaux de Périgueux. Mais Google Maps fait déjà le job gratuitement.
 
 ---
 
-## 2. Architecture technique
+## 2. ÉTAT ACTUEL & MATURITÉ
+
+| Critère | Évaluation | Justification |
+|---------|------------|---------------|
+| **Niveau de développement** | MVP avancé | Fonctionnel mais pas production-ready |
+| **Statut** | Side-project semi-pro | Qualité technique au-dessus de l'amateur, mais pas viable commercialement |
+| **Qualité technique** | Propre | Architecture modulaire, ES modules, code commenté, versionné (V221) |
+| **Qualité design/UX** | Pro | Interface moderne, dark mode, bottom sheet mobile, cohérent |
+| **Utilisable par d'autres ?** | Oui | PWA installable, intuitive, mais valeur ajoutée faible vs Google Maps |
+
+---
+
+## 3. FORCES RÉELLES (sans bullshit)
+
+### ✅ Ce qui est vraiment bon
+
+1. **Qualité technique impressionnante pour un projet perso**
+   - Architecture JavaScript moderne (ES modules, Workers, IndexedDB)
+   - Gestion intelligente du cache (Service Worker v221)
+   - Code bien structuré et commenté
+   - Refactorisation propre (V221 : -1800 lignes de code mort supprimées)
+
+2. **PWA exemplaire**
+   - Installable sur mobile/desktop
+   - Fonctionne hors-ligne
+   - Shortcuts, share target, manifest complet
+
+3. **SEO très poussé**
+   - Schema.org, Open Graph, géolocalisation
+   - Meta tags optimisés, canonical URLs
+
+4. **UX mobile soignée**
+   - Bottom sheet natif iOS-like
+   - Dark/light mode
+   - Interface épurée
+
+5. **Indépendance serveur pour les horaires**
+   - Données GTFS stockées localement
+   - Pas de backend requis pour la consultation basique
+
+### ⚠️ Avantages concurrentiels objectifs
+
+**Honnêtement : quasi aucun.**
+
+- Google Maps fait la même chose gratuitement
+- L'app officielle Péribus (si elle existe/est bonne) a la légitimité
+- Le seul avantage : interface plus jolie/rapide que Google Maps pour CE réseau spécifique
+
+---
+
+## 4. FAIBLESSES MAJEURES (impitoyable)
+
+### 🔴 Technique
+
+| Problème | Gravité | Détail |
+|----------|---------|--------|
+| Pas de temps réel GPS | CRITIQUE | Les positions des bus sont CALCULÉES, pas réelles. C'est le différenciateur principal qu'il manque. |
+| main.js = 4500 lignes | Majeur | Monolithe difficile à maintenir, malgré la refactorisation V221 |
+| Pas de tests | Majeur | Aucun test unitaire/intégration = dette technique |
+| Dépendance Google Routes API | Majeur | Coûts potentiels si trafic, et dépendance externe |
+
+### 🔴 Juridique
+
+| Problème | Gravité | Détail |
+|----------|---------|--------|
+| Utilisation du nom "Péribus" | RISQUE | Utilisé dans le SEO/title sans autorisation officielle |
+| Pas de structure juridique | Majeur | Pas de SIRET, éditeur = personne physique |
+| RGPD | OK | Aucune donnée collectée, conforme |
+| Données GTFS | Faible | Données publiques, mais redistribution sans mention peut poser problème |
+
+### 🔴 Business
+
+| Problème | Gravité | Détail |
+|----------|---------|--------|
+| Pas de modèle économique | CRITIQUE | Aucune source de revenus, aucune stratégie |
+| Marché minuscule | CRITIQUE | ~110 000 habitants dans le Grand Périgueux |
+| Concurrence écrasante | CRITIQUE | Google Maps est gratuit et meilleur |
+| Valeur ajoutée floue | Majeur | Pourquoi quelqu'un choisirait ça plutôt que Google Maps ? |
+
+### 🔴 Crédibilité
+
+| Aspect | Verdict |
+|--------|---------|
+| Fait amateur ? | Non, le design est pro |
+| Fait bricolé ? | Non, le code est propre |
+| Crédible ? | Oui visuellement, mais la mention "non-officiel" tue la confiance |
+
+---
+
+## 5. POTENTIEL RÉEL
+
+### Note : ⭐⭐☆☆☆ FAIBLE à MOYEN
+
+**Justification factuelle :**
+
+1. **Marché trop petit** : 110 000 habitants, peut-être 5-10% utilisent le bus régulièrement = 5 000-11 000 personnes max
+2. **Concurrence imbattable** : Google Maps est gratuit, universel, et a le temps réel
+3. **Pas de différenciateur** : Sans GPS temps réel, c'est juste "Google Maps avec une jolie UI"
+4. **Pas de barrière à l'entrée** : N'importe qui peut faire pareil avec les mêmes données GTFS
+
+**Y a-t-il un vrai besoin ?** Non. C'est un projet "cool à faire" techniquement, pas une solution à un problème criant.
+
+---
+
+## 6. MARCHÉ & CONCURRENCE
+
+### Qui fait déjà la même chose ?
+
+| Concurrent | Forces | Part de marché estimée |
+|------------|--------|----------------------|
+| **Google Maps** | Temps réel, mondial, gratuit | 80%+ |
+| **Citymapper** | UX premium, alertes, multi-villes | 5-10% |
+| **Moovit** | Communauté, gamification | 5% |
+| **App officielle Péribus** (si existe) | Légitimité, temps réel potentiel | 5-10% |
+| **Périmap** | Interface locale jolie | <1% |
+
+### En quoi Périmap est différent ?
+
+**Honnêtement : pas grand-chose.**
+- Interface plus épurée que Google Maps (subjectif)
+- Spécialisé Périgueux uniquement (avantage ET inconvénient)
+- Hors-ligne (Google Maps le fait aussi)
+
+### État du marché
+
+- **Saturé** au niveau mondial (Google Maps domine)
+- **Niche locale** potentiellement ouverte si partenariat officiel
+- **Barrière à l'entrée** : Quasi nulle. Les données GTFS sont publiques.
+
+---
+
+## 7. PUBLIC CIBLE RÉEL
+
+### Qui utiliserait vraiment ça ?
+
+| Segment | Taille | Réalisme |
+|---------|--------|----------|
+| Usagers réguliers Péribus cherchant une alternative | ~2 000-5 000 | Faible motivation à changer |
+| Étudiants Périgueux | ~500-1 000 | Possible |
+| Touristes | ~100/mois | Anecdotique |
+| Personnes sans smartphone récent (PWA légère) | ~200 | Très niche |
+
+**Total réaliste : 500-2 000 utilisateurs actifs mensuels maximum.**
+
+### Profil du public
+
+- **Pouvoir d'achat** : Faible (transports en commun = souvent budget serré)
+- **Facile à atteindre ?** : Difficile. Pas de budget marketing, pas de viralité naturelle.
+
+---
+
+## 8. MONÉTISATION
+
+### Est-ce monétisable ?
+
+**❌ NON / Très difficilement**
+
+### Analyse par modèle
+
+| Modèle | Viabilité | Raison |
+|--------|-----------|--------|
+| Publicité | ❌ | Trop peu d'utilisateurs, CPM ridicule |
+| Abonnement premium | ❌ | Aucune feature premium évidente, Google Maps est gratuit |
+| Affiliation | ❌ | Pas de produit/service à affilier |
+| B2B / Partenariat collectivité | ✅ Seule option | Vendre en marque blanche ou comme prestataire |
+| White-label multi-villes | ⚠️ Possible | Réutiliser le code pour d'autres réseaux GTFS |
+
+### Difficulté pour générer du revenu
+
+**🔴 TRÈS DIFFICILE**
+
+### Estimation réaliste des revenus
+
+| Horizon | Scénario | Revenus estimés |
+|---------|----------|-----------------|
+| Court terme (6-12 mois) | En l'état, publicité/dons | 0 - 200€/an |
+| Moyen terme (1-3 ans) | Avec partenariat local | 2 000 - 10 000€/an |
+| Moyen terme (1-3 ans) | White-label multi-villes | 10 000 - 30 000€/an |
+
+**Type de projet : Side-project sans revenu, ou petit complément si partenariat.**
+
+### Obstacles à la monétisation
+
+1. **Marché trop petit** pour la pub/freemium
+2. **Pas de légitimité** pour facturer sans partenariat officiel
+3. **Concurrence gratuite** (Google Maps)
+4. **Coûts API Google** potentiellement supérieurs aux revenus
+
+---
+
+## 9. RISQUES
+
+### Juridiques
+
+| Risque | Probabilité | Impact |
+|--------|-------------|--------|
+| Demande de retrait par Péribus/Transdev | Moyenne | Fatal - Obligation de rebranding total |
+| Utilisation non autorisée du nom "Péribus" dans le SEO | Moyenne | Potentiel litige |
+| Responsabilité si un usager rate un bus à cause d'infos erronées | Faible | Problématique mais mentions légales protègent |
+
+### Techniques
+
+| Risque | Probabilité | Impact |
+|--------|-------------|--------|
+| Facture Google API si trafic élevé | Moyenne | Coûts imprévus (1000 requêtes = ~$5, mais peut grimper) |
+| Changement format GTFS Péribus | Faible | Maintenance requise |
+| Obsolescence navigateurs (PWA) | Très faible | Faible impact |
+
+### Business
+
+| Risque | Probabilité | Impact |
+|--------|-------------|--------|
+| Péribus lance sa propre app moderne | Haute | Projet devient obsolète |
+| Google Maps améliore son UX locale | Certaine | Différenciateur réduit |
+| Désintérêt personnel (burnout side-project) | Haute | Abandon |
+
+---
+
+## 10. CE QUI MANQUE AUJOURD'HUI
+
+### Gaps critiques
+
+| Domaine | Manque | Impact |
+|---------|--------|--------|
+| **Technique** | Temps réel GPS | Pas de différenciateur vs Google Maps |
+| **Technique** | Tests automatisés | Dette technique, risque de régression |
+| **Business** | Modèle économique | Pas de viabilité |
+| **Légal** | Structure juridique | Impossible de facturer/contracter |
+| **Marketing** | Stratégie d'acquisition | Pas de croissance possible |
+
+### Ce qui bloque le projet
+
+1. **Pas d'accès aux données temps réel** (nécessite partenariat Transdev/collectivité)
+2. **Pas de différenciateur clair** face à Google Maps
+3. **Pas de ressources** pour le marketing
+
+---
+
+## 11. AMÉLIORATIONS PRIORITAIRES
+
+### Par ordre d'importance RÉELLE
+
+1. **🔴 DÉCIDER : continuer ou pivoter ?** - Sans partenariat officiel, le projet n'a pas d'avenir commercial
+
+2. **Si continue :**
+   - Contacter le service mobilité du Grand Périgueux pour partenariat
+   - Pitch : "J'ai développé cette app gratuitement, voulez-vous collaborer ?"
+
+3. **Sécurisation juridique**
+   - Créer structure juridique (auto-entrepreneur minimum)
+   - Renommer si risque avec "Péribus" dans le SEO
+
+4. **Technique (si partenariat)**
+   - Intégrer temps réel GPS (données Transdev)
+   - Ajouter tests unitaires (ranking.js, apiManager.js)
+
+5. **Marketing (si partenariat)**
+   - Landing page différenciante
+   - Présence locale (flyers arrêts de bus ?)
+
+---
+
+## 12. FONCTIONNALITÉS À CRÉER
+
+### Essentielles (si le projet continue sérieusement)
+
+| Fonctionnalité | Priorité | Difficulté | Impact |
+|----------------|----------|------------|--------|
+| Temps réel GPS | CRITIQUE | Haute (besoin partenariat) | Différenciateur majeur |
+| Favoris (arrêts/trajets) | Haute | Facile | Fidélisation |
+| Alertes perturbations push | Haute | Moyenne | Valeur ajoutée |
+| Tests automatisés | Haute | Moyenne | Stabilité |
+
+### Nice to have
+
+| Fonctionnalité | Priorité | Difficulté |
+|----------------|----------|------------|
+| Widget "prochain bus" | Moyenne | Haute |
+| Mode crowdsourcing (positions signalées) | Moyenne | Moyenne |
+| Multilingue | Basse | Facile |
+
+---
+
+## 13. PERSPECTIVES D'ÉVOLUTION
+
+### Court terme (3-6 mois)
+
+**Sans partenariat :** Stagnation. Quelques dizaines/centaines d'utilisateurs locaux fidèles. Pas de revenus.
+
+**Avec démarche partenariat :** Potentielle discussion avec la collectivité. Résultat incertain.
+
+### Moyen terme (6-18 mois)
+
+**Scénario optimiste :** Partenariat officiel → Accès temps réel → App de référence locale → 2 000-10 000€/an
+
+**Scénario réaliste :** Pas de partenariat → Projet portfolio → Utilité pour décrocher un job de dev
+
+**Scénario pessimiste :** Demande de retrait → Rebranding obligatoire ou abandon
+
+### Long terme (2-5 ans)
+
+**Meilleur cas :** White-label répliqué sur d'autres villes moyennes françaises → Side-business viable (20-50k€/an)
+
+**Cas probable :** Projet abandonné ou en maintenance minimale
+
+---
+
+## 14. CONSEILS STRATÉGIQUES CONCRETS
+
+### ✅ À faire en priorité
+
+1. **Décider maintenant** : soit tu contactes la collectivité pour un partenariat, soit tu assumes que c'est un projet portfolio
+2. **Si partenariat** : préparer un pitch professionnel (démo, métriques, proposition de valeur)
+3. **Utiliser comme portfolio** : le projet est techniquement impressionnant pour un CV
+
+### ❌ À arrêter/éviter
+
+1. **Arrêter d'optimiser sans objectif** : Le code est déjà propre, pas besoin de refactorisation infinie
+2. **Ne pas investir d'argent** : Pas de pub payante, pas de domaine premium, pas de serveur dédié
+3. **Ne pas surestimer le potentiel** : Ce n'est pas une startup, c'est un side-project local
+
+### 🎯 Prochain move stratégique
+
+**Email au service mobilité du Grand Périgueux** avec :
+- Démo de l'app
+- Proposition de collaboration (gratuite ou rémunérée)
+- Mise en avant de la valeur (app moderne, hors-ligne, PWA)
+
+Si réponse négative ou silence → Accepter que c'est un projet portfolio et passer à autre chose.
+
+---
+
+## 15. VERDICT FINAL
+
+### Statut actuel du projet
+
+## ⚠️ PROJET FRAGILE / INCERTAIN
+
+### Ce que ça peut devenir (scénario réaliste sur 1 an)
+
+| Scénario | Probabilité | Description |
+|----------|-------------|-------------|
+| **Meilleur réaliste** | 15% | Partenariat officiel → App de référence locale → 5-10k€/an |
+| **Probable** | 60% | Projet portfolio → Aide à décrocher un job de dev front-end/PWA |
+| **Pire** | 25% | Demande de retrait ou désintérêt → Abandon |
+
+### Recommandation finale
+
+## 🤔 Y ALLER PRUDEMMENT (side-project)
+
+**Justification :**
+
+Le projet est **techniquement excellent** mais **commercialement non viable** en l'état. Sans accès au temps réel GPS et sans partenariat officiel, il restera un "Google Maps local plus joli" sans valeur ajoutée suffisante.
+
+**Action recommandée :** Tenter UN contact sérieux avec la collectivité. Si ça ne donne rien en 2-3 mois, considérer ce projet comme un excellent portfolio technique et passer à un projet avec plus de potentiel.
+
+---
+
+---
+
+# 📖 DOCUMENTATION TECHNIQUE
+
+## Architecture technique
 
 ### Structure des fichiers JS
 
@@ -102,7 +440,7 @@ public/js/
 
 ---
 
-## 3. Flux de données critiques
+## Flux de données critiques
 
 ### Recherche d'itinéraire
 
@@ -132,9 +470,6 @@ public/js/
           [7] Tri par heure de départ
               │
               ▼
-          [8] Limite à 8 résultats
-              │
-              ▼
 [9] main.js::processIntelligentResults()
      │
      ▼
@@ -157,9 +492,7 @@ public/js/
 
 ---
 
-## 4. Fichiers critiques
-
-### Ne pas casser !
+## Fichiers critiques
 
 | Fichier | Lignes | Zones sensibles |
 |---------|--------|-----------------|
@@ -171,7 +504,7 @@ public/js/
 
 ---
 
-## 5. Bugs majeurs corrigés
+## Bugs majeurs corrigés
 
 | Version | Bug | Cause | Fix |
 |---------|-----|-------|-----|
@@ -182,14 +515,11 @@ public/js/
 
 ---
 
-## 6. API Google Routes
-
-### Structure de la réponse (mode TRANSIT)
+## API Google Routes - Structure réponse
 
 ```
 route
 ├── duration: "3660s"
-├── distanceMeters: 12500
 ├── polyline: { encodedPolyline: "..." }
 └── legs[]
     └── [0]
@@ -199,33 +529,17 @@ route
             ├── [0] travelMode: "WALK"
             ├── [1] travelMode: "TRANSIT" ◄── C'EST LÀ
             │   └── transitDetails
-            │       ├── transitLine
-            │       │   └── nameShort: "A"
             │       └── localizedValues
             │           ├── departureTime.time.text: "14:04" ◄── BONNE VALEUR
             │           └── arrivalTime.time.text: "14:52"
             └── [2] travelMode: "WALK"
 ```
 
-**Règle d'or** : Pour les routes TRANSIT, toujours parcourir `steps[]` et chercher `travelMode === 'TRANSIT'`, puis extraire de `transitDetails`.
-
-### Déduplication
-
-```
-uniqueKey = `${depTime}-${lineName}-${depStopName}`
-
-Exemples :
-  "14:04-A-Gare SNCF"     ✓ Gardé
-  "14:04-A-Gare SNCF"     ✗ Doublon, ignoré
-  "14:24-A-Gare SNCF"     ✓ Gardé (heure différente)
-  "14:04-B-Gare SNCF"     ✓ Gardé (ligne différente)
-```
+**Règle d'or** : Pour TRANSIT, parcourir `steps[]` et extraire de `transitDetails`.
 
 ---
 
-## 7. Refactorisation V221
-
-### Résumé des changements
+## Refactorisation V221
 
 | Métrique | Avant | Après | Delta |
 |----------|-------|-------|-------|
@@ -233,57 +547,14 @@ Exemples :
 | Lignes code mort | ~1,828 | 0 | **-1,828** |
 | Modules extraits | 0 | 2 | **+2** |
 
-### Fichiers supprimés (code mort)
+### Nouveaux modules
 
-| Fichier | Lignes | Raison |
-|---------|--------|--------|
-| `modules/index.js` | 123 | Barrel jamais importé |
-| `utils/logger.js` | 99 | Logger jamais utilisé |
-| `utils/performance.js` | 125 | Throttle/debounce inline |
-| `utils/theme.js` | 70 | Thème dans UIManager |
-| `state/appState.js` | 156 | État dans variables globales |
-| `ui/popoverManager.js` | 100 | Logique inline |
-| `ui/detailRenderer.js` | 300 | Jamais importé |
-| `controllers/bottomSheetController.js` | 200 | Logique dans main.js |
-| `controllers/viewController.js` | 350 | Logique dans main.js |
-| `search/googleRoutesProcessor.js` | 305 | Doublon de main.js |
-
-### Nouveaux modules créés
-
-#### `map/routeDrawing.js` (503 lignes)
-Utilitaires de dessin de routes sur Leaflet.
-
-**Exports :** `STOP_ROLE_PRIORITY`, `isWaitStep()`, `getPolylineLatLngs()`, `extractStepPolylines()`, `getLeafletStyleForStep()`
-
-#### `search/itineraryProcessor.js` (511 lignes)
-Traitement des réponses d'itinéraires.
-
-**Exports :** `parseDepartureMinutes()`, `parseTimeToSeconds()`, `createItinerarySignature()`
+- `map/routeDrawing.js` (503 lignes) - Dessin routes Leaflet
+- `search/itineraryProcessor.js` (511 lignes) - Traitement itinéraires
 
 ---
 
-## 8. Guide de debug
-
-### Checklist sauts d'horaires
-
-Si les horaires sautent (ex: 14:04 → 15:53) :
-
-1. **Vérifier les logs console :**
-   - `"📋 Horaires: 14:04, 14:24..."` → extraction OK
-   - `"📋 Horaires: , , ..."` → extraction CASSÉE
-
-2. **Vérifier la déduplication :**
-   - `"🚍 V218: 8/21 trajets"` → OK
-   - `"🚍 V218: 1/21 trajets"` → uniqueKey cassée
-
-3. **Vérifier le filtrage :**
-   - `"🕐 V205: Filtrage..."` → mode partir OK
-   - `"🕐 V220: Mode ARRIVER..."` → mode arriver OK
-
-4. **Points de rupture :**
-   - `apiManager.js` ligne ~660 : `extractDepartureTime()`
-   - `apiManager.js` ligne ~700 : construction `uniqueKey`
-   - `ranking.js` ligne ~160 : `filterExpiredDepartures`
+## Guide de debug
 
 ### Constantes importantes
 
@@ -294,7 +565,6 @@ Offsets mode partir : [0, 20, 40, 60, 90, 120, 150, 180] minutes
 
 // ranking.js
 MIN_BUS_ITINERARIES = 5
-Marge de filtrage : -2 minutes
 
 // main.js
 ARRIVAL_PAGE_SIZE = 6
@@ -306,63 +576,10 @@ CACHE_VERSION = 'v221'
 ### Commandes Git utiles
 
 ```bash
-# Voir les changements récents
 git log --oneline -20 -- public/js/apiManager.js
-
-# Comparer versions
 git diff v217..v221 -- public/js/apiManager.js
-
-# Revenir à une version
 git checkout v217 -- public/js/apiManager.js
-
-# Tag version stable
-git tag -a v221-stable -m "Refactorisation complète"
 ```
-
----
-
-## 9. Analyse business
-
-### Forces du projet
-
-1. **Qualité technique** : Architecture JS moderne, ES modules, Workers
-2. **PWA exemplaire** : Installable, hors-ligne, shortcuts
-3. **SEO poussé** : Schema.org, Open Graph, géolocalisation
-4. **UX soignée** : Bottom sheet mobile, dark mode
-5. **Données GTFS locales** : Pas de dépendance serveur
-
-### Faiblesses
-
-| Niveau | Problème |
-|--------|----------|
-| 🔴 Critique | Pas de temps réel GPS (positions calculées) |
-| 🟠 Majeur | Dépendance Google Routes API (coûts potentiels) |
-| 🟠 Majeur | Pas de tests automatisés |
-| 🟡 Mineur | main.js encore volumineux (~4500 lignes) |
-
-### Potentiel de monétisation
-
-| Modèle | Viabilité | Notes |
-|--------|-----------|-------|
-| Publicité | Faible | Trop peu d'utilisateurs |
-| Partenariat collectivité | **Fort** | Meilleure option |
-| White-label multi-villes | Possible | Code réutilisable |
-
-### Prochaines étapes recommandées
-
-**Haute priorité :**
-- [ ] Tests unitaires pour `ranking.js`
-- [ ] Tests d'intégration pour `apiManager.fetchItinerary()`
-
-**Moyenne priorité :**
-- [ ] Cache des résultats Google Routes
-- [ ] Métriques de performance
-- [ ] Mode hors-ligne amélioré
-
-**Basse priorité :**
-- [ ] Continuer refactorisation main.js
-- [ ] TypeScript
-- [ ] Documentation JSDoc complète
 
 ---
 
