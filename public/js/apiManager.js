@@ -714,9 +714,9 @@ export class ApiManager {
                     return depA.localeCompare(depB);
                 });
                 
-                // V198: Nettoyage - On renvoie TOUT sans pagination ni cache
-                // Le filtrage final se fera dans main.js
-                const busData = { routes: allBusRoutes, hasMore: false };
+                // V218: Limiter à 8 trajets bus maximum
+                const limitedBusRoutes = allBusRoutes.slice(0, 8);
+                const busData = { routes: limitedBusRoutes, hasMore: allBusRoutes.length > 8 };
                 
                 // Calculs pour le "meilleur" trajet (pour le score)
                 const bestRoute = allBusRoutes[0];
@@ -726,10 +726,10 @@ export class ApiManager {
                 const transferCount = Math.max(0, transitSteps.length - 1);
                 
                 results.bus = { data: busData, duration: durationMinutes, transfers: transferCount };
-                console.log(`🚍 V217: ${allBusRoutes.length} trajets trouvés (tous renvoyés)`);
+                console.log(`🚍 V218: ${limitedBusRoutes.length}/${allBusRoutes.length} trajets affichés (max 8)`);
                 
                 // V217: Log des heures pour vérification (avec le helper)
-                const heures = allBusRoutes.map(r => extractDepartureTime(r)).filter(Boolean).join(', ');
+                const heures = limitedBusRoutes.map(r => extractDepartureTime(r)).filter(Boolean).join(', ');
                 console.log(`📋 Horaires: ${heures}`);
                 
                 // Score simplifié
