@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.18.0-22c55e?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.23.0-22c55e?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/PWA-Ready-00c8ff?style=flat-square" alt="PWA">
   <img src="https://img.shields.io/badge/license-MIT-gray?style=flat-square" alt="License">
 </p>
@@ -205,7 +205,7 @@ perimap/
 | `main.js` | Logique métier principale |
 | `dataManager.js` | Indexation et accès données GTFS |
 | `mapRenderer.js` | Affichage carte, markers, polylines |
-| `apiManager.js` | Appels Google Places/Routes |
+| `apiManager.js` | Appels Google Places/Routes (V222: 1 appel bus, -70% API) |
 | `timeManager.js` | Gestion temps réel/simulé |
 | `tripScheduler.js` | Calcul positions des bus |
 | `uiManager.js` | Thème dark/light, préférences |
@@ -379,8 +379,8 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
      trajets avec correspondances)                    ┌─────────┴─────────┐
                                                       │                   │
                                               Mode "partir"      Mode "arriver"
-                                              8 appels API       1 appel API
-                                              décalés            unique (V219)
+                                              1 appel API        1 appel API
+                                              unique (V222)      unique (V222)
                                                       │
                                                       ▼
                                         extractDepartureTime() ← CRITIQUE V217
@@ -404,8 +404,8 @@ Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus
 |---------|------------------|----------|------------------------|
 | `apiManager.js` | 650-720 | `extractDepartureTime()` | Horaires vides, déduplication cassée |
 | `apiManager.js` | 695-705 | Construction `uniqueKey` | Tous trajets dédupliqués sauf 1 |
-| `apiManager.js` | 620-650 | Stratégie mode partir/arriver | 0 résultats en mode arriver |
-| `ranking.js` | 140-190 | `filterExpiredDepartures()` | Tous bus filtrés en mode arriver |
+| `apiManager.js` | 620-650 | Stratégie 1 appel (V222) | Économie 70% API |
+| `ranking.js` | 140-190 | `filterExpiredDepartures()` (V223) | Utilise arrivalTime en mode arriver |
 | `ranking.js` | 195-210 | `filterLateArrivals()` | Arrivées tardives non filtrées |
 | `service-worker.js` | 1 | `CACHE_VERSION` | Changements non déployés |
 
@@ -439,13 +439,14 @@ const extractDepartureTime = (route) => {
 
 | Aspect | Mode "Partir à" | Mode "Arriver à" |
 |--------|-----------------|------------------|
-| **Appels API** | 8 décalés (T+0 à T+180min) | 1 seul (V219) |
+| **Appels API** | 1 seul (V222) | 1 seul (V222) |
 | **Paramètre API** | `departureTime` | `arrivalTime` |
-| **Filtrage départs** | >= heure demandée | >= heure **actuelle** (V220) |
-| **Filtrage arrivées** | N/A | <= heure demandée |
+| **Filtrage** | départ >= heure demandée | arrivée >= heure actuelle (V223) |
+| **Résultats** | ~5-6 alternatives | ~5-6 alternatives |
 | **Tri** | Départ croissant | Arrivée décroissante |
+| **Économie API** | -70% (3 appels au lieu de 10) | -70% |
 
-**ERREUR CORRIGÉE V220** : En mode "arriver à 17h10", les bus de 15h32 étaient filtrés car `15:32 < 17:10`. Or en mode arriver, il faut comparer à l'heure **actuelle**, pas demandée !
+**ERREUR CORRIGÉE V223** : En mode "arriver", le filtrage utilisait l'heure de **départ** au lieu de l'heure d'**arrivée**. Un bus partant à 14h28 mais arrivant à 16h30 était incorrectement filtré.
 
 ### 🔄 Déduplication des Résultats (V217)
 
@@ -485,20 +486,22 @@ Si les horaires sautent (ex: 14:04 → 15:53 sans bus entre) :
 ### 📋 Constantes Importantes
 
 ```javascript
-// apiManager.js
+// apiManager.js (V222)
 MAX_BUS_RESULTS = 8;  // slice(0, 8)
-OFFSETS_PARTIR = [0, 20, 40, 60, 90, 120, 150, 180];  // minutes
+// V222: 1 seul appel API pour partir ET arriver
+// Google retourne 5-6 alternatives avec computeAlternativeRoutes: true
 
-// ranking.js
+// ranking.js (V223)
 MIN_BUS_ITINERARIES = 5;  // warning si moins
 FILTER_MARGIN = -2;  // minutes de marge
+// V223: Mode arriver filtre par arrivalTime (pas departureTime)
 
 // main.js
 ARRIVAL_PAGE_SIZE = 6;
 ENABLE_GTFS_ROUTER = true;
 
 // service-worker.js
-CACHE_VERSION = 'v220';  // ⚠️ INCRÉMENTER À CHAQUE DEPLOY
+CACHE_VERSION = 'v223';  // ⚠️ INCRÉMENTER À CHAQUE DEPLOY
 ```
 
 ### 🚀 Déploiement

@@ -1,6 +1,9 @@
 /**
- * ranking.js
+ * ranking.js - VERSION V223
  * Logique de déduplication, tri et filtrage pour les itinéraires.
+ * 
+ * ✅ V223: Fix filtrage mode arriver - utilise arrivalTime au lieu de departureTime
+ *    Un bus partant à 14h28 mais arrivant à 16h30 n'est plus incorrectement filtré
  */
 
 import { parseTimeStringToMinutes } from '../utils/formatters.js';
