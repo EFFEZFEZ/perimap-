@@ -1,12 +1,12 @@
 ﻿/**
- * main.js - V65 (UI fixes + prochains départs GTFS + limite vélo/piéton)
+ * main.js - V221 (Refactorisation + nettoyage code mort)
  *
  * Version refactorisée avec modules séparés pour:
- * - État centralisé (state/appState.js)
+ * - Dessin de routes (map/routeDrawing.js)
+ * - Traitement itinéraires (search/itineraryProcessor.js)
  * - Formatage (utils/formatters.js)
  * - Configuration (config/icons.js, config/routes.js)
- * - Controllers (controllers/)
- * - UI (ui/)
+ * - UI (ui/resultsRenderer.js, ui/trafficInfo.js)
  */
 
 // === Imports des managers ===
@@ -21,6 +21,15 @@ import { RouterWorkerClient } from './routerWorkerClient.js';
 import { UIManager } from './uiManager.js';
 import { createGeolocationManager } from './geolocationManager.js';
 import { loadBaseLayout } from './viewLoader.js';
+
+// === Imports des modules extraits (V221) ===
+import { 
+    isWaitStep,
+    getEncodedPolylineValue,
+    getPolylineLatLngs,
+    extractStepPolylines,
+    STOP_ROLE_PRIORITY as IMPORTED_STOP_ROLE_PRIORITY
+} from './map/routeDrawing.js';
 
 // === Imports des modules refactorisés ===
 import { 
@@ -111,12 +120,8 @@ const isSheetAtMaxLevel = () => currentBottomSheetLevelIndex === BOTTOM_SHEET_LE
 
 // normalizeStopNameForLookup & resolveStopCoordinates importés depuis utils/geo.js
 
-const STOP_ROLE_PRIORITY = {
-    boarding: 4,
-    alighting: 4,
-    transfer: 3,
-    intermediate: 1
-};
+// V221: STOP_ROLE_PRIORITY importé depuis map/routeDrawing.js
+const STOP_ROLE_PRIORITY = IMPORTED_STOP_ROLE_PRIORITY;
 
 function createStopDivIcon(role) {
     if (typeof L === 'undefined' || !L.divIcon) return null;
@@ -3305,89 +3310,8 @@ function getLeafletStyleForStep(step) {
     };
 }
 
-const getEncodedPolylineValue = (polyline) => {
-    if (!polyline) return null;
-    if (typeof polyline === 'string') return polyline;
-    return polyline.encodedPolyline || polyline.points || null;
-};
-
-const getPolylineLatLngs = (polyline) => {
-    if (!polyline) return null;
-
-    const normalizePairs = (pairs) => {
-        if (!Array.isArray(pairs)) return null;
-        const normalized = pairs
-            .map((pair) => {
-                if (!Array.isArray(pair) || pair.length < 2) return null;
-                const lat = Number(pair[0]);
-                const lon = Number(pair[1]);
-                if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-                return [lat, lon];
-            })
-            .filter(Boolean);
-        return normalized.length ? normalized : null;
-    };
-
-    if (Array.isArray(polyline)) {
-        const direct = normalizePairs(polyline);
-        if (direct) return direct;
-    }
-
-    if (Array.isArray(polyline.latLngs)) {
-        const direct = normalizePairs(polyline.latLngs);
-        if (direct) return direct;
-    }
-
-    if (Array.isArray(polyline.points)) {
-        const maybeRaw = normalizePairs(polyline.points);
-        if (maybeRaw) return maybeRaw;
-    }
-
-    if (Array.isArray(polyline.coordinates)) {
-        const converted = normalizePairs(polyline.coordinates.map(([lng, lat]) => [lat, lng]));
-        if (converted) return converted;
-    }
-
-    const encoded = getEncodedPolylineValue(polyline);
-    if (encoded) {
-        try {
-            return decodePolyline(encoded);
-        } catch (err) {
-            console.warn('getPolylineLatLngs: decode failed', err);
-        }
-    }
-
-    return null;
-};
-
-const isWaitStep = (step) => {
-    if (!step) return false;
-    if (step.type === 'WAIT') return true;
-    const instruction = (step.instruction || '').toLowerCase();
-    const looksLikeWait = instruction.includes('correspondance') || instruction.includes('attente') || instruction.includes('transfert');
-    const missingRoute = isMissingTextValue(step.routeShortName);
-    const missingStops = isMissingTextValue(step.departureStop) && isMissingTextValue(step.arrivalStop);
-    return looksLikeWait && (missingRoute || missingStops);
-};
-
-function extractStepPolylines(step) {
-    if (!step || isWaitStep(step)) return [];
-
-    const collected = [];
-    const pushIfValid = (poly) => {
-        if (poly) collected.push(poly);
-    };
-
-    if (step.type === 'BUS') {
-        pushIfValid(step?.polyline);
-    } else if (Array.isArray(step.polylines) && step.polylines.length) {
-        step.polylines.forEach(pushIfValid);
-    } else {
-        pushIfValid(step?.polyline);
-    }
-
-    return collected;
-}
+// V221: getEncodedPolylineValue, getPolylineLatLngs, isWaitStep, extractStepPolylines
+// sont maintenant importés depuis map/routeDrawing.js
 
 /**
  * ✅ V62: AMÉLIORATION - Ajoute les marqueurs de Début, Fin, Correspondance et Arrêts intermédiaires

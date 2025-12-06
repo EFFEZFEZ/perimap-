@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v220'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V211: 8 appels API sur 3h pour charger plus de trajets d'un coup
+const CACHE_VERSION = 'v221'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V221: Refactorisation modules extraits (routeDrawing, itineraryProcessor)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -48,20 +48,12 @@ const SECONDARY_ASSETS = [
   '/js/utils/formatters.js',
   '/js/utils/geo.js',
   '/js/utils/polyline.js',
-  '/js/utils/logger.js',
-  '/js/utils/performance.js',
   '/js/utils/gtfsProcessor.js',
-  '/js/utils/theme.js',
   '/js/itinerary/ranking.js',
   '/js/ui/resultsRenderer.js',
-  '/js/ui/detailRenderer.js',
-  '/js/ui/popoverManager.js',
   '/js/ui/trafficInfo.js',
-  '/js/controllers/bottomSheetController.js',
-  '/js/controllers/viewController.js',
-  '/js/state/appState.js',
-  '/js/modules/index.js',
-  '/js/search/googleRoutesProcessor.js',
+  '/js/map/routeDrawing.js',
+  '/js/search/itineraryProcessor.js',
   '/js/workers/gtfsWorker.js',
   '/js/workers/routerWorker.js',
   '/css/crowdsourcing.css',
