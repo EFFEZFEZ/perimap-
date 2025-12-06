@@ -145,10 +145,23 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
     return itineraries;
   }
   
-  const reqHour = parseInt(searchTime.hour) || 0;
-  const reqMinute = parseInt(searchTime.minute) || 0;
-  const requestMinutes = reqHour * 60 + reqMinute;
-  console.log(`🕐 V205: Filtrage des trajets avant ${reqHour}:${String(reqMinute).padStart(2,'0')} (heure demandée)`);
+  // V220: En mode ARRIVER, filtrer par rapport à l'heure ACTUELLE (pas l'heure demandée)
+  // Car l'heure demandée est l'heure d'arrivée, pas de départ
+  const isArriveMode = searchTime.type === 'arriver';
+  
+  let requestMinutes;
+  if (isArriveMode) {
+    // Mode arriver: filtrer les bus déjà partis (basé sur l'heure actuelle)
+    const now = new Date();
+    requestMinutes = now.getHours() * 60 + now.getMinutes();
+    console.log(`🕐 V220: Mode ARRIVER - Filtrage des trajets avant ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} (heure actuelle)`);
+  } else {
+    // Mode partir: filtrer les bus avant l'heure demandée
+    const reqHour = parseInt(searchTime.hour) || 0;
+    const reqMinute = parseInt(searchTime.minute) || 0;
+    requestMinutes = reqHour * 60 + reqMinute;
+    console.log(`🕐 V205: Filtrage des trajets avant ${reqHour}:${String(reqMinute).padStart(2,'0')} (heure demandée)`);
+  }
   
   const filtered = itineraries.filter(it => {
     // V142: Ne jamais filtrer vélo/marche - ils n'ont pas d'horaire fixe
