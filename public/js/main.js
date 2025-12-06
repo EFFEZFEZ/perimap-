@@ -432,14 +432,9 @@ async function initializeApp() {
         const locateError = geolocationManager?.handleGeolocationError || (() => {});
         mapRenderer.addLocateControl(locateSuccess, locateError);
 
-        // Exposer mapRenderer et dataManager globalement pour le système de retards et crowdsourcing
+        // Exposer mapRenderer et dataManager globalement pour le système de retards
         window.mapRenderer = mapRenderer;
         window.dataManager = dataManager;
-        
-        // Injecter dataManager dans le CrowdsourcingManager
-        if (typeof CrowdsourcingManager !== 'undefined' && CrowdsourcingManager.setDataManager) {
-            CrowdsourcingManager.setDataManager(dataManager);
-        }
         
         window.addDelayedBusMarker = (delayInfo) => {
             if (mapRenderer && typeof mapRenderer.addDelayedBusMarker === 'function') {
@@ -3802,35 +3797,8 @@ function renderItineraryDetail(itinerary) {
         }
     }).join('');
 
-    // Ajouter le bouton GO à la fin du contenu (uniquement pour les trajets bus)
-    const hasBusStep = itinerary.steps?.some(step => step.type === 'BUS');
-    const goButtonHtml = hasBusStep ? `
-        <div class="go-contribution-section">
-            <div class="go-contribution-divider"></div>
-            <div class="go-contribution-content">
-                <div class="go-contribution-icon">🚌</div>
-                <div class="go-contribution-text">
-                    <strong>Vous êtes dans ce bus ?</strong>
-                    <span>Aidez les autres usagers en partageant votre position en temps réel</span>
-                </div>
-                <button class="go-contribution-button" id="go-start-sharing-btn">
-                    <span class="go-btn-icon">GO</span>
-                    <span>Partager</span>
-                </button>
-            </div>
-        </div>
-    ` : '';
-
-    detailPanelContent.innerHTML = stepsHtml + goButtonHtml;
+    detailPanelContent.innerHTML = stepsHtml;
     resetDetailPanelScroll();
-
-    // Ajouter l'event listener pour le bouton GO
-    const goBtn = document.getElementById('go-start-sharing-btn');
-    if (goBtn && typeof CrowdsourcingManager !== 'undefined') {
-        goBtn.addEventListener('click', () => {
-            CrowdsourcingManager.startSharingFromItinerary(itinerary);
-        });
-    }
 
     // 2. Mettre à jour le résumé
     if(detailMapSummary) {

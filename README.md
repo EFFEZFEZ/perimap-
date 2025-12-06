@@ -547,7 +547,7 @@ CACHE_VERSION = 'v223';  // ⚠️ INCRÉMENTER À CHAQUE DEPLOY
 ### Long terme (2025+)
 
 - [ ] **Application native** : React Native ou Flutter
-- [ ] **Crowdsourcing** : Signalement perturbations par les usagers
+- [ ] **Signalement** : Perturbations signalées par les usagers
 - [ ] **Gamification** : Badges et récompenses fidélité
 - [ ] **Extension réseau** : Support d'autres réseaux Nouvelle-Aquitaine
 

@@ -9,7 +9,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v223'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V223: Fix filtrage mode arriver (utilise arrivalTime)
+const CACHE_VERSION = 'v224'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V224: Suppression crowdsourcing
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -39,7 +39,6 @@ const SECONDARY_ASSETS = [
   '/js/timeManager.js',
   '/js/apiManager.js',
   '/js/stopTimesStore.js',
-  '/js/crowdsourcing.js',
   '/js/uiManager.js',
   '/js/viewLoader.js',
   '/js/config.js',
@@ -56,7 +55,6 @@ const SECONDARY_ASSETS = [
   '/js/search/itineraryProcessor.js',
   '/js/workers/gtfsWorker.js',
   '/js/workers/routerWorker.js',
-  '/css/crowdsourcing.css',
   '/views/hall.html',
   '/views/horaires.html',
   '/views/carte.html',
