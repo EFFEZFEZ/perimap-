@@ -151,10 +151,11 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   
   let requestMinutes;
   if (isArriveMode) {
-    // Mode arriver: filtrer les bus déjà partis (basé sur l'heure actuelle)
+    // V223: Mode arriver - on filtre les bus qui ARRIVENT avant l'heure actuelle
+    // (pas ceux qui PARTENT avant l'heure actuelle, car un bus parti à 14h peut arriver à 16h)
     const now = new Date();
     requestMinutes = now.getHours() * 60 + now.getMinutes();
-    console.log(`🕐 V220: Mode ARRIVER - Filtrage des trajets avant ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} (heure actuelle)`);
+    console.log(`🕐 V223: Mode ARRIVER - Filtrage des trajets qui arrivent avant ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} (heure actuelle)`);
   } else {
     // Mode partir: filtrer les bus avant l'heure demandée
     const reqHour = parseInt(searchTime.hour) || 0;
@@ -170,14 +171,16 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
       return true;
     }
     
-    const depTime = it?.departureTime;
-    if (!depTime || depTime === '~' || depTime === '--:--') return true;
+    // V223: En mode arriver, utiliser l'heure d'ARRIVÉE pour le filtrage
+    // Un bus qui part à 14h mais arrive à 16h30 est valide si on veut arriver avant 17h40
+    const timeToCheck = isArriveMode ? it?.arrivalTime : it?.departureTime;
+    if (!timeToCheck || timeToCheck === '~' || timeToCheck === '--:--') return true;
     
-    const depMinutes = parseTimeToMinutes(depTime);
-    if (depMinutes === Infinity) return true;
+    const timeMinutes = parseTimeToMinutes(timeToCheck);
+    if (timeMinutes === Infinity) return true;
     
-    // Garder si départ >= heure demandée (avec 2 min de marge négative)
-    return depMinutes >= (requestMinutes - 2);
+    // Garder si l'heure >= heure actuelle/demandée (avec 2 min de marge négative)
+    return timeMinutes >= (requestMinutes - 2);
   });
   
   const removed = itineraries.length - filtered.length;
