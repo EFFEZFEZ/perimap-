@@ -1,7 +1,12 @@
 /**
- * apiManager.js - VERSION V181 (Proxy complet - Autocomplétion + Géocodage)
+ * apiManager.js - VERSION V222 (1 seul appel bus = économie maximale)
  * Gère tous les appels aux API externes (Google Places & Google Routes).
  *
+ * ✅ V222: 1 SEUL APPEL BUS (comme mode arrivée)
+ * - Google retourne 5-6 alternatives avec computeAlternativeRoutes: true
+ * - Mode partir ET arriver : 1 appel bus + 1 vélo + 1 marche = 3 appels
+ * - ÉCONOMIE : -70% de coût API (3 appels au lieu de 10)
+ * 
  * ✅ V181: PROXY COMPLET - Tout passe par les proxies Vercel en production
  * - /api/routes : Google Routes API (itinéraires bus/vélo/marche)
  * - /api/places : Google Places API (autocomplétion + geocoding placeId→coords)
@@ -616,34 +621,27 @@ export class ApiManager {
         };
 
         // ========================================
-        // V219: STRATÉGIE DIFFÉRENTE SELON MODE
-        // - Mode "partir" : 8 appels décalés dans le futur
-        // - Mode "arriver" : 1 seul appel (Google gère les alternatives)
+        // V222: STRATÉGIE MINIMALE - 1 SEUL APPEL BUS
+        // Google Routes avec computeAlternativeRoutes retourne 5-6 alternatives
+        // 
+        // - Mode "partir" : 1 appel = 5-6 trajets
+        // - Mode "arriver" : 1 appel = 5-6 trajets
+        // 
+        // ÉCONOMIE : 10 appels → 3 appels = -70% de coût API
         // ========================================
         
-        let searchTimes;
+        // V222: UN SEUL appel bus, que ce soit mode "partir" ou "arriver"
+        // Google renvoie déjà 5-6 alternatives avec computeAlternativeRoutes: true
+        const searchTimes = [searchTime];
+        
         if (searchTime && searchTime.type === 'arriver') {
-            // V219: Mode ARRIVER - UN SEUL appel avec arrivalTime exact
-            // Google Routes renvoie automatiquement les trajets qui arrivent AVANT ou À cette heure
-            // Faire des offsets négatifs ne fait que demander des arrivées dans le passé = aucun résultat
-            searchTimes = [searchTime];
-            console.log(`⏰ V219 Mode ARRIVER: 1 appel avec arrivalTime=${searchTime.hour}:${searchTime.minute}`);
+            console.log(`⏰ V222 Mode ARRIVER: 1 appel avec arrivalTime=${searchTime.hour}:${searchTime.minute}`);
         } else {
-            // Pour "Partir à", on cherche dans le FUTUR sur 3h
-            searchTimes = [
-                searchTime,                               // T+0 min
-                this._offsetSearchTime(searchTime, 20),   // T+20 min
-                this._offsetSearchTime(searchTime, 40),   // T+40 min
-                this._offsetSearchTime(searchTime, 60),   // T+1h
-                this._offsetSearchTime(searchTime, 90),   // T+1h30
-                this._offsetSearchTime(searchTime, 120),  // T+2h
-                this._offsetSearchTime(searchTime, 150),  // T+2h30
-                this._offsetSearchTime(searchTime, 180),  // T+3h
-            ];
+            console.log(`⏰ V222 Mode PARTIR: 1 appel avec departureTime=${searchTime?.hour || 'now'}:${searchTime?.minute || ''}`);
         }
         
         const [busResults, bikeResult, walkResult] = await Promise.allSettled([
-            // 4 appels bus en parallèle
+            // V220: 3 appels bus en parallèle (au lieu de 8)
             Promise.allSettled(searchTimes.map(st => this._fetchBusRoute(fromPlaceId, toPlaceId, st, fromCoords, toCoords))),
             this.fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords, toCoords),
             this.fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords, toCoords)
@@ -777,7 +775,9 @@ export class ApiManager {
         results.recommendations.sort((a, b) => b.score - a.score);
         
         const elapsed = Math.round(performance.now() - startTime);
-        console.log(`⚡ Calcul terminé en ${elapsed}ms`);
+        const apiCallCount = searchTimes.length + 2; // 1 bus + 1 bike + 1 walk = 3
+        console.log(`⚡ V222 Calcul terminé en ${elapsed}ms (${apiCallCount} appels API au lieu de 10)`);
+        console.log(`💰 Économie API: ${Math.round((1 - apiCallCount/10) * 100)}%`);
 
         // Régénérer le token de session
         if (window.google?.maps?.places) {
@@ -872,7 +872,7 @@ export class ApiManager {
             const dateTime = this._buildDateTime(searchTime);
             if (searchTime.type === 'arriver') {
                 body.arrivalTime = dateTime;
-                console.log(`🎯 V219 API arrivalTime: ${dateTime}`);
+                console.log(`🎯 V222 API arrivalTime: ${dateTime}`);
             } else {
                 body.departureTime = dateTime;
             }
