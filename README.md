@@ -2,16 +2,16 @@
   <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Périmap Logo" width="120" height="120">
 </p>
 
-<h1 align="center"> Périmap</h1>
+<h1 align="center">🚌 Périmap</h1>
 
 <p align="center">
   <strong>L'application moderne et gratuite pour les transports en commun de Périgueux</strong>
 </p>
 
 <p align="center">
-  <a href="https://perimap.fr"> perimap.fr</a> 
-  <a href="https://instagram.com/perimap.fr"> Instagram</a> 
-  <a href="https://facebook.com/perimap.fr"> Facebook</a>
+  <a href="https://perimap.fr">🌐 perimap.fr</a> •
+  <a href="https://instagram.com/perimap.fr">📸 Instagram</a> •
+  <a href="https://facebook.com/perimap.fr">👍 Facebook</a>
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 
 ---
 
-##  Table des matières
+## 📖 Table d des matières
 
 1. [Pourquoi ce projet ?](#-pourquoi-ce-projet-)
 2. [Fonctionnalités actives](#-fonctionnalités-actives)
@@ -37,17 +37,17 @@
 
 ---
 
-##  Pourquoi ce projet ?
+## 💡 Pourquouoi ce projet ?
 
 ### L'origine
 
 Je suis un utilisateur quotidien du réseau **Péribus** à Périgueux. Comme beaucoup, j'utilisais l'application officielle pour planifier mes trajets. Mais je rencontrais régulièrement des **frustrations** :
 
--  Interface peu intuitive et datée
--  Temps de chargement longs
--  Pas de visualisation claire des lignes sur une carte
--  Difficile de savoir où est le bus en temps réel
--  Pas de mode hors-ligne
+- ❌ Inerface peu intuitive et datée
+- ❌ Teps de chargement longs
+- ❌ Pa de visualisation claire des lignes sur une carte
+- ❌ Dfficile de savoir où est le bus en temps réel
+- ❌ Ps de mode hors-ligne
 
 ### La solution
 
@@ -57,19 +57,19 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 
 | Objectif | Statut |
 |----------|--------|
-| Interface moderne et intuitive |  |
-| Carte interactive avec toutes les lignes |  |
-| Position des bus en temps réel (estimée) |  |
-| Calcul d'itinéraire multimodal |  |
-| Fonctionne hors-ligne |  |
-| 100% gratuit, sans pub, sans tracking |  |
-| Open source |  |
+| Interface moderne et intuitive | ✅ |
+| Carte interactive avec toutes les lignes | ✅ |
+| Position des bus en temps réel (estimée) | ✅ |
+| Calcul d'itinéraire multimodal | ✅ i|
+| Fonctionne hors-ligne | ✅  |
+| 100% gratuit, sans pub, sans tracking | ✅ |
+| Open source | ✅- |
 
 ---
 
-##  Fonctionnalités actives
+## ✅ Fonctionnalités actives
 
-###  Carte interactive
+### 🗺️ Cartenal interactive
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -79,7 +79,7 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 | **Mode sombre** | Carte adaptée au thème choisi |
 | **Géolocalisation** | Centrage sur votre position |
 
-###  Bus en temps réel
+### 🚌us en temps réel
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -88,9 +88,9 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 | **Direction affichée** | Flèche indiquant le sens de circulation |
 | **Infos au clic** | Ligne, direction, prochain arrêt |
 
->  Les positions sont **estimées** à partir des horaires théoriques, pas du GPS réel des bus.
+> ⚠️ L positions sont **estimées** à partir des horaires théoriques, pas du GPS réel des bus.
 
-###  Calcul d'itinéraire
+### 🧭alcul d'itinéraire
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -100,7 +100,7 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 | **Détail complet** | Horaires, correspondances, durée de marche |
 | **Tracé sur carte** | Visualisation du trajet complet |
 
-###  Horaires
+### 📅 Haires
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -109,7 +109,7 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 | **Temps réel** | Affichage "dans X min" |
 | **Fiches horaires** | PDF officiels téléchargeables |
 
-###  PWA (Progressive Web App)
+### 📱 P (Progressive Web App)
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -118,7 +118,7 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 | **Rapide** | Données en cache, chargement instantané |
 | **Mises à jour auto** | Toujours la dernière version |
 
-###  Interface
+### Mi🎨 Interface
 
 | Fonctionnalité | Description |
 |----------------|-------------|
@@ -129,75 +129,75 @@ J'ai décidé de créer **Périmap** : une application web moderne, rapide et gr
 
 ---
 
-##  Comment ça fonctionne
+## ⚙️ Comment ça fonctionne
 
-###  Architecture simplifiée
+### Achitecture simplifiée
 
 ```
 
                         UTILISATEUR                               
-                    (navigateur web/PWA)                          
-
-                              
-                              
-
-                      FRONTEND (Vanilla JS)                       
-       
-    Carte          Itinéraire      Horaires                
-    Leaflet.js     UI/UX           GTFS Parser             
-       
-
-                              
-          
-                                                
-  
-  DONNÉES GTFS      API Google        OpenStreetMap          
-  (statiques)       (via Vercel)      (tuiles carte)         
-                                                             
-   stops.txt        Places API       CARTO Dark/Light     
-   routes.txt       Routes API       Leaflet.js           
-   trips.txt        Geocode API                            
-   stop_times                                               
-   calendar        (proxy sécurisé                          
-   shapes           clé cachée)                             
-  
-```
-
+┌─────────────────────────────────────────────────────────────────┐                    (navigateur web/PWA)                          
+││
+│                              │
+└─────────────────────────────┬───────────────────────────────────┘                              
+│
+                      FRONTEND▼ (Vanilla JS)                       
+┌─────────────────────────────────────────────────────────────────┐       
+│    Carte          Itinéraire      Horaires                │
+│  ┌─────────────┐  ┌──────────────┐Le┌─────────────────────────┐a│flet.js     UI/UX           GTFS Parser             
+│  │       ││││     ││
+││││  ││ ││
+│  └─────────────┘  └──────────────┘  └─────────────────────────┘ │                       
+└─────────────────────────────┬───────────────────────────────────┘          
+                              │                  
+  ┌───────────────────┼───────────────────┐
+  DONNÉES ▼GTFS      API Googl▼e        OpenStreet▼Map          
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────────────┐(statiques)       (via Vercel)      (tuiles carte)         
+│                 │ │                 │ │                         │
+│   stops.txt     │ │  Places API     │ │ C  ARTO Dark/Light     │
+│   routes.txt    │ │  Routes API     │ │ Leaflet.js           │
+│  • trips.txt    │ │  • Geocode API  │ │  •                      │ 
+│  • stop_times   │ │  •              │ │  •                      │  
+│  • calendar     │ │  •(proxy sécuris│é│                         │ 
+│  • shapes       │ │   clé cachée)   │ │                         │
+│  •││││ │
+│``•`││││ │
+└─────────────────┘└─────────────────┘└─────────────────────────┘
 ### Flux de données
 
 #### 1 Chargement initial
 ```
-Utilisateur ouvre l'app
+Utilis️⃣ateur ouvre l'app
      Service Worker vérifie le cache
      Charge les données GTFS (bundle JSON optimisé)
-     Construit les index en mémoire
-     Affiche la carte avec les lignes
-```
-
+    → Construit les index en mémoire
+    → Affiche la carte avec les lignes
+```→
+→
 #### 2 Calcul d'itinéraire
 ```
-Utilisateur saisit origine/destination
+Utilis️⃣ateur saisit origine/destination
      Autocomplétion via Google Places API (proxy Vercel)
      Sélection des lieux
-     Recherche des arrêts GTFS proches
-     Algorithme hybride :
-         GTFS local pour les bus
-         Google Routes API pour la marche
-     Affichage des résultats classés
-     Tracé sur la carte
-```
-
+    → Recherche des arrêts GTFS proches
+    → Algorithme hybride :
+    →     GTFS local pour les bus
+    →     Google Routes API pour la marche
+     Aff•ichage des résultats classés
+     Tra•cé sur la carte
+```→
+→
 #### 3 Position des bus
 ```
-Toutes les 5 secondes :
+Toutes️⃣ les 5 secondes :
      Récupère l'heure actuelle
      Pour chaque trip actif :
-         Trouve la position entre 2 arrêts
-         Interpole les coordonnées
-         Calcule l'orientation
-     Anime les marqueurs sur la carte
-```
-
+    →     Trouve la position entre 2 arrêts
+    →     Interpole les coordonnées
+        • Calcule l'orientation
+     Ani•me les marqueurs sur la carte
+```•
+→
 ### Technologies utilisées
 
 | Catégorie | Technologie | Rôle |
@@ -219,76 +219,76 @@ Les clés API Google ne sont **jamais exposées** côté client :
 Client                    Vercel (Serverless)              Google
                                                             
     POST /api/places                                        
-    {query: "Gare"}                                         
-   >                            
-                                   + API Key (env secret)   
-                                 >
-                                                            
-                                   Résultats                
-                                 <
-     Résultats filtrés                                      
-   <                            
-```
-
+  │  {query: "Gare"}             │                            │
+  │ >                            ││
+  │                              │   + API Key (env secret)   │
+  │ ──────────────────────────── │                            │ >
+  │                              │                            │
+  │                              │ ────────────────────────── │ Résultats                
+  │                              │ <│
+  │         Résultats filtrés    │                            │
+  │ <                            │──────────────────────────│
+  │ ```││
+│────────────────────────────││
+---
 ---
 
-##  Architecture technique
+
 
 ### Structure du projet
-
 ```
 perimap/
   public/                    # Application frontend
     index.html               # Page principale (SPA)
-    about.html               # À propos + Admin
-    mentions-legales.html    # Légal
-    style.css                # Styles (~10K lignes)
-    manifest.json            # PWA manifest
-    service-worker.js        # Cache et offline
-   
-     js/                   # JavaScript
-       app.js               # Point d'entrée, init
-       main.js              # Logique principale
-       config.js            # Configuration runtime
-       dataManager.js       # Gestion données GTFS
-       mapRenderer.js       # Carte Leaflet
-       apiManager.js        # APIs Google
-       timeManager.js       # Gestion temps
-       tripScheduler.js     # Positions bus
-       uiManager.js         # UI et thèmes
-       router.js            # Calcul itinéraires
-        workers/          # Web Workers
-        utils/            # Utilitaires
-        ui/               # Composants UI
-   
-     views/                # Templates HTML
-       carte.html
-       horaires.html
-       itineraire.html
-       ...
-   
-     data/                 # Données
-        gtfs/             # Données Péribus
-       map.geojson          # Tracés lignes
-       line-status.json     # État trafic
-   
-     icons/                # Icônes PWA
-
-  api/                      # Serverless Functions (Vercel)
-    places.js                # Proxy Google Places
-    routes.js                # Proxy Google Routes
-    geocode.js               # Proxy Geocoding
-    admin-token.js           # Auth admin
-
-  server/                   #  BACKEND FUTUR (désactivé)
-    ...                      # Voir section "En construction"
-
-  scripts/                  # Scripts utilitaires
-    preprocess-gtfs.mjs      # Prétraitement GTFS
-
- README.md                    # Ce fichier
-```
-
+├── 📁   about.html               # À propos + Admin
+│   ├── mentions-legales.html    # Légal
+│   ├── style.css                # Styles (~10K lignes)
+│   ├── manifest.json            # PWA manifest
+│   ├── service-worker.js        # Cache et offline
+│   ├──
+│   ├──  js/                   # JavaScript
+│   │    app.js               # Point d'entrée, init
+│   ├── 📁   main.js              # Logique principale
+│   │   ├── config.js            # Configuration runtime
+│   │   ├── dataManager.js       # Gestion données GTFS
+│   │   ├── mapRenderer.js       # Carte Leaflet
+│   │   ├── apiManager.js        # APIs Google
+│   │   ├── timeManager.js       # Gestion temps
+│   │   ├── tripScheduler.js     # Positions bus
+│   │   ├── uiManager.js         # UI et thèmes
+│   │   ├── router.js            # Calcul itinéraires
+│   │   ├──  workers/          # Web Workers
+│   │   ├──  utils/            # Utilitaires
+│   │   ├── 📁 ui/               # Composants UI
+│   │├──📁
+│   │  v└──i📁ews/                # Templates HTML
+│   │    carte.html
+│   ├── 📁   horaires.html
+│   │   ├── itineraire.html
+│   │   ├── ...
+│   │├──
+│   │  d└──ata/                 # Données
+│   │     gtfs/             # Données Péribus
+│   ├── 📁   map.geojson          # Tracés lignes
+│   │   ├── 📁line-status.json     # État trafic
+│   │├──
+│   │  i└──cons/                # Icônes PWA
+││
+│  a└──p📁i/                      # Serverless Functions (Vercel)
+│    places.js                # Proxy Google Places
+├── 📁   routes.js                # Proxy Google Routes
+│   ├── geocode.js               # Proxy Geocoding
+│   ├── admin-token.js           # Auth admin
+│├──
+│  s└──erver/                   #  BACKEND FUTUR (désactivé)
+│    ...                      # Voir section "En construction"
+├──📁🔴
+│  s└──cripts/                  # Scripts utilitaires
+│    preprocess-gtfs.mjs      # Prétraitement GTFS
+├──📁
+│ RE└──ADME.md                    # Ce fichier
+│```
+└──
 ### Modules principaux
 
 | Module | Responsabilité |
@@ -301,11 +301,11 @@ perimap/
 | apiManager.js | Appels API Google via proxies |
 
 ---
+---
 
-##  Installation et Développement
 
+## 🛠️ Installation et Développement
 ### Prérequis
-
 - Node.js 18+ (optionnel, pour scripts)
 - Serveur HTTP local (Live Server, Python...)
 - Navigateur moderne
@@ -346,11 +346,11 @@ node scripts/preprocess-gtfs.mjs
 
 ##  En construction
 
-Le dossier server/ contient le code **préparé mais désactivé** pour un futur backend autonome.
-
+Le dossier server/ co
+ntient le code **préparé mais désactivé** pour un futur backend autonome.
 ###  Pourquoi un backend futur ?
 
-| Actuellement | Futur envisagé |
+| Ac🤔tuellement | Futur envisagé |
 |--------------|----------------|
 | API Google (quota gratuit) | Notre propre système |
 | Dépendance externe | Autonomie totale |
@@ -358,31 +358,33 @@ Le dossier server/ contient le code **préparé mais désactivé** pour un futur
 
 ### Ce qui est préparé
 
-```
+``` 📦
 server/
   core/
      pathfinding/          #  Calcul d'itinéraires
-       raptor.js            # Algorithme RAPTOR (référence mondiale)
-       astar.js             # A* pour la marche
-       graph.js             # Graphe de transport
-   
-     places/               #  Autocomplétion maison
-       trie.js              # Structure Trie (recherche O(m))
-       fuzzy.js             # Recherche floue (fautes de frappe)
-       indexer.js           # Indexation arrêts + POI
-   
-     memory/               #  Mémoire utilisateur
-        store.js             # Interface stockage
-        sqlite.js            # Adaptateur SQLite
-        postgres.js          # Adaptateur PostgreSQL
-
-  api/                      # Routes REST
-  middleware/               # Auth, CORS, Rate limiting
-  utils/                    # Utilitaires
- README.md                    # Documentation détaillée
+├── 📁      raptor.js            # Algorithme RAPTOR (référence mondiale)
+│   ├── 📁   astar.js             #🗺️ A* pour la marche
+│   │   ├── graph.js             # Graphe de transport
+│   │├──
+│   │  p└──laces/               #  Autocomplétion maison
+│   │    trie.js              # Structure Trie (recherche O(m))
+│   ├── 📁   fuzzy.js             #📍 Recherche floue (fautes de frappe)
+│   │   ├── indexer.js           # Indexation arrêts + POI
+│   │├──
+│   │  m└──emory/               #  Mémoire utilisateur
+│   │     store.js             # Interface stockage
+│   └── 📁    sqlite.js            💾# Adaptateur SQLite
+│       ├── postgres.js          # Adaptateur PostgreSQL
+│├──
+│  api/ └──                     # Routes REST
+│  middleware/               # Auth, CORS, Rate limiting
+├── 📁 utils/                    # Utilitaires
+├── 📁README.md                    # Documentation détaillée
+├──`📁``
+└── README.md                    # Documentation détaillée
 ```
-
 ###  Pourquoi c'est désactivé ?
+### ❓ Pourquoi c'est désactivé ?
 
 | Raison | Explication |
 |--------|-------------|
@@ -390,7 +392,7 @@ server/
 | **Google fonctionne** | Le système actuel est gratuit et fiable |
 | **Priorité** | Focus sur les fonctionnalités utilisateur d'abord |
 
-###  Comment l'activer (futur)
+### 🔧 Comment l'activer (futur)
 
 ```bash
 cd server
@@ -402,9 +404,9 @@ npm start             # Démarrer le serveur
 
 ---
 
-##  Roadmap
+## 🗺️ Roadmap
 
-###  Fait
+### ✅ Fait
 
 - [x] Carte interactive avec toutes les lignes
 - [x] Position des bus en temps réel (estimée)
@@ -416,18 +418,18 @@ npm start             # Démarrer le serveur
 - [x] Page info trafic
 - [x] Page tarifs
 
-###  En cours
+### 🔄 En cours
 
 - [ ] Amélioration de la précision des positions bus
 - [ ] Optimisation du calcul d'itinéraire
 
-###  Prévu (court terme)
+### 📋 Prévu (court terme)
 
 - [ ] Notifications de perturbations
 - [ ] Widget "prochain bus" sur l'écran d'accueil
 - [ ] Partage d'itinéraire
 
-###  Prévu (long terme)
+### 🔮 Prévu (long terme)
 
 - [ ] Backend autonome (RAPTOR + autocomplétion maison)
 - [ ] Comptes utilisateur (favoris, historique)
@@ -435,9 +437,7 @@ npm start             # Démarrer le serveur
 - [ ] API temps réel officielle (si Péribus la fournit)
 
 ---
-
-##  Identité visuelle
-
+## 🎨 Identité visuelle
 ### Couleurs officielles
 
 | Couleur | Code | Usage |
