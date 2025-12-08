@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * astar.js
  * Implémentation de l'algorithme A* pour le calcul de chemins piétons
@@ -357,3 +361,4 @@ export class AStarAlgorithm {
 }
 
 export default AStarAlgorithm;
+

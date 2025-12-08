@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * core/places/index.js
  * Export principal du module d'autocomplétion de lieux
@@ -300,3 +304,4 @@ export { FuzzySearcher, fuzzyMatch, fuzzySearch, normalizeText } from './fuzzy.j
 export { PlacesIndexer } from './indexer.js';
 
 export default PlacesEngine;
+

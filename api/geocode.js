@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 export default async function handler(req, res) {
     const apiKey = process.env.GMAPS_SERVER_KEY;
     if (!apiKey) {
@@ -31,3 +35,4 @@ export default async function handler(req, res) {
         res.status(502).json({ error: 'Geocode proxy error', details: error.message });
     }
 }
+

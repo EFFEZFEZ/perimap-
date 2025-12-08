@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 const WORKER_MODULE_PATH = './workers/routerWorker.js';
 
 export class RouterWorkerClient {
@@ -127,3 +131,4 @@ function serializeWorkerIcons(icons) {
     });
     return safeIcons;
 }
+

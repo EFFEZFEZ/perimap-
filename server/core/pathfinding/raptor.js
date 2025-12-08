@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * raptor.js
  * Implémentation de l'algorithme RAPTOR (Round-Based Public Transit Routing)
@@ -398,3 +402,4 @@ export class RaptorAlgorithm {
 }
 
 export default RaptorAlgorithm;
+

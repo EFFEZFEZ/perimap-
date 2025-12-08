@@ -1,4 +1,8 @@
-﻿const GTFS_TRIPS_CACHE_TTL_MS = 120 * 1000; // 120s cache (augmenté pour performance)
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
+const GTFS_TRIPS_CACHE_TTL_MS = 120 * 1000; // 120s cache (augmenté pour performance)
 
 export const HYBRID_ROUTING_CONFIG = Object.freeze({
     STOP_SEARCH_RADIUS_M: 500,         // Réduit de 600 à 500 pour accélérer
@@ -1357,4 +1361,5 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
 
     return itineraries;
 }
+
 

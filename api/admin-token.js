@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * API Vercel Serverless pour récupérer le token admin
  * Route: /api/admin-token
@@ -34,3 +38,4 @@ export default function handler(req, res) {
 
   return res.status(200).json({ token });
 }
+

@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * timeManager.js
  * * Gère le temps réel ou simulé pour l'affichage des bus en circulation
@@ -205,3 +209,4 @@ export class TimeManager {
         return this.mode === 'simulated';
     }
 }
+

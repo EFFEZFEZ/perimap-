@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * api/places.js
  * API d'autocomplétion de lieux
@@ -195,3 +199,4 @@ export default router;
 // Placeholder
 const router = {};
 export default router;
+

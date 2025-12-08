@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * tripScheduler.js
  * * * CORRIGÉ (V15 - Logique Stricte)
@@ -170,3 +174,4 @@ export class TripScheduler {
         return stopInfo ? stopInfo.stop_name : lastStop.stop_id;
     }
 }
+

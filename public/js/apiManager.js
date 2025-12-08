@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * apiManager.js - VERSION V222 (1 seul appel bus = économie maximale)
  * Gère tous les appels aux API externes (Google Places & Google Routes).
@@ -1114,3 +1118,4 @@ export class ApiManager {
         return `Google Maps API a refusé le referer ${target}. Ajoutez cette URL dans les restrictions HTTP de votre clé Google Cloud.`;
     }
 }
+

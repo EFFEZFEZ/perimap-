@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * ranking.js - VERSION V223
  * Logique de déduplication, tri et filtrage pour les itinéraires.
@@ -377,3 +381,4 @@ export function rankDepartureItineraries(itineraries) {
 
   return scored.map(x => x.it);
 }
+

@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -210,3 +214,4 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
         getUserPlaceId
     };
 }
+

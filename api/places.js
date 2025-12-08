@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * Proxy API pour Google Places Autocomplete (NEW API)
  * Masque la clé API côté serveur (Vercel Edge Function)
@@ -151,3 +155,4 @@ export default async function handler(req, res) {
         res.status(502).json({ error: 'Places proxy error', details: error.message });
     }
 }
+

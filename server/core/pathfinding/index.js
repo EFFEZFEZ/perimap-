@@ -1,3 +1,7 @@
+﻿/*
+ * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ */
 /**
  * core/pathfinding/index.js
  * Export principal du module de pathfinding
@@ -350,3 +354,4 @@ export { AStarAlgorithm } from './astar.js';
 export { TransportGraph } from './graph.js';
 
 export default PathfindingEngine;
+
