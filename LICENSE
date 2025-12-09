@@ -1,24 +1,71 @@
-MIT License with Copyright Notice
+================================================================================
+                       PÉRIMAP - PROPRIETARY LICENSE
+================================================================================
 
-Copyright (c) 2025 Périmap
+Copyright (c) 2025 Périmap. Tous droits réservés.
 
-IMPORTANT: Ce projet contient des restrictions de droit d'auteur.
-Voir le fichier COPYRIGHT pour les conditions d'utilisation complètes.
+================================================================================
+                          RESTRICTIONS D'UTILISATION
+================================================================================
 
----
+Ce logiciel et le code source associé sont la propriété exclusive de Périmap.
+Tous les droits sont réservés.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software subject to the restrictions set forth in the COPYRIGHT file,
-including but not limited to:
+SANS AUTORISATION ÉCRITE PRÉALABLE DE L'AUTEUR :
 
-- Copying is PROHIBITED
-- Distribution is PROHIBITED  
-- Modification is PROHIBITED
-- Commercial use is PROHIBITED
+❌ COPIE INTERDITE
+   Vous ne pouvez pas copier, reproduire ou dupliquer ce code source,
+   en tout ou en partie, sous quelque forme que ce soit.
 
-The Software is provided "as is", without warranty of any kind, express or implied.
+❌ DISTRIBUTION INTERDITE
+   Vous ne pouvez pas distribuer, partager, transmettre, publier ou
+   rendre accessible ce code à des tiers.
 
----
+❌ MODIFICATION INTERDITE
+   Vous ne pouvez pas modifier, adapter, traduire, créer des œuvres
+   dérivées ou effectuer du reverse engineering de ce logiciel.
 
-For any authorization request, please contact the author directly.
+❌ USAGE COMMERCIAL INTERDIT
+   Toute utilisation commerciale, y compris mais sans s'y limiter :
+   - Vente du logiciel ou de services basés sur celui-ci
+   - Utilisation dans un produit commercial
+   - Intégration dans une solution payante
+   est strictement interdite sans licence commerciale.
+
+================================================================================
+                            EXCEPTION LIMITÉE
+================================================================================
+
+CONSULTATION AUTORISÉE :
+Le code peut être consulté et lu à titre informatif et éducatif uniquement,
+sans aucune modification, copie ou redistribution.
+
+================================================================================
+                        GARANTIE ET RESPONSABILITÉ
+================================================================================
+
+CE LOGICIEL EST FOURNI "TEL QUEL", SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU
+IMPLICITE, Y COMPRIS MAIS SANS S'Y LIMITER LES GARANTIES DE QUALITÉ MARCHANDE,
+D'ADÉQUATION À UN USAGE PARTICULIER ET D'ABSENCE DE CONTREFAÇON.
+
+EN AUCUN CAS L'AUTEUR NE POURRA ÊTRE TENU RESPONSABLE DE TOUT DOMMAGE DIRECT,
+INDIRECT, ACCESSOIRE, SPÉCIAL, EXEMPLAIRE OU CONSÉCUTIF.
+
+================================================================================
+                          DEMANDES D'AUTORISATION
+================================================================================
+
+Pour toute demande d'autorisation concernant :
+- Utilisation commerciale
+- Adaptation ou modification
+- Redistribution
+- Intégration dans un projet
+
+Veuillez contacter l'auteur via le dépôt GitHub du projet.
+
+================================================================================
+
+Ce document constitue l'accord de licence complet entre vous et Périmap
+concernant l'utilisation de ce logiciel.
+
+================================================================================

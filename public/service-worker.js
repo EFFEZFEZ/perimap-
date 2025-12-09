@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v224'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V224: Suppression crowdsourcing
+const CACHE_VERSION = 'v225'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V225: Mise à jour copyright + licence propriétaire
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

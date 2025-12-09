@@ -15,10 +15,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.25.0-22c55e?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-3.26.0-22c55e?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/PWA-Ready-00c8ff?style=flat-square" alt="PWA">
   <img src="https://img.shields.io/badge/GTFS-Péribus-orange?style=flat-square" alt="GTFS">
-  <img src="https://img.shields.io/badge/license-MIT-gray?style=flat-square" alt="License">
+  <img src="https://img.shields.io/badge/license-Proprietary-red?style=flat-square" alt="License">
 </p>
 
 ---
@@ -492,9 +492,25 @@ Ouvrez une issue avec :
 
 ---
 
-##  Licence
+## 📜 Droits d'auteur et Licence
 
-Ce projet est sous licence **MIT**. Voir le fichier LICENSE pour plus de détails.
+**Copyright © 2025 Périmap. Tous droits réservés.**
+
+Ce code source et tous les fichiers associés sont protégés par les lois sur le droit d'auteur.
+
+### ⚠️ Restrictions d'utilisation
+
+Sans autorisation écrite préalable de l'auteur :
+- ❌ **Copie interdite** : Vous ne pouvez pas copier ce code
+- ❌ **Distribution interdite** : Vous ne pouvez pas le partager ou le redistribuer
+- ❌ **Modification interdite** : Vous ne pouvez pas le modifier ou l'adapter
+- ❌ **Usage commercial interdit** : Toute utilisation commerciale est interdite
+
+**Exception** : Consultation à titre informatif uniquement.
+
+Pour toute demande d'autorisation, veuillez contacter l'auteur.
+
+Voir les fichiers `COPYRIGHT` et `LICENSE` pour les détails complets.
 
 ---
 
@@ -508,10 +524,14 @@ Ce projet est sous licence **MIT**. Voir le fichier LICENSE pour plus de détail
 ---
 
 <p align="center">
-  <strong>Fait avec  à Périgueux</strong>
+  <strong>Fait avec ❤️ à Périgueux</strong>
 </p>
 
 <p align="center">
   <a href="https://perimap.fr">perimap.fr</a>
+</p>
+
+<p align="center">
+  <strong>Copyright © 2025 Périmap. Tous droits réservés.</strong>
 </p>
 
