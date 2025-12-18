@@ -6380,7 +6380,7 @@ body.dark-theme .next-departures-label {
         background: var(--bg-main);
         border-radius: 24px 24px 0 0;
         box-shadow: 0 -25px 60px rgba(15, 23, 42, 0.45);
-        height: var(--sheet-height, 40vh);
+        height: var(--sheet-height, 50vh);
         padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
         transform: translateY(100%);
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.25s ease;
@@ -6414,17 +6414,7 @@ body.dark-theme .next-departures-label {
     }
 
     #detail-bottom-sheet .panel-handle {
-        display: block;
-        width: 48px;
-        height: 5px;
-        border-radius: 999px;
-        background: var(--border);
-        margin: 12px auto 8px;
-        cursor: grab;
-        touch-action: none;
-        /* V60: Zone de touch plus grande */
-        padding: 12px 40px;
-        background-clip: content-box;
+        display: none;
     }
     #detail-bottom-sheet.is-dragging .panel-handle {
         cursor: grabbing;
@@ -6505,9 +6495,10 @@ body.dark-theme .next-departures-label {
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         touch-action: none; /* Bloque le touch scroll par défaut */
-        padding-top: 0.5rem;
+        padding-top: 0;
         position: relative;
         background: var(--bg-main);
+        box-sizing: border-box;
     }
     
     /* Uniquement quand le sheet est expanded : permettre le scroll */
@@ -6546,7 +6537,8 @@ body.dark-theme .next-departures-label {
     }
 
     #detail-panel-content {
-        padding: 0.75rem 1rem 4rem 1rem;
+        padding: 0.5rem 0.75rem 4rem 0.75rem;
+        box-sizing: border-box;
     }
 
     /* Header keeps its translucent gradient regardless of sheet state */
@@ -6558,8 +6550,8 @@ body.dark-theme .next-departures-label {
 #detail-panel-content .step-detail {
     display: flex;
     position: relative;
-    padding-left: 3rem; /* MODIFIÉ: 2.5rem -> 3rem (plus d'espace) */
-    padding-bottom: 1.5rem;
+    padding-left: 2.5rem; /* Réduit de 3rem pour économiser l'espace vertical */
+    padding-bottom: 1.25rem; /* Réduit de 1.5rem */
     min-height: 40px;
     /* variable --line-color définie inline par JS */
 }
@@ -6573,7 +6565,7 @@ body.dark-theme .next-departures-label {
     position: absolute;
     left: 15px;
     top: 0;
-    bottom: -1.5rem; /* ⬅️ Correspond au padding-bottom de .step-detail */
+    bottom: -1.25rem; /* ⬅️ Correspond au padding-bottom réduit de .step-detail */
     width: 4px;
     background: var(--line-color, var(--border));
 }
@@ -6657,6 +6649,9 @@ body.dark-theme .next-departures-label {
         display: flex;
         flex-direction: column;
         padding-top: 4px; /* Aligner avec l'icône */
+        min-width: 0; /* Important pour le flex wrapping */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     #detail-panel-content .step-instruction {
@@ -6664,6 +6659,9 @@ body.dark-theme .next-departures-label {
         font-weight: 600;
         color: var(--text-primary);
         line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
     }
 
     #detail-panel-content .step-detail.wait .wait-info {
@@ -9552,25 +9550,9 @@ body.dark-theme .tarifs-choice {
         -webkit-overflow-scrolling: touch;
     }
     
-    /* Handle Apple-style */
+    /* Handle Apple-style - MASQUÉ */
     #detail-bottom-sheet .panel-handle {
-        width: 36px;
-        height: 5px;
-        border-radius: 3px;
-        background: rgba(0, 0, 0, 0.2);
-        margin: 8px auto 4px;
-        padding: 10px 30px;
-        background-clip: content-box;
-        cursor: grab;
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-    
-    #detail-bottom-sheet .panel-handle:active,
-    #detail-bottom-sheet.is-dragging .panel-handle {
-        background: rgba(0, 0, 0, 0.35);
-        background-clip: content-box;
-        cursor: grabbing;
-        transform: scaleX(1.2);
+        display: none;
     }
     
     /* Pendant le drag - pas de transition */

@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v225'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V225: Mise à jour copyright + licence propriétaire
+const CACHE_VERSION = 'v226'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V226: Correction overflow horizontal bottom sheet mobile
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

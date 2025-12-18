@@ -98,7 +98,7 @@ let loadMoreOffset = 0; // Décalage en minutes pour charger plus
 
 let geolocationManager = null;
 
-const BOTTOM_SHEET_LEVELS = [0.4, 0.8]; // Seulement 2 niveaux: peek (40%) et expanded (80%)
+const BOTTOM_SHEET_LEVELS = [0.4, 0.9]; // Seulement 2 niveaux: peek (40%) et expanded (90%)
 import { getAppConfig } from './config.js';
 import { deduplicateItineraries, rankArrivalItineraries, rankDepartureItineraries, filterExpiredDepartures, filterLateArrivals, limitBikeWalkItineraries, countBusItineraries, getMinBusItineraries } from './itinerary/ranking.js';
 import { normalizeStopNameForLookup, resolveStopCoordinates } from './utils/geo.js';
