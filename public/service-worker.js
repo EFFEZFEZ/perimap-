@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v235'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V235: auto-update SW + assets SWR (JS/CSS/HTML)
+const CACHE_VERSION = 'v236'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V236: fix app.js update + assets SWR (JS/CSS/HTML)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -132,10 +132,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Cache-First pour assets statiques (JS, CSS, HTML)
-  if (url.origin === self.location.origin && 
+  // Stale-While-Revalidate pour assets statiques (JS, CSS, HTML)
+  // Objectif: éviter un site "figé" entre deux versions.
+  if (url.origin === self.location.origin &&
       (request.url.endsWith('.js') || request.url.endsWith('.css') || request.url.endsWith('.html'))) {
-    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
     return;
   }
   

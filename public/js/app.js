@@ -74,7 +74,6 @@ async function registerServiceWorker() {
 /**
  * Affiche une notification discrète pour informer de la mise à jour
  */
-function showUpdateNotification() {
 function showUpdateNotification(registration) {
     // Évite les doublons
     if (document.getElementById('update-banner')) return;
