@@ -319,6 +319,14 @@ body.dark-theme .card, body.dark-theme .instruction-content, body.dark-theme .le
     background: rgba(8,12,18,0.6);
     border-color: rgba(255,255,255,0.04);
 }
+
+/* V229: Popup arrêts complètement opaque en dark mode */
+body.dark-theme .stop-schedule-popup .leaflet-popup-content-wrapper {
+    background: #0f172a !important;
+}
+body.dark-theme .stop-schedule-popup .leaflet-popup-tip {
+    background: #0f172a !important;
+}
 body.dark-theme .btn, body.dark-theme .btn-icon-round {
     background: rgba(255,255,255,0.02);
     color: var(--text-primary);
@@ -4727,14 +4735,14 @@ body.dark-theme .install-tip-steps section {
  * POPUP ARRÊT V105 - Style SNCF Connect
  * ========================================= */
 .stop-schedule-popup .leaflet-popup-content-wrapper {
-    background: var(--bg-primary) !important;
+    background: #ffffff !important;
     border-radius: var(--radius-lg) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
     border: 1px solid var(--border) !important;
     overflow: hidden;
 }
 .stop-schedule-popup .leaflet-popup-tip {
-    background: var(--bg-primary) !important;
+    background: #ffffff !important;
     border: 1px solid var(--border) !important;
     border-top: none !important;
     border-left: none !important;
