@@ -4,10 +4,11 @@
  */
 export default async function handler(req, res) {
     // CORS headers (optionnellement restreints via ALLOWED_ORIGINS)
-    const origin = req.headers?.origin;
+    const normalizeOrigin = (value) => (typeof value === 'string' ? value.trim().replace(/\/+$/, '') : '');
+    const origin = normalizeOrigin(req.headers?.origin);
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
         .split(',')
-        .map((value) => value.trim())
+        .map(normalizeOrigin)
         .filter(Boolean);
     const originAllowed = !origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin);
 
