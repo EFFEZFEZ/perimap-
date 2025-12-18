@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v245'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V245: JSON-LD + breadcrumbs sur pages SEO
+const CACHE_VERSION = 'v246'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V246: fix terminus destination + new stopName helper
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -59,6 +59,7 @@ const SECONDARY_ASSETS = [
   '/js/config/routes.js',
   '/js/utils/formatters.js',
   '/js/utils/geo.js',
+  '/js/utils/stopName.mjs',
   '/js/utils/polyline.js',
   '/js/utils/gtfsProcessor.js',
   '/js/itinerary/ranking.js',

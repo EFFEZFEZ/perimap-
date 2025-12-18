@@ -30,6 +30,8 @@
  * 5. Ajout de `panToUserLocation()` pour centrer la carte.
  */
 
+import { normalizeStopNameForComparison, shouldHideDestinationAtStop } from './utils/stopName.mjs';
+
 const LIGHT_TILE_CONFIG = Object.freeze({
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     options: {
@@ -438,9 +440,10 @@ export class MapRenderer {
             const nextStopName = bus.segment?.toStopInfo?.stop_name || 'Inconnu';
             const nextStopETA = tripScheduler.getNextStopETA(bus.segment, bus.currentSeconds);
 
-            const stateText = `En Ligne (vers ${destination})`;
-            const nextStopText = nextStopName;
             const etaText = nextStopETA ? nextStopETA.formatted : '...';
+            const isAtTerminus = etaText === 'Terminus' || shouldHideDestinationAtStop(nextStopName, destination);
+            const stateText = isAtTerminus ? 'Terminus' : `En Ligne (vers ${destination})`;
+            const nextStopText = nextStopName;
 
             // Sélectionne les éléments à mettre à jour
             const headerEl = domElement.querySelector('.info-popup-header');
@@ -741,13 +744,13 @@ export class MapRenderer {
                 };
             }
             
-            // ✅ V229: Filtrer les destinations qui correspondent au nom de l'arrêt (terminus)
-            // On compare en minuscules et on retire "terminus" pour la comparaison
-            const stopNameNormalized = masterStop.stop_name.toLowerCase().replace(/terminus\s*/gi, '').trim();
-            const destNameNormalized = line.destination.toLowerCase().replace(/terminus\s*/gi, '').trim();
-            
+            // ✅ V229+: Filtrer les destinations qui correspondent au nom de l'arrêt (terminus)
+            // Normalisation robuste: accents, parenthèses, tirets, "TERMINUS", etc.
+            const stopNameNormalized = normalizeStopNameForComparison(masterStop.stop_name);
+            const destNameNormalized = normalizeStopNameForComparison(line.destination);
+
             // Ne pas ajouter si c'est une arrivée au terminus (destination = arrêt actuel)
-            if (destNameNormalized !== stopNameNormalized) {
+            if (destNameNormalized && stopNameNormalized && destNameNormalized !== stopNameNormalized) {
                 lineGroups[routeName].destinations.push({
                     destination: line.destination,
                     departures: line.departures,
