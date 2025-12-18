@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v238'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V238: bump pour forcer la prise en compte du fix CSS autocomplete
+const CACHE_VERSION = 'v239'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V239: autocomplete z-index au-dessus du planner
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

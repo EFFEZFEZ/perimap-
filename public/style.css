@@ -5613,7 +5613,8 @@ body.dark-theme .real-select option {
     border-top: none;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: var(--elevation-2);
-    z-index: var(--z-dropdown);
+    /* Doit passer AU-DESSUS des contrôles du planner (popover/when button) */
+    z-index: var(--z-popover) !important;
     max-height: 250px;
     overflow-y: auto;
     display: none;
