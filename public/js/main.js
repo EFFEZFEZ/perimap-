@@ -3629,6 +3629,10 @@ function renderItineraryDetailHTML(itinerary) {
             const departureTimeLabel = getSafeTimeLabel(step.departureTime);
             const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
             
+            // ✅ V227: Déterminer si c'est un terminus - basé sur le nom de l'arrêt
+            const isTerminusArrival = arrivalStopLabel?.toLowerCase().includes('terminus') || arrivalStopLabel?.toLowerCase().includes('gare');
+            const arrivalLabel = isTerminusArrival ? 'Arrivée au terminus' : 'Descente à';
+            
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
                     <div class="step-icon">
@@ -3637,8 +3641,9 @@ function renderItineraryDetailHTML(itinerary) {
                     <div class="step-info">
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
-                        <div class="step-stop-point">
-                            <span class="step-time">Montée à <strong>${departureStopLabel}</strong></span>
+                        <div class="step-stop-point stop-context">
+                            <span class="stop-label">Montée</span>
+                            <span class="step-time"><strong>${departureStopLabel}</strong></span>
                             <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
                         
@@ -3659,9 +3664,10 @@ function renderItineraryDetailHTML(itinerary) {
                         </details>
                         ` : ''}
                         
-                        <div class="step-stop-point">
-                            <span class="step-time">Descente à <strong>${arrivalStopLabel}</strong></span>
-                            <span class="step-time-detail">(${arrivalTimeLabel})</span>
+                        <div class="step-stop-point stop-context ${isTerminusArrival ? 'is-terminus' : ''}">
+                            <span class="stop-label">${arrivalLabel}</span>
+                            <span class="step-time"><strong>${arrivalStopLabel}</strong></span>
+                            ${!isTerminusArrival ? `<span class="step-time-detail">(${arrivalTimeLabel})</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -3761,6 +3767,10 @@ function renderItineraryDetail(itinerary) {
             const departureTimeLabel = getSafeTimeLabel(step.departureTime);
             const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
 
+            // ✅ V227: Déterminer si c'est un terminus - basé sur le nom de l'arrêt
+            const isTerminusArrival = arrivalStopLabel?.toLowerCase().includes('terminus') || arrivalStopLabel?.toLowerCase().includes('gare');
+            const arrivalLabel = isTerminusArrival ? 'Arrivée au terminus' : 'Descente à';
+
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
                     <div class="step-icon">
@@ -3769,8 +3779,9 @@ function renderItineraryDetail(itinerary) {
                     <div class="step-info">
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
-                        <div class="step-stop-point">
-                            <span class="step-time">Montée à <strong>${departureStopLabel}</strong></span>
+                        <div class="step-stop-point stop-context">
+                            <span class="stop-label">Montée</span>
+                            <span class="step-time"><strong>${departureStopLabel}</strong></span>
                             <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
                         
@@ -3791,9 +3802,10 @@ function renderItineraryDetail(itinerary) {
                         </details>
                         ` : ''}
                         
-                        <div class="step-stop-point">
-                            <span class="step-time">Descente à <strong>${arrivalStopLabel}</strong></span>
-                            <span class="step-time-detail">(${arrivalTimeLabel})</span>
+                        <div class="step-stop-point stop-context ${isTerminusArrival ? 'is-terminus' : ''}">
+                            <span class="stop-label">${arrivalLabel}</span>
+                            <span class="step-time"><strong>${arrivalStopLabel}</strong></span>
+                            ${!isTerminusArrival ? `<span class="step-time-detail">(${arrivalTimeLabel})</span>` : ''}
                         </div>
                     </div>
                 </div>

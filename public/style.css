@@ -6497,7 +6497,6 @@ body.dark-theme .next-departures-label {
         touch-action: none; /* Bloque le touch scroll par défaut */
         padding-top: 0;
         position: relative;
-        background: var(--bg-main);
         box-sizing: border-box;
     }
     
@@ -6539,6 +6538,7 @@ body.dark-theme .next-departures-label {
     #detail-panel-content {
         padding: 0.5rem 0.75rem 4rem 0.75rem;
         box-sizing: border-box;
+        background: var(--bg-main);
     }
 
     /* Header keeps its translucent gradient regardless of sheet state */
@@ -6708,6 +6708,36 @@ body.dark-theme .next-departures-label {
         color: var(--text-secondary);
         margin-left: 0.5rem;
         font-weight: 500;
+    }
+    
+    /* V227: Labels contexte pour Montée/Descente/Terminus */
+    #detail-panel-content .stop-context {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.5rem;
+        align-items: baseline;
+    }
+    #detail-panel-content .stop-context .stop-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        opacity: 0.8;
+        white-space: nowrap;
+    }
+    #detail-panel-content .stop-context .step-time {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    #detail-panel-content .stop-context.is-terminus .stop-label {
+        color: var(--primary);
+        opacity: 1;
+        font-weight: 800;
+    }
+    #detail-panel-content .stop-context.is-terminus .step-time {
+        color: var(--primary);
     }
     
     /* Arrêts intermédiaires */
