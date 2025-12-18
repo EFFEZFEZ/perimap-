@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v244'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V244: pages SEO (horaires/ligne/itineraire/trafic/carte)
+const CACHE_VERSION = 'v245'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V245: JSON-LD + breadcrumbs sur pages SEO
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
