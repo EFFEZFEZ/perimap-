@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v236'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V236: fix app.js update + assets SWR (JS/CSS/HTML)
+const CACHE_VERSION = 'v237'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V237: bump pour forcer la prise en compte du dernier SW
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
