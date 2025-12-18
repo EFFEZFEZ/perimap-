@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v242'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V242: SEO dynamique (title/meta) selon la vue
+const CACHE_VERSION = 'v243'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V243: domaine canonique périmap.fr (xn--primap-bva.fr)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

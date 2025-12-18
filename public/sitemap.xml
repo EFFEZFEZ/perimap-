@@ -7,7 +7,7 @@
     
     <!-- Page d'accueil - Priorité maximale -->
     <url>
-        <loc>https://perimap.app/</loc>
+        <loc>https://www.xn--primap-bva.fr/</loc>
         <lastmod>2025-12-18</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
@@ -16,7 +16,7 @@
     
     <!-- À propos -->
     <url>
-        <loc>https://perimap.app/about.html</loc>
+        <loc>https://www.xn--primap-bva.fr/about.html</loc>
         <lastmod>2025-12-18</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
@@ -25,7 +25,7 @@
     
     <!-- Mentions légales (obligatoire droit français) -->
     <url>
-        <loc>https://perimap.app/mentions-legales.html</loc>
+        <loc>https://www.xn--primap-bva.fr/mentions-legales.html</loc>
         <lastmod>2025-12-18</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.4</priority>
@@ -34,7 +34,7 @@
     
     <!-- Plan réseau PDF -->
     <url>
-        <loc>https://perimap.app/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf</loc>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf</loc>
         <lastmod>2025-09-01</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>

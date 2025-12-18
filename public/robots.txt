@@ -1,5 +1,5 @@
 # PériMap - robots.txt
-# https://perimap.app/
+# https://www.xn--primap-bva.fr/
 
 User-agent: *
 Allow: /
@@ -22,7 +22,7 @@ Disallow: /data/gtfs/
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://perimap.app/sitemap.xml
+Sitemap: https://www.xn--primap-bva.fr/sitemap.xml
 
 # Google specifique
 User-agent: Googlebot
