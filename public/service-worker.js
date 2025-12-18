@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v232'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V232: Refonte UX/UI complète - Accessibilité WCAG, hiérarchie visuelle, labels conversationnels, states positifs
+const CACHE_VERSION = 'v234'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V234: pages statiques alignées (nav/actions) + cache mentions légales
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -23,6 +23,7 @@ const CRITICAL_ASSETS = [
   '/',
   '/index.html',
   '/about.html',
+  '/mentions-legales.html',
   '/style.css',
   '/js/app.js',
   '/manifest.json',

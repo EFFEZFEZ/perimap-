@@ -934,6 +934,10 @@ function setupStaticEventListeners() {
         const hash = window.location.hash.replace('#', '');
         if (hash) {
             switch(hash) {
+                case 'itineraire':
+                    // Ouvrir la vue itinéraire (sans recherche préalable)
+                    showResultsView();
+                    break;
                 case 'horaires':
                     showDashboardView('horaires');
                     break;
@@ -947,6 +951,15 @@ function setupStaticEventListeners() {
                 case 'tarifs':
                 case 'tarifs-grille':
                     showTarifsView('tarifs-grille');
+                    break;
+                case 'tarifs-achat':
+                    showTarifsView('tarifs-achat');
+                    break;
+                case 'tarifs-billettique':
+                    showTarifsView('tarifs-billettique');
+                    break;
+                case 'tarifs-amendes':
+                    showTarifsView('tarifs-amendes');
                     break;
             }
             // Nettoyer le hash après navigation
