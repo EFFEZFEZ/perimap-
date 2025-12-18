@@ -5,6 +5,127 @@
 import { loadBaseLayout } from './viewLoader.js';
 import { bootstrapApp } from './main.js';
 
+function setMetaContent(selector, content) {
+    if (!content) return;
+    const el = document.querySelector(selector);
+    if (el) {
+        el.setAttribute('content', content);
+        return;
+    }
+    // Create missing meta tags when needed (keeps SEO consistent even if tags evolve)
+    const meta = document.createElement('meta');
+    if (selector.startsWith('meta[name="')) {
+        const name = selector.slice('meta[name="'.length, -2);
+        meta.setAttribute('name', name);
+    } else if (selector.startsWith('meta[property="')) {
+        const property = selector.slice('meta[property="'.length, -2);
+        meta.setAttribute('property', property);
+    } else {
+        return;
+    }
+    meta.setAttribute('content', content);
+    document.head.appendChild(meta);
+}
+
+function applySeo({ title, description }) {
+    if (title) document.title = title;
+    if (description) setMetaContent('meta[name="description"]', description);
+
+    // Social previews
+    if (title) {
+        setMetaContent('meta[property="og:title"]', title);
+        setMetaContent('meta[name="twitter:title"]', title);
+    }
+    if (description) {
+        setMetaContent('meta[property="og:description"]', description);
+        setMetaContent('meta[name="twitter:description"]', description);
+    }
+}
+
+function getHashRouteAndParams() {
+    const raw = (window.location.hash || '').replace(/^#/, '').trim();
+    if (!raw) return { route: '', params: new URLSearchParams() };
+
+    const qIndex = raw.indexOf('?');
+    if (qIndex === -1) {
+        return { route: raw, params: new URLSearchParams() };
+    }
+    const route = raw.slice(0, qIndex);
+    const query = raw.slice(qIndex + 1);
+    return { route, params: new URLSearchParams(query) };
+}
+
+function configureDynamicSeo() {
+    const BRAND = 'PériMap';
+
+    const updateFromHash = () => {
+        const { route, params } = getHashRouteAndParams();
+        const normalized = (route || '').toLowerCase();
+
+        const lineParam = (params.get('ligne') || params.get('line') || params.get('route') || '').trim();
+        const lineLabel = lineParam ? lineParam.toUpperCase() : '';
+
+        // Default (home)
+        if (!normalized) {
+            applySeo({
+                title: `Péribus - Horaires & Itinéraires Bus Périgueux | ${BRAND}`,
+                description: `Horaires Péribus en temps réel, itinéraires (trajets), carte du réseau et infos voyageurs à Périgueux. ${BRAND} : application gratuite.`
+            });
+            return;
+        }
+
+        if (normalized === 'horaires') {
+            applySeo({
+                title: lineLabel
+                    ? `${BRAND} — Horaires ligne ${lineLabel} Péribus`
+                    : `${BRAND} — Liste des lignes Péribus`,
+                description: lineLabel
+                    ? `Consultez les horaires de la ligne ${lineLabel} Péribus (Grand Périgueux) avec ${BRAND}. Prochains passages, arrêts et détails de la ligne.`
+                    : `Retrouvez la liste des lignes Péribus et accédez aux horaires par ligne avec ${BRAND} (Grand Périgueux).`
+            });
+            return;
+        }
+
+        if (normalized === 'itineraire') {
+            applySeo({
+                title: `${BRAND} — Itinéraires Péribus (trajets)` ,
+                description: `Calculez votre trajet Péribus à Périgueux : itinéraires, correspondances, marche et temps estimés. ${BRAND} simplifie vos déplacements.`
+            });
+            return;
+        }
+
+        if (normalized === 'trafic' || normalized === 'info-trafic') {
+            applySeo({
+                title: `${BRAND} — Informations voyageurs Péribus`,
+                description: `Suivez les informations voyageurs Péribus : perturbations, état des lignes et messages trafic. Mis à jour régulièrement sur ${BRAND}.`
+            });
+            return;
+        }
+
+        if (normalized === 'carte') {
+            applySeo({
+                title: `${BRAND} — Carte du réseau Péribus`,
+                description: `Explorez la carte du réseau Péribus : lignes, arrêts et déplacements autour de Périgueux. ${BRAND} sur mobile et desktop.`
+            });
+            return;
+        }
+
+        if (normalized === 'tarifs' || normalized === 'tarifs-grille' || normalized === 'tarifs-achat' || normalized === 'tarifs-billettique' || normalized === 'tarifs-amendes') {
+            applySeo({
+                title: `${BRAND} — Tarifs Péribus`,
+                description: `Tarifs et billetterie Péribus : grille, achat, billettique et amendes. Retrouvez les infos utiles sur ${BRAND}.`
+            });
+            return;
+        }
+
+        // Fallback: keep current static SEO
+    };
+
+    // Initial hash (important because main.js cleans it via replaceState)
+    updateFromHash();
+    window.addEventListener('hashchange', updateFromHash);
+}
+
 /**
  * Enregistre le Service Worker avec détection automatique des mises à jour
  */
@@ -135,6 +256,10 @@ async function startApplication() {
     try {
         // Enregistre le SW en premier (non-bloquant)
         registerServiceWorker();
+
+        // SEO dynamique (titres/snippets) pour les URLs avec hash (/#horaires, /#itineraire, etc.)
+        // Important: main.js nettoie le hash après navigation, donc on doit le lire très tôt.
+        configureDynamicSeo();
         
         await loadBaseLayout();
         await bootstrapApp();
