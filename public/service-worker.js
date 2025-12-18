@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v228'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V228: Backdrop opaque (plein) au lieu de transparent
+const CACHE_VERSION = 'v229'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V229: Popup arrêts - filtrage terminus, ajout "Direction", retrait nom arrêt redondant
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

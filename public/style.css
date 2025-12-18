@@ -4837,6 +4837,17 @@ body.dark-theme .install-tip-steps section {
     margin-bottom: 0.5rem;
 }
 
+/* V229: Label "Direction" avant la destination */
+.stop-popup-v105 .dest-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    opacity: 0.7;
+    margin-right: 0.35rem;
+}
+
 /* Horaires */
 .stop-popup-v105 .popup-times {
     display: flex;

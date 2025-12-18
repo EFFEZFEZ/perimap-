@@ -740,12 +740,21 @@ export class MapRenderer {
                     destinations: []
                 };
             }
-            lineGroups[routeName].destinations.push({
-                destination: line.destination,
-                departures: line.departures,
-                tripId: line.tripId,
-                routeId: line.routeId
-            });
+            
+            // ✅ V229: Filtrer les destinations qui correspondent au nom de l'arrêt (terminus)
+            // On compare en minuscules et on retire "terminus" pour la comparaison
+            const stopNameNormalized = masterStop.stop_name.toLowerCase().replace(/terminus\s*/gi, '').trim();
+            const destNameNormalized = line.destination.toLowerCase().replace(/terminus\s*/gi, '').trim();
+            
+            // Ne pas ajouter si c'est une arrivée au terminus (destination = arrêt actuel)
+            if (destNameNormalized !== stopNameNormalized) {
+                lineGroups[routeName].destinations.push({
+                    destination: line.destination,
+                    departures: line.departures,
+                    tripId: line.tripId,
+                    routeId: line.routeId
+                });
+            }
         });
 
         // Trier les lignes par nom
@@ -770,12 +779,16 @@ export class MapRenderer {
             sortedLines.forEach(routeName => {
                 const lineGroup = lineGroups[routeName];
                 
+                // ✅ V229: Vérifier qu'il reste des destinations après filtrage
+                if (lineGroup.destinations.length === 0) {
+                    return; // Passer à la ligne suivante
+                }
+                
                 html += `<div class="popup-line-block">`;
                 
-                // Header de la ligne : badge + nom arrêt (comme SNCF)
+                // ✅ V229: Header de la ligne : badge uniquement (sans nom arrêt redondant)
                 html += `<div class="popup-line-header">
                             <span class="popup-badge" style="background:#${lineGroup.routeColor};color:#${lineGroup.routeTextColor};">${lineGroup.routeShortName}</span>
-                            <span class="popup-stop-name">${masterStop.stop_name}</span>
                          </div>`;
                 
                 // Destinations avec leurs horaires - CLIQUABLES
@@ -789,7 +802,7 @@ export class MapRenderer {
                                      data-stop-id="${masterStop.stop_id}"
                                      data-stop-name="${masterStop.stop_name}"
                                      data-trip-id="${dest.tripId || ''}">
-                                    ${dest.destination}
+                                    <span class="dest-label">Direction</span> ${dest.destination}
                                     <span class="dest-arrow">→</span>
                                 </div>
                                 <div class="popup-times">`;
