@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v243'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V243: domaine canonique périmap.fr (xn--primap-bva.fr)
+const CACHE_VERSION = 'v244'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V244: pages SEO (horaires/ligne/itineraire/trafic/carte)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -22,6 +22,14 @@ const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
+  '/horaires.html',
+  '/horaires-ligne-a.html',
+  '/horaires-ligne-b.html',
+  '/horaires-ligne-c.html',
+  '/horaires-ligne-d.html',
+  '/itineraire.html',
+  '/trafic.html',
+  '/carte.html',
   '/about.html',
   '/mentions-legales.html',
   '/style.css',

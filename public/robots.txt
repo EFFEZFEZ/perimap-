@@ -7,6 +7,14 @@ Allow: /
 # Pages principales à indexer
 Allow: /
 Allow: /index.html
+Allow: /horaires.html
+Allow: /horaires-ligne-a.html
+Allow: /horaires-ligne-b.html
+Allow: /horaires-ligne-c.html
+Allow: /horaires-ligne-d.html
+Allow: /itineraire.html
+Allow: /trafic.html
+Allow: /carte.html
 Allow: /about.html
 Allow: /mentions-legales.html
 Allow: /data/fichehoraire/
