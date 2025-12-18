@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v230'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V230: Popups arrêts complètement opaques (sans transparence)
+const CACHE_VERSION = 'v231'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V231: Design system professionnel - Variables CSS unifiées, contrastes WCAG, z-index cohérents, typographie/espacements standardisés
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

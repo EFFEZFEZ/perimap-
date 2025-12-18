@@ -241,12 +241,14 @@ body.dark-theme .map-btn-locate.has-error {
     /* Palette de base - Alignée sur charte Périmap */
     --primary: var(--pm-green);          /* Vert Périmap comme primaire */
     --primary-dark: var(--pm-green-hover);
-    --secondary: #64748b;
+    --secondary: #475569;                /* Amélioré pour contraste 7:1 */
     --bg-light: #f8fafc;
     --bg-main: #ffffff;
     --bg-secondary: #f1f5f9;
+    --bg-tertiary: #e2e8f0;
     --text-primary: #0f172a;
-    --text-secondary: #64748b;
+    --text-secondary: #475569;           /* Amélioré de #64748b pour contraste */
+    --text-muted: #64748b;
     --border: #e2e8f0;
     
     /* Ombres */
@@ -262,11 +264,58 @@ body.dark-theme .map-btn-locate.has-error {
     --radius-xl: 24px;
     --radius-full: 9999px;
     
-    /* Transitions */
-    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* Scale d'espacements (système 4px/8px) */
+    --spacing-0: 0;
+    --spacing-1: 0.25rem;  /* 4px */
+    --spacing-2: 0.5rem;   /* 8px */
+    --spacing-3: 0.75rem;  /* 12px */
+    --spacing-4: 1rem;     /* 16px */
+    --spacing-5: 1.25rem;  /* 20px */
+    --spacing-6: 1.5rem;   /* 24px */
+    --spacing-8: 2rem;     /* 32px */
+    --spacing-10: 2.5rem;  /* 40px */
+    --spacing-12: 3rem;    /* 48px */
+    --spacing-16: 4rem;    /* 64px */
+    
+    /* Scale typographique cohérente */
+    --font-size-xs: 0.75rem;   /* 12px */
+    --font-size-sm: 0.875rem;  /* 14px */
+    --font-size-base: 1rem;    /* 16px */
+    --font-size-lg: 1.125rem;  /* 18px */
+    --font-size-xl: 1.25rem;   /* 20px */
+    --font-size-2xl: 1.5rem;   /* 24px */
+    --font-size-3xl: 1.875rem; /* 30px */
+    --font-size-4xl: 2.25rem;  /* 36px */
+    --font-size-5xl: 3rem;     /* 48px */
+    
+    /* Z-index scale structurée */
+    --z-base: 0;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-overlay: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-toast: 700;
+    
+    /* Système d'élévation (ombres) */
+    --elevation-0: none;
+    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+    --elevation-3: 0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
+    --elevation-4: 0 12px 24px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.08);
+    --elevation-5: 0 24px 48px rgba(0, 0, 0, 0.16), 0 12px 24px rgba(0, 0, 0, 0.08);
+    
+    /* Transitions unifiées */
+    --transition-quick: 150ms ease-out;
+    --transition-normal: 250ms ease-out;
+    --transition-smooth: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Breakpoints unifiés (3 seulement) */
+    --breakpoint-mobile: 640px;
+    --breakpoint-tablet: 1024px;
+    --breakpoint-desktop: 1025px;
 }
 
 /* =========================================
@@ -299,9 +348,11 @@ body.dark-theme .map-btn-locate.has-error {
 body.dark-theme {
     --bg-main: #0b1220;
     --bg-secondary: #0f1724;
+    --bg-tertiary: #1a2332;
     --bg-light: #0b1220;
-    --text-primary: #e6eef8;
-    --text-secondary: #9fb3c9;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;  /* Contraste amélioré WCAG 7:1 */
+    --text-muted: #94a3b8;
     --border: rgba(255,255,255,0.08);
     --primary: var(--pm-green);
     --primary-dark: var(--pm-green-hover);
@@ -812,8 +863,8 @@ body {
     border-radius: var(--radius-full);
     font-weight: 700;
     text-decoration: none;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--elevation-1);
+    transition: transform var(--transition-quick), box-shadow var(--transition-quick);
 }
 
 .legal-about-btn:hover {
@@ -2234,13 +2285,13 @@ body.dark-theme .stats-section .stat-label {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    font-size: 1.125rem;
+    padding: var(--spacing-6);
+    font-size: var(--font-size-lg);
     font-weight: 700;
     color: white;
     text-decoration: none;
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-normal), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--elevation-1);
+    transition: all var(--transition-normal), transform var(--transition-bounce);
     position: relative;
     cursor: pointer;
     display: flex;
@@ -2460,13 +2511,13 @@ body.dark-theme .stats-section .stat-label {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-6);
+    box-shadow: var(--elevation-1);
     transition: box-shadow var(--transition-normal), transform var(--transition-normal);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--elevation-3);
 }
 #dashboard-hall .card {
     /* SUPPRIMÉ (V48): opacity, transform */
@@ -2559,18 +2610,19 @@ body.dark-theme .stats-section .stat-label {
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--elevation-3);
     max-height: 300px;
     overflow-y: auto;
-    z-index: 2000;
+    z-index: var(--z-dropdown);
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
 }
 .search-result-item {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-sm);
     cursor: pointer;
     border-bottom: 1px solid var(--border);
+    transition: background var(--transition-quick);
 }
 .search-result-item:last-child { border-bottom: none; }
 .search-result-item:hover { background: var(--bg-secondary); }
@@ -2633,10 +2685,10 @@ body.dark-theme .stats-section .stat-label {
 
 .accordion-content {
     background: var(--bg-main);
-    padding: 0 1.25rem; 
+    padding: 0 var(--spacing-5); 
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.35s ease-in-out;
+    transition: max-height var(--transition-smooth);
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
@@ -2766,14 +2818,14 @@ details[open] .accordion-content {
     align-items: center;
     justify-content: center;
     min-width: 40px;
-    padding: 0.375rem 0.625rem;
+    padding: var(--spacing-2) var(--spacing-3);
     font-weight: 700;
-    font-size: 0.875rem;
-    color: white;
+    font-size: var(--font-size-sm);
+    color: #ffffff;
     border-radius: var(--radius-md); 
     flex-shrink: 0;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease;
+    box-shadow: var(--elevation-1);
+    transition: all var(--transition-quick);
 }
 .trafic-badge-item:hover .line-badge {
     transform: translateY(-2px);
@@ -2846,13 +2898,13 @@ details[open] .accordion-content {
 .line-detail-modal {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
 
 .line-detail-modal.active {
@@ -3068,13 +3120,13 @@ details[open] .accordion-content {
 .banner-detail-modal {
     position: fixed;
     inset: 0;
-    z-index: 9999;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
 
 .banner-detail-modal.active {
@@ -3590,11 +3642,11 @@ body.dark-theme .map-theme-toggle:hover {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-left: 1px solid var(--border);
-    box-shadow: var(--shadow-lg);
-    z-index: 1500;
+    box-shadow: var(--elevation-4);
+    z-index: var(--z-fixed);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease-in-out;
+    transition: transform var(--transition-smooth);
     transform: translateX(0); 
 }
 #route-filter-panel.hidden {
@@ -3609,7 +3661,7 @@ body.dark-theme .map-theme-toggle:hover {
 @media (min-width: 769px) {
     body.view-map-locked #top-bar {
         position: relative;
-        z-index: 1000;
+        z-index: var(--z-sticky);
         flex-shrink: 0;
     }
 
@@ -3703,14 +3755,14 @@ body.dark-theme .map-theme-toggle:hover {
     #map-container #map-view #top-bar > #clock,
     #map-container #map-view #top-bar > #status-info {
         position: fixed !important; 
-        z-index: 1000;
+        z-index: var(--z-sticky);
         height: 36px;
-        padding: 0 12px;
+        padding: 0 var(--spacing-3);
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-radius: 18px;
-        font-size: 13px;
+        font-size: var(--font-size-xs);
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
         pointer-events: auto;
@@ -3769,13 +3821,13 @@ body.dark-theme .map-theme-toggle:hover {
     /* Groupe droite : status + toggle thème (compact mobile) */
     #top-right-controls {
         position: fixed;
-        top: calc(12px + env(safe-area-inset-top));
-        right: 12px;
+        top: calc(var(--spacing-3) + env(safe-area-inset-top));
+        right: var(--spacing-3);
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: var(--spacing-2);
         pointer-events: auto;
-        z-index: 1000;
+        z-index: var(--z-sticky);
     }
 
     #top-right-controls #status-info {
@@ -4847,13 +4899,12 @@ body.dark-theme .install-tip-steps section {
 
 /* V229: Label "Direction" avant la destination */
 .stop-popup-v105 .dest-label {
-    font-size: 0.7rem;
+    font-size: var(--font-size-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-secondary);
-    opacity: 0.7;
-    margin-right: 0.35rem;
+    margin-right: var(--spacing-2);
 }
 
 /* Horaires */
@@ -5292,18 +5343,18 @@ body.dark-theme .real-select option {
     top: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15), 0 -2px 8px rgba(0, 0, 0, 0.1);
-    padding: 8px 0;
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-3);
+    padding: var(--spacing-2) 0;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(8px);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 9999;
+    transform: translateY(var(--spacing-2));
+    transition: opacity var(--transition-quick), transform var(--transition-quick);
+    z-index: var(--z-popover);
     display: flex;
     flex-direction: column;
     width: 100px;
-    max-height: min(320px, 50vh); /* Taille raisonnable */
+    max-height: min(320px, 50vh);
     overflow-y: auto;
     scrollbar-width: thin;
 }
@@ -5383,12 +5434,12 @@ body.dark-theme .real-select option {
     border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
-    box-shadow: var(--shadow-md);
-    z-index: 1000;
+    box-shadow: var(--elevation-2);
+    z-index: var(--z-dropdown);
     max-height: 250px;
     overflow-y: auto;
     display: none;
-    animation: fadeInDown 0.2s ease-out;
+    animation: fadeInDown var(--transition-normal);
 }
 
 .suggestion-item {
@@ -5484,10 +5535,10 @@ body.dark-theme .real-select option {
         background: var(--bg-main);
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3); /* Grosse ombre */
+        box-shadow: var(--elevation-4);
         
         /* CRUCIAL : Z-Index très haut pour flotter */
-        z-index: 1000;
+        z-index: var(--z-popover);
         
         /* S'assurer qu'il est cliquable */
         pointer-events: auto;
@@ -5756,10 +5807,10 @@ body.dark-theme #results-planner-to:focus {
 }
 
 .results-list {
-    padding: 1rem;
-    flex: 1; /* This is already present in your snippet */
-    overflow-y: auto; /* This enables vertical scrolling when content overflows */
-    max-height: 500px; /* This sets a maximum height for the element */
+    padding: var(--spacing-4);
+    flex: 1;
+    overflow-y: auto;
+    max-height: 500px;
 }
 
 /* La CARTE prend le reste de l'espace */
@@ -6203,10 +6254,10 @@ body.dark-theme .next-departures-label {
     #itinerary-detail-container.is-active #detail-map-header {
         display: flex;
         position: absolute;
-        top: 1rem;
-        left: 1rem;
-        z-index: 1400;
-        gap: 1rem;
+        top: var(--spacing-4);
+        left: var(--spacing-4);
+        z-index: var(--z-overlay);
+        gap: var(--spacing-4);
         align-items: center;
         background: none;
     }
