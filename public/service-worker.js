@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v234'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V234: pages statiques alignées (nav/actions) + cache mentions légales
+const CACHE_VERSION = 'v235'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V235: auto-update SW + assets SWR (JS/CSS/HTML)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

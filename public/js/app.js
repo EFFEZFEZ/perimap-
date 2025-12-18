@@ -28,15 +28,27 @@ async function registerServiceWorker() {
 
             newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Nouvelle version prête, afficher notification
-                    showUpdateNotification();
+                    // Nouvelle version prête: activer immédiatement (update fluide)
+                    // + garde un fallback visuel si l'activation est bloquée.
+                    try {
+                        newWorker.postMessage('skipWaiting');
+                    } catch (e) {
+                        // ignore
+                    }
+                    showUpdateNotification(registration);
                 }
             });
         });
 
         // Si le SW est déjà installé et qu'il y a une mise à jour en attente
         if (registration.waiting) {
-            showUpdateNotification();
+            // On tente d'activer tout de suite.
+            try {
+                registration.waiting.postMessage('skipWaiting');
+            } catch (e) {
+                // ignore
+            }
+            showUpdateNotification(registration);
         }
 
         // Recharge automatiquement quand le nouveau SW prend le contrôle
@@ -49,6 +61,11 @@ async function registerServiceWorker() {
             }
         });
 
+        // Re-check updates when user comes back to the tab (keeps updates snappy)
+        window.addEventListener('focus', () => {
+            try { registration.update(); } catch (e) { /* ignore */ }
+        });
+
     } catch (error) {
         console.warn('[App] Erreur enregistrement Service Worker:', error);
     }
@@ -58,6 +75,7 @@ async function registerServiceWorker() {
  * Affiche une notification discrète pour informer de la mise à jour
  */
 function showUpdateNotification() {
+function showUpdateNotification(registration) {
     // Évite les doublons
     if (document.getElementById('update-banner')) return;
 
@@ -87,13 +105,25 @@ function showUpdateNotification() {
     document.body.appendChild(banner);
 
     // Bouton "Mettre à jour" - force le rechargement
-    document.getElementById('update-btn').addEventListener('click', () => {
-        // Demande au SW d'activer la nouvelle version
-        if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage('skipWaiting');
+    document.getElementById('update-btn').addEventListener('click', async () => {
+        try {
+            const reg = registration || await navigator.serviceWorker.getRegistration();
+            // IMPORTANT: il faut envoyer skipWaiting au worker en attente, pas au controller actuel.
+            if (reg?.waiting) {
+                reg.waiting.postMessage('skipWaiting');
+                return;
+            }
+            if (reg?.installing) {
+                reg.installing.postMessage('skipWaiting');
+                return;
+            }
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage('skipWaiting');
+            }
+        } catch (e) {
+            // fallback
+            window.location.reload();
         }
-        // Force le rechargement
-        window.location.reload(true);
     });
 
     // Bouton fermer
