@@ -745,7 +745,7 @@
                         <a href="/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf" target="_blank">Plan du réseau</a>
                         <a href="https://www.grandperigueux.fr/mon-quotidien/transports-mobilite/se-deplacer-en-bus-car/reseau-peribus/" target="_blank" rel="noopener">Réseau Péribus</a>
                         <a href="https://www.grandperigueux.fr" target="_blank" rel="noopener">Grand Périgueux</a>
-                        <a href="https://github.com/EFFEZFEZ/p-rimap-sans-api-" target="_blank" rel="noopener">Code source</a>
+                        <a href="https://github.com/EFFEZFEZ/perimap-" target="_blank" rel="noopener">Code source</a>
                     </div>
                     <div class="footer-links-column">
                         <h4>Données</h4>
@@ -1062,12 +1062,12 @@
             try {
                 el.className = 'status-msg'; el.textContent = 'Sauvegarde en cours...'; el.style.display = 'block';
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(newData, null, 2))));
-                const fileRes = await fetch('https://api.github.com/repos/EFFEZFEZ/p-rimap-sans-api-/contents/public/data/line-status.json', { 
+                const fileRes = await fetch('https://api.github.com/repos/EFFEZFEZ/perimap-/contents/public/data/line-status.json', { 
                     headers: { Authorization: `token ${token}` }
                 });
                 const file = await fileRes.json();
                 
-                await fetch('https://api.github.com/repos/EFFEZFEZ/p-rimap-sans-api-/contents/public/data/line-status.json', { 
+                await fetch('https://api.github.com/repos/EFFEZFEZ/perimap-/contents/public/data/line-status.json', { 
                     method: 'PUT', 
                     headers: { 
                         Authorization: `token ${token}`, 
