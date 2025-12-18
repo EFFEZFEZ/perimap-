@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v246'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V246: fix terminus destination + new stopName helper
+const CACHE_VERSION = 'v247'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V247: popup arrêt (nom) + départs uniquement (filtre terminus)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -60,6 +60,7 @@ const SECONDARY_ASSETS = [
   '/js/utils/formatters.js',
   '/js/utils/geo.js',
   '/js/utils/stopName.mjs',
+  '/js/utils/tripStopTimes.mjs',
   '/js/utils/polyline.js',
   '/js/utils/gtfsProcessor.js',
   '/js/itinerary/ranking.js',

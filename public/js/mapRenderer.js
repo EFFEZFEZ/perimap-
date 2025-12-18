@@ -766,6 +766,9 @@ export class MapRenderer {
         );
 
         let html = `<div class="stop-popup-v105">`;
+
+        // En-tête: nom de l'arrêt (évite le clic "à l'aveugle")
+        html += `<div class="popup-line-header"><span class="popup-stop-name">${masterStop.stop_name}</span></div>`;
         
         // Notice si premiers départs
         if (isNextDayDepartures) {

@@ -4,6 +4,7 @@
  */
 import { cleanDataset, buildGtfsIndexes } from './utils/gtfsProcessor.js';
 import { StopTimesStore } from './stopTimesStore.js';
+import { hasMeaningfulGtfsTime, isLastStopOfTrip } from './utils/tripStopTimes.mjs';
 
 /**
  * dataManager.js - CORRECTION V39
@@ -660,6 +661,11 @@ export class DataManager {
                 });
 
                 if (isServiceActive) {
+                    // Ne montrer que des DÉPARTS (évite les arrivées au terminus)
+                    if (!hasMeaningfulGtfsTime(st.departure_time)) return;
+                    const stopTimes = this.stopTimesByTrip[st.trip_id];
+                    if (isLastStopOfTrip(stopTimes, st.stop_id)) return;
+
                     const departureSeconds = this.timeToSeconds(st.departure_time);
                     if (departureSeconds >= currentSeconds) {
                         allDepartures.push({
@@ -725,14 +731,19 @@ export class DataManager {
                 });
 
                 if (isServiceActive) {
+                    // Ne montrer que des DÉPARTS (évite les arrivées au terminus)
+                    if (!hasMeaningfulGtfsTime(st.departure_time)) return;
+
+                    const stopTimes = this.stopTimesByTrip[st.trip_id];
+                    if (isLastStopOfTrip(stopTimes, st.stop_id)) return;
+
                     const departureSeconds = this.timeToSeconds(st.departure_time);
                     
                     // Tous les départs FUTURS (pas passés)
                     if (departureSeconds >= currentSeconds) {
                         const route = this.routesById[trip.route_id];
                         if (!route) return;
-                        
-                        const stopTimes = this.stopTimesByTrip[st.trip_id];
+
                         const destination = this.getTripDestination(stopTimes);
                         
                         allFutureDepartures.push({
