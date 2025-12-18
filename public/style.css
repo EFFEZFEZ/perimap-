@@ -6298,7 +6298,7 @@ body.dark-theme .next-departures-label {
         display: block;
         position: fixed;
         inset: 0;
-        background: rgba(8, 15, 28, 0.55);
+        background: rgb(8, 15, 28);
         z-index: 1080;
         opacity: 0;
         pointer-events: none;
@@ -9557,11 +9557,11 @@ body.dark-theme .tarifs-choice {
 
 /* === 5. BOTTOM SHEET APPLE-STYLE COMPLET === */
 
-/* Backdrop amélioré avec blur */
+/* Backdrop plein opaque sans transparence */
 #itinerary-detail-backdrop {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgb(0, 0, 0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     transition: opacity 0.35s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -9645,7 +9645,7 @@ body.dark-theme .tarifs-choice {
 
 /* === 6. DARK MODE COMPLET POUR BOTTOM SHEET === */
 body.dark-theme #itinerary-detail-backdrop {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgb(0, 0, 0);
 }
 
 body.dark-theme #detail-bottom-sheet {
