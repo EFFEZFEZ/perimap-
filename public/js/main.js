@@ -1059,6 +1059,21 @@ function setupStaticEventListeners() {
         btnToggleFilter.addEventListener('click', () => {
             routeFilterPanel.classList.toggle('hidden');
         });
+        
+        // Auto-collapse FAB après 3 secondes (mobile uniquement)
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                btnToggleFilter.classList.add('collapsed');
+            }, 3000);
+            
+            // Expand au survol/touch
+            btnToggleFilter.addEventListener('mouseenter', () => {
+                btnToggleFilter.classList.remove('collapsed');
+            });
+            btnToggleFilter.addEventListener('mouseleave', () => {
+                btnToggleFilter.classList.add('collapsed');
+            });
+        }
     }
     
     const closeFilterBtn = document.getElementById('close-filter');

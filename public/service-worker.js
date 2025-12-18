@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v231'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V231: Design system professionnel - Variables CSS unifiées, contrastes WCAG, z-index cohérents, typographie/espacements standardisés
+const CACHE_VERSION = 'v232'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V232: Refonte UX/UI complète - Accessibilité WCAG, hiérarchie visuelle, labels conversationnels, states positifs
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

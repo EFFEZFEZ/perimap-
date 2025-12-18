@@ -344,6 +344,50 @@ body.dark-theme .map-btn-locate.has-error {
     overflow-anchor: none;
 }
 
+/* =========================================
+ * ACCESSIBILITÉ WCAG - FOCUS VISIBLE
+ * ========================================= */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 3px solid var(--pm-green);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Focus pour éléments dans fond sombre */
+body.dark-theme button:focus-visible,
+body.dark-theme a:focus-visible,
+body.dark-theme input:focus-visible {
+    outline-color: var(--pm-cyan);
+}
+
+/* Touch targets minimum 44x44px (WCAG 2.5.5) */
+.btn-icon-round,
+.btn-geolocate,
+.btn-swap-direction,
+button.btn-close,
+button.tab {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Support prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* Dark theme - Aligné sur charte Périmap */
 body.dark-theme {
     --bg-main: #0b1220;
@@ -1575,11 +1619,11 @@ body.itinerary-view-active {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, 
-        rgba(30, 58, 95, 0.1) 0%, 
-        rgba(30, 58, 95, 0.2) 30%,
-        rgba(255, 255, 255, 0.6) 60%, 
-        rgba(255, 255, 255, 0.85) 80%,
-        rgba(255, 255, 255, 0.95) 100%);
+        rgba(30, 58, 95, 0.3) 0%,
+        rgba(30, 58, 95, 0.35) 30%,
+        rgba(255, 255, 255, 0.75) 60%, 
+        rgba(255, 255, 255, 0.9) 80%,
+        rgba(255, 255, 255, 0.98) 100%);
     pointer-events: none;
 }
 
@@ -1593,15 +1637,21 @@ body.itinerary-view-active {
     padding: 0;
     position: relative;
     z-index: 50;
-    padding-top: 4.5rem;
+    padding-top: var(--spacing-12);
 }
 
 .planner-block {
     background: #FFFFFF;
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-    border: 1px solid #e5e7eb;
+    padding: var(--spacing-6);
+    box-shadow: var(--elevation-4);
+    border: 2px solid rgba(34, 197, 94, 0.2);
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.planner-block:hover {
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: var(--elevation-5);
 }
 
 .planner-title {
@@ -1885,7 +1935,11 @@ body.dark-theme .hero-overlay {
 
 body.dark-theme .planner-block {
     background: rgba(15, 23, 42, 0.95);
-    border-color: rgba(255,255,255,0.08);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+body.dark-theme .planner-block:hover {
+    border-color: rgba(34, 197, 94, 0.5);
 }
 
 body.dark-theme .planner-title {
@@ -1896,6 +1950,31 @@ body.dark-theme .planner-block .form-group input[type="text"] {
     background: rgba(30, 41, 59, 0.8);
     border: 1px solid #374151;
     color: #e2e8f0;
+}
+
+/* Dark mode - Sections horaires */
+body.dark-theme .search-priority-section {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .search-prominent input {
+    background: var(--bg-secondary);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .search-prominent input:focus {
+    border-color: var(--pm-green);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Dark mode - État vide */
+body.dark-theme .empty-state .check-icon {
+    color: var(--pm-cyan);
+}
+
+body.dark-theme .empty-state h4 {
+    color: var(--text-primary);
 }
 
 body.dark-theme .planner-block .form-group input[type="text"]::placeholder {
@@ -2537,6 +2616,88 @@ body.dark-theme .stats-section .stat-label {
     display: block; /* V48: Affiché si actif */
     max-height: 2000px; 
     padding: 1.5rem; 
+}
+
+/* =========================================
+ * SECTIONS HORAIRES
+ * ========================================= */
+.search-priority-section {
+    margin-bottom: var(--spacing-8);
+    padding-bottom: var(--spacing-6);
+    border-bottom: 2px solid var(--border);
+}
+
+.search-priority-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.schedule-sheets-section {
+    margin-top: var(--spacing-6);
+}
+
+.schedule-sheets-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+/* Search bar proéminente */
+.search-prominent {
+    position: relative;
+    margin-bottom: var(--spacing-4);
+}
+
+.search-prominent input {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-4) var(--spacing-12);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+}
+
+.search-prominent input:focus {
+    border-color: var(--pm-green);
+    box-shadow: var(--elevation-2);
+}
+
+.search-prominent svg {
+    position: absolute;
+    left: var(--spacing-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* État vide positif */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-10) var(--spacing-6);
+    color: var(--text-secondary);
+}
+
+.empty-state .check-icon {
+    color: var(--pm-green);
+    margin: 0 auto var(--spacing-4);
+    display: block;
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .form-group {
@@ -3427,7 +3588,7 @@ details[open] .accordion-content {
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: #22c55e !important; /* Vert primaire forcé */
+        background: #22c55e !important;
         color: white !important;
         border: none;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -3436,8 +3597,23 @@ details[open] .accordion-content {
         justify-content: center;
         align-items: center;
         padding: 0;
-        cursor: pointer;
+        transition: width var(--transition-smooth), border-radius var(--transition-smooth);
     }
+    
+    /* État initial avec texte */
+    #map-container #btn-toggle-filter:not(.collapsed) {
+        width: auto;
+        padding: 0 var(--spacing-5);
+        border-radius: var(--radius-full);
+        gap: var(--spacing-2);
+    }
+    
+    /* État collapsed - icône seule */
+    #map-container #btn-toggle-filter.collapsed span,
+    .map-fab-button.collapsed span {
+        display: none;
+    }
+    
     #map-container #btn-toggle-filter svg {
         width: 24px;
         height: 24px;
@@ -5780,37 +5956,38 @@ body.dark-theme #results-planner-to:focus {
 
 /* NOUVEAU : Conteneur pour la liste des résultats */
 .results-list-wrapper {
-    flex: 1; /* Prend tout l'espace restant dans le panneau latéral */
-    overflow: visible;
-    overscroll-behavior: auto;
-    padding-bottom: 1.5rem;
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-light);
+    padding: var(--spacing-2) 0 var(--spacing-6) 0;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* Important pour le scroll flex */
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Firefox */
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 /* Scrollbar minimaliste (Webkit) */
 .results-list-wrapper::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 .results-list-wrapper::-webkit-scrollbar-track {
     background: transparent;
 }
 .results-list-wrapper::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    background: var(--border);
+    border-radius: var(--radius-full);
 }
 .results-list-wrapper::-webkit-scrollbar-thumb:hover {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
 .results-list {
-    padding: var(--spacing-4);
+    padding: var(--spacing-6) var(--spacing-4);
     flex: 1;
-    overflow-y: auto;
-    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
 }
 
 /* La CARTE prend le reste de l'espace */
@@ -6909,33 +7086,46 @@ body.dark-theme .next-departures-label {
         margin-bottom: 1rem;
     }
 
-    /* TRANSFORMER LES 3 BOUTONS EN GRILLE HORIZONTALE */
+    /* TRANSFORMER LES 3 BOUTONS EN GRILLE MOBILE OPTIMISÉE */
     .main-nav-buttons-condensed {
         display: grid;
-        grid-template-columns: repeat(3, 1fr); /* 3 colonnes égales */
-        gap: 0.75rem; /* Espace réduit */
-        margin-top: 1.5rem;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: var(--spacing-3);
+        margin-top: var(--spacing-6);
     }
 
-    .nav-button-condensed {
-        padding: 0.75rem 0.25rem;
-        flex-direction: column; /* Icône au-dessus du texte */
+    /* Bouton Itinéraire - CTA PRIMAIRE pleine largeur */
+    .nav-button-condensed[data-view="itineraire"] {
+        grid-column: 1 / -1; /* Prend toute la largeur */
+        padding: var(--spacing-5);
+        font-size: var(--font-size-lg);
+        aspect-ratio: auto;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--elevation-3);
+    }
+
+    /* Boutons secondaires - plus discrets */
+    .nav-button-condensed[data-view="horaires"],
+    .nav-button-condensed[data-view="info-trafic"] {
+        padding: var(--spacing-4);
+        font-size: var(--font-size-sm);
+        flex-direction: column;
         text-align: center;
-        justify-content: flex-start;
-        height: auto;
-        aspect-ratio: 1 / 1; /* Carré parfait */
-        border-radius: 16px; /* Plus arrondi (style iOS) */
+        justify-content: center;
+        aspect-ratio: 1.2 / 1;
+        border-radius: var(--radius-md);
     }
 
     .nav-button-condensed svg {
         width: 24px;
         height: 24px;
-        margin-bottom: 6px; /* Espace entre icône et texte */
+        margin-bottom: var(--spacing-2);
     }
 
-    .nav-button-condensed span {
-        font-size: 0.7rem; /* Texte plus petit */
-        line-height: 1.1;
+    .nav-button-condensed[data-view="itineraire"] svg {
+        width: 28px;
+        height: 28px;
     }
 
     /* ALIGNER LES CHIFFRES CLÉS SUR UNE LIGNE */
