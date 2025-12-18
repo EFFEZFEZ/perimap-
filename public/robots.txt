@@ -1,17 +1,19 @@
-# PériMap - Robots.txt optimisé SEO
+# PériMap - robots.txt
 # https://perimap.app/
 
 User-agent: *
 Allow: /
 
 # Pages principales à indexer
+Allow: /
 Allow: /index.html
 Allow: /about.html
-Allow: /views/
+Allow: /mentions-legales.html
 Allow: /data/fichehoraire/
 
 # Ressources à ne pas indexer
 Disallow: /api/
+Disallow: /views/
 Disallow: /js/workers/
 Disallow: /*.json$
 Disallow: /data/gtfs/
