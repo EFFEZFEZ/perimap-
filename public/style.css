@@ -5606,7 +5606,9 @@ body.dark-theme .real-select option {
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--bg-main);
+    /* Doit être opaque et capter les clics (pas de click-through) */
+    background: var(--bg-main) !important;
+    pointer-events: auto !important;
     border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 var(--radius-md) var(--radius-md);
