@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v258'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v258: Ghost Mode scraper (Puppeteer Stealth)
+const CACHE_VERSION = 'v259'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v259: Fix CSS cache + GTFS expired warning
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
