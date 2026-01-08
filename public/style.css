@@ -9910,14 +9910,11 @@ body.dark-theme .tarifs-choice {
     /* Pendant le drag - pas de transition */
     #detail-bottom-sheet.is-dragging {
         transition: none !important;
-        will-change: transform, height;
+        will-change: transform;
     }
     
-    /* Animation d'entrée fluide */
-    #itinerary-detail-container.is-active #detail-bottom-sheet {
-        transform: translateY(0);
-        animation: bottomSheetSlideUp 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-    }
+    /* V270: Animation d'entrée SUPPRIMÉE - les classes sheet-level-X gèrent la position */
+    /* Les classes sheet-level-0/1/2 dans le media query principal contrôlent le transform */
     
     /* État expanded - scroll activé */
     #detail-bottom-sheet.is-expanded {
