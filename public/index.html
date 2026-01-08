@@ -79,6 +79,7 @@
     
     <!-- CSS critique en premier -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/line-pages.css">
     
     <!-- CSS externes non-bloquants -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
@@ -421,6 +422,14 @@
             </div>
         </div>
     </header>
+
+    <!-- Quick Access Lignes (Mobile) - Visible uniquement sur mobile -->
+    <div class="app-quick-lines" aria-label="Accès rapide aux lignes principales">
+        <a href="/horaires-ligne-a.html" class="app-quick-line line-a" title="Horaires Ligne A">A</a>
+        <a href="/horaires-ligne-b.html" class="app-quick-line line-b" title="Horaires Ligne B">B</a>
+        <a href="/horaires-ligne-c.html" class="app-quick-line line-c" title="Horaires Ligne C">C</a>
+        <a href="/horaires-ligne-d.html" class="app-quick-line line-d" title="Horaires Ligne D">D</a>
+    </div>
 
     <main id="app-view-root"></main>
 

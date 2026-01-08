@@ -5,98 +5,108 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
     
+    <!-- ===== PAGES PRINCIPALES ===== -->
+    
     <!-- Page d'accueil - Priorité maximale -->
     <url>
         <loc>https://www.xn--primap-bva.fr/</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
         <mobile:mobile/>
     </url>
     
-    <!-- À propos -->
+    <!-- Itinéraires - Planificateur -->
     <url>
-        <loc>https://www.xn--primap-bva.fr/about.html</loc>
-        <lastmod>2025-12-18</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <loc>https://www.xn--primap-bva.fr/itineraire.html</loc>
+        <lastmod>2025-06-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <mobile:mobile/>
+    </url>
+    
+    <!-- Page horaires principale -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires.html</loc>
+        <lastmod>2025-06-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <mobile:mobile/>
+    </url>
+    
+    <!-- Carte interactive -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/carte.html</loc>
+        <lastmod>2025-06-13</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
         <mobile:mobile/>
     </url>
 
-    <!-- Horaires / Lignes -->
+    <!-- ===== PAGES PAR LIGNE - LIGNES PRINCIPALES (A, B, C, D) ===== -->
+    <!-- Pages SEO optimisées avec contenu riche et FAQ -->
+    
     <url>
-        <loc>https://www.xn--primap-bva.fr/horaires.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-d.html</loc>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
         <mobile:mobile/>
     </url>
     <url>
         <loc>https://www.xn--primap-bva.fr/horaires-ligne-a.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.85</priority>
         <mobile:mobile/>
     </url>
     <url>
         <loc>https://www.xn--primap-bva.fr/horaires-ligne-b.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.85</priority>
         <mobile:mobile/>
     </url>
     <url>
         <loc>https://www.xn--primap-bva.fr/horaires-ligne-c.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-        <mobile:mobile/>
-    </url>
-    <url>
-        <loc>https://www.xn--primap-bva.fr/horaires-ligne-d.html</loc>
-        <lastmod>2025-12-18</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.85</priority>
         <mobile:mobile/>
     </url>
 
-    <!-- Itinéraires -->
-    <url>
-        <loc>https://www.xn--primap-bva.fr/itineraire.html</loc>
-        <lastmod>2025-12-18</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.9</priority>
-        <mobile:mobile/>
-    </url>
-
-    <!-- Informations voyageurs -->
+    <!-- ===== INFORMATIONS VOYAGEURS ===== -->
+    
+    <!-- Info trafic temps réel -->
     <url>
         <loc>https://www.xn--primap-bva.fr/trafic.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.7</priority>
-        <mobile:mobile/>
-    </url>
-
-    <!-- Carte -->
-    <url>
-        <loc>https://www.xn--primap-bva.fr/carte.html</loc>
-        <lastmod>2025-12-18</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
         <mobile:mobile/>
     </url>
     
-    <!-- Mentions légales (obligatoire droit français) -->
+    <!-- À propos -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/about.html</loc>
+        <lastmod>2025-06-13</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+        <mobile:mobile/>
+    </url>
+    
+    <!-- ===== LÉGAL ===== -->
+    
     <url>
         <loc>https://www.xn--primap-bva.fr/mentions-legales.html</loc>
-        <lastmod>2025-12-18</lastmod>
+        <lastmod>2025-06-13</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.4</priority>
+        <priority>0.3</priority>
         <mobile:mobile/>
     </url>
     
-    <!-- Plan réseau PDF -->
+    <!-- ===== RESSOURCES PDF ===== -->
+    
     <url>
         <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf</loc>
         <lastmod>2025-09-01</lastmod>
