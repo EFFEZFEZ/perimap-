@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v255'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v255: Force total cache invalidation + dynamic geojson timestamp
+const CACHE_VERSION = 'v256'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v256: Bundle GTFS corrigé avec shapes valides
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

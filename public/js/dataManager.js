@@ -13,8 +13,8 @@ import { hasMeaningfulGtfsTime, isLastStopOfTrip } from './utils/tripStopTimes.m
  * (matching flexible des noms)
  */
 
-const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v4';  // V4: Force invalidation - nouveau geojson
-const GTFS_CACHE_VERSION = '4.0.0';  // V4.0: Nouveau geojson tracés corrigés
+const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v5';  // V5: Bundle GTFS corrigé - shapes corrects
+const GTFS_CACHE_VERSION = '5.0.0';  // V5.0: Shapes GTFS corrects depuis périmap test
 const GTFS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 heures (augmenté pour moins de rechargements)
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
