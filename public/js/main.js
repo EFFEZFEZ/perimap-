@@ -4237,7 +4237,7 @@ function showResultsView() {
  * *** MODIFIÉ V48 (Zoom Mobile) ***
  * Accepte la couche du trajet et gère le zoom au bon moment.
  */
-function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
+function showDetailView(routeLayer) {
     if (!itineraryDetailContainer) return;
     
     // Bloquer le scroll du body
@@ -4245,7 +4245,15 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
     
     initBottomSheetControls();
     cancelBottomSheetDrag();
+    
+    // V270: Reset au niveau 0 et appliquer IMMÉDIATEMENT la classe
     currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
+    if (detailBottomSheet) {
+        detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
+        detailBottomSheet.classList.add('sheet-level-0'); // Niveau 0 = 20% visible
+        detailBottomSheet.classList.remove('is-expanded');
+        detailBottomSheet.style.removeProperty('transform');
+    }
     
     itineraryDetailContainer.classList.remove('hidden');
     itineraryDetailContainer.classList.remove('is-scrolled');
@@ -4256,19 +4264,16 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
         requestAnimationFrame(() => itineraryDetailBackdrop.classList.add('is-active'));
     }
 
-    // Invalide la carte des détails MAINTENANT
+    // Invalide la carte des détails
     if (detailMapRenderer && detailMapRenderer.map) {
         detailMapRenderer.map.invalidateSize();
     }
 
-    // V269: Ajouter is-active AVANT d'appliquer le niveau
+    // V270: Ajouter is-active - le CSS appliquera sheet-level-0 automatiquement
     itineraryDetailContainer.classList.add('is-active');
     
-    // V269: Appliquer le niveau APRÈS is-active pour que le CSS fonctionne
+    // Zoomer sur le trajet après un frame
     requestAnimationFrame(() => {
-        prepareBottomSheetForViewport(false); // false = avec transition
-        
-        // ✅ V48: Zoomer sur le trajet
         if (routeLayer && detailMapRenderer.map) {
             try {
                 const bounds = routeLayer.getBounds();

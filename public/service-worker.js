@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v269'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v269: Fix bottom sheet niveaux (is-active + classes)
+const CACHE_VERSION = 'v270'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v270: Fix bottom sheet démarre niveau 0
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
