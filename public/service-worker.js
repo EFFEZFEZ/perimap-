@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v248'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V248: Fix calendar GTFS 2026 + fallback intelligent
+const CACHE_VERSION = 'v249'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V249: Force rechargement cache GTFS 2.12.0
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
