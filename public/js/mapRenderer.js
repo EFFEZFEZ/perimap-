@@ -1,9 +1,14 @@
 ﻿/*
- * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
- * mapRenderer.js - VERSION V24 (Solution Popup Indépendant)
+ * mapRenderer.js - VERSION V25 (Intégration Temps Réel)
+ *
+ * *** V25 - TEMPS RÉEL HAWK ***
+ * - Intégration du scraper hawk.perimouv.fr pour les horaires en direct
+ * - Affichage des temps réels avec icône WiFi et couleur verte
+ * - Fallback sur les horaires GTFS statiques si temps réel indisponible
  *
  * *** SOLUTION DÉFINITIVE V24 ***
  * - Le bug est que marker.bindPopup() est incompatible
@@ -31,6 +36,7 @@
  */
 
 import { normalizeStopNameForComparison, shouldHideDestinationAtStop } from './utils/stopName.mjs';
+import { realtimeManager } from './realtimeManager.js';
 
 const LIGHT_TILE_CONFIG = Object.freeze({
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -662,8 +668,9 @@ export class MapRenderer {
      * Appelé lorsqu'un marqueur d'arrêt est cliqué
      * V99: Affiche les premiers départs si rien dans l'heure
      * V110: Sur mobile, décale la carte vers le haut pour mieux voir la popup
+     * V25: Intégration temps réel hawk.perimouv.fr
      */
-    onStopClick(masterStop) {
+    async onStopClick(masterStop) {
         const currentSeconds = this.timeManager.getCurrentSeconds();
         const currentDate = this.timeManager.getCurrentDate();
 
@@ -676,32 +683,27 @@ export class MapRenderer {
         const { departuresByLine, isNextDayDepartures, firstDepartureTime } = result;
         console.log(`🕐 Départs trouvés:`, Object.keys(departuresByLine).length, 'lignes', isNextDayDepartures ? `(premiers départs à ${firstDepartureTime})` : '');
 
-        const popupContent = this.createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime);
-        
         const lat = parseFloat(masterStop.stop_lat);
         const lon = parseFloat(masterStop.stop_lon);
         
         // V110: Sur mobile, décaler la vue vers le haut pour que la popup soit visible
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
-            // Calculer un offset pour que l'arrêt soit dans le tiers inférieur de l'écran
-            // Cela laisse de la place pour la popup au-dessus
             const mapHeight = this.map.getSize().y;
-            const offsetY = mapHeight * 0.25; // Décaler de 25% vers le haut
-            
-            // Obtenir le point pixel de l'arrêt et l'ajuster
+            const offsetY = mapHeight * 0.25;
             const point = this.map.latLngToContainerPoint([lat, lon]);
             const newPoint = L.point(point.x, point.y - offsetY);
             const newCenter = this.map.containerPointToLatLng(newPoint);
-            
-            // Déplacer la carte avec animation
             this.map.panTo(newCenter, { animate: true, duration: 0.3 });
         }
+        
+        // V25: Créer d'abord le popup avec les données statiques
+        const popupContent = this.createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, null);
         
         const popup = L.popup({ 
             maxHeight: 350, 
             className: 'stop-schedule-popup',
-            autoPan: !isMobile, // V110: Désactiver l'autopan sur mobile car on gère manuellement
+            autoPan: !isMobile,
             autoPanPaddingTopLeft: isMobile ? [0, 0] : [50, 50],
             autoPanPaddingBottomRight: isMobile ? [0, 0] : [50, 50]
         })
@@ -720,14 +722,82 @@ export class MapRenderer {
                 });
             });
         }, 50);
+
+        // V25: Tenter de récupérer les données temps réel en arrière-plan
+        this.fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon);
+    }
+
+    /**
+     * V25: Récupère les données temps réel et met à jour le popup si ouvert
+     */
+    async fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon) {
+        try {
+            // Essayer avec le stop_id comme clé hawk
+            const realtimeData = await realtimeManager.getRealtimeForStop(masterStop.stop_id);
+            
+            if (realtimeData && realtimeData.schedules && realtimeData.schedules.length > 0) {
+                console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.schedules.length, 'passages');
+                
+                // Vérifier que le popup est toujours ouvert et au bon endroit
+                if (popup.isOpen()) {
+                    const newContent = this.createStopPopupContent(
+                        masterStop, 
+                        departuresByLine, 
+                        currentSeconds, 
+                        isNextDayDepartures, 
+                        firstDepartureTime,
+                        realtimeData
+                    );
+                    popup.setContent(newContent);
+                    
+                    // Ré-attacher les listeners
+                    setTimeout(() => {
+                        const destElements = document.querySelectorAll('.popup-dest-clickable');
+                        destElements.forEach(el => {
+                            el.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const destination = el.dataset.destination;
+                                this.goToDestinationStop(destination);
+                            });
+                        });
+                    }, 50);
+                }
+            } else {
+                console.log(`📡 Pas de données temps réel pour ${masterStop.stop_name}`);
+            }
+        } catch (error) {
+            console.warn(`⚠️ Erreur temps réel pour ${masterStop.stop_name}:`, error.message);
+        }
     }
 
     /**
      * Formate le contenu HTML pour le popup d'un arrêt
      * V106: Destinations cliquables pour afficher le tracé
+     * V25: Support temps réel avec icône WiFi et couleur verte
      */
-    createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures = false, firstDepartureTime = null) {
+    createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures = false, firstDepartureTime = null, realtimeData = null) {
         const lineKeys = Object.keys(departuresByLine);
+        
+        // V25: Icône SVG temps réel - Signal live (barres style WiFi/signal mobile)
+        const REALTIME_ICON = `<span class="realtime-icon"><svg viewBox="0 0 16 12" fill="currentColor">
+            <rect x="0" y="8" width="3" height="4" rx="0.5" opacity="1"/>
+            <rect x="4.5" y="5" width="3" height="7" rx="0.5" opacity="0.85"/>
+            <rect x="9" y="2" width="3" height="10" rx="0.5" opacity="0.7"/>
+            <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" opacity="0.55"/>
+        </svg></span>`;
+        
+        // V25: Indexer les données temps réel par ligne
+        const realtimeByLine = {};
+        if (realtimeData && realtimeData.schedules) {
+            realtimeData.schedules.forEach(rt => {
+                const ligne = rt.ligne?.toUpperCase();
+                if (!realtimeByLine[ligne]) {
+                    realtimeByLine[ligne] = [];
+                }
+                realtimeByLine[ligne].push(rt);
+            });
+        }
+        const hasRealtime = Object.keys(realtimeByLine).length > 0;
         
         // Regrouper par ligne (route_short_name)
         const lineGroups = {};
@@ -745,7 +815,6 @@ export class MapRenderer {
             }
             
             // ✅ V229+: Filtrer les destinations qui correspondent au nom de l'arrêt (terminus)
-            // Normalisation robuste: accents, parenthèses, tirets, "TERMINUS", etc.
             const stopNameNormalized = normalizeStopNameForComparison(masterStop.stop_name);
             const destNameNormalized = normalizeStopNameForComparison(line.destination);
 
@@ -767,15 +836,20 @@ export class MapRenderer {
 
         let html = `<div class="stop-popup-v105">`;
 
-        // En-tête: nom de l'arrêt (évite le clic "à l'aveugle")
-        html += `<div class="popup-line-header"><span class="popup-stop-name">${masterStop.stop_name}</span></div>`;
+        // En-tête: nom de l'arrêt + badge temps réel si disponible
+        html += `<div class="popup-line-header">
+                    <span class="popup-stop-name">${masterStop.stop_name}</span>`;
+        if (hasRealtime) {
+            html += `<span class="realtime-badge">${REALTIME_ICON} Live</span>`;
+        }
+        html += `</div>`;
         
         // Notice si premiers départs
         if (isNextDayDepartures) {
             html += `<div class="popup-notice">Ces horaires sont prévisionnels et peuvent changer en cas de perturbation.</div>`;
         }
 
-        if (sortedLines.length === 0) {
+        if (sortedLines.length === 0 && !hasRealtime) {
             html += `<div class="popup-empty">
                         <span class="popup-empty-icon">🌙</span>
                         <span>Aucun passage prévu</span>
@@ -789,6 +863,9 @@ export class MapRenderer {
                 if (lineGroup.destinations.length === 0) {
                     return; // Passer à la ligne suivante
                 }
+                
+                // V25: Récupérer les temps réels pour cette ligne
+                const lineRealtime = realtimeByLine[routeName.toUpperCase()] || [];
                 
                 html += `<div class="popup-line-block">`;
                 
@@ -813,15 +890,73 @@ export class MapRenderer {
                                 </div>
                                 <div class="popup-times">`;
                     
-                    // Tous les horaires (pas de slice)
-                    dest.departures.forEach(dep => {
-                        html += `<span class="popup-time">${dep.time.substring(0, 5)}</span>`;
+                    // V25: Trouver les temps réel matchant cette destination
+                    const matchingRealtime = lineRealtime.filter(rt => {
+                        if (!rt.destination) return false;
+                        // Match partiel sur la destination
+                        const rtDest = rt.destination.toLowerCase();
+                        const staticDest = dest.destination.toLowerCase();
+                        return rtDest.includes(staticDest) || staticDest.includes(rtDest) ||
+                               rtDest.split(' ')[0] === staticDest.split(' ')[0]; // Premier mot identique
                     });
+                    
+                    let realtimeUsed = 0;
+                    
+                    // Afficher les horaires (temps réel en priorité, puis statiques)
+                    dest.departures.forEach((dep, idx) => {
+                        // V25: Vérifier s'il y a un temps réel correspondant
+                        if (matchingRealtime.length > realtimeUsed) {
+                            const rt = matchingRealtime[realtimeUsed];
+                            realtimeUsed++;
+                            // Afficher le temps réel en vert avec icône
+                            html += `<span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${rt.temps}</span>`;
+                        } else {
+                            // Horaire statique GTFS
+                            html += `<span class="popup-time">${dep.time.substring(0, 5)}</span>`;
+                        }
+                    });
+                    
+                    // V25: Afficher les temps réels restants (bus supplémentaires)
+                    for (let i = realtimeUsed; i < matchingRealtime.length && i < 3; i++) {
+                        const rt = matchingRealtime[i];
+                        html += `<span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${rt.temps}</span>`;
+                    }
                     
                     html += `</div></div>`;
                 });
                 
                 html += `</div>`;
+            });
+            
+            // V25: Ajouter les lignes temps réel non présentes dans GTFS
+            Object.keys(realtimeByLine).forEach(ligne => {
+                if (!sortedLines.map(l => l.toUpperCase()).includes(ligne)) {
+                    const rtData = realtimeByLine[ligne];
+                    if (rtData.length > 0) {
+                        // Couleurs par défaut pour les lignes
+                        const lineColors = { A: 'fdd003', B: '1e91ff', C: 'dd1b75', D: '41ae18' };
+                        const lineTextColors = { A: '000000', B: 'ffffff', C: 'ffffff', D: 'ffffff' };
+                        
+                        html += `<div class="popup-line-block">`;
+                        html += `<div class="popup-line-header">
+                                    <span class="popup-badge" style="background:#${lineColors[ligne] || '666666'};color:#${lineTextColors[ligne] || 'ffffff'};">${ligne}</span>
+                                    <span class="realtime-badge">${REALTIME_ICON} Live</span>
+                                 </div>`;
+                        
+                        rtData.forEach(rt => {
+                            html += `<div class="popup-dest-row">
+                                        <div class="popup-dest-name">
+                                            <span class="dest-label">Direction</span> ${rt.destination}
+                                        </div>
+                                        <div class="popup-times">
+                                            <span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${rt.temps}</span>
+                                        </div>
+                                     </div>`;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                }
             });
         }
 

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v256'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v256: Bundle GTFS corrigé avec shapes valides
+const CACHE_VERSION = 'v258'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v258: Ghost Mode scraper (Puppeteer Stealth)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

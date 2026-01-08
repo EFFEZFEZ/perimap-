@@ -9,6 +9,11 @@ public/data/gtfs/gtfs.bundle.json
 !public/data/gtfs/.gitkeep
 !public/data/.gitkeep
 
+# Node.js
+node_modules/
+package-lock.json
+.vercel/
+
 # OS files
 .DS_Store
 Thumbs.db

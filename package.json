@@ -1,0 +1,23 @@
+{
+  "name": "perimap",
+  "version": "2.0.0",
+  "description": "Périmap - Application de transport en commun Grand Périgueux",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build needed'",
+    "postinstall": "echo 'Dependencies installed'"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^131.0.0",
+    "puppeteer-core": "^23.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Périmap",
+  "license": "UNLICENSED"
+}
