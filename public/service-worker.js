@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v251'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V251: Cache bust bundle GTFS
+const CACHE_VERSION = 'v252'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V252: Fix tracés lignes via shapes GTFS
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
