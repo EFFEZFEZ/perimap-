@@ -559,12 +559,12 @@ export class DataManager {
     }
 
     async loadGeoJSON() {
-        const response = await fetch('/data/map.geojson?v=20260108', { cache: 'no-store' });
+        // Cache bust avec timestamp pour forcer le rechargement
+        const response = await fetch('/data/map.geojson?v=20260108');
         if (!response.ok) {
             console.warn(`⚠️  map.geojson non trouvé`);
             return null;
         }
-        console.log('✅ map.geojson chargé avec succès');
         return await response.json();
     }
 
