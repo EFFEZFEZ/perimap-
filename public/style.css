@@ -6665,26 +6665,25 @@ body.dark-theme .next-departures-label {
         background: var(--bg-main);
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.25);
-        height: var(--sheet-height, 20vh); /* V266: Défaut à 20% */
+        height: var(--sheet-height, 20vh); /* V267: Défaut à 20% */
         padding-top: 12px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
         transform: translate3d(0, 100%, 0);
-        /* V266: Transition ultra-fluide - height aussi pour le drag */
-        transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-                    height 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        /* V267: Transition UNIQUEMENT sur height (pas transform pendant drag) */
+        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
+                    height 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
         overflow: hidden;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
         z-index: 1200;
-        overflow-y: hidden;
-        overflow-x: hidden;
-        /* V266: GPU acceleration pour fluidité */
+        /* V267: GPU layer pour fluidité maximale */
         will-change: transform, height;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        contain: layout style;
-        -webkit-transform: translate3d(0, 100%, 0);
+        transform-style: preserve-3d;
+        /* V267: Touch optimization */
+        touch-action: none;
     }
     
     /* Handle grise iPhone-style */
@@ -6722,12 +6721,11 @@ body.dark-theme .next-departures-label {
         transform: translate3d(0, 100%, 0);
     }
     #detail-bottom-sheet.is-dragging {
-        /* V266: Pendant le drag, PAS de transition = suivi instantané du doigt */
-        transition: none !important;
+        /* V267: Pendant le drag - micro-transition pour fluidité perçue */
+        transition: height 0.06s linear !important;
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
-        will-change: height;
     }
 
     #detail-bottom-sheet.sheet-height-no-transition {

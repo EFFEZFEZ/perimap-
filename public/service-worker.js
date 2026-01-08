@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v266'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v266: Bottom sheet 20/50/80%, anti-sautillement, fluidité drag
+const CACHE_VERSION = 'v267'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v267: Drag fluide 60fps rAF, fallback coords lignes scolaires
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

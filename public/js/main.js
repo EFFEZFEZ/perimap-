@@ -853,39 +853,56 @@ function onBottomSheetPointerDown(event) {
 function onBottomSheetPointerMove(event) {
     if (!bottomSheetDragState || !detailBottomSheet) return;
     event.preventDefault();
-    const viewportHeight = getViewportHeight();
-    if (!viewportHeight) return;
-    const deltaY = bottomSheetDragState.startY - event.clientY;
     
-    // V266: Anti-sautillement - ignorer les micro-mouvements (< 8px)
-    if (!bottomSheetDragState.hasMoved && Math.abs(deltaY) < 8) {
-        return; // Pas encore un vrai drag
-    }
+    // V267: Stocker les valeurs pour le prochain frame
+    bottomSheetDragState.pendingClientY = event.clientY;
     
-    // V266: Premier vrai mouvement détecté
-    if (!bottomSheetDragState.hasMoved) {
-        bottomSheetDragState.hasMoved = true;
-        bottomSheetDragState.isDragging = true;
-        detailBottomSheet.classList.add('is-dragging');
-        itineraryDetailContainer?.classList.add('sheet-is-dragging');
+    // V267: Throttle via requestAnimationFrame pour fluidité 60fps
+    if (!bottomSheetDragState.rafPending) {
+        bottomSheetDragState.rafPending = true;
+        requestAnimationFrame(() => {
+            if (!bottomSheetDragState) return;
+            bottomSheetDragState.rafPending = false;
+            
+            const viewportHeight = getViewportHeight();
+            if (!viewportHeight) return;
+            
+            const deltaY = bottomSheetDragState.startY - bottomSheetDragState.pendingClientY;
+            
+            // Anti-sautillement - ignorer les micro-mouvements (< 8px)
+            if (!bottomSheetDragState.hasMoved && Math.abs(deltaY) < 8) {
+                return;
+            }
+            
+            // Premier vrai mouvement détecté
+            if (!bottomSheetDragState.hasMoved) {
+                bottomSheetDragState.hasMoved = true;
+                bottomSheetDragState.isDragging = true;
+                detailBottomSheet.classList.add('is-dragging');
+                itineraryDetailContainer?.classList.add('sheet-is-dragging');
+            }
+            
+            const minHeight = viewportHeight * BOTTOM_SHEET_LEVELS[0];
+            const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
+            let nextHeight = bottomSheetDragState.startHeight + deltaY;
+            nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
+            
+            const now = performance.now();
+            if (bottomSheetDragState.lastHeight !== null) {
+                const deltaHeight = nextHeight - bottomSheetDragState.lastHeight;
+                const elapsed = now - (bottomSheetDragState.lastEventTime || now);
+                if (elapsed > 0) {
+                    bottomSheetDragState.velocity = deltaHeight / elapsed;
+                }
+            }
+            bottomSheetDragState.lastHeight = nextHeight;
+            bottomSheetDragState.lastClientY = bottomSheetDragState.pendingClientY;
+            bottomSheetDragState.lastEventTime = now;
+            
+            // V267: Une seule écriture DOM par frame
+            detailBottomSheet.style.setProperty('--sheet-height', `${Math.round(nextHeight)}px`);
+        });
     }
-    
-    const minHeight = viewportHeight * BOTTOM_SHEET_LEVELS[0];
-    const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
-    let nextHeight = bottomSheetDragState.startHeight + deltaY;
-    nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
-    const now = performance.now();
-    if (bottomSheetDragState.lastHeight !== null) {
-        const deltaHeight = nextHeight - bottomSheetDragState.lastHeight;
-        const elapsed = now - (bottomSheetDragState.lastEventTime || now);
-        if (elapsed > 0) {
-            bottomSheetDragState.velocity = deltaHeight / elapsed;
-        }
-    }
-    bottomSheetDragState.lastHeight = nextHeight;
-    bottomSheetDragState.lastClientY = event.clientY;
-    bottomSheetDragState.lastEventTime = now;
-    detailBottomSheet.style.setProperty('--sheet-height', `${nextHeight}px`);
 }
 
 function onBottomSheetPointerUp() {
@@ -3150,12 +3167,41 @@ async function ensureItineraryPolylines(itineraries) {
                     const arr = arrStopObj
                         ? { lat: parseFloat(arrStopObj.stop_lat), lon: parseFloat(arrStopObj.stop_lon) }
                         : (resolvedArrCoords ? { lat: resolvedArrCoords.lat, lon: resolvedArrCoords.lng } : null);
-                    if (dep && arr && !Number.isNaN(dep.lat) && !Number.isNaN(arr.lat)) {
-                        latLngPoints = [[dep.lat, dep.lon], [arr.lat, arr.lon]];
+                    
+                    // V267: Fallback ultime - utiliser les coords de l'itinéraire global si dispo
+                    let finalDep = dep;
+                    let finalArr = arr;
+                    
+                    if (!finalDep && itin.origin) {
+                        const o = itin.origin;
+                        if (o.lat && o.lng) finalDep = { lat: o.lat, lon: o.lng };
+                        else if (o.latitude && o.longitude) finalDep = { lat: o.latitude, lon: o.longitude };
+                    }
+                    if (!finalArr && itin.destination) {
+                        const d = itin.destination;
+                        if (d.lat && d.lng) finalArr = { lat: d.lat, lon: d.lng };
+                        else if (d.latitude && d.longitude) finalArr = { lat: d.latitude, lon: d.longitude };
+                    }
+                    
+                    // V267: Essayer aussi les coordonnées de step directement
+                    if (!finalDep && step.departureLocation) {
+                        const loc = step.departureLocation;
+                        if (loc.lat !== undefined) finalDep = { lat: loc.lat, lon: loc.lng || loc.lon };
+                        else if (loc.latLng) finalDep = { lat: loc.latLng.latitude, lon: loc.latLng.longitude };
+                    }
+                    if (!finalArr && step.arrivalLocation) {
+                        const loc = step.arrivalLocation;
+                        if (loc.lat !== undefined) finalArr = { lat: loc.lat, lon: loc.lng || loc.lon };
+                        else if (loc.latLng) finalArr = { lat: loc.latLng.latitude, lon: loc.latLng.longitude };
+                    }
+                    
+                    if (finalDep && finalArr && !Number.isNaN(finalDep.lat) && !Number.isNaN(finalArr.lat)) {
+                        latLngPoints = [[finalDep.lat, finalDep.lon], [finalArr.lat, finalArr.lon]];
                         encoded = encodePolyline(latLngPoints);
                         console.log('ensureItineraryPolylines: fallback polyline directe utilisée', {
                             itinId: itin.tripId || itin.trip?.trip_id || null,
-                            stepRoute: routeId
+                            stepRoute: routeId,
+                            source: 'coords-fallback'
                         });
                     }
                 }
