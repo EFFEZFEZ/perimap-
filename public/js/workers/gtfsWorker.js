@@ -4,9 +4,10 @@
  */
 import { cleanDataset, buildGtfsIndexes } from '../utils/gtfsProcessor.js';
 
+const BUNDLE_VERSION = '20260108'; // Version du bundle GTFS - change à chaque mise à jour
 const OPTIMIZED_BUNDLE_CANDIDATES = [
-    { url: '/data/gtfs/gtfs.bundle.json.gz', type: 'gzip' },
-    { url: '/data/gtfs/gtfs.bundle.json', type: 'json' }
+    { url: `/data/gtfs/gtfs.bundle.json.gz?v=${BUNDLE_VERSION}`, type: 'gzip' },
+    { url: `/data/gtfs/gtfs.bundle.json?v=${BUNDLE_VERSION}`, type: 'json' }
 ];
 const GTFS_FILES = [
     { file: 'routes.txt', key: 'routes' },
