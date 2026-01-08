@@ -465,58 +465,6 @@
 }
 
 /* ==========================================================================
-   Quick Menu for Main App (index.html)
-   ========================================================================== */
-
-/* Version pour l'app principale - ne s'affiche que sur mobile */
-.app-quick-lines {
-    display: none;
-}
-
-@media (max-width: 768px) {
-    .app-quick-lines {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        padding: 12px 16px;
-        margin: 12px 0;
-        background: var(--card-bg);
-        border-radius: 12px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .app-quick-lines::-webkit-scrollbar {
-        display: none;
-    }
-
-    .app-quick-line {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        font-weight: 700;
-        font-size: 16px;
-        text-decoration: none;
-        flex-shrink: 0;
-        transition: transform 0.15s ease;
-    }
-
-    .app-quick-line:hover,
-    .app-quick-line:active {
-        transform: scale(1.1);
-    }
-
-    .app-quick-line.line-a { background: var(--line-a-color); color: var(--line-a-text); }
-    .app-quick-line.line-b { background: var(--line-b-color); color: var(--line-b-text); }
-    .app-quick-line.line-c { background: var(--line-c-color); color: var(--line-c-text); }
-    .app-quick-line.line-d { background: var(--line-d-color); color: var(--line-d-text); }
-    .app-quick-line.line-n { background: var(--line-n-color); color: var(--line-n-text); }
-}
-
-/* ==========================================================================
    Animation d'entrée
    ========================================================================== */
 
