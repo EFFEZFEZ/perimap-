@@ -14,7 +14,7 @@ import { hasMeaningfulGtfsTime, isLastStopOfTrip } from './utils/tripStopTimes.m
  */
 
 const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v2';
-const GTFS_CACHE_VERSION = '2.11.0';  // V110: Fix mode arriver (filtrage sur heure d'arrivée)
+const GTFS_CACHE_VERSION = '2.12.0';  // V120: Mise à jour calendar.txt 2026 + fallback intelligent
 const GTFS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 heures (augmenté pour moins de rechargements)
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
