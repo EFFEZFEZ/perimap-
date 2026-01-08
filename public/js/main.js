@@ -4176,23 +4176,24 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
 }
 
 
-// *** NOUVELLE FONCTION V33 ***
+// *** NOUVELLE FONCTION V33 + V264 (Optimisée) ***
 function hideDetailView() {
     if (!itineraryDetailContainer) return;
     
-    // 1. D'abord, lancer l'animation de fermeture du backdrop
+    // 1. Lancer l'animation de fermeture immédiatement (GPU-optimisée)
     if (itineraryDetailBackdrop) {
         itineraryDetailBackdrop.classList.remove('is-active');
     }
-    
-    // 2. Retirer is-active pour déclencher l'animation de fermeture du bottom sheet
     itineraryDetailContainer.classList.remove('is-active');
     itineraryDetailContainer.classList.remove('is-scrolled');
     
-    // 3. Annuler tout drag en cours
+    // 2. Annuler tout drag en cours
     cancelBottomSheetDrag();
     
-    // 4. Attendre la fin de la transition CSS AVANT de cacher et reset
+    // 3. Débloquer le scroll IMMÉDIATEMENT (pas d'attente)
+    document.body.classList.remove('detail-view-open');
+    
+    // 4. Attendre la transition CSS AVANT de nettoyer le contenu
     setTimeout(() => {
         resetDetailViewState();
     }, DETAIL_SHEET_TRANSITION_MS);
@@ -4200,9 +4201,6 @@ function hideDetailView() {
 
 function resetDetailViewState() {
     if (!itineraryDetailContainer) return;
-    
-    // Débloquer le scroll du body
-    document.body.classList.remove('detail-view-open');
     
     itineraryDetailContainer.classList.add('hidden');
     itineraryDetailContainer.classList.remove('is-active');

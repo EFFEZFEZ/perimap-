@@ -206,12 +206,32 @@ export function extractStepPolylines(step) {
         if (poly) collected.push(poly);
     };
     
+    // Priorité 1: BUS avec polyline directe
     if (step.type === 'BUS') {
         pushIfValid(step?.polyline);
-    } else if (Array.isArray(step.polylines) && step.polylines.length) {
+    }
+    // Priorité 2: Tableau polylines (WALK multi-segments)
+    else if (Array.isArray(step.polylines) && step.polylines.length) {
         step.polylines.forEach(pushIfValid);
-    } else {
+    }
+    // Priorité 3: Polyline unique
+    else {
         pushIfValid(step?.polyline);
+    }
+    
+    // Fallback: chercher dans les substeps si aucune polyline trouvée
+    if (collected.length === 0 && step.subSteps && step.subSteps.length > 0) {
+        step.subSteps.forEach(subStep => {
+            pushIfValid(subStep?.polyline);
+            if (Array.isArray(subStep?.polylines)) {
+                subStep.polylines.forEach(pushIfValid);
+            }
+        });
+    }
+    
+    // Debug pour itinéraires multi-correspondances
+    if (collected.length === 0 && step.type !== 'WAIT') {
+        console.warn('[Polyline] Aucune polyline trouvée pour step:', step.type, step.instruction);
     }
     
     return collected;

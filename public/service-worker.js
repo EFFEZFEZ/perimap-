@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v263'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v263: Force GTFS cache v6 reload
+const CACHE_VERSION = 'v264'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v264: Bottom sheet fluide + tracés fix
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
