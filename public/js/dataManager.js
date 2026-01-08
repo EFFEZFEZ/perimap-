@@ -1469,5 +1469,62 @@ export class DataManager {
 
         return null;
     }
+
+    /**
+     * Génère un GeoJSON à partir des shapes GTFS pour l'affichage des tracés
+     * Cette fonction est utilisée comme fallback si map.geojson n'existe pas
+     */
+    generateGeoJsonFromShapes() {
+        if (!this.shapesById || Object.keys(this.shapesById).length === 0) {
+            console.warn('❌ Pas de shapes disponibles pour générer le GeoJSON');
+            return null;
+        }
+
+        const features = [];
+        const processedRoutes = new Set();
+
+        // Pour chaque trip, créer une feature GeoJSON avec le shape correspondant
+        this.trips.forEach(trip => {
+            const shapeId = trip.shape_id;
+            const routeId = trip.route_id;
+            
+            if (!shapeId || !this.shapesById[shapeId]) return;
+            
+            // Éviter les doublons : un seul tracé par route + direction
+            const key = `${routeId}_${trip.direction_id || 0}`;
+            if (processedRoutes.has(key)) return;
+            processedRoutes.add(key);
+
+            const route = this.routesById[routeId];
+            if (!route) return;
+
+            const coordinates = this.shapesById[shapeId];
+            if (!coordinates || coordinates.length < 2) return;
+
+            features.push({
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coordinates
+                },
+                properties: {
+                    route_id: routeId,
+                    shape_id: shapeId,
+                    route_short_name: route.route_short_name,
+                    route_long_name: route.route_long_name,
+                    route_color: route.route_color,
+                    route_text_color: route.route_text_color,
+                    direction_id: trip.direction_id || 0
+                }
+            });
+        });
+
+        console.log(`✅ GeoJSON généré: ${features.length} tracés à partir des shapes GTFS`);
+
+        return {
+            type: 'FeatureCollection',
+            features: features
+        };
+    }
 }
 

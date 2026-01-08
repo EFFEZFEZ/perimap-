@@ -493,8 +493,17 @@ async function initializeApp() {
             console.warn('Impossible d’optimiser le stockage des stop_times:', error);
         }
         
-        if (dataManager.geoJson) {
-            mapRenderer.displayMultiColorRoutes(dataManager.geoJson, dataManager, visibleRoutes);
+        // Afficher les tracés des lignes
+        let geoJsonData = dataManager.geoJson;
+        if (!geoJsonData && dataManager.hasShapeData()) {
+            console.log('🔄 map.geojson absent, génération à partir des shapes GTFS...');
+            geoJsonData = dataManager.generateGeoJsonFromShapes();
+            dataManager.geoJson = geoJsonData; // Mémoriser pour utilisation ultérieure
+        }
+        if (geoJsonData) {
+            mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
+        } else {
+            console.warn('⚠️ Aucun tracé disponible (ni map.geojson ni shapes.txt)');
         }
 
         mapRenderer.displayStops();
@@ -4369,8 +4378,10 @@ function handleRouteFilterChange() {
         const checkbox = document.getElementById(`route-${route.route_id}`);
         if (checkbox && checkbox.checked) { visibleRoutes.add(route.route_id); }
     });
-    if (dataManager.geoJson) {
-        mapRenderer.displayMultiColorRoutes(dataManager.geoJson, dataManager, visibleRoutes);
+    // Afficher les tracés avec geoJson existant ou généré à partir des shapes
+    const geoJsonData = dataManager.geoJson;
+    if (geoJsonData) {
+        mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
     }
     updateData();
 }
