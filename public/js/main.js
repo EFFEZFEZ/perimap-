@@ -98,7 +98,7 @@ let loadMoreOffset = 0; // Décalage en minutes pour charger plus
 
 let geolocationManager = null;
 
-const BOTTOM_SHEET_LEVELS = [0.4, 0.9]; // Seulement 2 niveaux: peek (40%) et expanded (90%)
+const BOTTOM_SHEET_LEVELS = [0.2, 0.5, 0.8]; // V266: 3 niveaux: peek (20%), mid (50%), expanded (80%)
 import { getAppConfig } from './config.js';
 import { deduplicateItineraries, rankArrivalItineraries, rankDepartureItineraries, filterExpiredDepartures, filterLateArrivals, limitBikeWalkItineraries, countBusItineraries, getMinBusItineraries } from './itinerary/ranking.js';
 import { normalizeStopNameForLookup, resolveStopCoordinates } from './utils/geo.js';
@@ -109,7 +109,7 @@ const APP_CONFIG = getAppConfig();
 const GOOGLE_API_KEY = APP_CONFIG.googleApiKey; // dynamique (config.js), jamais hardcodé ici
 ARRIVAL_PAGE_SIZE = APP_CONFIG.arrivalPageSize || ARRIVAL_PAGE_SIZE; // surcharge si fourni
 const BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD = 4; // px tolerance before locking drag
-const BOTTOM_SHEET_EXPANDED_LEVEL_INDEX = 1; // Index du niveau expanded (80%)
+const BOTTOM_SHEET_EXPANDED_LEVEL_INDEX = 2; // V266: Index du niveau expanded (80%) = index 2
 const BOTTOM_SHEET_VELOCITY_THRESHOLD = 0.35; // px per ms
 const BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX = 45; // px delta before forcing next snap
 const BOTTOM_SHEET_DRAG_BUFFER_PX = 20; // Zone au-dessus du sheet où on peut commencer le drag
@@ -839,10 +839,11 @@ function onBottomSheetPointerDown(event) {
         lastHeight: null,
         lastEventTime: performance.now(),
         velocity: 0,
-        startIndex: currentBottomSheetLevelIndex
+        startIndex: currentBottomSheetLevelIndex,
+        hasMoved: false, // V266: Anti-sautillement - ne pas changer tant qu'on n'a pas bougé
+        isDragging: false // V266: Vraiment en train de drag?
     };
-    detailBottomSheet.classList.add('is-dragging');
-    itineraryDetailContainer?.classList.add('sheet-is-dragging');
+    // V266: Ne pas ajouter is-dragging immédiatement (évite le saut)
     try { detailBottomSheet.setPointerCapture(event.pointerId); } catch (_) { /* ignore */ }
     window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
     window.addEventListener('pointerup', onBottomSheetPointerUp);
@@ -855,6 +856,20 @@ function onBottomSheetPointerMove(event) {
     const viewportHeight = getViewportHeight();
     if (!viewportHeight) return;
     const deltaY = bottomSheetDragState.startY - event.clientY;
+    
+    // V266: Anti-sautillement - ignorer les micro-mouvements (< 8px)
+    if (!bottomSheetDragState.hasMoved && Math.abs(deltaY) < 8) {
+        return; // Pas encore un vrai drag
+    }
+    
+    // V266: Premier vrai mouvement détecté
+    if (!bottomSheetDragState.hasMoved) {
+        bottomSheetDragState.hasMoved = true;
+        bottomSheetDragState.isDragging = true;
+        detailBottomSheet.classList.add('is-dragging');
+        itineraryDetailContainer?.classList.add('sheet-is-dragging');
+    }
+    
     const minHeight = viewportHeight * BOTTOM_SHEET_LEVELS[0];
     const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
     let nextHeight = bottomSheetDragState.startHeight + deltaY;
@@ -875,10 +890,13 @@ function onBottomSheetPointerMove(event) {
 
 function onBottomSheetPointerUp() {
     if (!bottomSheetDragState) return;
+    
+    const wasDragging = bottomSheetDragState.isDragging;
     const viewportHeight = getViewportHeight();
     let targetIndex = currentBottomSheetLevelIndex;
     
-    if (viewportHeight) {
+    // V266: Si on n'a pas vraiment bougé, ne rien changer
+    if (wasDragging && viewportHeight) {
         const appliedHeight = bottomSheetDragState.lastHeight ?? bottomSheetDragState.startHeight;
         const fraction = appliedHeight / viewportHeight;
         const closestIndex = getClosestSheetLevelIndex(fraction);
@@ -895,21 +913,27 @@ function onBottomSheetPointerUp() {
         }
     }
     
-    // 1. D'abord retirer is-dragging pour réactiver les transitions CSS
+    // 1. Nettoyer les listeners
     window.removeEventListener('pointermove', onBottomSheetPointerMove);
     window.removeEventListener('pointerup', onBottomSheetPointerUp);
     window.removeEventListener('pointercancel', onBottomSheetPointerUp);
     if (detailBottomSheet && bottomSheetDragState.pointerId !== undefined) {
         try { detailBottomSheet.releasePointerCapture(bottomSheetDragState.pointerId); } catch (_) { /* ignore */ }
     }
-    detailBottomSheet?.classList.remove('is-dragging');
-    itineraryDetailContainer?.classList.remove('sheet-is-dragging');
+    
+    // V266: Retirer is-dragging seulement si on l'avait ajouté
+    if (wasDragging) {
+        detailBottomSheet?.classList.remove('is-dragging');
+        itineraryDetailContainer?.classList.remove('sheet-is-dragging');
+    }
     bottomSheetDragState = null;
     
-    // 2. Attendre un frame pour que le navigateur réactive les transitions
-    requestAnimationFrame(() => {
-        applyBottomSheetLevel(targetIndex);
-    });
+    // 2. Appliquer le snap seulement si on a vraiment bougé
+    if (wasDragging) {
+        requestAnimationFrame(() => {
+            applyBottomSheetLevel(targetIndex);
+        });
+    }
 }
 
 function handleDetailPanelWheel(event) {
@@ -4179,6 +4203,10 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
             } catch (e) {
                 console.error("Erreur lors du fitBounds sur la carte détail:", e);
             }
+        } else if (detailMapRenderer.map) {
+            // V266: Fallback si pas de tracé - centrer sur Périgueux
+            console.warn('showItineraryDetailView: pas de routeLayer, centrage sur Périgueux');
+            detailMapRenderer.map.setView([45.1845, 0.7211], 13);
         }
         
     }, 10); // 10ms (Juste pour démarrer l'animation CSS)

@@ -6665,11 +6665,13 @@ body.dark-theme .next-departures-label {
         background: var(--bg-main);
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.25);
-        height: var(--sheet-height, 50vh);
+        height: var(--sheet-height, 20vh); /* V266: Défaut à 20% */
         padding-top: 12px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
         transform: translate3d(0, 100%, 0);
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        /* V266: Transition ultra-fluide - height aussi pour le drag */
+        transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    height 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         overflow: hidden;
         pointer-events: auto;
         display: flex;
@@ -6677,9 +6679,12 @@ body.dark-theme .next-departures-label {
         z-index: 1200;
         overflow-y: hidden;
         overflow-x: hidden;
-        will-change: transform;
+        /* V266: GPU acceleration pour fluidité */
+        will-change: transform, height;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
+        contain: layout style;
+        -webkit-transform: translate3d(0, 100%, 0);
     }
     
     /* Handle grise iPhone-style */
@@ -6717,10 +6722,12 @@ body.dark-theme .next-departures-label {
         transform: translate3d(0, 100%, 0);
     }
     #detail-bottom-sheet.is-dragging {
+        /* V266: Pendant le drag, PAS de transition = suivi instantané du doigt */
         transition: none !important;
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
+        will-change: height;
     }
 
     #detail-bottom-sheet.sheet-height-no-transition {
