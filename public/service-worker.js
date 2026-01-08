@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v253'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V253: SEO descriptions + logo Open Graph
+const CACHE_VERSION = 'v254'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - V254: Force cache bust map.geojson
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
