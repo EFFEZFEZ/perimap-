@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2025 Périmap. Tous droits réservés.
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 import { cleanDataset, buildGtfsIndexes } from './utils/gtfsProcessor.js';
@@ -13,8 +13,8 @@ import { hasMeaningfulGtfsTime, isLastStopOfTrip } from './utils/tripStopTimes.m
  * (matching flexible des noms)
  */
 
-const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v5';  // V5: Bundle GTFS corrigé - shapes corrects
-const GTFS_CACHE_VERSION = '5.0.0';  // V5.0: Shapes GTFS corrects depuis périmap test
+const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v6';  // V6: GTFS février 2026
+const GTFS_CACHE_VERSION = '6.0.0';  // V6.0: Calendrier valide jusqu'au 28 février 2026
 const GTFS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 heures (augmenté pour moins de rechargements)
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
