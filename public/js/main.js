@@ -4082,22 +4082,31 @@ function showMapView() {
 }
 
 function showDashboardHall() {
-    dashboardContainer.classList.remove('hidden');
-    itineraryResultsContainer.classList.add('hidden');
-    resetDetailViewState();
-    mapContainer.classList.add('hidden');
-    document.body.classList.remove('view-map-locked');
-    document.body.classList.remove('view-is-locked');
-    document.body.classList.remove('itinerary-view-active'); // V67
-    
-    if (dataManager) { 
-        renderAlertBanner(); 
-    }
-    dashboardContentView.classList.remove('view-is-active');
-    dashboardHall.classList.add('view-is-active');
-    document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
-        card.classList.remove('view-active');
+    // V265: Changement visuel IMMÉDIAT via requestAnimationFrame
+    requestAnimationFrame(() => {
+        // Cacher les conteneurs lourds visuellement d'abord
+        if (mapContainer) mapContainer.classList.add('hidden');
+        if (itineraryResultsContainer) itineraryResultsContainer.classList.add('hidden');
+        
+        // Afficher le hall
+        if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+        
+        // Nettoyage des classes body
+        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+        
+        // Gestion des vues internes
+        if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+        if (dashboardHall) dashboardHall.classList.add('view-is-active');
+        
+        // Retirer la classe active des cartes
+        document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
     });
+
+    // V265: Différer le nettoyage lourd pour UI instantanée
+    setTimeout(() => {
+        resetDetailViewState();
+        if (dataManager) renderAlertBanner();
+    }, 50);
 }
 
 function showResultsView() {
@@ -4202,19 +4211,24 @@ function hideDetailView() {
 function resetDetailViewState() {
     if (!itineraryDetailContainer) return;
     
+    // Masquage CSS pur
     itineraryDetailContainer.classList.add('hidden');
-    itineraryDetailContainer.classList.remove('is-active');
-    itineraryDetailContainer.classList.remove('is-scrolled');
+    itineraryDetailContainer.classList.remove('is-active', 'is-scrolled');
+    
+    // Nettoyage visuel du sheet
     if (detailBottomSheet) {
-        detailBottomSheet?.classList.remove('is-dragging');
+        detailBottomSheet.classList.remove('is-dragging', 'sheet-height-no-transition');
         itineraryDetailContainer?.classList.remove('sheet-is-dragging');
-        detailBottomSheet.classList.remove('sheet-height-no-transition');
         detailBottomSheet.style.removeProperty('--sheet-height');
     }
     resetDetailPanelScroll();
-    if (detailPanelContent) {
-        detailPanelContent.innerHTML = '';
+    
+    // V265: replaceChildren est plus rapide que innerHTML = ''
+    if (detailPanelContent && detailPanelContent.hasChildNodes()) {
+        detailPanelContent.replaceChildren();
     }
+    
+    // Nettoyage des layers Leaflet (rapide)
     if (currentDetailRouteLayer && detailMapRenderer?.map) {
         detailMapRenderer.map.removeLayer(currentDetailRouteLayer);
         currentDetailRouteLayer = null;

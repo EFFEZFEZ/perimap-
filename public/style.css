@@ -1725,7 +1725,7 @@ body.itinerary-view-active {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 1rem 1rem 1rem 2.75rem;
-    font-size: 0.95rem;
+    font-size: 16px; /* FORCE 16px pour empêcher le zoom iOS */
     color: #1e3a5f;
     width: 100%;
     transition: all 0.2s ease;
@@ -6695,6 +6695,20 @@ body.dark-theme .next-departures-label {
         border-radius: 2px;
         z-index: 10;
     }
+    
+    /* V265: Extension infinie du fond pour masquer le rebond élastique */
+    #detail-bottom-sheet::after {
+        content: '';
+        position: absolute;
+        bottom: -100vh;
+        left: 0;
+        right: 0;
+        height: 100vh;
+        background: #fff;
+        z-index: -1;
+        pointer-events: none;
+    }
+    
     #itinerary-detail-container.is-active #detail-bottom-sheet {
         transform: translate3d(0, 0, 0);
     }
@@ -9950,6 +9964,13 @@ body.dark-theme #detail-bottom-sheet {
 
 body.dark-theme #detail-bottom-sheet::before {
     background: rgba(255, 255, 255, 0.25);
+}
+
+/* V265: Extension infinie du fond dark mode */
+body.dark-theme #detail-bottom-sheet::after {
+    background: #0f172a;
+}
+
 body.dark-theme #detail-panel-content {
     background: #0f172a;
 }

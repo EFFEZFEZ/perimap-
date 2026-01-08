@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v264'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v264: Bottom sheet fluide + tracés fix
+const CACHE_VERSION = 'v265'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v265: UX mobile (16px inputs, ::after sheet, rAF retour)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
