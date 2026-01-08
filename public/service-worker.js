@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v254'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v254: Force reload map.geojson with cache bust
+const CACHE_VERSION = 'v255'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v255: Force total cache invalidation + dynamic geojson timestamp
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

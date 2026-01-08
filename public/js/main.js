@@ -495,13 +495,12 @@ async function initializeApp() {
         
         // Afficher les tracés des lignes
         let geoJsonData = dataManager.geoJson;
-        if (geoJsonData) {
-            console.log(`✅ GeoJSON chargé: ${geoJsonData.features?.length || 0} tracés`);
-            mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
-        } else if (dataManager.hasShapeData()) {
-            console.log('🔄 map.geojson absent, génération à partir des shapes GTFS en fallback...');
+        if (!geoJsonData && dataManager.hasShapeData()) {
+            console.log('🔄 map.geojson absent, génération à partir des shapes GTFS...');
             geoJsonData = dataManager.generateGeoJsonFromShapes();
-            dataManager.geoJson = geoJsonData;
+            dataManager.geoJson = geoJsonData; // Mémoriser pour utilisation ultérieure
+        }
+        if (geoJsonData) {
             mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
         } else {
             console.warn('⚠️ Aucun tracé disponible (ni map.geojson ni shapes.txt)');

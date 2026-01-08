@@ -111,11 +111,10 @@ async function fetchAndParseCsv(filename) {
 
 async function loadGeoJson() {
     try {
-        const response = await fetch('/data/map.geojson?v=20260108', { cache: 'no-store' });
+        const response = await fetch('/data/map.geojson', { cache: 'no-store' });
         if (!response.ok) {
             return null;
         }
-        console.log('✅ [Worker] map.geojson chargé');
         return await response.json();
     } catch (error) {
         console.warn('GeoJSON absent ou invalide.', error);

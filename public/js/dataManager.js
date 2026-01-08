@@ -13,8 +13,8 @@ import { hasMeaningfulGtfsTime, isLastStopOfTrip } from './utils/tripStopTimes.m
  * (matching flexible des noms)
  */
 
-const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v3';  // V3: Nouvelle clé pour forcer invalidation totale
-const GTFS_CACHE_VERSION = '3.0.0';  // V3.0: Calendar 2026 complet + fallback intelligent
+const GTFS_CACHE_KEY = 'peribus_gtfs_cache_v4';  // V4: Force invalidation - nouveau geojson
+const GTFS_CACHE_VERSION = '4.0.0';  // V4.0: Nouveau geojson tracés corrigés
 const GTFS_CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 heures (augmenté pour moins de rechargements)
 const GTFS_CACHE_META_KEY = 'peribus_gtfs_cache_meta';
 const GTFS_CACHE_DB = 'peribus_gtfs_cache_db';
@@ -559,8 +559,8 @@ export class DataManager {
     }
 
     async loadGeoJSON() {
-        // Cache bust avec timestamp pour forcer le rechargement
-        const response = await fetch('/data/map.geojson?v=20260108');
+        // Cache bust avec timestamp unique pour forcer le rechargement
+        const response = await fetch('/data/map.geojson?v=' + Date.now());
         if (!response.ok) {
             console.warn(`⚠️  map.geojson non trouvé`);
             return null;
