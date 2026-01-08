@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v268'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v268: Bottom sheet transform GPU (plus de height!)
+const CACHE_VERSION = 'v269'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v269: Fix bottom sheet niveaux (is-active + classes)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -720,9 +720,9 @@ function getViewportHeight() {
     return Math.max(window.innerHeight, document.documentElement?.clientHeight || 0);
 }
 
-// V268: Niveaux en % de translateY (100% = caché, 0% = full visible)
-// 80% = 20% visible, 50% = 50% visible, 15% = 85% visible
-const SHEET_TRANSLATE_LEVELS = [80, 50, 15]; // Correspondance avec BOTTOM_SHEET_LEVELS [0.2, 0.5, 0.8]
+// V269: Niveaux en % de translateY (100% = caché, 0% = full visible)
+// Correspondance CSS: sheet-level-0 = 80%, sheet-level-1 = 50%, sheet-level-2 = 10%
+const SHEET_TRANSLATE_LEVELS = [80, 50, 10];
 
 function getCurrentSheetTranslateY() {
     if (!detailBottomSheet) return 100;
@@ -4246,10 +4246,11 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
     initBottomSheetControls();
     cancelBottomSheetDrag();
     currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
-    prepareBottomSheetForViewport(true);
+    
     itineraryDetailContainer.classList.remove('hidden');
     itineraryDetailContainer.classList.remove('is-scrolled');
     resetDetailPanelScroll();
+    
     if (itineraryDetailBackdrop) {
         itineraryDetailBackdrop.classList.remove('hidden');
         requestAnimationFrame(() => itineraryDetailBackdrop.classList.add('is-active'));
@@ -4260,29 +4261,28 @@ function showDetailView(routeLayer) { // ✅ V48: Accepte routeLayer en argument
         detailMapRenderer.map.invalidateSize();
     }
 
-    // Force l'animation
-    setTimeout(() => {
-        itineraryDetailContainer.classList.add('is-active');
+    // V269: Ajouter is-active AVANT d'appliquer le niveau
+    itineraryDetailContainer.classList.add('is-active');
+    
+    // V269: Appliquer le niveau APRÈS is-active pour que le CSS fonctionne
+    requestAnimationFrame(() => {
+        prepareBottomSheetForViewport(false); // false = avec transition
         
-        // ✅ V48 (MODIFICATION IMPLÉMENTÉE):
-        // Zoome sur le trajet APRÈS que la carte soit visible et ait une taille
+        // ✅ V48: Zoomer sur le trajet
         if (routeLayer && detailMapRenderer.map) {
             try {
                 const bounds = routeLayer.getBounds();
                 if (bounds.isValid()) {
-                    // Ce zoom se produit maintenant au bon moment
                     detailMapRenderer.map.fitBounds(bounds, { padding: [20, 20] });
                 }
             } catch (e) {
                 console.error("Erreur lors du fitBounds sur la carte détail:", e);
             }
         } else if (detailMapRenderer.map) {
-            // V266: Fallback si pas de tracé - centrer sur Périgueux
             console.warn('showItineraryDetailView: pas de routeLayer, centrage sur Périgueux');
             detailMapRenderer.map.setView([45.1845, 0.7211], 13);
         }
-        
-    }, 10); // 10ms (Juste pour démarrer l'animation CSS)
+    });
 }
 
 
