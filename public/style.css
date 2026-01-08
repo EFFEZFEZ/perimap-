@@ -6666,15 +6666,15 @@ body.dark-theme .next-departures-label {
         background: var(--bg-main);
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.25);
-        /* V269: Hauteur FIXE à 100%, on translate pour montrer/cacher */
+        /* V272: Hauteur FIXE à 100%, on translate pour montrer/cacher */
         height: 100%;
         max-height: 90vh;
         padding-top: 12px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
-        /* V269: Position par défaut = caché */
+        /* V272: Position par défaut = caché */
         transform: translate3d(0, 100%, 0);
-        /* V269: Transition GPU-only sur transform = 60fps garanti */
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        /* V272: Transition Apple-style - spring curve */
+        transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
         overflow: hidden;
         pointer-events: auto;
         display: flex;

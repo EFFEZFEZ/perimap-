@@ -926,33 +926,37 @@ function onBottomSheetPointerUp() {
     const wasDragging = bottomSheetDragState.isDragging;
     let targetIndex = currentBottomSheetLevelIndex;
     
-    // V268: Calculer l'index cible basé sur le translateY actuel
+    // V272: Calculer l'index cible - UN SEUL NIVEAU À LA FOIS
     if (wasDragging) {
         const currentTranslate = bottomSheetDragState.currentTranslateY;
+        const startIndex = bottomSheetDragState.startIndex;
         const velocity = bottomSheetDragState.velocity || 0;
+        const deltaFromStart = bottomSheetDragState.startTranslateY - currentTranslate;
         
-        // Trouver le niveau le plus proche
-        let closestIndex = 0;
-        let closestDist = Infinity;
-        SHEET_TRANSLATE_LEVELS.forEach((level, idx) => {
-            const dist = Math.abs(currentTranslate - level);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestIndex = idx;
-            }
-        });
+        // V272: Par défaut, rester au niveau de départ
+        targetIndex = startIndex;
         
-        targetIndex = closestIndex;
+        // V272: Logique SNCF Connect - un seul niveau à la fois
+        // Seuil de distance : 15% du viewport pour changer de niveau
+        const SNAP_THRESHOLD_PERCENT = 15;
+        // Seuil de vélocité : 0.3% par ms
+        const VELOCITY_THRESHOLD = 0.3;
         
-        // V268: Si vélocité significative, aller dans la direction du swipe
-        // Vélocité négative = swipe vers le haut = niveau supérieur
-        if (Math.abs(velocity) > 0.05) { // % par ms
-            if (velocity < 0 && targetIndex < SHEET_TRANSLATE_LEVELS.length - 1) {
-                targetIndex++;
-            } else if (velocity > 0 && targetIndex > 0) {
-                targetIndex--;
+        // Swipe vers le HAUT (deltaFromStart > 0 = translateY diminue = plus visible)
+        if (deltaFromStart > SNAP_THRESHOLD_PERCENT || velocity < -VELOCITY_THRESHOLD) {
+            // Monter d'UN SEUL niveau (si possible)
+            if (startIndex < SHEET_TRANSLATE_LEVELS.length - 1) {
+                targetIndex = startIndex + 1;
             }
         }
+        // Swipe vers le BAS (deltaFromStart < 0 = translateY augmente = moins visible)
+        else if (deltaFromStart < -SNAP_THRESHOLD_PERCENT || velocity > VELOCITY_THRESHOLD) {
+            // Descendre d'UN SEUL niveau (si possible)
+            if (startIndex > 0) {
+                targetIndex = startIndex - 1;
+            }
+        }
+        // Sinon : retour au niveau de départ (rubber band)
     }
     
     // 1. Nettoyer les listeners
@@ -963,21 +967,28 @@ function onBottomSheetPointerUp() {
         try { detailBottomSheet.releasePointerCapture(bottomSheetDragState.pointerId); } catch (_) { /* ignore */ }
     }
     
-    // V268: Retirer is-dragging et le transform inline
-    if (wasDragging) {
-        detailBottomSheet?.classList.remove('is-dragging');
+    // V272: Fix scintillement - appliquer la classe AVANT de retirer is-dragging
+    if (wasDragging && detailBottomSheet) {
+        // 1. D'abord appliquer la classe du niveau cible (pendant que is-dragging est encore là)
+        detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
+        detailBottomSheet.classList.add(`sheet-level-${targetIndex}`);
+        currentBottomSheetLevelIndex = targetIndex;
+        
+        // 2. Gérer is-expanded
+        if (targetIndex >= BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
+            detailBottomSheet.classList.add('is-expanded');
+        } else {
+            detailBottomSheet.classList.remove('is-expanded');
+            if (detailPanelWrapper) detailPanelWrapper.scrollTop = 0;
+        }
+        
+        // 3. PUIS retirer is-dragging et le transform inline dans le même frame
+        detailBottomSheet.classList.remove('is-dragging');
+        detailBottomSheet.style.removeProperty('transform');
         itineraryDetailContainer?.classList.remove('sheet-is-dragging');
-        // Retirer le transform inline pour laisser le CSS prendre le relais
-        detailBottomSheet?.style.removeProperty('transform');
     }
-    bottomSheetDragState = null;
     
-    // 2. Appliquer le snap avec la belle transition CSS
-    if (wasDragging) {
-        requestAnimationFrame(() => {
-            applyBottomSheetLevel(targetIndex);
-        });
-    }
+    bottomSheetDragState = null;
 }
 
 function handleDetailPanelWheel(event) {
