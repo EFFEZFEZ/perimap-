@@ -617,8 +617,42 @@ export class DataManager {
             }
         });
 
+        // ✅ FALLBACK INTELLIGENT: Si aucun service n'est trouvé, utiliser les services du même jour de la semaine
+        // de la période la plus récente disponible dans calendar.txt
         if (activeServiceIds.size === 0) {
-            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString}`);
+            console.warn(`⚠️  AUCUN SERVICE ACTIF pour le ${dateString} (${dayOfWeek})`);
+            console.warn(`🔄 Activation du fallback: recherche des services pour ${dayOfWeek} dans la période la plus récente`);
+            
+            // Trouver la période la plus récente qui a des services pour ce jour de la semaine
+            let mostRecentEndDate = null;
+            this.calendar.forEach(s => {
+                const dayActive = s[dayOfWeek] === '1' || s[dayOfWeek] === 1;
+                if (dayActive && s.end_date) {
+                    if (!mostRecentEndDate || s.end_date > mostRecentEndDate) {
+                        mostRecentEndDate = s.end_date;
+                    }
+                }
+            });
+
+            if (mostRecentEndDate) {
+                console.log(`📅 Période la plus récente trouvée: jusqu'au ${mostRecentEndDate}`);
+                
+                // Utiliser les services de ce jour de la semaine, sans vérifier la plage de dates
+                this.calendar.forEach(s => {
+                    const dayActive = s[dayOfWeek] === '1' || s[dayOfWeek] === 1;
+                    const notRemoved = !removedServiceIds.has(s.service_id);
+                    
+                    if (dayActive && notRemoved) {
+                        activeServiceIds.add(s.service_id);
+                    }
+                });
+                
+                if (activeServiceIds.size > 0) {
+                    console.log(`✅ Fallback réussi: ${activeServiceIds.size} service(s) activé(s) pour ${dayOfWeek}`);
+                }
+            } else {
+                console.error(`❌ Aucun service trouvé pour ${dayOfWeek} dans calendar.txt`);
+            }
         }
         
         return activeServiceIds;
