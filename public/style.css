@@ -6657,6 +6657,7 @@ body.dark-theme .next-departures-label {
 
     /* Le fond de carte reste toujours interactif */
 
+    /* V268: Bottom Sheet avec transform au lieu de height = ULTRA FLUIDE */
     #detail-bottom-sheet {
         position: absolute;
         left: 0;
@@ -6665,25 +6666,37 @@ body.dark-theme .next-departures-label {
         background: var(--bg-main);
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.25);
-        height: var(--sheet-height, 20vh); /* V267: Défaut à 20% */
+        /* V268: Hauteur FIXE à 100%, on translate pour montrer/cacher */
+        height: 100%;
+        max-height: 85vh; /* Ne jamais dépasser 85% du viewport */
         padding-top: 12px;
         padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+        /* V268: Position par défaut = caché (translateY 100%) */
         transform: translate3d(0, 100%, 0);
-        /* V267: Transition UNIQUEMENT sur height (pas transform pendant drag) */
-        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
-                    height 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+        /* V268: Transition GPU-only sur transform = 60fps garanti */
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
         overflow: hidden;
         pointer-events: auto;
         display: flex;
         flex-direction: column;
         z-index: 1200;
-        /* V267: GPU layer pour fluidité maximale */
-        will-change: transform, height;
+        /* V268: GPU compositing */
+        will-change: transform;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         transform-style: preserve-3d;
-        /* V267: Touch optimization */
-        touch-action: none;
+        contain: layout style paint;
+    }
+    
+    /* V268: Niveaux du sheet via transform (pas height!) */
+    #detail-bottom-sheet.sheet-level-0 {
+        transform: translate3d(0, 80%, 0); /* 20% visible */
+    }
+    #detail-bottom-sheet.sheet-level-1 {
+        transform: translate3d(0, 50%, 0); /* 50% visible */
+    }
+    #detail-bottom-sheet.sheet-level-2 {
+        transform: translate3d(0, 15%, 0); /* 85% visible */
     }
     
     /* Handle grise iPhone-style */
@@ -6714,22 +6727,24 @@ body.dark-theme .next-departures-label {
     }
     
     #itinerary-detail-container.is-active #detail-bottom-sheet {
-        transform: translate3d(0, 0, 0);
+        /* V268: Quand actif, appliquer le niveau courant (géré par JS via classes) */
+        /* La classe sheet-level-X définit la position exacte */
     }
     
     #itinerary-detail-container:not(.is-active) #detail-bottom-sheet {
-        transform: translate3d(0, 100%, 0);
+        transform: translate3d(0, 100%, 0) !important; /* Caché */
     }
+    
     #detail-bottom-sheet.is-dragging {
-        /* V267: Pendant le drag - micro-transition pour fluidité perçue */
-        transition: height 0.06s linear !important;
+        /* V268: Pendant le drag = PAS de transition, suivi 1:1 du doigt */
+        transition: none !important;
         touch-action: none;
         user-select: none;
         -webkit-user-select: none;
     }
 
     #detail-bottom-sheet.sheet-height-no-transition {
-        transition: transform 0.3s ease-in-out, height 0s;
+        transition: none !important;
     }
 
     #detail-bottom-sheet .panel-handle {

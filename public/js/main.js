@@ -720,27 +720,38 @@ function getViewportHeight() {
     return Math.max(window.innerHeight, document.documentElement?.clientHeight || 0);
 }
 
-function getCurrentSheetHeightPx() {
-    if (!detailBottomSheet) return 0;
-    const inlineValue = parseFloat(detailBottomSheet.style.getPropertyValue('--sheet-height'));
-    if (Number.isFinite(inlineValue)) {
-        return inlineValue;
-    }
+// V268: Niveaux en % de translateY (100% = caché, 0% = full visible)
+// 80% = 20% visible, 50% = 50% visible, 15% = 85% visible
+const SHEET_TRANSLATE_LEVELS = [80, 50, 15]; // Correspondance avec BOTTOM_SHEET_LEVELS [0.2, 0.5, 0.8]
+
+function getCurrentSheetTranslateY() {
+    if (!detailBottomSheet) return 100;
+    // Lire le transform actuel
+    const style = window.getComputedStyle(detailBottomSheet);
+    const matrix = new DOMMatrix(style.transform);
     const viewportHeight = getViewportHeight();
-    return viewportHeight * BOTTOM_SHEET_LEVELS[currentBottomSheetLevelIndex];
+    if (!viewportHeight) return 100;
+    // translateY en pixels -> en %
+    return (matrix.m42 / viewportHeight) * 100;
 }
 
 function applyBottomSheetLevel(index, { immediate = false } = {}) {
     if (!detailBottomSheet || !isMobileDetailViewport()) return;
     const targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, index));
     currentBottomSheetLevelIndex = targetIndex;
-    const viewportHeight = getViewportHeight();
-    if (!viewportHeight) return;
-    const targetPx = Math.round(viewportHeight * BOTTOM_SHEET_LEVELS[targetIndex]);
+    
+    // V268: Retirer toutes les classes de niveau
+    detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
+    
     if (immediate) {
         detailBottomSheet.classList.add('sheet-height-no-transition');
     }
-    detailBottomSheet.style.setProperty('--sheet-height', `${targetPx}px`);
+    
+    // V268: Ajouter la classe du niveau cible
+    detailBottomSheet.classList.add(`sheet-level-${targetIndex}`);
+    
+    // V268: Retirer le transform inline (laisser CSS gérer)
+    detailBottomSheet.style.removeProperty('transform');
     
     // V60: Ajouter/retirer la classe is-expanded selon le niveau
     if (targetIndex >= BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
@@ -761,7 +772,8 @@ function applyBottomSheetLevel(index, { immediate = false } = {}) {
 function prepareBottomSheetForViewport(immediate = false) {
     if (!detailBottomSheet) return;
     if (!isMobileDetailViewport()) {
-        detailBottomSheet.style.removeProperty('--sheet-height');
+        detailBottomSheet.style.removeProperty('transform');
+        detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
         return;
     }
     applyBottomSheetLevel(currentBottomSheetLevelIndex, { immediate });
@@ -770,7 +782,8 @@ function prepareBottomSheetForViewport(immediate = false) {
 function handleBottomSheetResize() {
     if (!detailBottomSheet) return;
     if (!isMobileDetailViewport()) {
-        detailBottomSheet.style.removeProperty('--sheet-height');
+        detailBottomSheet.style.removeProperty('transform');
+        detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
         cancelBottomSheetDrag();
         return;
     }
@@ -831,19 +844,25 @@ function onBottomSheetPointerDown(event) {
     }
     
     event.preventDefault();
+    
+    // V268: Calculer le translateY actuel en %
+    const viewportHeight = getViewportHeight();
+    const startTranslateY = SHEET_TRANSLATE_LEVELS[currentBottomSheetLevelIndex];
+    
     bottomSheetDragState = {
         pointerId: event.pointerId,
         startY: event.clientY,
         lastClientY: event.clientY,
-        startHeight: getCurrentSheetHeightPx(),
-        lastHeight: null,
+        startTranslateY: startTranslateY, // V268: En % au lieu de px
+        currentTranslateY: startTranslateY,
         lastEventTime: performance.now(),
         velocity: 0,
         startIndex: currentBottomSheetLevelIndex,
-        hasMoved: false, // V266: Anti-sautillement - ne pas changer tant qu'on n'a pas bougé
-        isDragging: false // V266: Vraiment en train de drag?
+        hasMoved: false,
+        isDragging: false,
+        viewportHeight: viewportHeight
     };
-    // V266: Ne pas ajouter is-dragging immédiatement (évite le saut)
+    
     try { detailBottomSheet.setPointerCapture(event.pointerId); } catch (_) { /* ignore */ }
     window.addEventListener('pointermove', onBottomSheetPointerMove, { passive: false });
     window.addEventListener('pointerup', onBottomSheetPointerUp);
@@ -854,79 +873,85 @@ function onBottomSheetPointerMove(event) {
     if (!bottomSheetDragState || !detailBottomSheet) return;
     event.preventDefault();
     
-    // V267: Stocker les valeurs pour le prochain frame
-    bottomSheetDragState.pendingClientY = event.clientY;
+    const viewportHeight = bottomSheetDragState.viewportHeight;
+    if (!viewportHeight) return;
     
-    // V267: Throttle via requestAnimationFrame pour fluidité 60fps
-    if (!bottomSheetDragState.rafPending) {
-        bottomSheetDragState.rafPending = true;
-        requestAnimationFrame(() => {
-            if (!bottomSheetDragState) return;
-            bottomSheetDragState.rafPending = false;
-            
-            const viewportHeight = getViewportHeight();
-            if (!viewportHeight) return;
-            
-            const deltaY = bottomSheetDragState.startY - bottomSheetDragState.pendingClientY;
-            
-            // Anti-sautillement - ignorer les micro-mouvements (< 8px)
-            if (!bottomSheetDragState.hasMoved && Math.abs(deltaY) < 8) {
-                return;
-            }
-            
-            // Premier vrai mouvement détecté
-            if (!bottomSheetDragState.hasMoved) {
-                bottomSheetDragState.hasMoved = true;
-                bottomSheetDragState.isDragging = true;
-                detailBottomSheet.classList.add('is-dragging');
-                itineraryDetailContainer?.classList.add('sheet-is-dragging');
-            }
-            
-            const minHeight = viewportHeight * BOTTOM_SHEET_LEVELS[0];
-            const maxHeight = viewportHeight * BOTTOM_SHEET_LEVELS[BOTTOM_SHEET_LEVELS.length - 1];
-            let nextHeight = bottomSheetDragState.startHeight + deltaY;
-            nextHeight = Math.max(minHeight, Math.min(maxHeight, nextHeight));
-            
-            const now = performance.now();
-            if (bottomSheetDragState.lastHeight !== null) {
-                const deltaHeight = nextHeight - bottomSheetDragState.lastHeight;
-                const elapsed = now - (bottomSheetDragState.lastEventTime || now);
-                if (elapsed > 0) {
-                    bottomSheetDragState.velocity = deltaHeight / elapsed;
-                }
-            }
-            bottomSheetDragState.lastHeight = nextHeight;
-            bottomSheetDragState.lastClientY = bottomSheetDragState.pendingClientY;
-            bottomSheetDragState.lastEventTime = now;
-            
-            // V267: Une seule écriture DOM par frame
-            detailBottomSheet.style.setProperty('--sheet-height', `${Math.round(nextHeight)}px`);
-        });
+    // V268: Calcul direct du deltaY en pixels -> convertir en %
+    const deltaYPx = bottomSheetDragState.startY - event.clientY;
+    const deltaYPercent = (deltaYPx / viewportHeight) * 100;
+    
+    // Anti-sautillement - ignorer les micro-mouvements (< 5px)
+    if (!bottomSheetDragState.hasMoved && Math.abs(deltaYPx) < 5) {
+        return;
     }
+    
+    // Premier vrai mouvement détecté
+    if (!bottomSheetDragState.hasMoved) {
+        bottomSheetDragState.hasMoved = true;
+        bottomSheetDragState.isDragging = true;
+        detailBottomSheet.classList.add('is-dragging');
+        // V268: Retirer les classes de niveau pendant le drag
+        detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
+        itineraryDetailContainer?.classList.add('sheet-is-dragging');
+    }
+    
+    // V268: Calculer le nouveau translateY en %
+    // Plus on drag vers le haut (deltaY positif), plus le translateY diminue (plus visible)
+    let newTranslateY = bottomSheetDragState.startTranslateY - deltaYPercent;
+    
+    // Limites: min 15% (85% visible), max 80% (20% visible)
+    const minTranslate = SHEET_TRANSLATE_LEVELS[SHEET_TRANSLATE_LEVELS.length - 1]; // 15%
+    const maxTranslate = SHEET_TRANSLATE_LEVELS[0]; // 80%
+    newTranslateY = Math.max(minTranslate, Math.min(maxTranslate, newTranslateY));
+    
+    // Calculer la vélocité
+    const now = performance.now();
+    const elapsed = now - (bottomSheetDragState.lastEventTime || now);
+    if (elapsed > 0) {
+        const deltaTranslate = newTranslateY - bottomSheetDragState.currentTranslateY;
+        bottomSheetDragState.velocity = deltaTranslate / elapsed; // % par ms
+    }
+    
+    bottomSheetDragState.currentTranslateY = newTranslateY;
+    bottomSheetDragState.lastClientY = event.clientY;
+    bottomSheetDragState.lastEventTime = now;
+    
+    // V268: Appliquer le transform DIRECTEMENT (pas de CSS var, pas de height)
+    detailBottomSheet.style.transform = `translate3d(0, ${newTranslateY}%, 0)`;
 }
 
 function onBottomSheetPointerUp() {
     if (!bottomSheetDragState) return;
     
     const wasDragging = bottomSheetDragState.isDragging;
-    const viewportHeight = getViewportHeight();
     let targetIndex = currentBottomSheetLevelIndex;
     
-    // V266: Si on n'a pas vraiment bougé, ne rien changer
-    if (wasDragging && viewportHeight) {
-        const appliedHeight = bottomSheetDragState.lastHeight ?? bottomSheetDragState.startHeight;
-        const fraction = appliedHeight / viewportHeight;
-        const closestIndex = getClosestSheetLevelIndex(fraction);
-        targetIndex = closestIndex;
+    // V268: Calculer l'index cible basé sur le translateY actuel
+    if (wasDragging) {
+        const currentTranslate = bottomSheetDragState.currentTranslateY;
         const velocity = bottomSheetDragState.velocity || 0;
-        const deltaFromStart = appliedHeight - bottomSheetDragState.startHeight;
-        const biasNeeded = closestIndex === bottomSheetDragState.startIndex;
-        if (biasNeeded && Math.abs(velocity) > BOTTOM_SHEET_VELOCITY_THRESHOLD) {
-            const direction = velocity > 0 ? 1 : -1;
-            targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, bottomSheetDragState.startIndex + direction));
-        } else if (biasNeeded && Math.abs(deltaFromStart) > BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX) {
-            const direction = deltaFromStart > 0 ? 1 : -1;
-            targetIndex = Math.max(0, Math.min(BOTTOM_SHEET_LEVELS.length - 1, bottomSheetDragState.startIndex + direction));
+        
+        // Trouver le niveau le plus proche
+        let closestIndex = 0;
+        let closestDist = Infinity;
+        SHEET_TRANSLATE_LEVELS.forEach((level, idx) => {
+            const dist = Math.abs(currentTranslate - level);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestIndex = idx;
+            }
+        });
+        
+        targetIndex = closestIndex;
+        
+        // V268: Si vélocité significative, aller dans la direction du swipe
+        // Vélocité négative = swipe vers le haut = niveau supérieur
+        if (Math.abs(velocity) > 0.05) { // % par ms
+            if (velocity < 0 && targetIndex < SHEET_TRANSLATE_LEVELS.length - 1) {
+                targetIndex++;
+            } else if (velocity > 0 && targetIndex > 0) {
+                targetIndex--;
+            }
         }
     }
     
@@ -938,14 +963,16 @@ function onBottomSheetPointerUp() {
         try { detailBottomSheet.releasePointerCapture(bottomSheetDragState.pointerId); } catch (_) { /* ignore */ }
     }
     
-    // V266: Retirer is-dragging seulement si on l'avait ajouté
+    // V268: Retirer is-dragging et le transform inline
     if (wasDragging) {
         detailBottomSheet?.classList.remove('is-dragging');
         itineraryDetailContainer?.classList.remove('sheet-is-dragging');
+        // Retirer le transform inline pour laisser le CSS prendre le relais
+        detailBottomSheet?.style.removeProperty('transform');
     }
     bottomSheetDragState = null;
     
-    // 2. Appliquer le snap seulement si on a vraiment bougé
+    // 2. Appliquer le snap avec la belle transition CSS
     if (wasDragging) {
         requestAnimationFrame(() => {
             applyBottomSheetLevel(targetIndex);
