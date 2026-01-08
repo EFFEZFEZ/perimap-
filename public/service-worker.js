@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v259'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v259: Fix CSS cache + GTFS expired warning
+const CACHE_VERSION = 'v260'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v260: CSS restauré + GTFS février 2026
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
