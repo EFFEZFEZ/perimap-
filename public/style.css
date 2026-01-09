@@ -1505,7 +1505,6 @@ body.view-map-locked #map {
     height: 100% !important;
     min-height: 0; /* V304: Permettre au flex de fonctionner */
 }
-}
 
 /* V64: Cacher la scrollbar sur la vue carte */
 #map-container,

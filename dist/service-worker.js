@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v307'; // ✅ v307: Fix panneau analytics caché, année 2026, copie fichiers dist
+const CACHE_VERSION = 'v309'; // ✅ v309: Réduction cache mémoire serveur pour VPS 1Go
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
