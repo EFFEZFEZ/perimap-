@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v305'; // ✅ v305: Dark mode auto, offline manager, modules refactorisés
+const CACHE_VERSION = 'v306'; // ✅ v306: Edge Functions, cache optimisé, Brotli, skeleton loaders, Analytics
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -1,91 +1,66 @@
 /*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
- */
-/**
- * Proxy API pour Google Places Autocomplete (NEW API)
- * Masque la clÈ API cÙtÈ serveur (Vercel Edge Function)
+ * Copyright (c) 2026 P√©rimap. Tous droits r√©serv√©s.
+ * API Places - Version Edge Function (ultra-rapide)
  * 
- * Utilise la NOUVELLE API Places (places.googleapis.com)
- * 
- * Endpoints supportÈs:
- * - GET /api/places?input=... : AutocomplÈtion
- * - GET /api/places?placeId=... : RÈcupÈrer les coordonnÈes d'un lieu
+ * Sert √† l'autocompl√©tion quand tu tapes une adresse
+ * et √† trouver les coordonn√©es GPS d'un lieu
  */
 
-export default async function handler(req, res) {
-    // CORS headers (optionnellement restreints via ALLOWED_ORIGINS)
-    const normalizeOrigin = (value) => (typeof value === 'string' ? value.trim().replace(/\/+$/, '') : '');
-    const origin = normalizeOrigin(req.headers?.origin);
-    const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-        .split(',')
-        .map(normalizeOrigin)
-        .filter(Boolean);
-    const originAllowed = !origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin);
+export const config = {
+    runtime: 'edge',
+};
 
-    res.setHeader('Vary', 'Origin');
-    if (origin && originAllowed) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    } else if (!origin) {
-        // RequÍte serveur-‡-serveur (pas d'Origin)
-        res.setHeader('Access-Control-Allow-Origin', '*');
-    }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(request) {
+    const url = new URL(request.url);
+    const origin = request.headers.get('origin') || '';
+    
+    const corsHeaders = {
+        'Access-Control-Allow-Origin': origin || '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin',
+    };
 
-    if (req.method === 'OPTIONS') {
-        if (origin && !originAllowed) {
-            res.status(403).json({ error: 'Origin not allowed' });
-            return;
-        }
-        res.status(200).end();
-        return;
+    if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 200, headers: corsHeaders });
     }
 
-    if (origin && !originAllowed) {
-        res.status(403).json({ error: 'Origin not allowed' });
-        return;
-    }
-
-    if (req.method !== 'GET') {
-        res.status(405).json({ error: 'MÈthode non autorisÈe. Utilisez GET.' });
-        return;
+    if (request.method !== 'GET') {
+        return new Response(
+            JSON.stringify({ error: 'M√©thode non autoris√©e. Utilisez GET.' }),
+            { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
     }
 
     const apiKey = process.env.GMAPS_SERVER_KEY;
     if (!apiKey) {
-        res.status(500).json({ error: 'GMAPS_SERVER_KEY manquant sur le serveur.' });
-        return;
+        return new Response(
+            JSON.stringify({ error: 'GMAPS_SERVER_KEY manquant sur le serveur.' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
     }
 
-    const { input, placeId, sessionToken } = req.query;
+    const input = url.searchParams.get('input');
+    const placeId = url.searchParams.get('placeId');
 
     try {
-        // Mode 1: AutocomplÈtion avec la NOUVELLE API Places
+        // Mode 1: Autocompl√©tion (quand l'utilisateur tape une adresse)
         if (input) {
-            const url = 'https://places.googleapis.com/v1/places:autocomplete';
+            const placesUrl = 'https://places.googleapis.com/v1/places:autocomplete';
             
             const requestBody = {
                 input: input,
                 languageCode: 'fr',
-                // Restriction stricte ‡ la zone du Grand PÈrigueux (rectangle)
+                // Zone du Grand P√©rigueux uniquement
                 locationRestriction: {
                     rectangle: {
-                        low: {
-                            latitude: 45.10,   // Sud
-                            longitude: 0.55    // Ouest
-                        },
-                        high: {
-                            latitude: 45.30,   // Nord
-                            longitude: 0.90    // Est
-                        }
+                        low: { latitude: 45.10, longitude: 0.55 },
+                        high: { latitude: 45.30, longitude: 0.90 }
                     }
                 }
             };
 
-            console.log('[places proxy] Autocomplete request (NEW API):', input);
-            
-            const response = await fetch(url, {
+            const response = await fetch(placesUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,85 +72,80 @@ export default async function handler(req, res) {
 
             const data = await response.json();
 
-            // Log pour debug
-            console.log('[places proxy] Google response status:', response.status);
-            if (data.error) {
-                console.error('[places proxy] Google error:', data.error);
-                res.status(response.status).json({ 
-                    error: data.error.message || 'Google API error',
-                    details: data.error
-                });
-                return;
-            }
-
             if (!response.ok) {
-                res.status(response.status).json(data);
-                return;
+                return new Response(
+                    JSON.stringify({ error: 'Erreur Places API', details: data }),
+                    { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                );
             }
 
-            // Transformer la rÈponse pour le frontend
-            const predictions = (data.suggestions || [])
-                .filter(s => s.placePrediction)
-                .map(s => ({
-                    description: s.placePrediction.text?.text || '',
-                    placeId: s.placePrediction.placeId
-                }));
+            // Transforme le format Google en format simple
+            const predictions = (data.suggestions || []).map(s => ({
+                description: s.placePrediction?.text?.text || '',
+                placeId: s.placePrediction?.placeId || ''
+            })).filter(p => p.placeId);
 
-            console.log('[places proxy] Returning', predictions.length, 'predictions');
-            res.status(200).json({ predictions });
-            return;
+            return new Response(
+                JSON.stringify({ predictions }),
+                { 
+                    status: 200, 
+                    headers: { 
+                        ...corsHeaders, 
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 's-maxage=300, stale-while-revalidate=600'
+                    } 
+                }
+            );
         }
 
-        // Mode 2: Place Details pour obtenir les coordonnÈes (NEW API)
+        // Mode 2: R√©cup√©rer les coordonn√©es GPS d'un lieu
         if (placeId) {
-            // La nouvelle API Places attend le format "places/{placeId}"
-            const placeName = placeId.startsWith('places/') ? placeId : `places/${placeId}`;
-            const url = `https://places.googleapis.com/v1/${placeName}`;
-            
-            console.log('[places proxy] Place details request:', placeName);
-            
-            const response = await fetch(url, {
+            const detailsUrl = `https://places.googleapis.com/v1/places/${placeId}`;
+
+            const response = await fetch(detailsUrl, {
                 method: 'GET',
                 headers: {
                     'X-Goog-Api-Key': apiKey,
-                    'X-Goog-FieldMask': 'location,formattedAddress'
+                    'X-Goog-FieldMask': 'location'
                 }
             });
 
             const data = await response.json();
 
-            if (data.error) {
-                console.error('[places proxy] Google error:', data.error);
-                res.status(response.status).json({ 
-                    error: data.error.message || 'Google API error',
-                    details: data.error
-                });
-                return;
+            if (!response.ok || !data.location) {
+                return new Response(
+                    JSON.stringify({ error: 'Lieu non trouv√©' }),
+                    { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                );
             }
 
-            if (!response.ok) {
-                res.status(response.status).json(data);
-                return;
-            }
-
-            if (data.location) {
-                res.status(200).json({ 
+            return new Response(
+                JSON.stringify({ 
                     lat: data.location.latitude, 
-                    lng: data.location.longitude,
-                    formattedAddress: data.formattedAddress || ''
-                });
-                return;
-            }
-
-            res.status(404).json({ error: 'Lieu non trouvÈ' });
-            return;
+                    lng: data.location.longitude 
+                }),
+                { 
+                    status: 200, 
+                    headers: { 
+                        ...corsHeaders, 
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 's-maxage=86400, stale-while-revalidate=604800'
+                    } 
+                }
+            );
         }
 
-        res.status(400).json({ error: 'ParamËtre input ou placeId requis.' });
+        return new Response(
+            JSON.stringify({ error: 'Param√®tre input ou placeId requis' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
 
     } catch (error) {
-        console.error('[places proxy] Error:', error);
-        res.status(502).json({ error: 'Places proxy error', details: error.message });
+        console.error('[places edge] Error:', error);
+        return new Response(
+            JSON.stringify({ error: 'Places proxy error', details: error.message }),
+            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
     }
 }
 

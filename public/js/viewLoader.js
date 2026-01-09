@@ -3,11 +3,11 @@
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 const LAYOUT_PLAN = [
-    { url: './views/hall.html', target: '#app-view-root' },
-    { url: './views/horaires.html', target: '#dashboard-content-view .content-cards' },
-    { url: './views/trafic.html', target: '#dashboard-content-view .content-cards' },
-    { url: './views/carte.html', target: '#app-view-root' },
-    { url: './views/itineraire.html', target: '#app-view-root' }
+    { url: '/views/hall.html', target: '#app-view-root' },
+    { url: '/views/horaires.html', target: '#dashboard-content-view .content-cards' },
+    { url: '/views/trafic.html', target: '#dashboard-content-view .content-cards' },
+    { url: '/views/carte.html', target: '#app-view-root' },
+    { url: '/views/itineraire.html', target: '#app-view-root' }
 ];
 
 async function injectFragment({ url, target: targetSelector, position = 'beforeend' }) {

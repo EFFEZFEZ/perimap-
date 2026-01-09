@@ -1641,9 +1641,9 @@ async function executeItinerarySearch(source, sourceElements) {
     console.log(`Recherche Google API (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     if (source === 'hall') {
         showResultsView(); 
-    } else {
-        resultsListContainer.innerHTML = '<p class="results-message">Mise à jour de l\'itinéraire...</p>';
     }
+    // V220: Afficher des skeleton loaders pendant le chargement (plus joli qu'un texte)
+    if (resultsRenderer) resultsRenderer.showSkeleton(4);
     resultsModeTabs.classList.add('hidden');
     try {
         let fromCoords = null;

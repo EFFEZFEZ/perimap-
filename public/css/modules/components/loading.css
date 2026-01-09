@@ -281,3 +281,42 @@ body.dark-theme .skeleton-result-card {
 body.dark-theme .loading-overlay-text {
     color: #94a3b8;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SKELETON ITINÉRAIRES
+   V220: Loaders pour la recherche d'itinéraires
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.skeleton-wrapper {
+    margin-bottom: var(--spacing-3);
+}
+
+.skeleton-route {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--bg-main);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+}
+
+.skeleton-route .route-option-left {
+    flex-shrink: 0;
+}
+
+.skeleton-route .route-option-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.skeleton-route .route-option-right {
+    flex-shrink: 0;
+}
+
+body.dark-theme .skeleton-route {
+    background: var(--bg-card);
+    border-color: var(--border-dark);
+}

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { gzipSync } from 'node:zlib';
+import { gzipSync, brotliCompressSync, constants } from 'node:zlib';
 import { cleanDataset } from '../public/js/utils/gtfsProcessor.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,6 +10,7 @@ const __dirname = path.dirname(__filename);
 const GTFS_DIR = path.resolve(__dirname, '../public/data/gtfs');
 const OUTPUT_FILE = path.join(GTFS_DIR, 'gtfs.bundle.json');
 const COMPRESSED_OUTPUT_FILE = `${OUTPUT_FILE}.gz`;
+const BROTLI_OUTPUT_FILE = `${OUTPUT_FILE}.br`;  // Nouveau : Brotli (meilleure compression)
 const GTFS_FILES = [
     { file: 'routes.txt', key: 'routes' },
     { file: 'trips.txt', key: 'trips' },
@@ -40,8 +41,19 @@ async function main() {
     const gzipped = gzipSync(jsonBuffer, { level: 9 });
     await fs.writeFile(COMPRESSED_OUTPUT_FILE, gzipped);
 
+    // Compression Brotli (encore meilleure, ~20% plus petit que gzip)
+    const brotliOptions = {
+        params: {
+            [constants.BROTLI_PARAM_QUALITY]: constants.BROTLI_MAX_QUALITY,
+            [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_TEXT
+        }
+    };
+    const brotlied = brotliCompressSync(jsonBuffer, brotliOptions);
+    await fs.writeFile(BROTLI_OUTPUT_FILE, brotlied);
+
     console.log(`✅ Bundle GTFS généré: ${OUTPUT_FILE}`);
-    console.log(`✅ Bundle compressé généré: ${COMPRESSED_OUTPUT_FILE}`);
+    console.log(`✅ Bundle gzip généré: ${COMPRESSED_OUTPUT_FILE} (${(gzipped.length / 1024).toFixed(1)} Ko)`);
+    console.log(`✅ Bundle Brotli généré: ${BROTLI_OUTPUT_FILE} (${(brotlied.length / 1024).toFixed(1)} Ko)`);
 }
 
 function parseCsv(text) {

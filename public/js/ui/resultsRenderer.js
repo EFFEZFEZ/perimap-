@@ -198,6 +198,35 @@ export function createResultsRenderer(deps) {
     resultsListContainer.appendChild(loadMoreBtn);
   }
 
-  return { render };
+  /**
+   * Affiche des skeleton loaders pendant le chargement
+   * Plus agréable qu'un texte "Chargement..."
+   */
+  function showSkeleton(count = 3) {
+    if (!resultsListContainer) return;
+    
+    let html = '';
+    for (let i = 0; i < count; i++) {
+      html += `
+        <div class="route-option-wrapper skeleton-wrapper">
+          <div class="route-option skeleton-route">
+            <div class="route-option-left">
+              <div class="skeleton skeleton-badge" style="width: 50px; height: 24px;"></div>
+            </div>
+            <div class="route-option-center">
+              <div class="skeleton skeleton-line" style="width: 80%; height: 14px; margin-bottom: 8px;"></div>
+              <div class="skeleton skeleton-line" style="width: 60%; height: 12px;"></div>
+            </div>
+            <div class="route-option-right">
+              <div class="skeleton skeleton-badge" style="width: 45px; height: 20px;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    resultsListContainer.innerHTML = html;
+  }
+
+  return { render, showSkeleton };
 }
 
