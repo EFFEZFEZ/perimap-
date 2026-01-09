@@ -15,12 +15,14 @@
  */
 
 export class TripScheduler {
-    constructor(dataManager) {
+    constructor(dataManager, delayManager = null) {
         this.dataManager = dataManager;
+        this.delayManager = delayManager; // Optionnel - pour intégrer les retards
     }
 
     /**
      * Récupère tous les trips "en service" (en mouvement OU en attente au terminus)
+     * V2: Intégration des retards temps réel
      */
     getActiveTrips(currentSeconds, date) {
         if (!this.dataManager.isLoaded) {
@@ -34,6 +36,16 @@ export class TripScheduler {
             const state = this.findCurrentState(stopTimes, currentSeconds); 
             
             if (state) {
+                // V2: Calculer le retard si delayManager disponible
+                let delay = null;
+                if (this.delayManager) {
+                    delay = this.delayManager.calculateTripDelay(trip, stopTimes, currentSeconds);
+                    if (delay) {
+                        // Enregistrer la donnée de retard pour les stats
+                        this.delayManager.recordDelay(delay, route, currentSeconds);
+                    }
+                }
+
                 // state est toujours de type 'moving'
                 activeBuses.push({
                     tripId,
@@ -41,7 +53,8 @@ export class TripScheduler {
                     route,
                     segment: state, // 'state' est 'moving'
                     position: null, // 'position' n'est jamais utilisé
-                    currentSeconds
+                    currentSeconds,
+                    delay // V2: Ajouter les données de retard
                 });
             }
         });

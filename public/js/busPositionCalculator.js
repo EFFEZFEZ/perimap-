@@ -12,8 +12,9 @@
  */
 
 export class BusPositionCalculator {
-    constructor(dataManager) {
+    constructor(dataManager, delayManager = null) {
         this.dataManager = dataManager;
+        this.delayManager = delayManager; // Optionnel - pour ajuster positions avec retards
         
         // Cache pour stocker les géométries pré-calculées entre deux arrêts
         // Clé: "routeId_fromStopId_toStopId"
@@ -227,14 +228,31 @@ export class BusPositionCalculator {
 
     /**
      * Calcule toutes les positions pour les bus actifs
+     * V2: Ajuste les positions en fonction des retards temps réel
      */
     calculateAllPositions(allBuses) {
         return allBuses.map(bus => {
             const routeId = bus.route?.route_id;
             let position = null;
             let bearing = 0;
+            let adjustedProgress = bus.segment?.progress || 0;
 
             if (bus.segment) {
+                // V2: Si données de retard disponibles, ajuster la progression
+                if (this.delayManager && bus.delay) {
+                    adjustedProgress = this.delayManager.adjustProgressForDelay(
+                        bus.segment,
+                        bus.delay,
+                        bus.currentSeconds
+                    );
+                    
+                    // Créer un segment ajusté avec la nouvelle progression
+                    bus.segment = {
+                        ...bus.segment,
+                        progress: adjustedProgress
+                    };
+                }
+
                 // Cas 1: Bus en mouvement
                 position = this.calculatePosition(bus.segment, routeId);
                 // Si le calcul de position a réussi, on calcule l'angle
@@ -255,7 +273,8 @@ export class BusPositionCalculator {
             return {
                 ...bus,
                 position,
-                bearing 
+                bearing,
+                adjustedProgress
             };
         }).filter(bus => bus !== null);
     }

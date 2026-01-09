@@ -18,6 +18,9 @@ import { DataManager } from './dataManager.js';
 import { TimeManager } from './timeManager.js';
 import { TripScheduler } from './tripScheduler.js';
 import { BusPositionCalculator } from './busPositionCalculator.js';
+import { delayManager } from './delayManager.js';
+import { DelayStatsUI } from './delayStatsUI.js';
+import { DataExporter, DataExporterUI } from './dataExporter.js';
 import { MapRenderer } from './mapRenderer.js';
 import { ApiManager } from './apiManager.js';
 import { createRouterContext, encodePolyline, decodePolyline } from './router.js';
@@ -465,8 +468,20 @@ async function initializeApp() {
         wireThemeToggles();
         initTheme();
         
-        tripScheduler = new TripScheduler(dataManager);
-        busPositionCalculator = new BusPositionCalculator(dataManager);
+        // V2: Initialiser le delayManager
+        delayManager.init(dataManager, realtimeManager);
+        
+        tripScheduler = new TripScheduler(dataManager, delayManager);
+        busPositionCalculator = new BusPositionCalculator(dataManager, delayManager);
+        
+        // V2: Initialiser l'interface des statistiques de retard
+        const delayStatsUI = new DelayStatsUI(delayManager);
+        delayStatsUI.init();
+        
+        // Initialiser la console d'analytics
+        const dataExporterUI = new DataExporterUI();
+        dataExporterUI.init();
+        window.dataExporterUI = dataExporterUI;
         
         initializeRouteFilter();
 
@@ -521,7 +536,12 @@ async function initializeApp() {
         
         updateDataStatus('Données chargées', 'loaded');
         checkAndSetupTimeMode();
-        updateData(); 
+        updateData();
+        
+        // V2: Synchroniser les statistiques de retard tous les 5 minutes
+        setInterval(() => {
+            delayManager.syncStatsToServer();
+        }, 5 * 60 * 1000); // 5 minutes
         
     } catch (error) {
         console.error('Erreur lors de l\'initialisation GTFS:', error);
