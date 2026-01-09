@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v283'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v283: accordéon exclusif + logo noir mode clair
+const CACHE_VERSION = 'v284'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v284: couleurs DA mode sombre menu mobile
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

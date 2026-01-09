@@ -8586,20 +8586,46 @@ body.dark-theme .nav-dropdown-menu {
 }
 
 body.dark-theme .mobile-menu {
-    background: #0f172a; /* Fond solide en dark mode aussi */
+    background: #0f172a; /* Fond solide en dark mode */
     border-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-theme .mobile-menu-category {
     color: #FFFFFF;
+    border-left-color: var(--pm-green, #22c55e);
 }
 
 body.dark-theme .mobile-menu-category:hover {
     color: #FFFFFF;
+    background: rgba(34, 197, 94, 0.08) !important;
+}
+
+body.dark-theme .mobile-menu-category[aria-expanded="true"] {
+    background: rgba(34, 197, 94, 0.1) !important;
+    border-left-color: var(--pm-cyan, #00c8ff) !important;
 }
 
 body.dark-theme .mobile-menu-item {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+body.dark-theme .mobile-menu-item::before {
+    background: var(--pm-green, #22c55e);
+    opacity: 0.6;
+}
+
+body.dark-theme .mobile-menu-item:hover {
+    background: rgba(0, 200, 255, 0.1);
     color: #FFFFFF;
+}
+
+body.dark-theme .mobile-menu-item:hover::before {
+    background: var(--pm-cyan, #00c8ff);
+    opacity: 1;
+}
+
+body.dark-theme .mobile-menu-items {
+    border-left-color: rgba(34, 197, 94, 0.25);
 }
 
 /* Responsive */
