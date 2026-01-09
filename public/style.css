@@ -8437,27 +8437,29 @@ body:not(.view-is-locked) {
     background: transparent;
 }
 
-/* Puce ronde simple */
+/* Puce ronde - vert Périmap */
 .mobile-menu-item::before {
     content: '';
     display: inline-block;
     width: 5px;
     height: 5px;
     min-width: 5px;
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--pm-green, #22c55e);
+    opacity: 0.6;
     border-radius: 50%;
     transition: all 0.2s ease;
 }
 
 .mobile-menu-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 200, 255, 0.08);
     color: #FFFFFF !important;
     padding-left: 1.5rem;
 }
 
 .mobile-menu-item:hover::before {
-    background: #FFFFFF;
-    transform: scale(1.2);
+    background: var(--pm-cyan, #00c8ff);
+    opacity: 1;
+    transform: scale(1.3);
 }
 
 .mobile-menu-item:active {
@@ -8477,9 +8479,9 @@ body:not(.view-is-locked) {
     width: 100%;
     padding: 0.9rem 1rem;
     margin-bottom: 0.35rem;
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: transparent !important;
     border: none;
-    border-left: 3px solid rgba(255, 255, 255, 0.3);
+    border-left: 3px solid var(--pm-green, #22c55e);
     outline: none !important;
     box-shadow: none !important;
     font-size: 0.75rem;
@@ -8517,8 +8519,8 @@ button.mobile-menu-category:focus {
 }
 
 .mobile-menu-category:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-left-color: rgba(255, 255, 255, 0.5) !important;
+    background: rgba(34, 197, 94, 0.06) !important;
+    border-left-color: var(--pm-green, #22c55e) !important;
     color: #FFFFFF !important;
 }
 
@@ -8529,8 +8531,8 @@ button.mobile-menu-category:focus {
 }
 
 .mobile-menu-category[aria-expanded="true"] {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-left-color: #FFFFFF !important;
+    background: rgba(34, 197, 94, 0.08) !important;
+    border-left-color: var(--pm-cyan, #00c8ff) !important;
 }
 
 .mobile-menu-category:active {
@@ -8555,7 +8557,7 @@ button.mobile-menu-category:focus {
     opacity: 0;
     margin-left: 0.5rem;
     padding-left: 0.5rem;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 .mobile-menu-items.is-expanded {
