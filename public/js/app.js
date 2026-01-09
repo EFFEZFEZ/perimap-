@@ -4,6 +4,7 @@
  */
 import { loadBaseLayout } from './viewLoader.js';
 import { bootstrapApp } from './main.js';
+import { offlineManager } from './offlineManager.js';
 
 function setMetaContent(selector, content) {
     if (!content) return;
@@ -256,6 +257,9 @@ async function startApplication() {
     try {
         // Enregistre le SW en premier (non-bloquant)
         registerServiceWorker();
+        
+        // Initialise le gestionnaire de mode hors ligne
+        offlineManager.init();
 
         // SEO dynamique (titres/snippets) pour les URLs avec hash (/#horaires, /#itineraire, etc.)
         // Important: main.js nettoie le hash après navigation, donc on doit le lire très tôt.

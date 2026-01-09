@@ -282,9 +282,34 @@ function wireThemeToggles() {
     const themeToggles = Array.from(document.querySelectorAll('[data-theme-toggle]'));
     themeToggles.forEach(btn => {
         btn.addEventListener('click', () => {
-            const nextIsDark = !document.body.classList.contains('dark-theme');
+            const currentSaved = localStorage.getItem('ui-theme');
+            const currentIsDark = document.body.classList.contains('dark-theme');
+            
+            // Cycle: light → dark → auto → light
+            let nextMode;
+            if (currentSaved === 'light') {
+                nextMode = 'dark';
+            } else if (currentSaved === 'dark') {
+                nextMode = 'auto';
+            } else {
+                // auto ou null → light
+                nextMode = 'light';
+            }
+            
+            let nextIsDark;
+            if (nextMode === 'auto') {
+                nextIsDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false;
+            } else {
+                nextIsDark = (nextMode === 'dark');
+            }
+            
             applyThemeState(nextIsDark);
-            try { localStorage.setItem('ui-theme', nextIsDark ? 'dark' : 'light'); } catch (e) { /* ignore */ }
+            try { 
+                localStorage.setItem('ui-theme', nextMode);
+                // Afficher un toast pour indiquer le mode actuel
+                const modeLabel = nextMode === 'auto' ? 'automatique 🌓' : (nextMode === 'dark' ? 'sombre 🌙' : 'clair ☀️');
+                console.log(`🎨 Thème: ${modeLabel}`);
+            } catch (e) { /* ignore */ }
         }, { passive: true });
     });
 }

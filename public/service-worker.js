@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v304'; // ✅ v304: Vite build, CSS modules, tests ajoutés
+const CACHE_VERSION = 'v305'; // ✅ v305: Dark mode auto, offline manager, modules refactorisés
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -60,6 +60,7 @@ const SECONDARY_ASSETS = [
   '/js/delayManager.js',
   '/js/dataExporter.js',
   '/js/delayStatsUI.js',
+  '/js/offlineManager.js',
   '/js/config/icons.js',
   '/js/config/routes.js',
   '/js/config/stopKeyMapping.js',
@@ -73,8 +74,12 @@ const SECONDARY_ASSETS = [
   '/js/itinerary/ranking.js',
   '/js/ui/resultsRenderer.js',
   '/js/ui/trafficInfo.js',
+  '/js/ui/bottomSheetManager.js',
+  '/js/ui/navigationManager.js',
+  '/js/ui/installManager.js',
   '/js/map/routeDrawing.js',
   '/js/search/itineraryProcessor.js',
+  '/js/search/searchManager.js',
   '/js/workers/gtfsWorker.js',
   '/js/workers/routerWorker.js',
   '/views/hall.html',

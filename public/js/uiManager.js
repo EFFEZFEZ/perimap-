@@ -44,14 +44,49 @@ export class UIManager {
         });
     }
 
+    /**
+     * Initialise le thème avec détection automatique système
+     * Priorité: 1. Choix utilisateur (localStorage) 2. Préférence système
+     * Écoute les changements système en temps réel
+     */
     initTheme(renderers = []) {
         try {
+            this._themeRenderers = renderers;
             const saved = localStorage.getItem('ui-theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const useDark = saved ? (saved === 'dark') : prefersDark;
+            const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+            const prefersDark = mediaQuery?.matches ?? false;
+            
+            // Si 'auto' ou rien, utiliser la préférence système
+            const isAuto = !saved || saved === 'auto';
+            const useDark = isAuto ? prefersDark : (saved === 'dark');
+            
             this.applyThemeState(useDark, renderers);
+            
+            // Écouter les changements de préférence système en temps réel
+            if (mediaQuery && isAuto) {
+                this._mediaQueryListener = (e) => {
+                    // Seulement si l'utilisateur n'a pas fait de choix manuel
+                    const currentSaved = localStorage.getItem('ui-theme');
+                    if (!currentSaved || currentSaved === 'auto') {
+                        this.applyThemeState(e.matches, this._themeRenderers || []);
+                        console.log(`🌓 Thème système détecté: ${e.matches ? 'sombre' : 'clair'}`);
+                    }
+                };
+                mediaQuery.addEventListener('change', this._mediaQueryListener);
+            }
         } catch (e) {
             console.warn('initTheme error', e);
+        }
+    }
+    
+    /**
+     * Nettoie le listener de thème système
+     */
+    destroyThemeListener() {
+        if (this._mediaQueryListener) {
+            const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
+            mediaQuery?.removeEventListener('change', this._mediaQueryListener);
+            this._mediaQueryListener = null;
         }
     }
 
