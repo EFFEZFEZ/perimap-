@@ -20,7 +20,10 @@ export class TimeManager {
     }
 
     /**
-     * Récupère l'heure réelle actuelle
+     * Récupère l'heure réelle actuelle (OPTIMISÉE V2 - Avec décimales pour fluidité)
+     * 
+     * Retourne maintenant les décimales pour permettre une interpolation fluide
+     * à chaque frame du navigateur, au lieu d'attendre la prochaine seconde entière.
      */
     getRealTime() {
         /* MODIFICATION: Met à jour la date en même temps */
@@ -30,8 +33,10 @@ export class TimeManager {
         const hours = now.getHours();
         const minutes = now.getMinutes();
         const seconds = now.getSeconds();
+        const milliseconds = now.getMilliseconds();
         
-        return hours * 3600 + minutes * 60 + seconds;
+        // OPTIMISATION V2: Retourne les décimales de secondes pour l'interpolation fluide
+        return hours * 3600 + minutes * 60 + seconds + (milliseconds / 1000);
     }
 
     /**
@@ -98,13 +103,21 @@ export class TimeManager {
     }
 
     /**
-     * Boucle principale de mise à jour
+     * Boucle principale de mise à jour (OPTIMISÉE V2 - requestAnimationFrame)
+     * 
+     * Maintenant utilise requestAnimationFrame pour une fluidité maximale.
+     * Les mises à jour se font à chaque frame du navigateur (~60fps)
+     * au lieu de chaque 1000ms, créant des mouvements lisses et continus.
+     * 
+     * La précision de temps est maintenant en millisecondes pour une
+     * interpolation vraiment fluide.
      */
     tick() {
         if (!this.isRunning) return;
 
         const now = Date.now();
         if (this.mode === 'simulated' && this.simulatedSeconds !== null && this.lastTickTime !== null) {
+            // Calcul du temps écoulé en secondes (avec décimales)
             const elapsed = (now - this.lastTickTime) / 1000;
             this.simulatedSeconds += elapsed;
             
@@ -123,7 +136,9 @@ export class TimeManager {
 
         this.notifyListeners();
 
-        setTimeout(() => this.tick(), 1000);
+        // OPTIMISATION V2: Utilise requestAnimationFrame au lieu de setTimeout
+        // Cela permet ~60fps au lieu de 1fps, pour des mouvements fluides
+        requestAnimationFrame(() => this.tick());
     }
 
     /**
