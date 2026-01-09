@@ -118,31 +118,22 @@ async function scrapeHawk(stopKey) {
     const referer = getRandomReferer();
     const url = `https://hawk.perimouv.fr/qrcodes/schedule.aspx?key=${stopKey}`;
     
-    // Headers stealth complets
+    console.log(`[Realtime] Fetching ${url}`);
+    
+    // Headers simplifiés mais réalistes
     const headers = {
         'User-Agent': profile.userAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Sec-Ch-Ua': profile.secChUa,
-        'Sec-Ch-Ua-Mobile': profile.secChUaMobile,
-        'Sec-Ch-Ua-Platform': profile.secChUaPlatform,
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'cross-site',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': '1',
-        'Referer': referer,
-        'DNT': '1'
+        'Referer': referer
     };
 
     // Jitter anti-pattern
-    await sleep(randomJitter(50, 200));
+    await sleep(randomJitter(50, 150));
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
     try {
         const response = await fetch(url, {
@@ -153,16 +144,21 @@ async function scrapeHawk(stopKey) {
         });
 
         clearTimeout(timeout);
+        
+        console.log(`[Realtime] Response status: ${response.status}`);
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
 
         const html = await response.text();
+        console.log(`[Realtime] HTML length: ${html.length}`);
+        
         return parseHawkHTML(html);
 
     } catch (error) {
         clearTimeout(timeout);
+        console.error(`[Realtime] Fetch error:`, error.message);
         throw error;
     }
 }
