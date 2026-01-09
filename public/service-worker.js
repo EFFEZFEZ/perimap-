@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v282'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v282: couleurs DA Périmap (vert signature, cyan hover)
+const CACHE_VERSION = 'v283'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v283: accordéon exclusif + logo noir mode clair
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

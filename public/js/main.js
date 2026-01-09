@@ -1326,13 +1326,22 @@ function setupNavigationDropdowns() {
             }
         });
         
-        // Gestion des catégories dépliables (accordéon)
+        // Gestion des catégories dépliables (accordéon exclusif - un seul ouvert à la fois)
         mobileMenu.querySelectorAll('.mobile-menu-category').forEach(category => {
             category.addEventListener('click', () => {
                 const isExpanded = category.getAttribute('aria-expanded') === 'true';
                 const itemsContainer = category.nextElementSibling;
                 
-                // Toggle l'état
+                // Fermer toutes les autres catégories d'abord
+                mobileMenu.querySelectorAll('.mobile-menu-category').forEach(otherCategory => {
+                    if (otherCategory !== category) {
+                        otherCategory.setAttribute('aria-expanded', 'false');
+                        const otherItems = otherCategory.nextElementSibling;
+                        if (otherItems) otherItems.classList.remove('is-expanded');
+                    }
+                });
+                
+                // Toggle l'état de la catégorie cliquée
                 category.setAttribute('aria-expanded', !isExpanded);
                 itemsContainer.classList.toggle('is-expanded', !isExpanded);
             });

@@ -1481,10 +1481,12 @@ body.itinerary-view-active {
     width: auto;
     object-fit: contain;
     display: block;
-    /* Protection mode clair - fond subtil derrière le logo */
-    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.05) 0%, transparent 70%);
-    border-radius: 8px;
-    padding: 2px;
+    /* Pas de fond, on utilise un filtre pour le mode clair */
+}
+
+/* Logo en mode clair: inverser les couleurs pour visibilité */
+body:not(.dark-theme) .header-logo-img {
+    filter: brightness(0) saturate(100%);
 }
 .header-title-group {
     display: flex;

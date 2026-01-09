@@ -899,6 +899,16 @@
                 category.addEventListener('click', () => {
                     const isExpanded = category.getAttribute('aria-expanded') === 'true';
                     const itemsContainer = category.nextElementSibling;
+                    
+                    // Fermer toutes les autres catégories d'abord
+                    mobileMenu.querySelectorAll('.mobile-menu-category').forEach(otherCategory => {
+                        if (otherCategory !== category) {
+                            otherCategory.setAttribute('aria-expanded', 'false');
+                            const otherItems = otherCategory.nextElementSibling;
+                            if (otherItems) otherItems.classList.remove('is-expanded');
+                        }
+                    });
+                    
                     category.setAttribute('aria-expanded', (!isExpanded).toString());
                     if (itemsContainer) itemsContainer.classList.toggle('is-expanded', !isExpanded);
                 });
