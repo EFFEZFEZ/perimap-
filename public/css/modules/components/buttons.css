@@ -1,0 +1,316 @@
+/**
+ * Boutons - Périmap
+ * 
+ * Système de boutons cohérent
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTON DE BASE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    
+    padding: var(--spacing-2) var(--spacing-4);
+    min-height: 40px;
+    
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    
+    transition: all var(--transition-quick);
+    
+    /* Prévenir la sélection de texte */
+    user-select: none;
+    -webkit-user-select: none;
+    
+    /* GPU acceleration */
+    will-change: transform, box-shadow;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--pm-green);
+    outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VARIANTES DE COULEUR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Primary - Vert Périmap */
+.btn-primary {
+    background: var(--pm-green);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--pm-green-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--pm-green-glow);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Secondary - Gris */
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+/* Outline */
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--pm-green);
+    color: var(--pm-green);
+}
+
+.btn-outline:hover {
+    background: var(--pm-green-light);
+}
+
+/* Ghost */
+.btn-ghost {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+    background: var(--bg-secondary);
+}
+
+/* Gradient Périmap */
+.btn-gradient {
+    background: var(--pm-gradient);
+    color: white;
+    border: none;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+/* Danger */
+.btn-danger {
+    background: var(--color-error);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* Warning */
+.btn-warning {
+    background: var(--color-warning);
+    color: #0f172a;
+}
+
+.btn-warning:hover {
+    background: #ca8a04;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAILLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-xs {
+    padding: var(--spacing-1) var(--spacing-2);
+    min-height: 28px;
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+}
+
+.btn-sm {
+    padding: var(--spacing-1) var(--spacing-3);
+    min-height: 32px;
+    font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+    padding: var(--spacing-3) var(--spacing-6);
+    min-height: 48px;
+    font-size: var(--font-size-base);
+}
+
+.btn-xl {
+    padding: var(--spacing-4) var(--spacing-8);
+    min-height: 56px;
+    font-size: var(--font-size-lg);
+    border-radius: var(--radius-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORMES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-square {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-square.btn-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.btn-square.btn-lg {
+    width: 48px;
+    height: 48px;
+}
+
+.btn-circle {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.btn-circle.btn-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.btn-circle.btn-lg {
+    width: 48px;
+    height: 48px;
+}
+
+.btn-pill {
+    border-radius: var(--radius-full);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ÉTATS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+.btn-primary.btn-loading::after,
+.btn-gradient.btn-loading::after,
+.btn-danger.btn-loading::after {
+    border-color: white;
+    border-right-color: transparent;
+}
+
+/* Block (pleine largeur) */
+.btn-block {
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ICÔNES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+.btn-sm svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-lg svg {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-icon-only {
+    padding: var(--spacing-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GROUPE DE BOUTONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-group {
+    display: inline-flex;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.btn-group .btn:last-child {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.btn-group .btn:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .btn-secondary {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-secondary:hover {
+    background: #334155;
+}
+
+body.dark-theme .btn-ghost {
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .btn-outline {
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+body.dark-theme .btn-outline:hover {
+    background: rgba(74, 222, 128, 0.1);
+}

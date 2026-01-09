@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr" prefix="og: https://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    
+    <!-- SEO Principal - Mots-clés stratégiques -->
+    <title>Périmap, Horaires et plan du Péribus</title>
+    <meta name="description" content="Dédié au réseau Péribus du Grand Périgueux. Horaires, calcul d'itinéraire, carte interactive. Application gratuite et indépendante.">
+    <meta name="keywords" content="péribus, bus périgueux, horaires péribus, itinéraire bus périgueux, grand périgueux transport, réseau péribus, péribus horaires, bus périgueux gratuit, application péribus, plan bus périgueux, transports grand périgueux, peribus, bus perigueux, horaires peribus, péribus temps réel, ligne A B C D péribus, prochain bus périgueux, tarif péribus, abonnement péribus, carte péribus, arrêt bus périgueux, gare périgueux, centre ville périgueux bus, transport périgueux, mobilité périgueux, bus trélissac, bus boulazac, bus chancelade, dordogne transport, nouvelle aquitaine bus, calcul trajet périgueux, meilleur app péribus, perimap, perimap application">
+    <meta name="author" content="PériMap - Application indépendante Grand Périgueux">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow">
+    <meta name="bingbot" content="index, follow">
+    <link rel="canonical" href="https://www.xn--primap-bva.fr/">
+    
+    <!-- Géolocalisation SEO -->
+    <meta name="geo.region" content="FR-NAQ">
+    <meta name="geo.placename" content="Périgueux, Dordogne, France">
+    <meta name="geo.position" content="45.1846;0.7214">
+    <meta name="ICBM" content="45.1846, 0.7214">
+    
+    <!-- Open Graph avancé -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PériMap">
+    <meta property="og:title" content="Périmap, Horaires et plan du Péribus">
+    <meta property="og:description" content="Dédié au réseau Péribus du Grand Périgueux. Application gratuite et indépendante pour consulter les horaires et calculer vos trajets.">
+    <meta property="og:url" content="https://www.xn--primap-bva.fr/">
+    <meta property="og:image" content="https://www.xn--primap-bva.fr/icons/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="PériMap - Horaires et itinéraires bus Péribus Périgueux">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@PeriMap">
+    <meta name="twitter:title" content="Périmap, Horaires et plan du Péribus">
+    <meta name="twitter:description" content="Dédié au réseau Péribus du Grand Périgueux. Application gratuite et indépendante.">
+    <meta name="twitter:image" content="https://www.xn--primap-bva.fr/icons/og-image.png">
+    
+    <!-- PWA & Mobile -->
+    <meta name="theme-color" content="#22c55e">
+    <meta name="msapplication-TileColor" content="#22c55e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="PériMap">
+    <meta name="application-name" content="PériMap">
+    
+    <!-- API Key: Gérée côté serveur via /api/routes et /api/places -->
+    <!-- La clé n'est plus exposée côté client pour des raisons de sécurité -->
+    
+    <!-- Admin Token (injected from Vercel env at build time) -->
+    <script>
+        window.__ADMIN_TOKEN = '__VITE_ADMIN_TOKEN__';
+        if (window.__ADMIN_TOKEN === '__VITE_ADMIN_TOKEN__') {
+            window.__ADMIN_TOKEN = '';
+        }
+    </script>
+    
+    <!-- Favicons & Icons -->
+    <link rel="manifest" href="/assets/manifest-BI4Kxu6Y.json">
+    <link rel="icon" type="image/webp" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192-CNpYhbKG.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp">
+    
+    <!-- Preload ressources critiques -->
+    <link rel="preload" href="/assets/app-CFeCSgMg.js" as="script" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://maps.googleapis.com">
+    <link rel="dns-prefetch" href="https://routes.googleapis.com">
+    
+    <!-- CSS critique en premier -->
+    
+    <!-- CSS externes non-bloquants -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin="" media="print" onload="this.media='all'"/>
+    <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" media="print" onload="this.media='all'"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" media="print" onload="this.media='all'"/>
+
+    <!-- Scripts externes avec defer (non-bloquants) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script defer src="https://unpkg.com/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Font avec display=swap pour éviter FOIT -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Schema.org - Application de transport -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PériMap",
+        "alternateName": ["Péribus horaires", "Bus Périgueux", "Horaires bus Grand Périgueux"],
+        "url": "https://www.xn--primap-bva.fr/",
+        "applicationCategory": "TravelApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "browserRequirements": "Requires JavaScript",
+        "description": "Application gratuite pour consulter les horaires Péribus, calculer vos itinéraires bus à Périgueux et visualiser le plan du réseau Grand Périgueux en temps réel.",
+        "featureList": [
+            "Calcul d'itinéraire bus en temps réel",
+            "Horaires de toutes les lignes Péribus",
+            "Plan interactif du réseau",
+            "Alertes trafic et perturbations",
+            "Mode hors-ligne",
+            "Géolocalisation"
+        ],
+        "screenshot": "https://www.xn--primap-bva.fr/icons/screenshot.png",
+        "softwareVersion": "3.18.0",
+        "datePublished": "2024-01-01",
+        "dateModified": "2025-12-05",
+        "inLanguage": "fr",
+        "isAccessibleForFree": true,
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "156",
+            "bestRating": "5",
+            "worstRating": "1"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "PériMap",
+            "url": "https://www.xn--primap-bva.fr/"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "PériMap",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://www.xn--primap-bva.fr/icons/icon-512.png"
+            }
+        },
+        "sameAs": [
+            "https://www.instagram.com/perimap.fr/",
+            "https://www.facebook.com/perimap.fr",
+            "https://github.com/EFFEZFEZ/perimap-"
+        ]
+    }
+    </script>
+    
+    <!-- Schema.org - Service de transport local -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Réseau Péribus - Grand Périgueux",
+        "description": "Réseau de transport en commun du Grand Périgueux. Consultez les horaires et itinéraires sur PériMap.",
+        "url": "https://www.xn--primap-bva.fr/",
+        "areaServed": {
+            "@type": "City",
+            "name": "Périgueux",
+            "containedInPlace": {
+                "@type": "AdministrativeArea",
+                "name": "Dordogne, Nouvelle-Aquitaine, France"
+            }
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "45.1846",
+            "longitude": "0.7214"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Périgueux",
+            "addressRegion": "Dordogne",
+            "postalCode": "24000",
+            "addressCountry": "FR"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            "opens": "06:00",
+            "closes": "21:00"
+        }
+    }
+    </script>
+    
+    <!-- Schema.org - FAQ pour SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Comment consulter les horaires Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Utilisez PériMap pour consulter tous les horaires des lignes Péribus (A, B, C, D, K, e, N, R) en temps réel. Entrez simplement votre arrêt de départ et d'arrivée pour obtenir les prochains passages."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quel est le prix d'un ticket de bus Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le ticket unitaire Péribus coûte 1,30€. Des abonnements mensuels et annuels sont disponibles avec des tarifs réduits pour les jeunes, étudiants et seniors."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Quelles communes sont desservies par Péribus ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Le réseau Péribus dessert Périgueux et les communes du Grand Périgueux : Boulazac, Trélissac, Coulounieix-Chamiers, Chancelade, Marsac-sur-l'Isle, Notre-Dame-de-Sanilhac, et plus encore."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Comment calculer un itinéraire bus à Périgueux ?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Sur PériMap, entrez votre point de départ et d'arrivée dans le calculateur d'itinéraire. L'application vous propose les meilleurs trajets avec les correspondances, durées et horaires en temps réel."
+                }
+            }
+        ]
+    }
+    </script>
+    
+    <!-- Schema.org - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://www.xn--primap-bva.fr/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Horaires Péribus",
+                "item": "https://www.xn--primap-bva.fr/#horaires"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Calcul itinéraire",
+                "item": "https://www.xn--primap-bva.fr/#itineraire"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Plan du réseau",
+                "item": "https://www.xn--primap-bva.fr/#carte"
+            }
+        ]
+    }
+    </script>
+    
+    <!-- Hreflang pour SEO international -->
+    <link rel="alternate" hreflang="fr" href="https://www.xn--primap-bva.fr/">
+    <link rel="alternate" hreflang="x-default" href="https://www.xn--primap-bva.fr/">
+  <script type="module" crossorigin src="/js/main-CHW5p1SW.js"></script>
+  <link rel="modulepreload" crossorigin href="/js/chunks/modulepreload-polyfill-YP0FEG5d.js">
+  <link rel="stylesheet" crossorigin href="/css/style-D4UUMuna.css">
+</head>
+<body>
+
+    <!-- Preloader removed: instant load requested by user -->
+
+    <!-- Header principal IDFM-style -->
+    <header id="main-header">
+        <div class="header-content">
+            <!-- Menu burger mobile (à gauche) -->
+            <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <a href="/" class="logo">
+                <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Logo PériMap" class="header-logo-img">
+                <div class="header-title-group">
+                    <span class="brand-name">PériMap</span>
+                </div>
+            </a>
+            
+            <!-- Navigation principale avec dropdowns -->
+            <nav class="header-nav-main">
+                <!-- Me déplacer -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger">
+                        Me déplacer
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="#" class="nav-dropdown-item" data-action="itineraire">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 12H8m4-4v8"/></svg>
+                            Itinéraire
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="horaires">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            Horaires des lignes
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="info-trafic">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            État du réseau
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="carte">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+                            Carte interactive
+                        </a>
+                        <a href="/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf" target="_blank" class="nav-dropdown-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                            Plan du réseau (PDF)
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Tarifs -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger">
+                        Tarifs
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="#" class="nav-dropdown-item" data-action="tarifs-grille">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Grille tarifaire
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="tarifs-achat">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            Où acheter ?
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="tarifs-billettique">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            Billettique
+                        </a>
+                        <a href="#" class="nav-dropdown-item" data-action="tarifs-amendes">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Fraudes & amendes
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Services -->
+                <div class="nav-dropdown">
+                    <button class="nav-dropdown-trigger">
+                        Services
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <a href="/about.html" class="nav-dropdown-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            <span>À propos</span>
+                        </a>
+                        <div class="nav-dropdown-item nav-dropdown-item--disabled">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                            <span>Autres services</span>
+                            <span class="nav-badge">Bientôt</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <nav class="header-nav-right">
+                <button id="theme-toggle-btn" class="btn-icon-round" data-theme-toggle="true" aria-label="Basculer thème sombre" title="Thème sombre" aria-pressed="false">
+                    <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
+                </button>
+            </nav>
+        </div>
+        
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="mobile-menu hidden">
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-category" aria-expanded="false">
+                    <span>Me déplacer</span>
+                    <svg class="mobile-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="mobile-menu-items">
+                    <a href="#" class="mobile-menu-item" data-action="itineraire">Itinéraire</a>
+                    <a href="#" class="mobile-menu-item" data-action="horaires">Horaires des lignes</a>
+                    <a href="#" class="mobile-menu-item" data-action="info-trafic">État du réseau</a>
+                    <a href="#" class="mobile-menu-item" data-action="carte">Carte interactive</a>
+                    <a href="/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf" target="_blank" class="mobile-menu-item">Plan du réseau (PDF)</a>
+                </div>
+            </div>
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-category" aria-expanded="false">
+                    <span>Tarifs</span>
+                    <svg class="mobile-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="mobile-menu-items">
+                    <a href="#" class="mobile-menu-item" data-action="tarifs-grille">Grille tarifaire</a>
+                    <a href="#" class="mobile-menu-item" data-action="tarifs-achat">Où acheter ?</a>
+                    <a href="#" class="mobile-menu-item" data-action="tarifs-billettique">Billettique</a>
+                    <a href="#" class="mobile-menu-item" data-action="tarifs-amendes">Fraudes & amendes</a>
+                </div>
+            </div>
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-category" aria-expanded="false">
+                    <span>Services</span>
+                    <svg class="mobile-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="mobile-menu-items">
+                    <a href="/about.html" class="mobile-menu-item">À propos</a>
+                    <span class="mobile-menu-item mobile-menu-item--disabled">Autres services <span class="nav-badge">Bientôt</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main id="app-view-root"></main>
+
+    <!-- Footer professionnel -->
+    <footer id="site-footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="PériMap" class="footer-logo">
+                    <div class="footer-brand-text">
+                        <span class="footer-brand-name">PériMap</span>
+                        <span class="footer-brand-tagline">Simplifiez vos déplacements dans le Grand Périgueux</span>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h4>Navigation</h4>
+                        <a href="/">Accueil</a>
+                        <a href="/about.html">À propos</a>
+                        <a href="/mentions-legales.html">Mentions légales</a>
+                    </div>
+                    <div class="footer-links-column footer-social-column">
+                        <h4>Suivez-nous</h4>
+                        <div class="footer-social-links">
+                            <a href="https://www.instagram.com/perimap.fr/" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Instagram PériMap" title="Suivez-nous sur Instagram">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </a>
+                            <a href="https://www.facebook.com/perimap.fr" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Facebook PériMap" title="Suivez-nous sur Facebook">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-links-column">
+                        <h4>Ressources</h4>
+                        <a href="/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf" target="_blank">Plan du réseau</a>
+                        <a href="https://www.grandperigueux.fr/mon-quotidien/transports-mobilite/se-deplacer-en-bus-car/reseau-peribus/" target="_blank" rel="noopener">Réseau Péribus</a>
+                        <a href="https://www.grandperigueux.fr" target="_blank" rel="noopener">Grand Périgueux</a>
+                        <a href="https://github.com/EFFEZFEZ/perimap-" target="_blank" rel="noopener">Code source</a>
+                    </div>
+                    <div class="footer-links-column">
+                        <h4>Données</h4>
+                        <p class="footer-data-info">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            © Grand Périgueux / Péribus
+                        </p>
+                        <p class="footer-license">Licence ODbL</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="footer-independent">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Application indépendante, non affiliée au Grand Périgueux ou Péribus.
+                </p>
+                <div class="footer-bottom-right">
+                    <div class="footer-social-mobile">
+                        <a href="https://www.instagram.com/perimap.fr/" target="_blank" rel="noopener" class="footer-social-btn-sm" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="https://www.facebook.com/perimap.fr" target="_blank" rel="noopener" class="footer-social-btn-sm" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </a>
+                    </div>
+                    <p class="footer-copyright">© 2025 PériMap · Tous droits réservés · Fait avec ❤️ pour le Grand Périgueux</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
