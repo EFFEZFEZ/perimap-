@@ -1,14 +1,18 @@
 /*
  * Copyright (c) 2026 Périmap. Tous droits réservés.
- * API Places - Version Edge Function (ultra-rapide)
+ * API Places - Version Edge Function (proxy vers Oracle Cloud)
+ * V311 - Proxy vers backend Oracle au lieu de Google
  * 
- * Sert à l'autocomplétion quand tu tapes une adresse
- * et à trouver les coordonnées GPS d'un lieu
+ * Redirige les requêtes vers notre serveur Oracle Cloud
+ * qui utilise Photon (OSM) + arrêts GTFS locaux
  */
 
 export const config = {
     runtime: 'edge',
 };
+
+// URL du backend Oracle Cloud
+const ORACLE_BACKEND = 'http://79.72.24.141';
 
 export default async function handler(request) {
     const url = new URL(request.url);
@@ -21,6 +25,8 @@ export default async function handler(request) {
         'Vary': 'Origin',
     };
 
+    console.log('[places edge V311] Requête reçue:', request.url);
+
     if (request.method === 'OPTIONS') {
         return new Response(null, { status: 200, headers: corsHeaders });
     }
@@ -32,118 +38,140 @@ export default async function handler(request) {
         );
     }
 
-    const apiKey = process.env.GMAPS_SERVER_KEY;
-    if (!apiKey) {
-        return new Response(
-            JSON.stringify({ error: 'GMAPS_SERVER_KEY manquant sur le serveur.' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-    }
-
-    const input = url.searchParams.get('input');
+    const input = url.searchParams.get('input') || url.searchParams.get('q');
     const placeId = url.searchParams.get('placeId');
 
+    console.log('[places edge V311] Params - input:', input, 'placeId:', placeId);
+
     try {
-        // Mode 1: Autocomplétion (quand l'utilisateur tape une adresse)
+        // Mode 1: Autocomplétion - proxy vers Oracle Cloud
         if (input) {
-            const placesUrl = 'https://places.googleapis.com/v1/places:autocomplete';
+            const oracleUrl = `${ORACLE_BACKEND}/api/places/autocomplete?q=${encodeURIComponent(input)}`;
+            console.log('[places edge V311] Proxy autocomplete vers:', oracleUrl);
             
-            const requestBody = {
-                input: input,
-                languageCode: 'fr',
-                // Zone du Grand Périgueux uniquement
-                locationRestriction: {
-                    rectangle: {
-                        low: { latitude: 45.10, longitude: 0.55 },
-                        high: { latitude: 45.30, longitude: 0.90 }
-                    }
-                }
-            };
-
-            const response = await fetch(placesUrl, {
-                method: 'POST',
+            const startTime = Date.now();
+            const response = await fetch(oracleUrl, {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-Goog-Api-Key': apiKey,
-                    'X-Goog-FieldMask': 'suggestions.placePrediction.placeId,suggestions.placePrediction.text'
-                },
-                body: JSON.stringify(requestBody)
+                    'Accept': 'application/json',
+                    'User-Agent': 'Perimap-Vercel-Edge/1.0'
+                }
             });
+            const elapsed = Date.now() - startTime;
 
-            const data = await response.json();
+            console.log('[places edge V311] Oracle réponse en', elapsed, 'ms, status:', response.status);
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('[places edge V311] Erreur Oracle:', errorText);
                 return new Response(
-                    JSON.stringify({ error: 'Erreur Places API', details: data }),
+                    JSON.stringify({ error: 'Erreur backend Oracle', details: errorText }),
                     { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 );
             }
 
-            // Transforme le format Google en format simple
+            const data = await response.json();
+            console.log('[places edge V311] Suggestions reçues:', data.suggestions?.length || 0);
+
+            // Transforme le format Oracle en format attendu par le frontend
             const predictions = (data.suggestions || []).map(s => ({
-                description: s.placePrediction?.text?.text || '',
-                placeId: s.placePrediction?.placeId || ''
-            })).filter(p => p.placeId);
+                description: s.label || s.name || '',
+                placeId: s.id || `photon_${s.lat}_${s.lon}`,
+                location: s.location || (s.lat && s.lon ? { lat: s.lat, lng: s.lon } : null),
+                type: s.type || 'address'
+            })).filter(p => p.description);
+
+            console.log('[places edge V311] Retourne', predictions.length, 'prédictions');
 
             return new Response(
-                JSON.stringify({ predictions }),
+                JSON.stringify({ predictions, source: 'oracle-cloud' }),
                 { 
                     status: 200, 
                     headers: { 
                         ...corsHeaders, 
                         'Content-Type': 'application/json',
-                        'Cache-Control': 's-maxage=300, stale-while-revalidate=600'
+                        'Cache-Control': 's-maxage=60, stale-while-revalidate=120',
+                        'X-Backend': 'oracle-cloud'
                     } 
                 }
             );
         }
 
-        // Mode 2: Récupérer les coordonnées GPS d'un lieu
+        // Mode 2: Récupérer les coordonnées GPS d'un lieu (par placeId)
         if (placeId) {
-            const detailsUrl = `https://places.googleapis.com/v1/places/${placeId}`;
+            // Si le placeId contient des coordonnées (format photon_lat_lon)
+            if (placeId.startsWith('photon_')) {
+                const parts = placeId.split('_');
+                if (parts.length >= 3) {
+                    const lat = parseFloat(parts[1]);
+                    const lon = parseFloat(parts[2]);
+                    console.log('[places edge V311] Coordonnées extraites du placeId:', lat, lon);
+                    return new Response(
+                        JSON.stringify({ lat, lng: lon, source: 'photon-id' }),
+                        { 
+                            status: 200, 
+                            headers: { 
+                                ...corsHeaders, 
+                                'Content-Type': 'application/json',
+                                'Cache-Control': 's-maxage=86400',
+                                'X-Backend': 'oracle-cloud'
+                            } 
+                        }
+                    );
+                }
+            }
 
-            const response = await fetch(detailsUrl, {
+            // Sinon, on cherche le lieu par son ID sur Oracle
+            const oracleUrl = `${ORACLE_BACKEND}/api/places/details?placeId=${encodeURIComponent(placeId)}`;
+            console.log('[places edge V311] Proxy details vers:', oracleUrl);
+
+            const response = await fetch(oracleUrl, {
                 method: 'GET',
                 headers: {
-                    'X-Goog-Api-Key': apiKey,
-                    'X-Goog-FieldMask': 'location'
+                    'Accept': 'application/json',
+                    'User-Agent': 'Perimap-Vercel-Edge/1.0'
                 }
             });
 
-            const data = await response.json();
-
-            if (!response.ok || !data.location) {
+            if (!response.ok) {
+                console.error('[places edge V311] Lieu non trouvé:', placeId);
                 return new Response(
                     JSON.stringify({ error: 'Lieu non trouvé' }),
                     { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 );
             }
 
+            const data = await response.json();
+            console.log('[places edge V311] Détails reçus:', data);
+
             return new Response(
                 JSON.stringify({ 
-                    lat: data.location.latitude, 
-                    lng: data.location.longitude 
+                    lat: data.lat || data.location?.lat, 
+                    lng: data.lng || data.lon || data.location?.lng,
+                    source: 'oracle-cloud'
                 }),
                 { 
                     status: 200, 
                     headers: { 
                         ...corsHeaders, 
                         'Content-Type': 'application/json',
-                        'Cache-Control': 's-maxage=86400, stale-while-revalidate=604800'
+                        'Cache-Control': 's-maxage=86400',
+                        'X-Backend': 'oracle-cloud'
                     } 
                 }
             );
         }
 
+        console.log('[places edge V311] Aucun paramètre valide');
         return new Response(
-            JSON.stringify({ error: 'Paramètre input ou placeId requis' }),
+            JSON.stringify({ error: 'Paramètre input, q ou placeId requis' }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
 
     } catch (error) {
-        console.error('[places edge] Error:', error);
+        console.error('[places edge V311] Error:', error);
         return new Response(
-            JSON.stringify({ error: 'Places proxy error', details: error.message }),
+            JSON.stringify({ error: 'Oracle proxy error', details: error.message }),
             { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
