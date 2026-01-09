@@ -732,11 +732,23 @@ export class MapRenderer {
      */
     async fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon) {
         try {
-            // Essayer avec le stop_id comme clé hawk
-            const realtimeData = await realtimeManager.getRealtimeForStop(masterStop.stop_id);
+            // Utiliser getRealtimeForStopPlace pour les arrêts maîtres (StopPlace)
+            // Cela récupérera les données pour tous les quais de cet arrêt
+            const realtimeData = await realtimeManager.getRealtimeForStopPlace(masterStop.stop_id);
             
-            if (realtimeData && realtimeData.schedules && realtimeData.schedules.length > 0) {
-                console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.schedules.length, 'passages');
+            if (realtimeData && realtimeData.departures && realtimeData.departures.length > 0) {
+                console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
+                
+                // Convertir au format attendu par createStopPopupContent
+                const realtimeForPopup = {
+                    schedules: realtimeData.departures.map(d => ({
+                        ligne: d.line,
+                        destination: d.destination,
+                        temps: d.time,
+                        quai: d.quay || '',
+                        realtime: d.realtime !== false
+                    }))
+                };
                 
                 // Vérifier que le popup est toujours ouvert et au bon endroit
                 if (popup.isOpen()) {
@@ -746,7 +758,7 @@ export class MapRenderer {
                         currentSeconds, 
                         isNextDayDepartures, 
                         firstDepartureTime,
-                        realtimeData
+                        realtimeForPopup
                     );
                     popup.setContent(newContent);
                     

@@ -5,7 +5,7 @@
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  */
 
-import { getHawkKeyForStop, isRealtimeEnabled } from './config/stopKeyMapping.js';
+import { getHawkKeyForStop, getHawkKeysForStopPlace, isRealtimeEnabled, loadStopIdMapping } from './config/stopKeyMapping.js';
 
 export class RealtimeManager {
     constructor() {
@@ -20,6 +20,9 @@ export class RealtimeManager {
         this.isAvailable = false;
         this.lastError = null;
         
+        // Référence aux stops GTFS (pour le mapping)
+        this.stops = null;
+        
         // Statistiques
         this.stats = {
             requests: 0,
@@ -29,20 +32,31 @@ export class RealtimeManager {
     }
 
     /**
+     * Initialise le manager avec les données GTFS
+     * @param {Array} stops - Liste des arrêts GTFS
+     */
+    init(stops) {
+        this.stops = stops;
+        loadStopIdMapping(stops);
+    }
+
+    /**
      * Récupère les horaires temps réel pour un arrêt
      * @param {string|number} stopId - L'identifiant GTFS de l'arrêt
+     * @param {string} [stopCode] - Optionnel: le stop_code si connu
      * @returns {Promise<RealtimeData|null>}
      */
-    async getRealtimeForStop(stopId) {
+    async getRealtimeForStop(stopId, stopCode = null) {
         // Vérifier si le temps réel est activé pour cet arrêt
-        if (!isRealtimeEnabled(stopId)) {
+        if (!isRealtimeEnabled(stopId, stopCode)) {
+            console.debug(`[Realtime] Temps réel non disponible pour stop ${stopId}`);
             return null;
         }
         
         // Obtenir la clé hawk correspondante
-        const hawkKey = getHawkKeyForStop(stopId);
+        const hawkKey = getHawkKeyForStop(stopId, stopCode);
         if (!hawkKey) {
-            console.debug(`[Realtime] Pas de clé hawk pour stop ${stopId}`);
+            console.debug(`[Realtime] Pas de clé hawk pour stop ${stopId} (code: ${stopCode})`);
             return null;
         }
         
@@ -80,6 +94,8 @@ export class RealtimeManager {
             this.lastError = null;
             this.stats.successes++;
             
+            console.log(`[Realtime] ✅ Données reçues pour hawk:${hawkKey}:`, data.count, 'départs');
+            
             return data;
 
         } catch (error) {
@@ -88,6 +104,72 @@ export class RealtimeManager {
             this.stats.failures++;
             return null;
         }
+    }
+
+    /**
+     * Récupère les horaires temps réel pour un StopPlace (arrêt parent avec plusieurs quais)
+     * @param {string} stopPlaceId - ID du StopPlace (ex: MOBIITI:StopPlace:77017)
+     * @returns {Promise<RealtimeData|null>}
+     */
+    async getRealtimeForStopPlace(stopPlaceId) {
+        if (!this.stops) {
+            console.warn('[Realtime] Stops non initialisés, appeler init() d\'abord');
+            return null;
+        }
+        
+        // Obtenir toutes les clés hawk pour ce StopPlace
+        const hawkKeys = getHawkKeysForStopPlace(stopPlaceId, this.stops);
+        
+        if (hawkKeys.length === 0) {
+            console.debug(`[Realtime] Pas de clés hawk pour StopPlace ${stopPlaceId}`);
+            return null;
+        }
+        
+        console.log(`[Realtime] StopPlace ${stopPlaceId} -> ${hawkKeys.length} quais: ${hawkKeys.map(k => k.stopCode).join(', ')}`);
+        
+        // Récupérer les données pour chaque quai
+        const allDepartures = [];
+        
+        for (const { stopId, stopCode, hawkKey } of hawkKeys) {
+            const data = await this.getRealtimeForStop(stopId, stopCode);
+            if (data && data.departures) {
+                allDepartures.push(...data.departures.map(d => ({
+                    ...d,
+                    quay: stopCode,
+                    hawkKey
+                })));
+            }
+        }
+        
+        if (allDepartures.length === 0) {
+            return null;
+        }
+        
+        // Fusionner et trier par temps
+        allDepartures.sort((a, b) => {
+            const timeA = this.parseTime(a.time);
+            const timeB = this.parseTime(b.time);
+            return timeA - timeB;
+        });
+        
+        return {
+            stopPlaceId,
+            timestamp: new Date().toISOString(),
+            departures: allDepartures.slice(0, 10),
+            count: allDepartures.length
+        };
+    }
+
+    /**
+     * Parse un temps au format HH:MM en minutes
+     */
+    parseTime(timeStr) {
+        if (!timeStr) return Infinity;
+        const match = timeStr.match(/(\d{2}):(\d{2})/);
+        if (match) {
+            return parseInt(match[1]) * 60 + parseInt(match[2]);
+        }
+        return Infinity;
     }
 
     /**

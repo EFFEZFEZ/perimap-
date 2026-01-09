@@ -116,7 +116,7 @@ async function sleep(ms) {
 async function scrapeHawk(stopKey) {
     const profile = getRandomProfile();
     const referer = getRandomReferer();
-    const url = `https://hawk.perimouv.fr/horaires/${stopKey}`;
+    const url = `https://hawk.perimouv.fr/qrcodes/schedule.aspx?key=${stopKey}`;
     
     // Headers stealth complets
     const headers = {
@@ -174,115 +174,44 @@ async function scrapeHawk(stopKey) {
 function parseHawkHTML(html) {
     const departures = [];
 
-    // Pattern pour les départs temps réel Hawk/Hanover
-    // Format typique: <div class="departure">...</div>
+    // Extraire le nom de l'arrêt
+    const stopNameMatch = html.match(/<span[^>]*class=['"]stop-name-text['"][^>]*>([^<]+)<\/span>/i);
+    const stopName = stopNameMatch ? stopNameMatch[1].trim() : null;
+
+    // Extraire les lignes (dans les balises <text> des SVG)
+    const lineMatches = [...html.matchAll(/<text[^>]*>([^<]+)<\/text>/gi)];
     
-    // Pattern 1: Format JSON embarqué (si présent)
-    const jsonMatch = html.match(/var\s+departures\s*=\s*(\[[\s\S]*?\]);/);
-    if (jsonMatch) {
-        try {
-            const parsed = JSON.parse(jsonMatch[1]);
-            return parsed.map(d => ({
-                line: d.line || d.routeShortName || '',
-                destination: d.destination || d.headsign || '',
-                time: d.time || d.departureTime || '',
-                realtime: d.realtime !== false,
-                delay: d.delay || 0
-            }));
-        } catch (e) {
-            // Continue avec parsing HTML
-        }
+    // Extraire les destinations
+    const destMatches = [...html.matchAll(/<div class='row-cell destination-cell destination'[^>]*>([^<]+)<\/div>/gi)];
+    
+    // Extraire les temps au format HH:MM (temps d'attente)
+    const timeMatches = [...html.matchAll(/<div class='row-cell schedule'[^>]*>(\d{2}:\d{2})/gi)];
+    
+    // Vérifier si chaque départ est théorique (contient T.png après le temps)
+    const scheduleBlocks = [...html.matchAll(/<div class='row-cell schedule'[^>]*>(\d{2}:\d{2})([^<]*(?:<[^>]*>[^<]*)*?)<\/div>/gi)];
+    
+    const minLen = Math.min(lineMatches.length, destMatches.length, timeMatches.length);
+    
+    for (let i = 0; i < minLen; i++) {
+        // Vérifier si ce départ est théorique
+        const isTheoretical = scheduleBlocks[i] ? scheduleBlocks[i][0].includes('T.png') : false;
+        
+        departures.push({
+            line: lineMatches[i][1].trim(),
+            destination: destMatches[i][1].trim(),
+            time: timeMatches[i][1].trim(),
+            realtime: !isTheoretical,
+            theoretical: isTheoretical
+        });
     }
 
-    // Pattern 2: Tables de départs
-    const tableRegex = /<tr[^>]*class="[^"]*departure[^"]*"[^>]*>([\s\S]*?)<\/tr>/gi;
-    let tableMatch;
-    while ((tableMatch = tableRegex.exec(html)) !== null) {
-        const row = tableMatch[1];
-        const lineMatch = row.match(/<td[^>]*class="[^"]*line[^"]*"[^>]*>([^<]+)</i);
-        const destMatch = row.match(/<td[^>]*class="[^"]*destination[^"]*"[^>]*>([^<]+)</i);
-        const timeMatch = row.match(/<td[^>]*class="[^"]*time[^"]*"[^>]*>([^<]+)</i);
-        
-        if (lineMatch || destMatch || timeMatch) {
-            departures.push({
-                line: lineMatch ? lineMatch[1].trim() : '',
-                destination: destMatch ? destMatch[1].trim() : '',
-                time: timeMatch ? timeMatch[1].trim() : '',
-                realtime: true
-            });
-        }
+    // Ajouter le nom de l'arrêt aux données
+    const result = departures.slice(0, 10);
+    if (stopName) {
+        result.stopName = stopName;
     }
-
-    // Pattern 3: Divs de départs (format Hanover classique)
-    const divRegex = /<div[^>]*class="[^"]*(?:departure|horaire|passage)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
-    let divMatch;
-    while ((divMatch = divRegex.exec(html)) !== null) {
-        const content = divMatch[1];
-        
-        // Extraire ligne
-        const lineMatch = content.match(/(?:ligne|line)[:\s]*([A-D]|\d+)/i) ||
-                         content.match(/<span[^>]*class="[^"]*line[^"]*"[^>]*>([^<]+)</i) ||
-                         content.match(/<strong>([A-D])<\/strong>/i);
-        
-        // Extraire destination
-        const destMatch = content.match(/(?:direction|vers|destination)[:\s]*([^<\n]+)/i) ||
-                         content.match(/<span[^>]*class="[^"]*(?:destination|direction)[^"]*"[^>]*>([^<]+)</i);
-        
-        // Extraire temps
-        const timeMatch = content.match(/(\d{1,2}:\d{2}|\d+\s*min|proche|imminent)/i) ||
-                         content.match(/<span[^>]*class="[^"]*time[^"]*"[^>]*>([^<]+)</i);
-        
-        if (lineMatch && (destMatch || timeMatch)) {
-            departures.push({
-                line: lineMatch[1].trim(),
-                destination: destMatch ? destMatch[1].trim() : '',
-                time: timeMatch ? timeMatch[1].trim() : '',
-                realtime: true
-            });
-        }
-    }
-
-    // Pattern 4: Format liste simple
-    const listRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
-    let listMatch;
-    while ((listMatch = listRegex.exec(html)) !== null) {
-        const item = listMatch[1];
-        // Chercher pattern "Ligne X - Direction - HH:MM"
-        const fullMatch = item.match(/(?:ligne\s*)?([A-D]|\d+)[^A-Za-z0-9]*(?:vers|direction|→)?\s*([^-\d]+?)\s*[-–]\s*(\d{1,2}:\d{2}|\d+\s*min)/i);
-        if (fullMatch) {
-            departures.push({
-                line: fullMatch[1].trim(),
-                destination: fullMatch[2].trim(),
-                time: fullMatch[3].trim(),
-                realtime: true
-            });
-        }
-    }
-
-    // Pattern 5: Texte brut structuré
-    const textBlocks = html.match(/(?:Ligne\s*)?([A-D])\s*(?:vers|→|direction)?\s*([^\d\n<]+?)\s*[:–-]\s*(\d{1,2}h?\d{2}|\d+\s*min(?:utes?)?|Proche)/gi);
-    if (textBlocks) {
-        for (const block of textBlocks) {
-            const parts = block.match(/([A-D])\s*(?:vers|→|direction)?\s*([^\d\n<]+?)\s*[:–-]\s*(\d{1,2}h?\d{2}|\d+\s*min(?:utes?)?|Proche)/i);
-            if (parts && departures.length < 20) {
-                departures.push({
-                    line: parts[1].trim(),
-                    destination: parts[2].trim(),
-                    time: parts[3].trim().replace('h', ':'),
-                    realtime: true
-                });
-            }
-        }
-    }
-
-    // Dédupliquer
-    const seen = new Set();
-    return departures.filter(d => {
-        const key = `${d.line}-${d.destination}-${d.time}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    }).slice(0, 10); // Max 10 départs
+    
+    return result;
 }
 
 // ============================================

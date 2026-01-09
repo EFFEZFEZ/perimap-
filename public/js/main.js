@@ -25,6 +25,7 @@ import { RouterWorkerClient } from './routerWorkerClient.js';
 import { UIManager } from './uiManager.js';
 import { createGeolocationManager } from './geolocationManager.js';
 import { loadBaseLayout } from './viewLoader.js';
+import { realtimeManager } from './realtimeManager.js';
 
 // === Imports des modules extraits (V221) ===
 import { 
@@ -429,6 +430,9 @@ async function initializeApp() {
     try {
         await dataManager.loadAllData((message) => updateDataStatus(message, 'loading'));
         timeManager = new TimeManager();
+        
+        // Initialiser le realtimeManager avec les stops GTFS pour le mapping hawk
+        realtimeManager.init(dataManager.stops);
         
         mapRenderer = new MapRenderer('map', dataManager, timeManager);
         mapRenderer.initializeMap();
