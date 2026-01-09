@@ -1,10 +1,10 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 import { cleanDataset, buildGtfsIndexes } from '../utils/gtfsProcessor.js';
 
-const BUNDLE_VERSION = '20260108b'; // Version du bundle GTFS - change Ã  chaque mise Ã  jour
+const BUNDLE_VERSION = '20260108b'; // Version du bundle GTFS - change à chaque mise à jour
 const OPTIMIZED_BUNDLE_CANDIDATES = [
     { url: `/data/gtfs/gtfs.bundle.json.gz?v=${BUNDLE_VERSION}`, type: 'gzip' },
     { url: `/data/gtfs/gtfs.bundle.json?v=${BUNDLE_VERSION}`, type: 'json' }
@@ -25,9 +25,9 @@ self.addEventListener('message', async (event) => {
     }
 
     try {
-        postProgress('Chargement des donnÃ©es GTFS optimisÃ©es...');
+        postProgress('Chargement des données GTFS optimisées...');
         const dataset = await loadDataset();
-        postProgress('Nettoyage des donnÃ©es...');
+        postProgress('Nettoyage des données...');
         const cleaned = cleanDataset(dataset);
         postProgress('Construction des index GTFS...');
         const indexes = buildGtfsIndexes(cleaned);
@@ -74,12 +74,12 @@ async function tryLoadOptimizedBundle() {
 async function fetchBundle(candidate) {
     const response = await fetch(candidate.url, { cache: 'no-store' });
     if (!response.ok) {
-        throw new Error(`Bundle non trouvÃ© (${response.status})`);
+        throw new Error(`Bundle non trouvé (${response.status})`);
     }
 
     if (candidate.type === 'gzip') {
         if (typeof DecompressionStream === 'undefined' || !response.body) {
-            throw new Error('DÃ©compression gzip non supportÃ©e dans ce navigateur');
+            throw new Error('Décompression gzip non supportée dans ce navigateur');
         }
         const decompressedStream = response.body.pipeThrough(new DecompressionStream('gzip'));
         const text = await new Response(decompressedStream).text();
@@ -181,4 +181,5 @@ function parseCsv(text) {
             return record;
         });
 }
+
 

@@ -6,7 +6,7 @@
  * - Les lignes les plus consultées
  * - Les patterns de consultation pour optimisation
  * 
- * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
+ * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
  */
 
 export class AnalyticsManager {
@@ -287,3 +287,4 @@ export class AnalyticsManager {
 
 // Export d'une instance singleton
 export const analyticsManager = new AnalyticsManager();
+

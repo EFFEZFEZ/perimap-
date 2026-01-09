@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * middleware/rateLimit.js
- * Rate limiting pour protÃ©ger l'API
+ * Rate limiting pour protéger l'API
  * 
- * ğŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 import { config } from '../config.js';
@@ -19,14 +19,14 @@ export function setupRateLimit(app) {
   /*
   import rateLimit from 'express-rate-limit';
 
-  // Limite gÃ©nÃ©rale
+  // Limite générale
   const generalLimiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
     max: config.rateLimit.maxRequests,
     standardHeaders: true,
     legacyHeaders: false,
     message: {
-      error: 'Trop de requÃªtes, veuillez rÃ©essayer plus tard.',
+      error: 'Trop de requêtes, veuillez réessayer plus tard.',
       retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
     },
     keyGenerator: (req) => {
@@ -35,14 +35,14 @@ export function setupRateLimit(app) {
     },
   });
 
-  // Limite stricte pour le calcul d'itinÃ©raires (plus coÃ»teux)
+  // Limite stricte pour le calcul d'itinéraires (plus coûteux)
   const routeLimiter = rateLimit({
     windowMs: config.rateLimit.windowMs,
     max: config.rateLimit.maxRouteRequests,
     standardHeaders: true,
     legacyHeaders: false,
     message: {
-      error: 'Trop de recherches d\'itinÃ©raires, veuillez rÃ©essayer plus tard.',
+      error: 'Trop de recherches d\'itinéraires, veuillez réessayer plus tard.',
       retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
     },
     keyGenerator: (req) => {
@@ -55,12 +55,12 @@ export function setupRateLimit(app) {
   app.use('/api/routes/compute', routeLimiter);
   */
 
-  console.log('ğŸ›¡ï¸ Rate limiting configurÃ©');
+  console.log('??? Rate limiting configuré');
 }
 
 /**
- * Middleware de rate limiting personnalisÃ© (sans dÃ©pendance)
- * Pour les cas oÃ¹ express-rate-limit n'est pas disponible
+ * Middleware de rate limiting personnalisé (sans dépendance)
+ * Pour les cas où express-rate-limit n'est pas disponible
  */
 export class SimpleRateLimiter {
   constructor(options = {}) {
@@ -94,7 +94,7 @@ export class SimpleRateLimiter {
         const retryAfter = Math.ceil((record.resetTime - now) / 1000);
         res.setHeader('Retry-After', retryAfter);
         return res.status(429).json({
-          error: 'Trop de requÃªtes',
+          error: 'Trop de requêtes',
           retryAfter,
         });
       }
@@ -104,7 +104,7 @@ export class SimpleRateLimiter {
   }
 
   /**
-   * Nettoie les entrÃ©es expirÃ©es
+   * Nettoie les entrées expirées
    */
   cleanup() {
     const now = Date.now();
@@ -117,4 +117,5 @@ export class SimpleRateLimiter {
 }
 
 export default setupRateLimit;
+
 

@@ -1,11 +1,11 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
- * API Vercel Serverless pour rÃ©cupÃ©rer le token admin
+ * API Vercel Serverless pour récupérer le token admin
  * Route: /api/admin-token
- * SÃ©curitÃ©: NÃ©cessite le bon mot de passe
+ * Sécurité: Nécessite le bon mot de passe
  */
 
 export default function handler(req, res) {
@@ -44,7 +44,7 @@ export default function handler(req, res) {
 
   const { password } = req.body || {};
 
-  // SÃ©curitÃ©: pas de mot de passe codÃ© en dur.
+  // Sécurité: pas de mot de passe codé en dur.
   const expectedPassword = process.env.ADMIN_PASSWORD;
   if (!expectedPassword) {
     return res.status(503).json({ error: 'Admin endpoint disabled (ADMIN_PASSWORD not configured)' });
@@ -63,4 +63,5 @@ export default function handler(req, res) {
 
   return res.status(200).json({ token });
 }
+
 

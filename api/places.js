@@ -1,16 +1,16 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * Proxy API pour Google Places Autocomplete (NEW API)
- * Masque la clÃ© API cÃ´tÃ© serveur (Vercel Edge Function)
+ * Masque la clé API côté serveur (Vercel Edge Function)
  * 
  * Utilise la NOUVELLE API Places (places.googleapis.com)
  * 
- * Endpoints supportÃ©s:
- * - GET /api/places?input=... : AutocomplÃ©tion
- * - GET /api/places?placeId=... : RÃ©cupÃ©rer les coordonnÃ©es d'un lieu
+ * Endpoints supportés:
+ * - GET /api/places?input=... : Autocomplétion
+ * - GET /api/places?placeId=... : Récupérer les coordonnées d'un lieu
  */
 
 export default async function handler(req, res) {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     if (origin && originAllowed) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     } else if (!origin) {
-        // RequÃªte serveur-Ã -serveur (pas d'Origin)
+        // Requête serveur-à-serveur (pas d'Origin)
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== 'GET') {
-        res.status(405).json({ error: 'MÃ©thode non autorisÃ©e. Utilisez GET.' });
+        res.status(405).json({ error: 'Méthode non autorisée. Utilisez GET.' });
         return;
     }
 
@@ -61,14 +61,14 @@ export default async function handler(req, res) {
     const { input, placeId, sessionToken } = req.query;
 
     try {
-        // Mode 1: AutocomplÃ©tion avec la NOUVELLE API Places
+        // Mode 1: Autocomplétion avec la NOUVELLE API Places
         if (input) {
             const url = 'https://places.googleapis.com/v1/places:autocomplete';
             
             const requestBody = {
                 input: input,
                 languageCode: 'fr',
-                // Restriction stricte Ã  la zone du Grand PÃ©rigueux (rectangle)
+                // Restriction stricte à la zone du Grand Périgueux (rectangle)
                 locationRestriction: {
                     rectangle: {
                         low: {
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
                 return;
             }
 
-            // Transformer la rÃ©ponse pour le frontend
+            // Transformer la réponse pour le frontend
             const predictions = (data.suggestions || [])
                 .filter(s => s.placePrediction)
                 .map(s => ({
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
             return;
         }
 
-        // Mode 2: Place Details pour obtenir les coordonnÃ©es (NEW API)
+        // Mode 2: Place Details pour obtenir les coordonnées (NEW API)
         if (placeId) {
             // La nouvelle API Places attend le format "places/{placeId}"
             const placeName = placeId.startsWith('places/') ? placeId : `places/${placeId}`;
@@ -167,15 +167,16 @@ export default async function handler(req, res) {
                 return;
             }
 
-            res.status(404).json({ error: 'Lieu non trouvÃ©' });
+            res.status(404).json({ error: 'Lieu non trouvé' });
             return;
         }
 
-        res.status(400).json({ error: 'ParamÃ¨tre input ou placeId requis.' });
+        res.status(400).json({ error: 'Paramètre input ou placeId requis.' });
 
     } catch (error) {
         console.error('[places proxy] Error:', error);
         res.status(502).json({ error: 'Places proxy error', details: error.message });
     }
 }
+
 

@@ -1,19 +1,19 @@
-﻿/*
- * Copyright (c) 2025 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+/*
+ * Copyright (c) 2026 P�rimap. Tous droits r�serv�s.
+ * Ce code ne peut �tre ni copi�, ni distribu�, ni modifi� sans l'autorisation �crite de l'auteur.
  */
 /**
  * scripts/buildGraph.js
- * Script de pré-calcul du graphe de transport
+ * Script de pr�-calcul du graphe de transport
  * 
- * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ?? STATUT: D�SACTIV� - Code pr�par� pour le futur
  * 
  * Usage: npm run build-graph
  * 
  * Ce script:
- * 1. Charge les données GTFS
+ * 1. Charge les donn�es GTFS
  * 2. Construit le graphe de transport
- * 3. Pré-calcule les index nécessaires
+ * 3. Pr�-calcule les index n�cessaires
  * 4. Sauvegarde le graphe en cache
  */
 
@@ -35,31 +35,31 @@ const __dirname = dirname(__filename);
 const logger = createLogger('build-graph');
 
 async function main() {
-  logger.info('🚀 Démarrage de la construction du graphe...');
+  logger.info('?? D�marrage de la construction du graphe...');
   const startTime = Date.now();
 
   try {
-    // 1. Charger les données GTFS
-    logger.info('📂 Chargement des données GTFS...');
+    // 1. Charger les donn�es GTFS
+    logger.info('?? Chargement des donn�es GTFS...');
     const gtfsData = await loadGtfsData(config.paths.gtfs);
-    logger.info(`   ✅ ${gtfsData.stops.length} arrêts, ${gtfsData.routes.length} lignes`);
+    logger.info(`   ? ${gtfsData.stops.length} arr�ts, ${gtfsData.routes.length} lignes`);
 
     // 2. Construire le moteur de pathfinding
-    logger.info('🔧 Construction du graphe de pathfinding...');
+    logger.info('?? Construction du graphe de pathfinding...');
     const pathfinding = new PathfindingEngine(gtfsData, config.pathfinding);
     await pathfinding.buildGraph();
-    logger.info('   ✅ Graphe de pathfinding prêt');
+    logger.info('   ? Graphe de pathfinding pr�t');
 
     // 3. Construire l'index des places
-    logger.info('📍 Construction de l\'index des places...');
+    logger.info('?? Construction de l\'index des places...');
     const places = new PlacesEngine(gtfsData.stops, config.places);
     await places.buildIndex();
-    logger.info('   ✅ Index des places prêt');
+    logger.info('   ? Index des places pr�t');
 
     // 4. Sauvegarder le cache
-    logger.info('💾 Sauvegarde du cache...');
+    logger.info('?? Sauvegarde du cache...');
     
-    // Créer le dossier de cache si nécessaire
+    // Cr�er le dossier de cache si n�cessaire
     if (!existsSync(config.paths.cache)) {
       mkdirSync(config.paths.cache, { recursive: true });
     }
@@ -68,13 +68,13 @@ async function main() {
     const graphCache = pathfinding.graph.serialize();
     const graphCachePath = join(config.paths.cache, 'graph.json');
     writeFileSync(graphCachePath, JSON.stringify(graphCache));
-    logger.info(`   ✅ Graphe sauvegardé: ${graphCachePath}`);
+    logger.info(`   ? Graphe sauvegard�: ${graphCachePath}`);
 
     // Sauvegarder les places
     const placesCache = places.indexer.export();
     const placesCachePath = join(config.paths.cache, 'places.json');
     writeFileSync(placesCachePath, JSON.stringify(placesCache));
-    logger.info(`   ✅ Places sauvegardées: ${placesCachePath}`);
+    logger.info(`   ? Places sauvegard�es: ${placesCachePath}`);
 
     // 5. Statistiques
     const elapsed = Date.now() - startTime;
@@ -82,18 +82,18 @@ async function main() {
     const placesStats = places.getStats();
 
     logger.info('');
-    logger.info('📊 Statistiques:');
+    logger.info('?? Statistiques:');
     logger.info(`   - Temps de construction: ${elapsed}ms`);
-    logger.info(`   - Mémoire graphe: ${graphStats.memory.mb} MB`);
-    logger.info(`   - Arrêts indexés: ${placesStats.stops}`);
-    logger.info(`   - POI indexés: ${placesStats.pois}`);
-    logger.info(`   - Entrées Trie: ${placesStats.trieStats.words}`);
+    logger.info(`   - M�moire graphe: ${graphStats.memory.mb} MB`);
+    logger.info(`   - Arr�ts index�s: ${placesStats.stops}`);
+    logger.info(`   - POI index�s: ${placesStats.pois}`);
+    logger.info(`   - Entr�es Trie: ${placesStats.trieStats.words}`);
 
     logger.info('');
-    logger.info('✅ Construction terminée avec succès!');
+    logger.info('? Construction termin�e avec succ�s!');
 
   } catch (error) {
-    logger.error('❌ Erreur lors de la construction:', error);
+    logger.error('? Erreur lors de la construction:', error);
     process.exit(1);
   }
 }
@@ -102,20 +102,21 @@ main();
 */
 
 console.log(`
-╔═══════════════════════════════════════════════════════════════╗
-║                                                               ║
-║   📊 BUILD GRAPH - Script de pré-calcul                       ║
-║                                                               ║
-║   🔴 STATUT: DÉSACTIVÉ                                        ║
-║                                                               ║
-║   Ce script construira le graphe de transport à partir        ║
-║   des données GTFS pour optimiser les calculs d'itinéraires.  ║
-║                                                               ║
-║   Pour activer:                                               ║
-║   1. Décommenter le code dans ce fichier                      ║
-║   2. npm install                                              ║
-║   3. npm run build-graph                                      ║
-║                                                               ║
-╚═══════════════════════════════════════════════════════════════╝
++---------------------------------------------------------------+
+�                                                               �
+�   ?? BUILD GRAPH - Script de pr�-calcul                       �
+�                                                               �
+�   ?? STATUT: D�SACTIV�                                        �
+�                                                               �
+�   Ce script construira le graphe de transport � partir        �
+�   des donn�es GTFS pour optimiser les calculs d'itin�raires.  �
+�                                                               �
+�   Pour activer:                                               �
+�   1. D�commenter le code dans ce fichier                      �
+�   2. npm install                                              �
+�   3. npm run build-graph                                      �
+�                                                               �
++---------------------------------------------------------------+
 `);
+
 

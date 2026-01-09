@@ -1,16 +1,16 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * sqlite.js
- * Adaptateur SQLite pour la mÃ©moire utilisateur
+ * Adaptateur SQLite pour la mémoire utilisateur
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  * 
- * SQLite est idÃ©al pour:
- * - DÃ©ploiements simples (fichier unique)
- * - Pas de serveur de BDD sÃ©parÃ©
+ * SQLite est idéal pour:
+ * - Déploiements simples (fichier unique)
+ * - Pas de serveur de BDD séparé
  * - Performances excellentes en lecture
  * - Backup facile (copie du fichier)
  */
@@ -37,10 +37,10 @@ export class SQLiteStore extends StorageInterface {
   }
 
   /**
-   * Connexion Ã  la base de donnÃ©es
+   * Connexion à la base de données
    */
   async connect() {
-    // NOTE: En production, dÃ©commenter et installer better-sqlite3
+    // NOTE: En production, décommenter et installer better-sqlite3
     /*
     const Database = (await import('better-sqlite3')).default;
     this.db = new Database(this.dbPath);
@@ -52,11 +52,11 @@ export class SQLiteStore extends StorageInterface {
     this.db.pragma('temp_store = MEMORY');
     */
 
-    // CrÃ©er les tables
+    // Créer les tables
     await this.createTables();
     
     this.isConnected = true;
-    console.log(`ðŸ“¦ SQLite connectÃ©: ${this.dbPath}`);
+    console.log(`?? SQLite connecté: ${this.dbPath}`);
     return true;
   }
 
@@ -72,7 +72,7 @@ export class SQLiteStore extends StorageInterface {
   }
 
   /**
-   * VÃ©rification de santÃ©
+   * Vérification de santé
    */
   async healthCheck() {
     if (!this.db) {
@@ -88,7 +88,7 @@ export class SQLiteStore extends StorageInterface {
   }
 
   /**
-   * CrÃ©ation des tables
+   * Création des tables
    */
   async createTables() {
     const schema = `
@@ -136,7 +136,7 @@ export class SQLiteStore extends StorageInterface {
       CREATE INDEX IF NOT EXISTS idx_fav_user ON favorites(user_id);
       CREATE UNIQUE INDEX IF NOT EXISTS idx_fav_user_place ON favorites(user_id, place_id);
 
-      -- Statistiques d'utilisation des arrÃªts
+      -- Statistiques d'utilisation des arrêts
       CREATE TABLE IF NOT EXISTS stop_usage (
         user_id TEXT NOT NULL,
         stop_id TEXT NOT NULL,
@@ -147,7 +147,7 @@ export class SQLiteStore extends StorageInterface {
       );
     `;
 
-    // NOTE: En production, exÃ©cuter chaque statement
+    // NOTE: En production, exécuter chaque statement
     /*
     const statements = schema.split(';').filter(s => s.trim());
     for (const stmt of statements) {
@@ -155,7 +155,7 @@ export class SQLiteStore extends StorageInterface {
     }
     */
     
-    console.log('ðŸ“Š Tables SQLite crÃ©Ã©es');
+    console.log('?? Tables SQLite créées');
   }
 
   // === UTILISATEURS ===
@@ -287,7 +287,7 @@ export class SQLiteStore extends StorageInterface {
       searchData.selectedResult ? JSON.stringify(searchData.selectedResult) : null
     );
 
-    // Nettoyer les anciennes entrÃ©es
+    // Nettoyer les anciennes entrées
     this.db.prepare(`
       DELETE FROM search_history
       WHERE user_id = ? AND id NOT IN (
@@ -431,7 +431,7 @@ export class SQLiteStore extends StorageInterface {
     return true;
   }
 
-  // === PRÃ‰FÃ‰RENCES ===
+  // === PRÉFÉRENCES ===
 
   async getPreferences(userId) {
     const user = await this.getUser(userId);
@@ -503,7 +503,7 @@ export class SQLiteStore extends StorageInterface {
     const { daysOld = 90 } = options;
     
     /*
-    // Supprimer les recherches anciennes au-delÃ  de la limite
+    // Supprimer les recherches anciennes au-delà de la limite
     const deleted = this.db.prepare(`
       DELETE FROM search_history
       WHERE timestamp < datetime('now', '-' || ? || ' days')
@@ -533,4 +533,5 @@ export class SQLiteStore extends StorageInterface {
 }
 
 export default SQLiteStore;
+
 

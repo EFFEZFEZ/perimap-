@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * api/routes.js
- * API de calcul d'itinÃ©raires
+ * API de calcul d'itinéraires
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 /*
@@ -17,7 +17,7 @@ const router = Router();
 
 /**
  * POST /api/routes/compute
- * Calcule un itinÃ©raire entre deux points
+ * Calcule un itinéraire entre deux points
  * 
  * Body:
  * {
@@ -48,22 +48,22 @@ router.post('/compute', async (req, res, next) => {
 
     if (!validateCoordinates(origin) || !validateCoordinates(destination)) {
       return res.status(400).json({
-        error: 'CoordonnÃ©es invalides (lat, lon requis)',
+        error: 'Coordonnées invalides (lat, lon requis)',
       });
     }
 
-    // DÃ©terminer l'heure de dÃ©part
+    // Déterminer l'heure de départ
     let time;
     if (departureTime) {
       time = new Date(departureTime);
     } else if (arrivalTime) {
-      // TODO: ImplÃ©menter la recherche par heure d'arrivÃ©e
+      // TODO: Implémenter la recherche par heure d'arrivée
       time = new Date(arrivalTime);
     } else {
       time = new Date();
     }
 
-    // Calculer les itinÃ©raires
+    // Calculer les itinéraires
     const itineraries = await pathfinding.computeItineraries(
       origin,
       destination,
@@ -71,7 +71,7 @@ router.post('/compute', async (req, res, next) => {
       options
     );
 
-    // Enregistrer la recherche si l'utilisateur est identifiÃ©
+    // Enregistrer la recherche si l'utilisateur est identifié
     const userId = req.userId;
     if (userId && userMemory) {
       await userMemory.recordSearch(userId, {
@@ -94,13 +94,13 @@ router.post('/compute', async (req, res, next) => {
 
 /**
  * GET /api/routes/nearby-stops
- * Trouve les arrÃªts Ã  proximitÃ© d'un point
+ * Trouve les arrêts à proximité d'un point
  * 
  * Query:
  * - lat: number (requis)
  * - lon: number (requis)
- * - radius: number (optionnel, dÃ©faut 500m)
- * - limit: number (optionnel, dÃ©faut 10)
+ * - radius: number (optionnel, défaut 500m)
+ * - limit: number (optionnel, défaut 10)
  */
 /*
 router.get('/nearby-stops', async (req, res, next) => {
@@ -142,7 +142,7 @@ router.get('/nearby-stops', async (req, res, next) => {
 
 /**
  * GET /api/routes/stop/:id/departures
- * Obtient les prochains dÃ©parts d'un arrÃªt
+ * Obtient les prochains départs d'un arrêt
  */
 /*
 router.get('/stop/:id/departures', async (req, res, next) => {
@@ -153,7 +153,7 @@ router.get('/stop/:id/departures', async (req, res, next) => {
 
     const referenceTime = time ? new Date(time) : new Date();
     
-    // TODO: ImplÃ©menter getNextDepartures
+    // TODO: Implémenter getNextDepartures
     const departures = [];
 
     res.json({
@@ -173,4 +173,5 @@ export default router;
 // Placeholder
 const router = {};
 export default router;
+
 

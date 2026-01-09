@@ -1,13 +1,13 @@
-Ôªø/*
- * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
- * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
+/*
+ * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
+ * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
  */
 /**
  * main.js - V221 (Refactorisation + nettoyage code mort)
  *
- * Version refactoris√©e avec modules s√©par√©s pour:
+ * Version refactorisÈe avec modules sÈparÈs pour:
  * - Dessin de routes (map/routeDrawing.js)
- * - Traitement itin√©raires (search/itineraryProcessor.js)
+ * - Traitement itinÈraires (search/itineraryProcessor.js)
  * - Formatage (utils/formatters.js)
  * - Configuration (config/icons.js, config/routes.js)
  * - UI (ui/resultsRenderer.js, ui/trafficInfo.js)
@@ -40,7 +40,7 @@ import {
     STOP_ROLE_PRIORITY as IMPORTED_STOP_ROLE_PRIORITY
 } from './map/routeDrawing.js';
 
-// === Imports des modules refactoris√©s ===
+// === Imports des modules refactorisÈs ===
 import { 
     isMeaningfulTime, 
     isMissingTextValue,
@@ -67,39 +67,39 @@ let dataManager;
 let timeManager;
 let tripScheduler;
 let busPositionCalculator;
-let mapRenderer; // Carte temps r√©el
-let detailMapRenderer; // Carte d√©tail mobile
-let resultsMapRenderer; // Carte r√©sultats PC
+let mapRenderer; // Carte temps rÈel
+let detailMapRenderer; // Carte dÈtail mobile
+let resultsMapRenderer; // Carte rÈsultats PC
 let visibleRoutes = new Set();
 let apiManager; 
 let routerContext = null;
 let routerWorkerClient = null;
 let uiManager = null;
-let resultsRenderer = null; // instance du renderer des r√©sultats
+let resultsRenderer = null; // instance du renderer des rÈsultats
 
 // Feature flags
 let gtfsAvailable = true; // set to false if GTFS loading fails -> degraded API-only mode
 
-// ‚ö†Ô∏è V60: GTFS Router d√©sactiv√© temporairement (performances insuffisantes)
-// TODO: Am√©liorer l'algorithme de pathfinding avant de r√©activer
-const ENABLE_GTFS_ROUTER = true; // V189: ACTIV√â pour avoir TOUS les horaires (comme SNCF Connect)
+// ?? V60: GTFS Router dÈsactivÈ temporairement (performances insuffisantes)
+// TODO: AmÈliorer l'algorithme de pathfinding avant de rÈactiver
+const ENABLE_GTFS_ROUTER = true; // V189: ACTIV… pour avoir TOUS les horaires (comme SNCF Connect)
 
-// √âtat global
+// …tat global
 let lineStatuses = {}; 
-let currentDetailRouteLayer = null; // Trac√© sur la carte d√©tail mobile
-let currentResultsRouteLayer = null; // Trac√© sur la carte PC
-let currentDetailMarkerLayer = null; // ‚úÖ NOUVEAU V46.1
-let currentResultsMarkerLayer = null; // ‚úÖ NOUVEAU V46.1
-let allFetchedItineraries = []; // Stocke tous les itin√©raires (bus/v√©lo/marche)
-// Pagination / tri sp√©cifique mode "arriver"
+let currentDetailRouteLayer = null; // TracÈ sur la carte dÈtail mobile
+let currentResultsRouteLayer = null; // TracÈ sur la carte PC
+let currentDetailMarkerLayer = null; // ? NOUVEAU V46.1
+let currentResultsMarkerLayer = null; // ? NOUVEAU V46.1
+let allFetchedItineraries = []; // Stocke tous les itinÈraires (bus/vÈlo/marche)
+// Pagination / tri spÈcifique mode "arriver"
 let lastSearchMode = null; // 'partir' | 'arriver'
-let arrivalRankedAll = []; // Liste compl√®te tri√©e (arriver)
-let arrivalRenderedCount = 0; // Combien affich√©s actuellement
-let ARRIVAL_PAGE_SIZE = 6; // V120: Augment√© √† 6 pour afficher plus d'options
+let arrivalRankedAll = []; // Liste complËte triÈe (arriver)
+let arrivalRenderedCount = 0; // Combien affichÈs actuellement
+let ARRIVAL_PAGE_SIZE = 6; // V120: AugmentÈ ‡ 6 pour afficher plus d'options
 
-// V60: √âtat pour charger plus de d√©parts
-let lastSearchTime = null; // Dernier searchTime utilis√©
-let loadMoreOffset = 0; // D√©calage en minutes pour charger plus
+// V60: …tat pour charger plus de dÈparts
+let lastSearchTime = null; // Dernier searchTime utilisÈ
+let loadMoreOffset = 0; // DÈcalage en minutes pour charger plus
 
 let geolocationManager = null;
 
@@ -111,13 +111,13 @@ import { createResultsRenderer } from './ui/resultsRenderer.js';
 const BOTTOM_SHEET_DEFAULT_INDEX = 0;
 const BOTTOM_SHEET_DRAG_ZONE_PX = 110;
 const APP_CONFIG = getAppConfig();
-const GOOGLE_API_KEY = APP_CONFIG.googleApiKey; // dynamique (config.js), jamais hardcod√© ici
+const GOOGLE_API_KEY = APP_CONFIG.googleApiKey; // dynamique (config.js), jamais hardcodÈ ici
 ARRIVAL_PAGE_SIZE = APP_CONFIG.arrivalPageSize || ARRIVAL_PAGE_SIZE; // surcharge si fourni
 const BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD = 4; // px tolerance before locking drag
 const BOTTOM_SHEET_EXPANDED_LEVEL_INDEX = 2; // V266: Index du niveau expanded (80%) = index 2
 const BOTTOM_SHEET_VELOCITY_THRESHOLD = 0.35; // px per ms
 const BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX = 45; // px delta before forcing next snap
-const BOTTOM_SHEET_DRAG_BUFFER_PX = 20; // Zone au-dessus du sheet o√π on peut commencer le drag
+const BOTTOM_SHEET_DRAG_BUFFER_PX = 20; // Zone au-dessus du sheet o˘ on peut commencer le drag
 let currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
 let bottomSheetDragState = null;
 let bottomSheetControlsInitialized = false;
@@ -125,11 +125,11 @@ let bottomSheetControlsInitialized = false;
 const isSheetAtMinLevel = () => currentBottomSheetLevelIndex === 0;
 const isSheetAtMaxLevel = () => currentBottomSheetLevelIndex === BOTTOM_SHEET_LEVELS.length - 1;
 
-// ICONS, ALERT_BANNER_ICONS, getManeuverIcon et getAlertBannerIcon sont import√©s depuis config/icons.js
+// ICONS, ALERT_BANNER_ICONS, getManeuverIcon et getAlertBannerIcon sont importÈs depuis config/icons.js
 
-// normalizeStopNameForLookup & resolveStopCoordinates import√©s depuis utils/geo.js
+// normalizeStopNameForLookup & resolveStopCoordinates importÈs depuis utils/geo.js
 
-// V221: STOP_ROLE_PRIORITY import√© depuis map/routeDrawing.js
+// V221: STOP_ROLE_PRIORITY importÈ depuis map/routeDrawing.js
 const STOP_ROLE_PRIORITY = IMPORTED_STOP_ROLE_PRIORITY;
 
 function createStopDivIcon(role) {
@@ -149,9 +149,9 @@ function createStopDivIcon(role) {
     });
 }
 
-// ALERT_BANNER_ICONS et getAlertBannerIcon sont import√©s depuis config/icons.js
+// ALERT_BANNER_ICONS et getAlertBannerIcon sont importÈs depuis config/icons.js
 
-// isMissingTextValue, getSafeStopLabel, getSafeTimeLabel, getSafeRouteBadgeLabel, hasStopMetadata sont import√©es depuis utils/formatters.js
+// isMissingTextValue, getSafeStopLabel, getSafeTimeLabel, getSafeRouteBadgeLabel, hasStopMetadata sont importÈes depuis utils/formatters.js
 
 const shouldSuppressBusStep = (step) => {
     if (!step || step.type !== 'BUS') return false;
@@ -166,7 +166,7 @@ const shouldSuppressBusStep = (step) => {
     return lacksIntermediateStops;
 };
 
-// computeTimeDifferenceMinutes est maintenant import√©e depuis utils/formatters.js
+// computeTimeDifferenceMinutes est maintenant importÈe depuis utils/formatters.js
 
 function getWaitStepPresentation(steps, index) {
     const step = steps?.[index] || {};
@@ -199,26 +199,26 @@ function getWaitStepPresentation(steps, index) {
 }
 
 /**
- * Fonction appel√©e lors du clic sur une carte d'itin√©raire.
- * Affiche/masque les d√©tails de l'itin√©raire et met √† jour la carte.
- * V59: G√®re le cas mobile (vue overlay) vs desktop (accord√©on inline)
+ * Fonction appelÈe lors du clic sur une carte d'itinÈraire.
+ * Affiche/masque les dÈtails de l'itinÈraire et met ‡ jour la carte.
+ * V59: GËre le cas mobile (vue overlay) vs desktop (accordÈon inline)
  */
 function onSelectItinerary(itinerary, cardEl) {
     if (!itinerary || !cardEl) return;
 
-    // V59: Sur mobile, on affiche la vue d√©tail overlay
+    // V59: Sur mobile, on affiche la vue dÈtail overlay
     if (isMobileDetailViewport()) {
         // Marquer cette carte comme active visuellement
         document.querySelectorAll('.route-option').forEach(c => c.classList.remove('is-active'));
         cardEl.classList.add('is-active');
         
-        // Rendre le d√©tail dans la vue mobile et afficher l'overlay
+        // Rendre le dÈtail dans la vue mobile et afficher l'overlay
         const routeLayer = renderItineraryDetail(itinerary);
         showDetailView(routeLayer);
         return;
     }
 
-    // Desktop: comportement accord√©on existant
+    // Desktop: comportement accordÈon existant
     const wrapper = cardEl.closest('.route-option-wrapper');
     if (!wrapper) return;
 
@@ -227,7 +227,7 @@ function onSelectItinerary(itinerary, cardEl) {
 
     const wasExpanded = !detailsDiv.classList.contains('hidden');
 
-    // Fermer tous les autres d√©tails ouverts
+    // Fermer tous les autres dÈtails ouverts
     document.querySelectorAll('.route-option-wrapper .route-details').forEach(d => {
         if (d !== detailsDiv) d.classList.add('hidden');
     });
@@ -235,19 +235,19 @@ function onSelectItinerary(itinerary, cardEl) {
         if (c !== cardEl) c.classList.remove('is-active');
     });
 
-    // Toggle l'√©tat de cette carte
+    // Toggle l'Ètat de cette carte
     if (wasExpanded) {
         detailsDiv.classList.add('hidden');
         cardEl.classList.remove('is-active');
     } else {
-        // G√©n√©rer le HTML des d√©tails si pas encore fait
+        // GÈnÈrer le HTML des dÈtails si pas encore fait
         if (!detailsDiv.innerHTML.trim()) {
             detailsDiv.innerHTML = renderItineraryDetailHTML(itinerary);
         }
         detailsDiv.classList.remove('hidden');
         cardEl.classList.add('is-active');
 
-        // V117: Mettre √† jour la carte avec l'itin√©raire s√©lectionn√©
+        // V117: Mettre ‡ jour la carte avec l'itinÈraire sÈlectionnÈ
         if (resultsMapRenderer && resultsMapRenderer.map) {
             resultsMapRenderer.map.invalidateSize();
             setTimeout(() => drawRouteOnResultsMap(itinerary), 50);
@@ -290,12 +290,12 @@ function wireThemeToggles() {
     });
 }
 
-// Service Worker est enregistr√© dans app.js
+// Service Worker est enregistrÈ dans app.js
 
-// PDF_FILENAME_MAP et ROUTE_LONG_NAME_MAP sont maintenant import√©es depuis config/routes.js
-// getManeuverIcon est maintenant import√©e depuis config/icons.js
+// PDF_FILENAME_MAP et ROUTE_LONG_NAME_MAP sont maintenant importÈes depuis config/routes.js
+// getManeuverIcon est maintenant importÈe depuis config/icons.js
 
-// √âL√âMENTS DOM
+// …L…MENTS DOM
 let dashboardContainer, dashboardHall, dashboardContentView, btnBackToHall;
 let infoTraficList, infoTraficAvenir, infoTraficCount;
 let alertBanner, alertBannerContent, alertBannerClose;
@@ -316,13 +316,13 @@ let installTipContainer, installTipCloseBtn;
 let fromPlaceId = null;
 let toPlaceId = null;
 
-// LINE_CATEGORIES est maintenant import√©e depuis config/routes.js
+// LINE_CATEGORIES est maintenant importÈe depuis config/routes.js
 
-const DETAIL_SHEET_TRANSITION_MS = 380; // Doit √™tre >= √† la transition CSS (350ms + marge)
+const DETAIL_SHEET_TRANSITION_MS = 380; // Doit Ítre >= ‡ la transition CSS (350ms + marge)
 
-// getCategoryForRoute est maintenant import√©e depuis config/routes.js
+// getCategoryForRoute est maintenant importÈe depuis config/routes.js
 
-// Initialise toutes les r√©f√©rences DOM
+// Initialise toutes les rÈfÈrences DOM
 function initializeDomElements() {
     dashboardContainer = document.getElementById('dashboard-container');
     dashboardHall = document.getElementById('dashboard-hall');
@@ -384,10 +384,10 @@ function initializeDomElements() {
 }
 
 async function initializeApp() {
-    // Initialise les r√©f√©rences DOM
+    // Initialise les rÈfÈrences DOM
     initializeDomElements();
 
-    // Instanciation du renderer (apr√®s s√©lection des √©l√©ments DOM)
+    // Instanciation du renderer (aprËs sÈlection des ÈlÈments DOM)
     resultsRenderer = createResultsRenderer({
         resultsListContainer,
         resultsModeTabs,
@@ -395,9 +395,9 @@ async function initializeApp() {
         getArrivalState: () => ({ lastSearchMode, arrivalRankedAll, arrivalRenderedCount, pageSize: ARRIVAL_PAGE_SIZE }),
         setArrivalRenderedCount: (val) => { arrivalRenderedCount = val; },
         onSelectItinerary: (itinerary, cardEl) => onSelectItinerary(itinerary, cardEl),
-        onLoadMoreDepartures: () => loadMoreDepartures(), // V60: Charger plus de d√©parts
-        onLoadMoreArrivals: () => loadMoreArrivals(), // V132: Charger plus d'arriv√©es
-        getDataManager: () => dataManager, // V64: Acc√®s aux donn√©es GTFS pour prochains d√©parts
+        onLoadMoreDepartures: () => loadMoreDepartures(), // V60: Charger plus de dÈparts
+        onLoadMoreArrivals: () => loadMoreArrivals(), // V132: Charger plus d'arrivÈes
+        getDataManager: () => dataManager, // V64: AccËs aux donnÈes GTFS pour prochains dÈparts
         getSearchTime: () => lastSearchTime // V212: Expose la date/heure de recherche pour enrichissement GTFS
     });
 
@@ -429,7 +429,7 @@ async function initializeApp() {
             resultsButton: resultsGeolocateBtn
         });
     }
-    updateDataStatus('Chargement des donn√©es...', 'loading');
+    updateDataStatus('Chargement des donnÈes...', 'loading');
 
     try {
         await dataManager.loadAllData((message) => updateDataStatus(message, 'loading'));
@@ -444,7 +444,7 @@ async function initializeApp() {
         const locateError = geolocationManager?.handleGeolocationError || (() => {});
         mapRenderer.addLocateControl(locateSuccess, locateError);
 
-        // Exposer mapRenderer et dataManager globalement pour le syst√®me de retards
+        // Exposer mapRenderer et dataManager globalement pour le systËme de retards
         window.mapRenderer = mapRenderer;
         window.dataManager = dataManager;
         
@@ -464,7 +464,7 @@ async function initializeApp() {
         currentResultsMarkerLayer = L.layerGroup().addTo(resultsMapRenderer.map);
         resultsMapRenderer.addLocateControl(locateSuccess, locateError);
 
-        // Wire theme toggles now that fragments sont charg√©s, puis applique le th√®me initial
+        // Wire theme toggles now that fragments sont chargÈs, puis applique le thËme initial
         wireThemeToggles();
         initTheme();
         
@@ -485,8 +485,8 @@ async function initializeApp() {
         
         initializeRouteFilter();
 
-        // ‚ö†Ô∏è V60: Router GTFS d√©sactiv√© temporairement pour performances
-        // TODO: R√©activer quand l'algorithme sera optimis√©
+        // ?? V60: Router GTFS dÈsactivÈ temporairement pour performances
+        // TODO: RÈactiver quand l'algorithme sera optimisÈ
         if (ENABLE_GTFS_ROUTER) {
             try {
                 const geocodeProxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/geocode` : '/api/geocode';
@@ -496,13 +496,13 @@ async function initializeApp() {
                     googleApiKey: GOOGLE_API_KEY,
                     geocodeProxyUrl
                 });
-                console.log('üîß Router GTFS local activ√©');
+                console.log('?? Router GTFS local activÈ');
             } catch (error) {
                 console.warn('Router worker indisponible, fallback main thread.', error);
                 routerWorkerClient = null;
             }
         } else {
-            console.log('‚è∏Ô∏è Router GTFS local d√©sactiv√© (ENABLE_GTFS_ROUTER=false)');
+            console.log('?? Router GTFS local dÈsactivÈ (ENABLE_GTFS_ROUTER=false)');
             routerWorkerClient = null;
             routerContext = null;
         }
@@ -510,20 +510,20 @@ async function initializeApp() {
         try {
             await dataManager.optimizeStopTimesStorage();
         } catch (error) {
-            console.warn('Impossible d‚Äôoptimiser le stockage des stop_times:', error);
+            console.warn('Impossible díoptimiser le stockage des stop_times:', error);
         }
         
-        // Afficher les trac√©s des lignes
+        // Afficher les tracÈs des lignes
         let geoJsonData = dataManager.geoJson;
         if (!geoJsonData && dataManager.hasShapeData()) {
-            console.log('üîÑ map.geojson absent, g√©n√©ration √† partir des shapes GTFS...');
+            console.log('?? map.geojson absent, gÈnÈration ‡ partir des shapes GTFS...');
             geoJsonData = dataManager.generateGeoJsonFromShapes();
-            dataManager.geoJson = geoJsonData; // M√©moriser pour utilisation ult√©rieure
+            dataManager.geoJson = geoJsonData; // MÈmoriser pour utilisation ultÈrieure
         }
         if (geoJsonData) {
             mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
         } else {
-            console.warn('‚ö†Ô∏è Aucun trac√© disponible (ni map.geojson ni shapes.txt)');
+            console.warn('?? Aucun tracÈ disponible (ni map.geojson ni shapes.txt)');
         }
 
         mapRenderer.displayStops();
@@ -534,7 +534,7 @@ async function initializeApp() {
             document.getElementById('instructions').classList.add('hidden');
         }
         
-        updateDataStatus('Donn√©es charg√©es', 'loaded');
+        updateDataStatus('DonnÈes chargÈes', 'loaded');
         checkAndSetupTimeMode();
         updateData();
         
@@ -546,7 +546,7 @@ async function initializeApp() {
     } catch (error) {
         console.error('Erreur lors de l\'initialisation GTFS:', error);
         gtfsAvailable = false;
-        updateDataStatus('GTFS indisponible. Mode d√©grad√© (API seule).', 'warning');
+        updateDataStatus('GTFS indisponible. Mode dÈgradÈ (API seule).', 'warning');
     }
 
     // Attach robust handlers for back buttons and condensed nav (extra safety)
@@ -620,7 +620,7 @@ function attachRobustBackHandlers() {
 }
 
 function setupDashboardContent() {
-    // Initialiser tous les statuts √† "normal" par d√©faut
+    // Initialiser tous les statuts ‡ "normal" par dÈfaut
     dataManager.routes.forEach(route => {
         lineStatuses[route.route_id] = { status: 'normal', message: '' };
     });
@@ -629,7 +629,7 @@ function setupDashboardContent() {
     loadLineStatuses().then(() => {
         renderInfoTraficCard();
         renderAlertBanner();
-        updateNewsBanner(dataManager, lineStatuses); // V114: Mise √† jour du bandeau d√©filant
+        updateNewsBanner(dataManager, lineStatuses); // V114: Mise ‡ jour du bandeau dÈfilant
     });
     
     buildFicheHoraireList();
@@ -637,13 +637,13 @@ function setupDashboardContent() {
 
 /**
  * V82: Charge les statuts des lignes depuis /data/line-status.json
- * Ce fichier peut √™tre modifi√© facilement pour mettre √† jour l'√©tat des lignes
+ * Ce fichier peut Ítre modifiÈ facilement pour mettre ‡ jour l'Ètat des lignes
  */
 async function loadLineStatuses() {
     try {
         const response = await fetch('/data/line-status.json?t=' + Date.now()); // Cache-bust
         if (!response.ok) {
-            console.warn('[LineStatus] Fichier line-status.json non trouv√©, utilisation des statuts par d√©faut');
+            console.warn('[LineStatus] Fichier line-status.json non trouvÈ, utilisation des statuts par dÈfaut');
             return;
         }
         
@@ -665,7 +665,7 @@ async function loadLineStatuses() {
             }
         }
         
-        // Message global (pour les alertes g√©n√©rales)
+        // Message global (pour les alertes gÈnÈrales)
         if (data.globalMessage) {
             console.log('[LineStatus] Message global:', data.globalMessage);
         }
@@ -675,19 +675,19 @@ async function loadLineStatuses() {
     }
 }
 
-// Fonction d'animation g√©n√©rique (D√âPLAC√âE EN DEHORS)
+// Fonction d'animation gÈnÈrique (D…PLAC…E EN DEHORS)
 function animateValue(obj, start, end, duration, suffix = "") {
     let startTimestamp = null;
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         
-        // Easing function (pour que √ßa ralentisse √† la fin)
+        // Easing function (pour que Áa ralentisse ‡ la fin)
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
         
         const value = Math.floor(easeOutQuart * (end - start) + start);
         
-        // Gestion sp√©ciale pour les nombres √† virgule (comme 2.1M)
+        // Gestion spÈciale pour les nombres ‡ virgule (comme 2.1M)
         if (suffix === "M" && end === 2.1) {
              obj.innerHTML = (easeOutQuart * 2.1).toFixed(1) + suffix;
         } else {
@@ -745,7 +745,7 @@ function getViewportHeight() {
     return Math.max(window.innerHeight, document.documentElement?.clientHeight || 0);
 }
 
-// V269: Niveaux en % de translateY (100% = cach√©, 0% = full visible)
+// V269: Niveaux en % de translateY (100% = cachÈ, 0% = full visible)
 // Correspondance CSS: sheet-level-0 = 80%, sheet-level-1 = 50%, sheet-level-2 = 10%
 const SHEET_TRANSLATE_LEVELS = [80, 50, 10];
 
@@ -775,7 +775,7 @@ function applyBottomSheetLevel(index, { immediate = false } = {}) {
     // V268: Ajouter la classe du niveau cible
     detailBottomSheet.classList.add(`sheet-level-${targetIndex}`);
     
-    // V268: Retirer le transform inline (laisser CSS g√©rer)
+    // V268: Retirer le transform inline (laisser CSS gÈrer)
     detailBottomSheet.style.removeProperty('transform');
     
     // V60: Ajouter/retirer la classe is-expanded selon le niveau
@@ -783,7 +783,7 @@ function applyBottomSheetLevel(index, { immediate = false } = {}) {
         detailBottomSheet.classList.add('is-expanded');
     } else {
         detailBottomSheet.classList.remove('is-expanded');
-        // Reset le scroll quand on r√©duit le sheet
+        // Reset le scroll quand on rÈduit le sheet
         if (detailPanelWrapper) {
             detailPanelWrapper.scrollTop = 0;
         }
@@ -858,7 +858,7 @@ function onBottomSheetPointerDown(event) {
     const isExpanded = currentBottomSheetLevelIndex >= BOTTOM_SHEET_EXPANDED_LEVEL_INDEX;
     const wrapperScroll = detailPanelWrapper ? detailPanelWrapper.scrollTop : 0;
     
-    // V60: Si pas expanded, on peut drag depuis n'importe o√π sur le sheet
+    // V60: Si pas expanded, on peut drag depuis n'importe o˘ sur le sheet
     if (!isExpanded) {
         // Permettre le drag depuis la handle, la zone de drag, ou le contenu
         if (!isHandle && !inDragRegion && !inSheetContent) return;
@@ -910,7 +910,7 @@ function onBottomSheetPointerMove(event) {
         return;
     }
     
-    // Premier vrai mouvement d√©tect√©
+    // Premier vrai mouvement dÈtectÈ
     if (!bottomSheetDragState.hasMoved) {
         bottomSheetDragState.hasMoved = true;
         bottomSheetDragState.isDragging = true;
@@ -929,7 +929,7 @@ function onBottomSheetPointerMove(event) {
     const maxTranslate = SHEET_TRANSLATE_LEVELS[0]; // 80%
     newTranslateY = Math.max(minTranslate, Math.min(maxTranslate, newTranslateY));
     
-    // Calculer la v√©locit√©
+    // Calculer la vÈlocitÈ
     const now = performance.now();
     const elapsed = now - (bottomSheetDragState.lastEventTime || now);
     if (elapsed > 0) {
@@ -951,20 +951,20 @@ function onBottomSheetPointerUp() {
     const wasDragging = bottomSheetDragState.isDragging;
     let targetIndex = currentBottomSheetLevelIndex;
     
-    // V272: Calculer l'index cible - UN SEUL NIVEAU √Ä LA FOIS
+    // V272: Calculer l'index cible - UN SEUL NIVEAU ¿ LA FOIS
     if (wasDragging) {
         const currentTranslate = bottomSheetDragState.currentTranslateY;
         const startIndex = bottomSheetDragState.startIndex;
         const velocity = bottomSheetDragState.velocity || 0;
         const deltaFromStart = bottomSheetDragState.startTranslateY - currentTranslate;
         
-        // V272: Par d√©faut, rester au niveau de d√©part
+        // V272: Par dÈfaut, rester au niveau de dÈpart
         targetIndex = startIndex;
         
-        // V272: Logique SNCF Connect - un seul niveau √† la fois
+        // V272: Logique SNCF Connect - un seul niveau ‡ la fois
         // Seuil de distance : 15% du viewport pour changer de niveau
         const SNAP_THRESHOLD_PERCENT = 15;
-        // Seuil de v√©locit√© : 0.3% par ms
+        // Seuil de vÈlocitÈ : 0.3% par ms
         const VELOCITY_THRESHOLD = 0.3;
         
         // Swipe vers le HAUT (deltaFromStart > 0 = translateY diminue = plus visible)
@@ -981,7 +981,7 @@ function onBottomSheetPointerUp() {
                 targetIndex = startIndex - 1;
             }
         }
-        // Sinon : retour au niveau de d√©part (rubber band)
+        // Sinon : retour au niveau de dÈpart (rubber band)
     }
     
     // 1. Nettoyer les listeners
@@ -994,12 +994,12 @@ function onBottomSheetPointerUp() {
     
     // V272: Fix scintillement - appliquer la classe AVANT de retirer is-dragging
     if (wasDragging && detailBottomSheet) {
-        // 1. D'abord appliquer la classe du niveau cible (pendant que is-dragging est encore l√†)
+        // 1. D'abord appliquer la classe du niveau cible (pendant que is-dragging est encore l‡)
         detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
         detailBottomSheet.classList.add(`sheet-level-${targetIndex}`);
         currentBottomSheetLevelIndex = targetIndex;
         
-        // 2. G√©rer is-expanded
+        // 2. GÈrer is-expanded
         if (targetIndex >= BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
             detailBottomSheet.classList.add('is-expanded');
         } else {
@@ -1007,7 +1007,7 @@ function onBottomSheetPointerUp() {
             if (detailPanelWrapper) detailPanelWrapper.scrollTop = 0;
         }
         
-        // 3. PUIS retirer is-dragging et le transform inline dans le m√™me frame
+        // 3. PUIS retirer is-dragging et le transform inline dans le mÍme frame
         detailBottomSheet.classList.remove('is-dragging');
         detailBottomSheet.style.removeProperty('transform');
         itineraryDetailContainer?.classList.remove('sheet-is-dragging');
@@ -1042,13 +1042,13 @@ function setupStaticEventListeners() {
     try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
     populateTimeSelects();
 
-    // G√©rer les liens hash (#horaires, #trafic, etc.)
+    // GÈrer les liens hash (#horaires, #trafic, etc.)
     function handleHashNavigation() {
         const hash = window.location.hash.replace('#', '');
         if (hash) {
             switch(hash) {
                 case 'itineraire':
-                    // Ouvrir la vue itin√©raire (sans recherche pr√©alable)
+                    // Ouvrir la vue itinÈraire (sans recherche prÈalable)
                     showResultsView();
                     break;
                 case 'horaires':
@@ -1075,15 +1075,15 @@ function setupStaticEventListeners() {
                     showTarifsView('tarifs-amendes');
                     break;
             }
-            // Nettoyer le hash apr√®s navigation
+            // Nettoyer le hash aprËs navigation
             history.replaceState(null, '', window.location.pathname);
         }
     }
     
-    // √âcouter les changements de hash
+    // …couter les changements de hash
     window.addEventListener('hashchange', handleHashNavigation);
     
-    // G√©rer le hash initial au chargement
+    // GÈrer le hash initial au chargement
     if (window.location.hash) {
         setTimeout(handleHashNavigation, 100);
     }
@@ -1116,7 +1116,7 @@ function setupStaticEventListeners() {
         detailPanelWrapper.addEventListener('touchmove', (e) => {
             // V60: Si on n'est pas au niveau max, bloquer le scroll et permettre le drag
             if (currentBottomSheetLevelIndex < BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
-                // V√©rifier si l'√©v√©nement est cancelable avant d'appeler preventDefault
+                // VÈrifier si l'ÈvÈnement est cancelable avant d'appeler preventDefault
                 if (e.cancelable) {
                     e.preventDefault();
                 }
@@ -1140,7 +1140,7 @@ function setupStaticEventListeners() {
         detailPanelWrapper.addEventListener('wheel', handleDetailPanelWheel, { passive: false });
         
         detailPanelWrapper.addEventListener('scroll', () => {
-            // V60: Ne pas g√©rer le scroll si on n'est pas au niveau max
+            // V60: Ne pas gÈrer le scroll si on n'est pas au niveau max
             if (currentBottomSheetLevelIndex < BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
                 detailPanelWrapper.scrollTop = 0;
                 return;
@@ -1186,7 +1186,7 @@ function setupStaticEventListeners() {
             routeFilterPanel.classList.toggle('hidden');
         });
         
-        // Auto-collapse FAB apr√®s 3 secondes (mobile uniquement)
+        // Auto-collapse FAB aprËs 3 secondes (mobile uniquement)
         if (window.innerWidth <= 768) {
             setTimeout(() => {
                 btnToggleFilter.classList.add('collapsed');
@@ -1326,7 +1326,7 @@ function setupStaticEventListeners() {
     initBottomSheetControls();
 }
 
-// Nouvelle fonction pour g√©rer les menus dropdown
+// Nouvelle fonction pour gÈrer les menus dropdown
 function setupNavigationDropdowns() {
     // Mobile menu toggle
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
@@ -1338,7 +1338,7 @@ function setupNavigationDropdowns() {
             mobileMenuToggle.classList.toggle('is-active');
             mobileMenu.classList.toggle('hidden');
             
-            // Bloquer/d√©bloquer le scroll de la page
+            // Bloquer/dÈbloquer le scroll de la page
             if (isOpening) {
                 document.body.classList.add('mobile-menu-open');
             } else {
@@ -1346,13 +1346,13 @@ function setupNavigationDropdowns() {
             }
         });
         
-        // Gestion des cat√©gories d√©pliables (accord√©on exclusif - un seul ouvert √† la fois)
+        // Gestion des catÈgories dÈpliables (accordÈon exclusif - un seul ouvert ‡ la fois)
         mobileMenu.querySelectorAll('.mobile-menu-category').forEach(category => {
             category.addEventListener('click', () => {
                 const isExpanded = category.getAttribute('aria-expanded') === 'true';
                 const itemsContainer = category.nextElementSibling;
                 
-                // Fermer toutes les autres cat√©gories d'abord
+                // Fermer toutes les autres catÈgories d'abord
                 mobileMenu.querySelectorAll('.mobile-menu-category').forEach(otherCategory => {
                     if (otherCategory !== category) {
                         otherCategory.setAttribute('aria-expanded', 'false');
@@ -1361,7 +1361,7 @@ function setupNavigationDropdowns() {
                     }
                 });
                 
-                // Toggle l'√©tat de la cat√©gorie cliqu√©e
+                // Toggle l'Ètat de la catÈgorie cliquÈe
                 category.setAttribute('aria-expanded', !isExpanded);
                 itemsContainer.classList.toggle('is-expanded', !isExpanded);
             });
@@ -1403,32 +1403,32 @@ function setupNavigationDropdowns() {
     });
 }
 
-// V75: V√©rifie si le dashboard est charg√© et le recharge si n√©cessaire
+// V75: VÈrifie si le dashboard est chargÈ et le recharge si nÈcessaire
 async function ensureDashboardLoaded() {
-    // V√©rifier si les √©l√©ments cl√©s du dashboard existent
+    // VÈrifier si les ÈlÈments clÈs du dashboard existent
     const dashboardExists = document.getElementById('dashboard-container');
     if (!dashboardExists) {
-        console.log('[Navigation] Dashboard non charg√©, rechargement...');
+        console.log('[Navigation] Dashboard non chargÈ, rechargement...');
         await reloadDashboardFromTarifs();
-        return true; // Indique qu'on a recharg√©
+        return true; // Indique qu'on a rechargÈ
     }
     return false;
 }
 
-// G√©rer les actions de navigation
+// GÈrer les actions de navigation
 async function handleNavigationAction(action) {
-    // V75: Pour les actions qui n√©cessitent le dashboard, s'assurer qu'il est charg√©
+    // V75: Pour les actions qui nÈcessitent le dashboard, s'assurer qu'il est chargÈ
     const needsDashboard = ['itineraire', 'horaires', 'info-trafic', 'carte'].includes(action);
     
     if (needsDashboard) {
         await ensureDashboardLoaded();
-        // R√©initialiser les r√©f√©rences DOM apr√®s rechargement potentiel
+        // RÈinitialiser les rÈfÈrences DOM aprËs rechargement potentiel
         initializeDomElements();
     }
     
     switch(action) {
         case 'itineraire':
-            // Aller √† la vue r√©sultats d'itin√©raire (sans recherche pr√©alable)
+            // Aller ‡ la vue rÈsultats d'itinÈraire (sans recherche prÈalable)
             showResultsView();
             break;
         case 'horaires':
@@ -1454,7 +1454,7 @@ async function handleNavigationAction(action) {
             showTarifsView('tarifs-amendes');
             break;
         default:
-            console.log('Action non g√©r√©e:', action);
+            console.log('Action non gÈrÈe:', action);
     }
 }
 
@@ -1498,14 +1498,14 @@ async function reloadDashboardFromTarifs() {
         // Recharger le layout de base
         await loadBaseLayout();
         
-        // R√©initialiser les r√©f√©rences DOM
+        // RÈinitialiser les rÈfÈrences DOM
         initializeDomElements();
         
-        // R√©attacher les event listeners statiques
+        // RÈattacher les event listeners statiques
         setupStaticEventListeners();
         attachRobustBackHandlers();
         
-        // R√©afficher les fiches horaires
+        // RÈafficher les fiches horaires
         if (dataManager && ficheHoraireContainer) {
             renderFicheHoraire();
         }
@@ -1530,14 +1530,14 @@ async function reloadDashboardFromTarifs() {
         document.body.classList.remove('view-map-locked');
         document.body.classList.remove('view-is-locked');
         
-        // R√©afficher les alertes et infos trafic
+        // RÈafficher les alertes et infos trafic
         if (dataManager) {
             renderAlertBanner();
             renderInfoTrafic();
         }
         
         window.scrollTo(0, 0);
-        console.log('[main] Dashboard recharg√© depuis tarifs');
+        console.log('[main] Dashboard rechargÈ depuis tarifs');
         
     } catch (error) {
         console.error('Erreur rechargement dashboard:', error);
@@ -1575,10 +1575,10 @@ async function executeItinerarySearch(source, sourceElements) {
     const { fromInput, toInput, dateSelect, hourSelect, minuteSelect, popover } = sourceElements;
     
     // V59: Reset complet pour nouvelle recherche
-    console.log('üîÑ === NOUVELLE RECHERCHE ===');
+    console.log('?? === NOUVELLE RECHERCHE ===');
     
     if (!fromPlaceId || !toPlaceId) {
-        alert("Veuillez s√©lectionner un point de d√©part et d'arriv√©e depuis les suggestions.");
+        alert("Veuillez sÈlectionner un point de dÈpart et d'arrivÈe depuis les suggestions.");
         return;
     }
     const searchTime = {
@@ -1596,8 +1596,8 @@ async function executeItinerarySearch(source, sourceElements) {
         try { dateSelect.value = todayIso; } catch (e) {}
     }
     
-    // Debug: v√©rifier l'heure r√©ellement s√©lectionn√©e
-    console.log('üïê Heure s√©lectionn√©e:', {
+    // Debug: vÈrifier l'heure rÈellement sÈlectionnÈe
+    console.log('?? Heure sÈlectionnÈe:', {
         date: searchTime.date,
         heure: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`,
         mode: searchTime.type,
@@ -1605,14 +1605,14 @@ async function executeItinerarySearch(source, sourceElements) {
         hourSelectIndex: hourSelect.selectedIndex,
         minuteSelectValue: minuteSelect.value,
         minuteSelectIndex: minuteSelect.selectedIndex,
-        // Debug suppl√©mentaire
+        // Debug supplÈmentaire
         hourOptions: hourSelect.options?.length,
         selectedHourText: hourSelect.options?.[hourSelect.selectedIndex]?.textContent
     });
-    lastSearchMode = searchTime.type; // M√©moriser le mode pour le rendu/pagination
-    lastSearchTime = { ...searchTime }; // V60: M√©moriser pour charger plus
+    lastSearchMode = searchTime.type; // MÈmoriser le mode pour le rendu/pagination
+    lastSearchTime = { ...searchTime }; // V60: MÈmoriser pour charger plus
     loadMoreOffset = 0; // V60: Reset l'offset
-    // V59: Reset complet de l'√©tat de recherche
+    // V59: Reset complet de l'Ètat de recherche
     arrivalRankedAll = [];
     arrivalRenderedCount = 0;
     allFetchedItineraries = [];
@@ -1622,48 +1622,48 @@ async function executeItinerarySearch(source, sourceElements) {
     if (source === 'hall') {
         showResultsView(); 
     } else {
-        resultsListContainer.innerHTML = '<p class="results-message">Mise √† jour de l\'itin√©raire...</p>';
+        resultsListContainer.innerHTML = '<p class="results-message">Mise ‡ jour de l\'itinÈraire...</p>';
     }
     resultsModeTabs.classList.add('hidden');
     try {
         let fromCoords = null;
         let toCoords = null;
-        let fromGtfsStops = null; // V49: Arr√™ts GTFS forc√©s pour les p√¥les multimodaux (tableau de stop_id)
+        let fromGtfsStops = null; // V49: ArrÍts GTFS forcÈs pour les pÙles multimodaux (tableau de stop_id)
         let toGtfsStops = null;
         
-        // üöÄ V60: R√©solution des coordonn√©es EN PARALL√àLE
+        // ?? V60: RÈsolution des coordonnÈes EN PARALL»LE
         const coordsStart = performance.now();
         const [fromResult, toResult] = await Promise.all([
-            apiManager.getPlaceCoords(fromPlaceId).catch(e => { console.warn('Coords d√©part:', e); return null; }),
-            apiManager.getPlaceCoords(toPlaceId).catch(e => { console.warn('Coords arriv√©e:', e); return null; })
+            apiManager.getPlaceCoords(fromPlaceId).catch(e => { console.warn('Coords dÈpart:', e); return null; }),
+            apiManager.getPlaceCoords(toPlaceId).catch(e => { console.warn('Coords arrivÈe:', e); return null; })
         ]);
         
         if (fromResult) {
             fromCoords = { lat: fromResult.lat, lng: fromResult.lng };
             if (fromResult.isMultiStop && fromResult.gtfsStops) {
                 fromGtfsStops = fromResult.gtfsStops.map(s => s.stopId);
-                console.log(`üéì P√¥le multimodal origine: ${fromGtfsStops.length} arr√™ts`);
+                console.log(`?? PÙle multimodal origine: ${fromGtfsStops.length} arrÍts`);
             }
         }
         if (toResult) {
             toCoords = { lat: toResult.lat, lng: toResult.lng };
             if (toResult.isMultiStop && toResult.gtfsStops) {
                 toGtfsStops = toResult.gtfsStops.map(s => s.stopId);
-                console.log(`üéì P√¥le multimodal destination: ${toGtfsStops.length} arr√™ts`);
+                console.log(`?? PÙle multimodal destination: ${toGtfsStops.length} arrÍts`);
             }
         }
-        console.log(`‚ö° Coords r√©solues en ${Math.round(performance.now() - coordsStart)}ms`);
+        console.log(`? Coords rÈsolues en ${Math.round(performance.now() - coordsStart)}ms`);
 
         const fromLabel = sourceElements.fromInput?.value || '';
         const toLabel = sourceElements.toInput?.value || '';
 
-        // üöÄ V60: Routage optimis√© - API Google uniquement
-        // ‚ö†Ô∏è Router GTFS local d√©sactiv√© (ENABLE_GTFS_ROUTER=false)
+        // ?? V60: Routage optimisÈ - API Google uniquement
+        // ?? Router GTFS local dÈsactivÈ (ENABLE_GTFS_ROUTER=false)
         const routingStart = performance.now();
         
         let hybridItins = [];
         
-        // GTFS Router (d√©sactiv√© par d√©faut pour performances)
+        // GTFS Router (dÈsactivÈ par dÈfaut pour performances)
         if (ENABLE_GTFS_ROUTER && routerWorkerClient) {
             try {
                 hybridItins = await routerWorkerClient.computeHybridItinerary({
@@ -1671,7 +1671,7 @@ async function executeItinerarySearch(source, sourceElements) {
                     labels: { fromLabel, toLabel },
                     forcedStops: { from: fromGtfsStops, to: toGtfsStops }
                 });
-                console.log('üîç GTFS local:', hybridItins?.length || 0, 'itin√©raires');
+                console.log('?? GTFS local:', hybridItins?.length || 0, 'itinÈraires');
             } catch (e) {
                 console.warn('GTFS router error:', e);
             }
@@ -1681,12 +1681,12 @@ async function executeItinerarySearch(source, sourceElements) {
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
             .catch(e => { console.error('API Google error:', e); return null; });
         
-        console.log(`‚ö° Routage termin√© en ${Math.round(performance.now() - routingStart)}ms`);
+        console.log(`? Routage terminÈ en ${Math.round(performance.now() - routingStart)}ms`);
 
-        // Traiter les r√©sultats Google
+        // Traiter les rÈsultats Google
         if (intelligentResults) {
             allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
-            console.log('‚úÖ API Google:', allFetchedItineraries?.length || 0, 'itin√©raires');
+            console.log('? API Google:', allFetchedItineraries?.length || 0, 'itinÈraires');
             
             // Fusionner avec GTFS si disponible
             if (hybridItins?.length) {
@@ -1699,15 +1699,15 @@ async function executeItinerarySearch(source, sourceElements) {
                 }
             }
         } else if (hybridItins?.length) {
-            console.log('üîÑ Fallback GTFS:', hybridItins.length, 'itin√©raires');
+            console.log('?? Fallback GTFS:', hybridItins.length, 'itinÈraires');
             allFetchedItineraries = hybridItins;
         } else {
             allFetchedItineraries = [];
         }
 
-        // Debug: v√©rifier si l'heure demand√©e correspond
+        // Debug: vÈrifier si l'heure demandÈe correspond
         const heureDemandeMin = parseInt(searchTime.hour) * 60 + parseInt(searchTime.minute);
-        console.log('üìä Heure demand√©e:', `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`);
+        console.log('?? Heure demandÈe:', `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`);
 
         // Ensure every BUS step has a polyline (GTFS constructed or fallback)
         try {
@@ -1716,48 +1716,48 @@ async function executeItinerarySearch(source, sourceElements) {
             console.warn('Erreur lors de l\'assurance des polylines:', e);
         }
 
-        // TOUJOURS filtrer les trajets dont le d√©part est pass√© (m√™me en mode "arriver")
+        // TOUJOURS filtrer les trajets dont le dÈpart est passÈ (mÍme en mode "arriver")
         // Mais seulement si la recherche est pour aujourd'hui
         allFetchedItineraries = filterExpiredDepartures(allFetchedItineraries, searchTime);
         
-        // En mode "arriver", filtrer aussi les trajets qui arrivent APR√àS l'heure demand√©e
+        // En mode "arriver", filtrer aussi les trajets qui arrivent APR»S l'heure demandÈe
         if (searchTime.type === 'arriver') {
             const targetHour = parseInt(searchTime.hour) || 0;
             const targetMinute = parseInt(searchTime.minute) || 0;
             allFetchedItineraries = filterLateArrivals(allFetchedItineraries, targetHour, targetMinute);
         }
         
-        // V64: Limiter v√©lo et pi√©ton √† un seul trajet de chaque
-        // Ces modes n'ont pas d'horaires, un seul r√©sultat suffit
+        // V64: Limiter vÈlo et piÈton ‡ un seul trajet de chaque
+        // Ces modes n'ont pas d'horaires, un seul rÈsultat suffit
         allFetchedItineraries = limitBikeWalkItineraries(allFetchedItineraries);
 
-        // Debug: apr√®s filtrage
-        console.log('üìã Apr√®s filtrage:', {
+        // Debug: aprËs filtrage
+        console.log('?? AprËs filtrage:', {
             mode: searchTime.type || 'partir',
             restants: allFetchedItineraries?.length || 0
         });
 
-        // V63: On ne d√©duplique PLUS - Google g√®re le ranking, on garde tous les horaires
+        // V63: On ne dÈduplique PLUS - Google gËre le ranking, on garde tous les horaires
         // const searchMode = searchTime.type || 'partir';
         // allFetchedItineraries = deduplicateItineraries(allFetchedItineraries, searchMode);
         
-        console.log('üìä Itin√©raires disponibles:', allFetchedItineraries?.length || 0);
+        console.log('?? ItinÈraires disponibles:', allFetchedItineraries?.length || 0);
 
-        // V137b: Forcer un ordre croissant clair (d√©parts les plus proches ‚Üí plus √©loign√©s)
+        // V137b: Forcer un ordre croissant clair (dÈparts les plus proches ? plus ÈloignÈs)
         const heureDemandee = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
         if (searchTime.type === 'arriver') {
-            console.log(`üéØ Mode ARRIVER: tri cible ${heureDemandee} (arriv√©e d√©croissante)`);
+            console.log(`?? Mode ARRIVER: tri cible ${heureDemandee} (arrivÈe dÈcroissante)`);
             const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
             arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], searchTime);
             arrivalRenderedCount = arrivalRankedAll.length; // Montrer tout, pas de pagination
         } else {
-            console.log(`üéØ Mode PARTIR: tri chrono croissant appliqu√© (base ${heureDemandee})`);
+            console.log(`?? Mode PARTIR: tri chrono croissant appliquÈ (base ${heureDemandee})`);
             allFetchedItineraries = sortItinerariesByDeparture(allFetchedItineraries);
             arrivalRankedAll = [];
             arrivalRenderedCount = 0;
         }
         
-        console.log('üìä Itin√©raires (ordre Google conserv√©):', 
+        console.log('?? ItinÈraires (ordre Google conservÈ):', 
             allFetchedItineraries.slice(0, 5).map(it => ({
                 dep: it.departureTime,
                 arr: it.arrivalTime,
@@ -1767,7 +1767,7 @@ async function executeItinerarySearch(source, sourceElements) {
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         if (allFetchedItineraries.length > 0) {
-            // V117: S'assurer que la carte est bien dimensionn√©e avant de dessiner
+            // V117: S'assurer que la carte est bien dimensionnÈe avant de dessiner
             if (resultsMapRenderer && resultsMapRenderer.map) {
                 setTimeout(() => {
                     resultsMapRenderer.map.invalidateSize();
@@ -1776,42 +1776,42 @@ async function executeItinerarySearch(source, sourceElements) {
             } else {
                 drawRouteOnResultsMap(allFetchedItineraries[0]);
             }
-            // V60: Le bouton GO est maintenant int√©gr√© dans le bottom sheet de chaque itin√©raire
+            // V60: Le bouton GO est maintenant intÈgrÈ dans le bottom sheet de chaque itinÈraire
         }
     } catch (error) {
-        console.error("√âchec de la recherche d'itin√©raire:", error);
+        console.error("…chec de la recherche d'itinÈraire:", error);
         if (resultsListContainer) {
-            resultsListContainer.innerHTML = `<p class="results-message error">Impossible de calculer l'itin√©raire. ${error.message}</p>`;
+            resultsListContainer.innerHTML = `<p class="results-message error">Impossible de calculer l'itinÈraire. ${error.message}</p>`;
         }
         resultsModeTabs.classList.add('hidden');
     }
 }
 
 /**
- * V60: Charge plus de d√©parts en d√©calant l'heure de recherche
- * V95: Cache les itin√©raires existants pour √©viter les doublons + ne charge que des bus
+ * V60: Charge plus de dÈparts en dÈcalant l'heure de recherche
+ * V95: Cache les itinÈraires existants pour Èviter les doublons + ne charge que des bus
  */
 async function loadMoreDepartures() {
     if (!lastSearchTime || !fromPlaceId || !toPlaceId) {
-        console.warn('loadMoreDepartures: pas de recherche pr√©c√©dente');
+        console.warn('loadMoreDepartures: pas de recherche prÈcÈdente');
         return;
     }
 
-    // V95: Cr√©er un cache des signatures d'itin√©raires existants pour √©viter les doublons
+    // V95: CrÈer un cache des signatures d'itinÈraires existants pour Èviter les doublons
     const existingSignatures = new Set();
     const existingDepartures = new Set();
     
     allFetchedItineraries.forEach(it => {
-        // Signature bas√©e sur la structure du trajet
+        // Signature basÈe sur la structure du trajet
         const sig = createItinerarySignature(it);
         existingSignatures.add(sig);
-        // Aussi garder les heures de d√©part exactes
+        // Aussi garder les heures de dÈpart exactes
         if (it.departureTime && it.departureTime !== '~') {
             existingDepartures.add(it.departureTime);
         }
     });
 
-    // Trouver le dernier d√©part bus pour commencer apr√®s
+    // Trouver le dernier dÈpart bus pour commencer aprËs
     const busItineraries = allFetchedItineraries.filter(it => it.type === 'BUS' || it.type === 'TRANSIT');
     let startHour, startMinute;
     
@@ -1823,9 +1823,9 @@ async function loadMoreDepartures() {
         baseDateObj = new Date(lastSearchTime.date);
     }
     
-    // Si on a trouv√© un dernier d√©part, on l'utilise comme base
-    // V209: On ajoute seulement +1 min car l'API Google ajoute d√©j√† des d√©calages internes (+15/+30/+50)
-    // Avant on ajoutait +5 min, ce qui cr√©ait des sauts d'horaire (7h26 ‚Üí 9h22)
+    // Si on a trouvÈ un dernier dÈpart, on l'utilise comme base
+    // V209: On ajoute seulement +1 min car l'API Google ajoute dÈj‡ des dÈcalages internes (+15/+30/+50)
+    // Avant on ajoutait +5 min, ce qui crÈait des sauts d'horaire (7h26 ? 9h22)
     if (busItineraries.length > 0) {
         const lastDep = busItineraries[busItineraries.length - 1].departureTime;
         const match = lastDep?.match(/(\d{1,2}):(\d{2})/);
@@ -1833,20 +1833,20 @@ async function loadMoreDepartures() {
             const h = parseInt(match[1], 10);
             const m = parseInt(match[2], 10);
             
-            // Attention: si le dernier d√©part est le lendemain (ex: 00:15 alors qu'on cherchait 23:00)
+            // Attention: si le dernier dÈpart est le lendemain (ex: 00:15 alors qu'on cherchait 23:00)
             // Il faut ajuster la date. Simplification: on prend l'heure de lastSearchTime
             // Si lastDep < lastSearchTime, c'est probablement le lendemain
             
-            baseDateObj.setHours(h, m + 1, 0, 0); // +1 min seulement (l'API ajoute d√©j√† des d√©calages)
+            baseDateObj.setHours(h, m + 1, 0, 0); // +1 min seulement (l'API ajoute dÈj‡ des dÈcalages)
             
-            // Si on passe de 23h √† 00h, setHours g√®re le changement de jour automatiquement
-            // MAIS il faut √™tre s√ªr que baseDateObj √©tait au bon jour avant
+            // Si on passe de 23h ‡ 00h, setHours gËre le changement de jour automatiquement
+            // MAIS il faut Ítre s˚r que baseDateObj Ètait au bon jour avant
         } else {
              // Fallback
              baseDateObj.setHours(parseInt(lastSearchTime.hour), parseInt(lastSearchTime.minute) + 30, 0, 0);
         }
     } else {
-        // Fallback: d√©caler de 30 minutes par rapport √† la recherche initiale
+        // Fallback: dÈcaler de 30 minutes par rapport ‡ la recherche initiale
         loadMoreOffset += 30;
         baseDateObj.setHours(parseInt(lastSearchTime.hour), parseInt(lastSearchTime.minute) + loadMoreOffset, 0, 0);
     }
@@ -1858,57 +1858,57 @@ async function loadMoreDepartures() {
 
     const offsetSearchTime = {
         ...lastSearchTime,
-        date: newDateStr, // Date mise √† jour
+        date: newDateStr, // Date mise ‡ jour
         hour: String(baseDateObj.getHours()).padStart(2, '0'),
         minute: String(baseDateObj.getMinutes()).padStart(2, '0')
     };
 
-    console.log(`üîÑ Chargement + de d√©parts √† partir de ${offsetSearchTime.date} ${offsetSearchTime.hour}:${offsetSearchTime.minute}`);
-    console.log(`üì¶ Cache: ${existingSignatures.size} signatures, ${existingDepartures.size} heures de d√©part`);
+    console.log(`?? Chargement + de dÈparts ‡ partir de ${offsetSearchTime.date} ${offsetSearchTime.hour}:${offsetSearchTime.minute}`);
+    console.log(`?? Cache: ${existingSignatures.size} signatures, ${existingDepartures.size} heures de dÈpart`);
 
     try {
         // Appeler l'API avec le nouvel horaire
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
         let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
         
-        // V95: Filtrer strictement les nouveaux itin√©raires
+        // V95: Filtrer strictement les nouveaux itinÈraires
         const beforeFilter = newItineraries.length;
         newItineraries = newItineraries.filter(it => {
-            // 1. Exclure TOUS les v√©lo et pi√©ton (on les a d√©j√† de la premi√®re recherche)
+            // 1. Exclure TOUS les vÈlo et piÈton (on les a dÈj‡ de la premiËre recherche)
             if (it.type === 'BIKE' || it.type === 'WALK' || it._isBike || it._isWalk) {
                 return false;
             }
             
             // V199: Suppression du filtrage par heure exacte (existingDepartures)
-            // Cela bloquait les trajets diff√©rents partant √† la m√™me heure
+            // Cela bloquait les trajets diffÈrents partant ‡ la mÍme heure
             
-            // 3. Exclure les trajets avec la m√™me signature (m√™me structure)
+            // 3. Exclure les trajets avec la mÍme signature (mÍme structure)
             const sig = createItinerarySignature(it);
             if (existingSignatures.has(sig)) {
-                // M√™me structure mais peut-√™tre horaire diff√©rent - v√©rifier l'heure
-                // Si c'est vraiment le m√™me trajet √† la m√™me heure, exclure
+                // MÍme structure mais peut-Ítre horaire diffÈrent - vÈrifier l'heure
+                // Si c'est vraiment le mÍme trajet ‡ la mÍme heure, exclure
                 return false;
             }
             
             return true;
         });
         
-        console.log(`üîç Filtrage: ${beforeFilter} ‚Üí ${newItineraries.length} (${beforeFilter - newItineraries.length} doublons/v√©lo/pi√©ton exclus)`);
+        console.log(`?? Filtrage: ${beforeFilter} ? ${newItineraries.length} (${beforeFilter - newItineraries.length} doublons/vÈlo/piÈton exclus)`);
         
         if (newItineraries.length === 0) {
-            console.log('Aucun nouveau d√©part trouv√©');
+            console.log('Aucun nouveau dÈpart trouvÈ');
             // Afficher un message
             const btn = document.querySelector('.load-more-departures button');
             if (btn) {
-                btn.innerHTML = 'Plus de d√©parts disponibles';
+                btn.innerHTML = 'Plus de dÈparts disponibles';
                 btn.disabled = true;
             }
             return;
         }
 
-        console.log(`‚úÖ ${newItineraries.length} nouveaux d√©parts bus ajout√©s`);
+        console.log(`? ${newItineraries.length} nouveaux dÈparts bus ajoutÈs`);
         
-        // Ajouter les nouveaux itin√©raires et mettre √† jour le cache
+        // Ajouter les nouveaux itinÈraires et mettre ‡ jour le cache
         newItineraries.forEach(it => {
             const sig = createItinerarySignature(it);
             existingSignatures.add(sig);
@@ -1921,41 +1921,41 @@ async function loadMoreDepartures() {
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         
-        // R√©activer le bouton
+        // RÈactiver le bouton
         const btn = document.querySelector('.load-more-departures button');
         if (btn) {
             btn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Charger + de d√©parts
+                Charger + de dÈparts
             `;
             btn.disabled = false;
         }
         
     } catch (error) {
-        console.error('Erreur chargement + de d√©parts:', error);
+        console.error('Erreur chargement + de dÈparts:', error);
         const btn = document.querySelector('.load-more-departures button');
         if (btn) {
-            btn.innerHTML = 'Erreur - R√©essayer';
+            btn.innerHTML = 'Erreur - RÈessayer';
             btn.disabled = false;
         }
     }
 }
 
 /**
- * V95: Cr√©e une signature unique pour un itin√©raire bas√©e sur sa structure
- * Permet de d√©tecter les doublons m√™me avec des horaires diff√©rents
+ * V95: CrÈe une signature unique pour un itinÈraire basÈe sur sa structure
+ * Permet de dÈtecter les doublons mÍme avec des horaires diffÈrents
  */
 function createItinerarySignature(it) {
     if (!it) return 'null';
     
     const type = it.type || 'BUS';
     
-    // Pour v√©lo/pi√©ton, signature simple par type
+    // Pour vÈlo/piÈton, signature simple par type
     if (type === 'BIKE' || type === 'WALK') {
         return `${type}_only`;
     }
     
-    // Pour les bus, signature bas√©e sur les lignes et arr√™ts
+    // Pour les bus, signature basÈe sur les lignes et arrÍts
     const segments = (it.summarySegments || [])
         .map(s => s.name || s.routeShortName || 'X')
         .join('>');
@@ -1970,7 +1970,7 @@ function createItinerarySignature(it) {
         })
         .join('|');
     
-    // Inclure l'heure de d√©part pour distinguer les m√™mes trajets √† des heures diff√©rentes
+    // Inclure l'heure de dÈpart pour distinguer les mÍmes trajets ‡ des heures diffÈrentes
     const depTime = it.departureTime || '';
     
     return `${type}::${segments}::${steps}::${depTime}`;
@@ -1996,32 +1996,32 @@ function createItinerarySignature(it) {
         return h * 3600 + m * 60;
     }
 
-    // V142: Garantit un ordre chronologique croissant (proche ‚Üí lointain)
+    // V142: Garantit un ordre chronologique croissant (proche ? lointain)
     // MAIS conserve les groupes par type: BUS d'abord, puis BIKE, puis WALK
     function sortItinerariesByDeparture(list) {
-        // S√©parer par type
+        // SÈparer par type
         const busItins = list.filter(it => it.type !== 'BIKE' && it.type !== 'WALK' && !it._isBike && !it._isWalk);
         const bikeItins = list.filter(it => it.type === 'BIKE' || it._isBike);
         const walkItins = list.filter(it => it.type === 'WALK' || it._isWalk);
         
-        // Trier seulement les bus par heure de d√©part
+        // Trier seulement les bus par heure de dÈpart
         busItins.sort((a, b) => parseDepartureMinutes(a?.departureTime) - parseDepartureMinutes(b?.departureTime));
         
-        // Recomposer: BUS tri√©s, puis BIKE, puis WALK
+        // Recomposer: BUS triÈs, puis BIKE, puis WALK
         return [...busItins, ...bikeItins, ...walkItins];
     }
 
 /**
  * V132: Charge plus de trajets pour le mode "arriver"
- * Recherche des trajets arrivant plus t√¥t que ceux d√©j√† affich√©s
+ * Recherche des trajets arrivant plus tÙt que ceux dÈj‡ affichÈs
  */
 async function loadMoreArrivals() {
     if (!lastSearchTime || !fromPlaceId || !toPlaceId || lastSearchTime.type !== 'arriver') {
-        console.warn('loadMoreArrivals: pas de recherche arriver pr√©c√©dente');
+        console.warn('loadMoreArrivals: pas de recherche arriver prÈcÈdente');
         return;
     }
 
-    // Cr√©er un cache des signatures d'itin√©raires existants
+    // CrÈer un cache des signatures d'itinÈraires existants
     const existingSignatures = new Set();
     const existingArrivals = new Set();
     
@@ -2041,7 +2041,7 @@ async function loadMoreArrivals() {
         baseDateObj = new Date(lastSearchTime.date);
     }
 
-    // Trouver l'arriv√©e la plus t√¥t parmi les bus pour chercher encore plus t√¥t
+    // Trouver l'arrivÈe la plus tÙt parmi les bus pour chercher encore plus tÙt
     const busItineraries = allFetchedItineraries.filter(it => it.type === 'BUS' || it.type === 'TRANSIT');
     
     if (busItineraries.length > 0) {
@@ -2057,7 +2057,7 @@ async function loadMoreArrivals() {
         if (earliestArrival !== Infinity) {
             // On recule de 30 minutes
             // Attention: earliestArrival est en minutes depuis minuit.
-            // Il faut g√©rer le passage au jour pr√©c√©dent si < 0
+            // Il faut gÈrer le passage au jour prÈcÈdent si < 0
             // Simplification: on utilise setHours sur l'objet Date
             
             const h = Math.floor(earliestArrival / 60);
@@ -2068,7 +2068,7 @@ async function loadMoreArrivals() {
              baseDateObj.setHours(parseInt(lastSearchTime.hour) - 1, parseInt(lastSearchTime.minute), 0, 0);
         }
     } else {
-        // Fallback: d√©caler de 1h en arri√®re
+        // Fallback: dÈcaler de 1h en arriËre
         baseDateObj.setHours(parseInt(lastSearchTime.hour) - 1, parseInt(lastSearchTime.minute), 0, 0);
     }
 
@@ -2084,24 +2084,24 @@ async function loadMoreArrivals() {
         minute: String(baseDateObj.getMinutes()).padStart(2, '0')
     };
 
-    console.log(`üîÑ Chargement + d'arriv√©es (cible ${offsetSearchTime.date} ${offsetSearchTime.hour}:${offsetSearchTime.minute})`);
-    console.log(`üì¶ Cache: ${existingSignatures.size} signatures, ${existingArrivals.size} heures d'arriv√©e`);
+    console.log(`?? Chargement + d'arrivÈes (cible ${offsetSearchTime.date} ${offsetSearchTime.hour}:${offsetSearchTime.minute})`);
+    console.log(`?? Cache: ${existingSignatures.size} signatures, ${existingArrivals.size} heures d'arrivÈe`);
 
     try {
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
         let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
         
-        // Filtrer les nouveaux itin√©raires
+        // Filtrer les nouveaux itinÈraires
         const beforeFilter = newItineraries.length;
         newItineraries = newItineraries.filter(it => {
-            // Exclure v√©lo et pi√©ton
+            // Exclure vÈlo et piÈton
             if (it.type === 'BIKE' || it.type === 'WALK' || it._isBike || it._isWalk) {
                 return false;
             }
             
             // V199: Suppression du filtrage par heure exacte (existingArrivals)
             
-            // Exclure les trajets avec la m√™me signature
+            // Exclure les trajets avec la mÍme signature
             const sig = createItinerarySignature(it);
             if (existingSignatures.has(sig)) {
                 return false;
@@ -2110,10 +2110,10 @@ async function loadMoreArrivals() {
             return true;
         });
         
-        console.log(`üîç Filtrage: ${beforeFilter} ‚Üí ${newItineraries.length} nouveaux trajets`);
+        console.log(`?? Filtrage: ${beforeFilter} ? ${newItineraries.length} nouveaux trajets`);
         
         if (newItineraries.length === 0) {
-            console.log('Aucun nouveau trajet arriv√©e trouv√©');
+            console.log('Aucun nouveau trajet arrivÈe trouvÈ');
             const btn = document.querySelector('.load-more-arrivals button');
             if (btn) {
                 btn.innerHTML = 'Plus de trajets disponibles';
@@ -2122,9 +2122,9 @@ async function loadMoreArrivals() {
             return;
         }
 
-        console.log(`‚úÖ ${newItineraries.length} nouveaux trajets arriv√©e ajout√©s`);
+        console.log(`? ${newItineraries.length} nouveaux trajets arrivÈe ajoutÈs`);
         
-        // Ajouter les nouveaux itin√©raires
+        // Ajouter les nouveaux itinÈraires
         newItineraries.forEach(it => {
             const sig = createItinerarySignature(it);
             existingSignatures.add(sig);
@@ -2133,7 +2133,7 @@ async function loadMoreArrivals() {
         
         allFetchedItineraries = [...allFetchedItineraries, ...newItineraries];
         
-        // Re-trier et mettre √† jour arrivalRankedAll
+        // Re-trier et mettre ‡ jour arrivalRankedAll
         const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
         arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], lastSearchTime);
         arrivalRenderedCount = arrivalRankedAll.length; // Montrer tout, pas de pagination
@@ -2142,21 +2142,21 @@ async function loadMoreArrivals() {
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         
-        // R√©activer le bouton
+        // RÈactiver le bouton
         const btn = document.querySelector('.load-more-arrivals button');
         if (btn) {
             btn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                G√©n√©rer + de trajets
+                GÈnÈrer + de trajets
             `;
             btn.disabled = false;
         }
         
     } catch (error) {
-        console.error('Erreur chargement + d\'arriv√©es:', error);
+        console.error('Erreur chargement + d\'arrivÈes:', error);
         const btn = document.querySelector('.load-more-arrivals button');
         if (btn) {
-            btn.innerHTML = 'Erreur - R√©essayer';
+            btn.innerHTML = 'Erreur - RÈessayer';
             btn.disabled = false;
         }
     }
@@ -2191,7 +2191,7 @@ function prefillOtherPlanner(sourceFormName, sourceElements) {
         tab.classList.toggle('active', tab.dataset.tab === sourceActiveTab);
     });
     targetElements.whenBtn.querySelector('span').textContent = sourceElements.whenBtn.querySelector('span').textContent;
-    targetElements.popoverSubmitBtn.textContent = (sourceActiveTab === 'arriver') ? "Valider l'arriv√©e" : 'Partir maintenant';
+    targetElements.popoverSubmitBtn.textContent = (sourceActiveTab === 'arriver') ? "Valider l'arrivÈe" : 'Partir maintenant';
 }
 
 async function handleAutocomplete(query, container, onSelect) {
@@ -2205,7 +2205,7 @@ async function handleAutocomplete(query, container, onSelect) {
         const suggestions = await apiManager.getPlaceAutocomplete(query);
         renderSuggestions(suggestions, container, onSelect);
     } catch (error) {
-        console.warn("Erreur d'autocompl√©tion:", error);
+        console.warn("Erreur d'autocomplÈtion:", error);
         container.style.display = 'none';
     }
 }
@@ -2260,7 +2260,7 @@ function renderSuggestions(suggestions, container, onSelect) {
 
 function processGoogleRoutesResponse(data) {
     if (!data || !data.routes || data.routes.length === 0) {
-        console.warn("R√©ponse de l'API Routes (BUS) vide ou invalide.");
+        console.warn("RÈponse de l'API Routes (BUS) vide ou invalide.");
         return [];
     }
     return data.routes.map(route => {
@@ -2321,20 +2321,20 @@ function processGoogleRoutesResponse(data) {
                 const line = transit.transitLine;
                 if (line) {
                     const shortName = line.nameShort || 'BUS';
-                    // V199: D√©sactivation du filtrage strict "Ligne non-locale"
+                    // V199: DÈsactivation du filtrage strict "Ligne non-locale"
                     // On accepte tout ce que Google renvoie, sauf si c'est explicitement TER ou 322
                     if (shortName === 'TER' || shortName === '322') {
-                         console.warn(`[Filtre] Trajet rejet√©: Ligne interdite ("${shortName}") d√©tect√©e.`);
+                         console.warn(`[Filtre] Trajet rejetÈ: Ligne interdite ("${shortName}") dÈtectÈe.`);
                          isRegionalRoute = true;
                     } else if (dataManager && dataManager.isLoaded && !dataManager.routesByShortName[shortName]) {
-                        console.log(`‚ö†Ô∏è V199: Ligne inconnue du GTFS ("${shortName}") mais conserv√©e.`);
+                        console.log(`?? V199: Ligne inconnue du GTFS ("${shortName}") mais conservÈe.`);
                     }
                     
                     const color = line.color || '#3388ff';
                     const textColor = line.textColor || '#ffffff';
                     const departureStop = stopDetails.departureStop || {};
                     const arrivalStop = stopDetails.arrivalStop || {};
-                    let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'Arr√™t inconnu');
+                    let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'ArrÍt inconnu');
                     
                     if (intermediateStops.length === 0 && dataManager && dataManager.isLoaded) {
                         const apiDepName = departureStop.name;
@@ -2352,8 +2352,8 @@ function processGoogleRoutesResponse(data) {
                     itinerary.steps.push({
                         type: 'BUS', icon: ICONS.BUS, routeShortName: shortName, routeColor: color, routeTextColor: textColor,
                         instruction: `Prendre le <b>${shortName}</b> direction <b>${transit.headsign || 'destination'}</b>`,
-                        departureStop: departureStop.name || 'Arr√™t de d√©part', departureTime: depTime,
-                        arrivalStop: arrivalStop.name || 'Arr√™t d\'arriv√©e', arrivalTime: arrTime,
+                        departureStop: departureStop.name || 'ArrÍt de dÈpart', departureTime: depTime,
+                        arrivalStop: arrivalStop.name || 'ArrÍt d\'arrivÈe', arrivalTime: arrTime,
                         numStops: transit.stopCount || 0, intermediateStops: intermediateStops,
                         duration: formatGoogleDuration(step.staticDuration), polyline: step.polyline
                         , durationRaw: rawDuration
@@ -2478,17 +2478,17 @@ function processGoogleRoutesResponse(data) {
     }).filter(itinerary => itinerary !== null);
 }
 
-// (D√©duplication d√©plac√©e vers itinerary/ranking.js)
+// (DÈduplication dÈplacÈe vers itinerary/ranking.js)
 
 function processIntelligentResults(intelligentResults, searchTime) {
-    console.log("=== D√âBUT PROCESS INTELLIGENT RESULTS ===");
-    console.log("üì• Mode de recherche:", searchTime?.type || 'partir');
-    console.log("üì• Heure demand√©e:", `${searchTime?.hour}:${String(searchTime?.minute || 0).padStart(2,'0')}`);
+    console.log("=== D…BUT PROCESS INTELLIGENT RESULTS ===");
+    console.log("?? Mode de recherche:", searchTime?.type || 'partir');
+    console.log("?? Heure demandÈe:", `${searchTime?.hour}:${String(searchTime?.minute || 0).padStart(2,'0')}`);
     
     const itineraries = [];
     const sortedRecommendations = [...intelligentResults.recommendations].sort((a, b) => b.score - a.score);
 
-    // 1. Extraction des r√©sultats Google
+    // 1. Extraction des rÈsultats Google
     sortedRecommendations.forEach(rec => {
         let modeData = null;
         let modeInfo = null;
@@ -2525,8 +2525,8 @@ function processIntelligentResults(intelligentResults, searchTime) {
         }
     });
     
-    // Debug: afficher tous les itin√©raires extraits de Google AVANT filtrage
-    console.log("üìã Itin√©raires Google bruts (avant filtrage):", itineraries.map(it => ({
+    // Debug: afficher tous les itinÈraires extraits de Google AVANT filtrage
+    console.log("?? ItinÈraires Google bruts (avant filtrage):", itineraries.map(it => ({
         type: it.type,
         dep: it.departureTime,
         arr: it.arrivalTime,
@@ -2534,7 +2534,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
     })));
 
     // V193: FILTRAGE DES BUS GOOGLE PAR JOUR DE SERVICE GTFS
-    // V√©rifie que les lignes retourn√©es par Google circulent bien ce jour-l√†
+    // VÈrifie que les lignes retournÈes par Google circulent bien ce jour-l‡
     if (dataManager && dataManager.isLoaded) {
         let searchDate;
         if (!searchTime?.date || searchTime.date === 'today' || searchTime.date === "Aujourd'hui") {
@@ -2543,7 +2543,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
             searchDate = new Date(searchTime.date);
         }
         
-        // V194: Ajouter l'heure pour que la date soit compl√®te
+        // V194: Ajouter l'heure pour que la date soit complËte
         if (searchTime?.hour !== undefined) {
             searchDate.setHours(parseInt(searchTime.hour) || 0, parseInt(searchTime.minute) || 0, 0, 0);
         }
@@ -2551,15 +2551,15 @@ function processIntelligentResults(intelligentResults, searchTime) {
         const activeServiceIds = dataManager.getServiceIds(searchDate);
         const dayNames = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
         const dayName = dayNames[searchDate.getDay()];
-        console.log(`üìÖ V194: V√©rification pour ${dayName} ${searchDate.toLocaleDateString()} - ${activeServiceIds.size} services actifs`);
-        console.log(`üìÖ V194: Services actifs:`, Array.from(activeServiceIds));
+        console.log(`?? V194: VÈrification pour ${dayName} ${searchDate.toLocaleDateString()} - ${activeServiceIds.size} services actifs`);
+        console.log(`?? V194: Services actifs:`, Array.from(activeServiceIds));
         
         if (activeServiceIds.size === 0) {
-            console.warn(`‚ö†Ô∏è V194: AUCUN SERVICE ACTIF pour ${dayName} - Les bus ne circulent peut-√™tre pas (GTFS local)`);
-            // V199: On ne supprime plus les bus, on fait confiance √† Google
-            console.log(`‚ö†Ô∏è V199: Conservation des itin√©raires Google malgr√© l'absence de services locaux`);
+            console.warn(`?? V194: AUCUN SERVICE ACTIF pour ${dayName} - Les bus ne circulent peut-Ítre pas (GTFS local)`);
+            // V199: On ne supprime plus les bus, on fait confiance ‡ Google
+            console.log(`?? V199: Conservation des itinÈraires Google malgrÈ l'absence de services locaux`);
         } else {
-            // Construire un Set des lignes actives ce jour-l√†
+            // Construire un Set des lignes actives ce jour-l‡
             const activeLinesThisDay = new Set();
             for (const trip of dataManager.trips) {
                 const isActive = Array.from(activeServiceIds).some(sid => 
@@ -2574,14 +2574,14 @@ function processIntelligentResults(intelligentResults, searchTime) {
                     }
                 }
             }
-            console.log(`üöç V194: Lignes actives ${dayName}:`, Array.from(activeLinesThisDay).sort().join(', '));
+            console.log(`?? V194: Lignes actives ${dayName}:`, Array.from(activeLinesThisDay).sort().join(', '));
             
-            // Filtrer les itin√©raires bus Google
+            // Filtrer les itinÈraires bus Google
             const beforeCount = itineraries.filter(it => it.type === 'BUS').length;
             const filteredItineraries = itineraries.filter(itin => {
-                if (itin.type !== 'BUS') return true; // Garder v√©lo et marche
+                if (itin.type !== 'BUS') return true; // Garder vÈlo et marche
                 
-                // Extraire les noms de lignes depuis l'itin√©raire
+                // Extraire les noms de lignes depuis l'itinÈraire
                 const lineNames = new Set();
                 if (itin.summarySegments) {
                     itin.summarySegments.forEach(seg => {
@@ -2597,43 +2597,43 @@ function processIntelligentResults(intelligentResults, searchTime) {
                             lineNames.add(step.lineName.toUpperCase());
                             lineNames.add(step.lineName.toUpperCase().replace(/\s+/g, ''));
                         }
-                        // V194: Aussi v√©rifier routeShortName
+                        // V194: Aussi vÈrifier routeShortName
                         if (step.type === 'BUS' && step.routeShortName) {
                             lineNames.add(step.routeShortName.toUpperCase());
                         }
                     });
                 }
                 
-                // V√©rifier si au moins une ligne est active
+                // VÈrifier si au moins une ligne est active
                 const hasActiveLine = Array.from(lineNames).some(name => activeLinesThisDay.has(name));
                 
                 if (!hasActiveLine && lineNames.size > 0) {
-                    console.log(`‚ö†Ô∏è V199: Lignes [${Array.from(lineNames).join(', ')}] non trouv√©es dans GTFS local pour ${dayName}, mais conserv√©es (Google First)`);
+                    console.log(`?? V199: Lignes [${Array.from(lineNames).join(', ')}] non trouvÈes dans GTFS local pour ${dayName}, mais conservÈes (Google First)`);
                     // return false; // V199: On ne filtre plus
                 }
                 
-                // Si pas de nom de ligne trouv√©, on garde par prudence
+                // Si pas de nom de ligne trouvÈ, on garde par prudence
                 if (lineNames.size === 0) {
-                    console.warn(`‚ö†Ô∏è V194: Itin√©raire sans nom de ligne, conserv√© par d√©faut`);
+                    console.warn(`?? V194: ItinÈraire sans nom de ligne, conservÈ par dÈfaut`);
                 }
                 return true;
             });
             
             const afterCount = filteredItineraries.filter(it => it.type === 'BUS').length;
             if (beforeCount !== afterCount) {
-                console.log(`üìä V194: ${beforeCount - afterCount} itin√©raire(s) bus rejet√©(s) (hors service ${dayName})`);
+                console.log(`?? V194: ${beforeCount - afterCount} itinÈraire(s) bus rejetÈ(s) (hors service ${dayName})`);
             }
             
-            // Remplacer itineraries par la version filtr√©e
+            // Remplacer itineraries par la version filtrÈe
             itineraries.length = 0;
             itineraries.push(...filteredItineraries);
         }
     }
 
-    // 2. LOGIQUE DE FEN√äTRE TEMPORELLE (Horaire Arriv√©e)
+    // 2. LOGIQUE DE FEN TRE TEMPORELLE (Horaire ArrivÈe)
     try {
         if (searchTime && searchTime.type === 'arriver') {
-            // A. D√©finir la cible
+            // A. DÈfinir la cible
             let reqDate = null;
             if (!searchTime.date || searchTime.date === 'today' || searchTime.date === "Aujourd'hui") {
                 reqDate = new Date();
@@ -2645,18 +2645,18 @@ function processIntelligentResults(intelligentResults, searchTime) {
             reqDate.setHours(reqHour, reqMinute, 0, 0);
             const reqMs = reqDate.getTime();
 
-            // B. Fen√™tre √©largie : on accepte les arriv√©es jusqu'√† 4h AVANT l'heure demand√©e
-            // Le tri ensuite classera par proximit√© √† l'heure cible
-            const BEFORE_MINUTES = 240; // 4h de fen√™tre en amont pour avoir plus de choix
+            // B. FenÍtre Èlargie : on accepte les arrivÈes jusqu'‡ 4h AVANT l'heure demandÈe
+            // Le tri ensuite classera par proximitÈ ‡ l'heure cible
+            const BEFORE_MINUTES = 240; // 4h de fenÍtre en amont pour avoir plus de choix
             const windowStart = reqMs - BEFORE_MINUTES * 60 * 1000;
-            const windowEnd = reqMs; // pas de trajets apr√®s l'heure demand√©e
+            const windowEnd = reqMs; // pas de trajets aprËs l'heure demandÈe
 
-            console.log(`üïí Cible: ${reqDate.toLocaleTimeString()} | Fen√™tre: ${new Date(windowStart).toLocaleTimeString()} ‚Üí ${new Date(windowEnd).toLocaleTimeString()} ( -${BEFORE_MINUTES}min / +0min )`);
+            console.log(`?? Cible: ${reqDate.toLocaleTimeString()} | FenÍtre: ${new Date(windowStart).toLocaleTimeString()} ? ${new Date(windowEnd).toLocaleTimeString()} ( -${BEFORE_MINUTES}min / +0min )`);
 
             const busItins = itineraries.filter(i => i.type === 'BUS' && i.arrivalTime && i.arrivalTime !== '~' && i.arrivalTime !== '--:--');
             const otherItins = itineraries.filter(i => i.type !== 'BUS');
 
-            // Parser l'heure d'arriv√©e (HH:MM) en Timestamp
+            // Parser l'heure d'arrivÈe (HH:MM) en Timestamp
             const parseArrivalMs = (arrivalStr) => {
                 if (!arrivalStr || typeof arrivalStr !== 'string') return NaN;
                 const m = arrivalStr.match(/(\d{1,2}):(\d{2})/);
@@ -2670,31 +2670,31 @@ function processIntelligentResults(intelligentResults, searchTime) {
 
             const busWithMs = busItins.map(i => ({ itin: i, arrivalMs: parseArrivalMs(i.arrivalTime) })).filter(x => !isNaN(x.arrivalMs));
 
-            // C. Filtrer les bus Google qui sont DANS la fen√™tre
+            // C. Filtrer les bus Google qui sont DANS la fenÍtre
             let filteredBus = busWithMs
                 .filter(x => x.arrivalMs >= windowStart && x.arrivalMs <= windowEnd)
                 .map(x => x.itin);
 
-            console.log(`üöå Bus Google trouv√©s dans la fen√™tre : ${filteredBus.length} sur ${busItins.length} total`);
+            console.log(`?? Bus Google trouvÈs dans la fenÍtre : ${filteredBus.length} sur ${busItins.length} total`);
             if (busWithMs.length > filteredBus.length) {
                 const exclus = busWithMs.filter(x => x.arrivalMs < windowStart || x.arrivalMs > windowEnd);
-                console.log(`üìÖ Bus exclus (hors fen√™tre):`, exclus.map(x => ({ arr: x.itin.arrivalTime, ms: x.arrivalMs })));
+                console.log(`?? Bus exclus (hors fenÍtre):`, exclus.map(x => ({ arr: x.itin.arrivalTime, ms: x.arrivalMs })));
             }
 
-            // D. INJECTION GTFS (Data locale) pour compl√©ter
+            // D. INJECTION GTFS (Data locale) pour complÈter
             // ON SUPPRIME LA LIMITE "TARGET_BUS_COUNT" pour prendre TOUT ce qui existe.
             
             let gtfsAdded = [];
             let candidateStopIds = new Set();
             if (dataManager && dataManager.isLoaded) {
-                console.log("üìÇ Recherche dans les donn√©es GTFS locales...");
+                console.log("?? Recherche dans les donnÈes GTFS locales...");
                 
                 const normalize = (name) => {
                     if (!name) return "";
                     return name.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]/g, '').trim();
                 };
 
-                // R√©cup√©rer les noms d'arr√™ts d'arriv√©e depuis Google pour savoir o√π chercher
+                // RÈcupÈrer les noms d'arrÍts d'arrivÈe depuis Google pour savoir o˘ chercher
                 const candidateNames = new Set();
                 busItins.forEach(it => {
                     if (!it.steps) return;
@@ -2715,17 +2715,17 @@ function processIntelligentResults(intelligentResults, searchTime) {
                     }
                 });
                 
-                // Si Google n'a rien donn√©, on cherche "Tourny" ou "Gare" par d√©faut (optionnel)
+                // Si Google n'a rien donnÈ, on cherche "Tourny" ou "Gare" par dÈfaut (optionnel)
                 if (candidateStopIds.size === 0) {
-                     console.warn("‚ö†Ô∏è Aucun arr√™t candidat trouv√© via Google, recherche GTFS impossible.");
+                     console.warn("?? Aucun arrÍt candidat trouvÈ via Google, recherche GTFS impossible.");
                 } else {
-                    console.log(`üìç Arr√™ts candidats GTFS (IDs):`, Array.from(candidateStopIds));
+                    console.log(`?? ArrÍts candidats GTFS (IDs):`, Array.from(candidateStopIds));
                 }
 
                 const serviceIdSet = dataManager.getServiceIds(new Date(reqDate));
-                const seenKeys = new Set(); // Pour √©viter les doublons exacts
+                const seenKeys = new Set(); // Pour Èviter les doublons exacts
 
-                // Ajouter les cl√©s des bus Google d√©j√† trouv√©s pour ne pas les dupliquer
+                // Ajouter les clÈs des bus Google dÈj‡ trouvÈs pour ne pas les dupliquer
                 filteredBus.forEach(b => {
                     seenKeys.add(`${b.summarySegments[0]?.name}_${b.arrivalTime}`);
                 });
@@ -2738,21 +2738,21 @@ function processIntelligentResults(intelligentResults, searchTime) {
                         const trip = dataManager.tripsByTripId[st.trip_id];
                         if (!trip) continue;
 
-                        // V√©rif Service (Jour de la semaine)
+                        // VÈrif Service (Jour de la semaine)
                         const isServiceActive = Array.from(serviceIdSet).some(sid => dataManager.serviceIdsMatch(trip.service_id, sid));
                         if (!isServiceActive) continue;
 
                         const arrTimeStr = st.arrival_time || st.departure_time;
                         const seconds = dataManager.timeToSeconds(arrTimeStr);
                         
-                        // Calcul du Timestamp Arriv√©e GTFS
+                        // Calcul du Timestamp ArrivÈe GTFS
                         const d = new Date(reqDate);
                         const hours = Math.floor(seconds / 3600);
                         const mins = Math.floor((seconds % 3600) / 60);
                         d.setHours(hours, mins, 0, 0);
                         const arrMs = d.getTime();
 
-                        // === TEST CRITIQUE DE LA FEN√äTRE ===
+                        // === TEST CRITIQUE DE LA FEN TRE ===
                         if (arrMs >= windowStart && arrMs <= windowEnd) {
                             
                             const route = dataManager.getRoute(trip.route_id) || {};
@@ -2762,7 +2762,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                             if (!seenKeys.has(key)) {
                                 seenKeys.add(key); // Marquer comme vu
 
-                                // Cr√©ation de l'itin√©raire GTFS enrichi (noms lisibles, horaires, polylines via shapes)
+                                // CrÈation de l'itinÈraire GTFS enrichi (noms lisibles, horaires, polylines via shapes)
                                                 const stopTimesList = dataManager.getStopTimes(st.trip_id) || [];
                                                 const alightIndex = stopTimesList.findIndex(s => s.stop_id === st.stop_id);
 
@@ -2770,7 +2770,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                                 // 1) Prefer a stop that matches any origin candidate stop IDs (if available)
                                                 // 2) Otherwise, pick the nearest predecessor before alightIndex (within a small window)
                                                 let boardingIndex = null;
-                                                // D√©clarer originCandidateIds en dehors du try pour qu'il soit accessible plus bas
+                                                // DÈclarer originCandidateIds en dehors du try pour qu'il soit accessible plus bas
                                                 let originCandidateIds = new Set();
                                                 try {
                                                     // Build origin candidate IDs from the current Google results (departure stops)
@@ -2817,7 +2817,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                                         boardingIndex = 0;
                                                     }
                                                 } catch (err) {
-                                                    console.warn('Erreur d√©termination boardingIndex GTFS, fallback utilis√©', err);
+                                                    console.warn('Erreur dÈtermination boardingIndex GTFS, fallback utilisÈ', err);
                                                     boardingIndex = 0;
                                                 }
 
@@ -2834,7 +2834,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                 const DIST_THRESHOLD_METERS = 500; // max acceptable walking distance to boarding
                                 if (originCandidateIds && originCandidateIds.size > 0) {
                                     if (!originCandidateIds.has(boardingST.stop_id)) {
-                                        // Not exact match by ID ‚Äî compute nearest origin candidate distance
+                                        // Not exact match by ID ó compute nearest origin candidate distance
                                         let minDist = Infinity;
                                         originCandidateIds.forEach(cid => {
                                             const cand = dataManager.getStop(cid);
@@ -2870,7 +2870,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                     console.debug('GTFS injection: alighting stop has no readable name', { tripId: st.trip_id, alightingST });
                                 }
 
-                                // R√©cup√©rer g√©om√©trie shape/route
+                                // RÈcupÈrer gÈomÈtrie shape/route
                                 let geometry = dataManager.getRouteGeometry(trip.route_id);
                                 if (!geometry && trip.shape_id) {
                                     geometry = dataManager.getShapeGeoJSON(trip.shape_id, trip.route_id);
@@ -2928,7 +2928,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                     arrivalStop: alightingStopObj.stop_name || alightingST.stop_id,
                                     departureTime: dataManager.formatTime(depSeconds),
                                     arrivalTime: dataManager.formatTime(arrSeconds),
-                                    duration: dataManager.formatDuration(Math.max(0, arrSeconds - depSeconds)) || 'Horaires th√©oriques',
+                                    duration: dataManager.formatDuration(Math.max(0, arrSeconds - depSeconds)) || 'Horaires thÈoriques',
                                     intermediateStops,
                                     numStops: Math.max(0, (alightIndex - boardingIndex)),
                                     _durationSeconds: Math.max(0, arrSeconds - depSeconds)
@@ -2943,7 +2943,7 @@ function processIntelligentResults(intelligentResults, searchTime) {
                                     arrivalTime: busStep.arrivalTime || dataManager.formatTime(seconds),
                                     summarySegments: [{ type: 'BUS', name: routeName, color: route.route_color ? `#${route.route_color}` : '#3388ff', textColor: route.route_text_color ? `#${route.route_text_color}` : '#ffffff' }],
                                     durationRaw: busStep._durationSeconds || 0,
-                                    duration: busStep.duration || 'Horaires th√©oriques',
+                                    duration: busStep.duration || 'Horaires thÈoriques',
                                     steps: [busStep]
                                 };
                                     // Verify trip headsign/direction loosely matches candidate arrival names to avoid cloning reverse trips
@@ -2969,34 +2969,34 @@ function processIntelligentResults(intelligentResults, searchTime) {
                         }
                     }
                 }
-                console.log(`‚úÖ Bus GTFS ajout√©s : ${gtfsAdded.length}`);
+                console.log(`? Bus GTFS ajoutÈs : ${gtfsAdded.length}`);
             }
 
-            // E. INCLURE LES R√âSULTATS GTFS DANS L'AFFICHAGE (fen√™tre stricte: jusqu'√† l'heure demand√©e)
-            // On annote d'abord les bus Google confirm√©s par GTFS
+            // E. INCLURE LES R…SULTATS GTFS DANS L'AFFICHAGE (fenÍtre stricte: jusqu'‡ l'heure demandÈe)
+            // On annote d'abord les bus Google confirmÈs par GTFS
             let matchedCount = 0;
             filteredBus.forEach(it => {
                 const key = `${it.summarySegments[0]?.name}_${it.arrivalTime}`;
                 const match = gtfsAdded.find(g => `${g.summarySegments[0]?.name}_${g.arrivalTime}` === key);
-                // Do not annotate Google itineraries with provenance flags ‚Äî treat all sources uniformly in UI.
+                // Do not annotate Google itineraries with provenance flags ó treat all sources uniformly in UI.
             });
 
-            // Pr√©parer la liste combin√©e (Google + GTFS) ‚Äî sans limitation du nombre
+            // PrÈparer la liste combinÈe (Google + GTFS) ó sans limitation du nombre
             const allBuses = [];
-            // Ajouter les bus Google filtr√©s (d√©j√† dans la fen√™tre [req-30min, req])
+            // Ajouter les bus Google filtrÈs (dÈj‡ dans la fenÍtre [req-30min, req])
             filteredBus.forEach(it => {
                 allBuses.push({ itin: it, arrivalMs: parseArrivalMs(it.arrivalTime), source: 'google' });
             });
-            // Ajouter les bus GTFS trouv√©s dans la m√™me fen√™tre
+            // Ajouter les bus GTFS trouvÈs dans la mÍme fenÍtre
             gtfsAdded.forEach(g => {
                 const arrivalMs = parseArrivalMs(g.arrivalTime);
-                // uniquement si dans la fen√™tre (s√©curit√©)
+                // uniquement si dans la fenÍtre (sÈcuritÈ)
                 if (!isNaN(arrivalMs) && arrivalMs >= windowStart && arrivalMs <= windowEnd) {
                     allBuses.push({ itin: g, arrivalMs: arrivalMs, source: 'gtfs' });
                 }
             });
 
-            // Trier chronologiquement par heure d'arriv√©e
+            // Trier chronologiquement par heure d'arrivÈe
             allBuses.sort((a, b) => a.arrivalMs - b.arrivalMs);
 
             // Diagnostics GTFS
@@ -3010,16 +3010,16 @@ function processIntelligentResults(intelligentResults, searchTime) {
             };
 
             if (missingGtfs.length > 0) {
-                console.warn(`‚ö†Ô∏è GTFS: ${missingGtfs.length} d√©part(s) trouv√©s dans GTFS mais non propos√©s par l'API Google.`);
+                console.warn(`?? GTFS: ${missingGtfs.length} dÈpart(s) trouvÈs dans GTFS mais non proposÈs par l'API Google.`);
                 console.table(itineraries._gtfsDiagnostics.missing);
             } else {
-                console.log('‚úÖ GTFS et Google coh√©rents pour cette fen√™tre.');
+                console.log('? GTFS et Google cohÈrents pour cette fenÍtre.');
             }
 
             // F. RECONSTRUIRE LA LISTE FINALE: inclure TOUS les bus (Google + GTFS) sans limite
             itineraries.length = 0;
             allBuses.forEach(b => itineraries.push(b.itin));
-            // Rajouter pi√©ton/v√©lo filtr√©s dans la fen√™tre demand√©e
+            // Rajouter piÈton/vÈlo filtrÈs dans la fenÍtre demandÈe
             const filteredOther = otherItins.filter(o => {
                 if (!o.arrivalTime || o.arrivalTime === '~' || o.arrivalTime === '--:--') return false;
                 const ms = parseArrivalMs(o.arrivalTime);
@@ -3028,16 +3028,16 @@ function processIntelligentResults(intelligentResults, searchTime) {
             itineraries.push(...filteredOther);
         }
     } catch (e) {
-        console.warn('Erreur lors du filtrage par heure d\'arriv√©e:', e);
+        console.warn('Erreur lors du filtrage par heure d\'arrivÈe:', e);
     }
 
-    // V115: Passer le searchMode √† deduplicateItineraries pour garder les bons horaires
+    // V115: Passer le searchMode ‡ deduplicateItineraries pour garder les bons horaires
     const searchMode = searchTime?.type || 'partir';
-    // V216: D√âSACTIV√â - On garde TOUS les trajets, m√™me avec la m√™me structure mais horaires diff√©rents
+    // V216: D…SACTIV… - On garde TOUS les trajets, mÍme avec la mÍme structure mais horaires diffÈrents
     // let finalList = deduplicateItineraries(itineraries, searchMode);
     let finalList = [...itineraries];
 
-    // Tri + pagination sp√©cifique au mode "arriver"
+    // Tri + pagination spÈcifique au mode "arriver"
     if (searchTime && searchTime.type === 'arriver') {
         const parseArrivalMsGeneric = (arrivalStr, baseDate) => {
             if (!arrivalStr || typeof arrivalStr !== 'string') return 0;
@@ -3050,23 +3050,23 @@ function processIntelligentResults(intelligentResults, searchTime) {
 
         const targetMinutes = (parseInt(searchTime.hour) || 0) * 60 + (parseInt(searchTime.minute) || 0);
 
-        // V134: Tri SIMPLE - par heure d'arriv√©e D√âCROISSANTE
-        // L'utilisateur veut arriver √† 16h -> on affiche d'abord 15h55, puis 15h45, puis 15h30...
+        // V134: Tri SIMPLE - par heure d'arrivÈe D…CROISSANTE
+        // L'utilisateur veut arriver ‡ 16h -> on affiche d'abord 15h55, puis 15h45, puis 15h30...
         // C'est l'ordre logique : le meilleur (plus proche de 16h) en premier
         finalList.sort((a, b) => {
             const arrA = parseArrivalMsGeneric(a.arrivalTime);
             const arrB = parseArrivalMsGeneric(b.arrivalTime);
             
-            // Filtrer les arriv√©es apr√®s l'heure demand√©e (trop tard)
+            // Filtrer les arrivÈes aprËs l'heure demandÈe (trop tard)
             const aValid = arrA <= targetMinutes;
             const bValid = arrB <= targetMinutes;
             if (aValid !== bValid) return aValid ? -1 : 1;
             
-            // Trier par arriv√©e D√âCROISSANTE (15h55 avant 15h45 avant 15h30...)
+            // Trier par arrivÈe D…CROISSANTE (15h55 avant 15h45 avant 15h30...)
             return arrB - arrA;
         });
         
-        console.log('üéØ V134: Tri ARRIVER (arriv√©e d√©croissante):', finalList.slice(0, 5).map(it => ({
+        console.log('?? V134: Tri ARRIVER (arrivÈe dÈcroissante):', finalList.slice(0, 5).map(it => ({
             arr: it.arrivalTime,
             dep: it.departureTime
         })));
@@ -3089,7 +3089,7 @@ async function ensureItineraryPolylines(itineraries) {
 
     const shapesReady = await dataManager.ensureShapesIndexLoaded();
     if (shapesReady === false) {
-        console.warn('ensureItineraryPolylines: les shapes GTFS n\'ont pas pu √™tre charg√©es.');
+        console.warn('ensureItineraryPolylines: les shapes GTFS n\'ont pas pu Ítre chargÈes.');
     }
 
     const normalize = (s) => (s || '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[^a-z0-9]/g, '').trim();
@@ -3109,7 +3109,7 @@ async function ensureItineraryPolylines(itineraries) {
 
                 const hasExistingEncoded = step.polyline && (step.polyline.encodedPolyline || step.polyline.points);
                 if (!hasLocalGeometryHints && hasExistingEncoded) {
-                    // Probable itin√©raire Google d√©j√† complet -> garder la polyline fournie
+                    // Probable itinÈraire Google dÈj‡ complet -> garder la polyline fournie
                     continue;
                 }
 
@@ -3154,7 +3154,7 @@ async function ensureItineraryPolylines(itineraries) {
                         }
                     }
                 } catch (err) {
-                    console.warn('ensureItineraryPolylines: erreur r√©solution arr√™ts', err);
+                    console.warn('ensureItineraryPolylines: erreur rÈsolution arrÍts', err);
                 }
 
                 if (!depStopObj && step.departureStop) {
@@ -3224,7 +3224,7 @@ async function ensureItineraryPolylines(itineraries) {
                         .map(pair => [Number(pair[0]), Number(pair[1])])
                         .filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
                     encoded = latLngPoints.length >= 2 ? encodePolyline(latLngPoints) : null;
-                    console.log('ensureItineraryPolylines: polyline reconstruite depuis la g√©om√©trie', {
+                    console.log('ensureItineraryPolylines: polyline reconstruite depuis la gÈomÈtrie', {
                         itinId: itin.tripId || itin.trip?.trip_id || null,
                         stepRoute: routeId,
                         pointCount: latLngPoints?.length || 0
@@ -3240,7 +3240,7 @@ async function ensureItineraryPolylines(itineraries) {
                         ? { lat: parseFloat(arrStopObj.stop_lat), lon: parseFloat(arrStopObj.stop_lon) }
                         : (resolvedArrCoords ? { lat: resolvedArrCoords.lat, lon: resolvedArrCoords.lng } : null);
                     
-                    // V267: Fallback ultime - utiliser les coords de l'itin√©raire global si dispo
+                    // V267: Fallback ultime - utiliser les coords de l'itinÈraire global si dispo
                     let finalDep = dep;
                     let finalArr = arr;
                     
@@ -3255,7 +3255,7 @@ async function ensureItineraryPolylines(itineraries) {
                         else if (d.latitude && d.longitude) finalArr = { lat: d.latitude, lon: d.longitude };
                     }
                     
-                    // V267: Essayer aussi les coordonn√©es de step directement
+                    // V267: Essayer aussi les coordonnÈes de step directement
                     if (!finalDep && step.departureLocation) {
                         const loc = step.departureLocation;
                         if (loc.lat !== undefined) finalDep = { lat: loc.lat, lon: loc.lng || loc.lon };
@@ -3270,7 +3270,7 @@ async function ensureItineraryPolylines(itineraries) {
                     if (finalDep && finalArr && !Number.isNaN(finalDep.lat) && !Number.isNaN(finalArr.lat)) {
                         latLngPoints = [[finalDep.lat, finalDep.lon], [finalArr.lat, finalArr.lon]];
                         encoded = encodePolyline(latLngPoints);
-                        console.log('ensureItineraryPolylines: fallback polyline directe utilis√©e', {
+                        console.log('ensureItineraryPolylines: fallback polyline directe utilisÈe', {
                             itinId: itin.tripId || itin.trip?.trip_id || null,
                             stepRoute: routeId,
                             source: 'coords-fallback'
@@ -3282,7 +3282,7 @@ async function ensureItineraryPolylines(itineraries) {
                     step.polyline = { encodedPolyline: encoded, latLngs: latLngPoints };
                     console.debug('ensureItineraryPolylines: reconstructed polyline', { itinId: itin.tripId || itin.trip?.trip_id || null });
                 } else {
-                    console.warn('ensureItineraryPolylines: impossible de reconstruire la polyline pour une √©tape BUS (aucune coordonn√©e fiable)', {
+                    console.warn('ensureItineraryPolylines: impossible de reconstruire la polyline pour une Ètape BUS (aucune coordonnÈe fiable)', {
                         itinId: itin.tripId || itin.trip?.trip_id || null,
                         stepRoute: routeId,
                         departureStop: step.departureStop,
@@ -3304,7 +3304,7 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
     const distanceKm = modeInfo.distance;
     const durationRawSeconds = durationMinutes * 60;
     const icon = mode === 'bike' ? ICONS.BICYCLE : ICONS.WALK;
-    const modeLabel = mode === 'bike' ? 'V√©lo' : 'Marche';
+    const modeLabel = mode === 'bike' ? 'VÈlo' : 'Marche';
     const type = mode === 'bike' ? 'BIKE' : 'WALK';
     
     let departureTimeStr = "~";
@@ -3322,10 +3322,10 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
             departureTimeStr = `${String(departureDate.getHours()).padStart(2, '0')}:${String(departureDate.getMinutes()).padStart(2, '0')}`;
             arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
         } catch(e) {
-            console.warn("Erreur calcul date pour v√©lo/marche", e);
+            console.warn("Erreur calcul date pour vÈlo/marche", e);
         }
     } else if (searchTime.type === 'arriver') {
-        // Recherche "Arriver" : on fixe l'heure d'arriv√©e et on d√©duit l'heure de d√©part.
+        // Recherche "Arriver" : on fixe l'heure d'arrivÈe et on dÈduit l'heure de dÈpart.
         try {
             let arrivalDate;
             if(searchTime.date === 'today' || searchTime.date === "Aujourd'hui" || !searchTime.date) {
@@ -3338,7 +3338,7 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
             arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
             departureTimeStr = `${String(departureDate.getHours()).padStart(2, '0')}:${String(departureDate.getMinutes()).padStart(2, '0')}`;
         } catch(e) {
-            console.warn("Erreur calcul date (arriver) pour v√©lo/marche", e);
+            console.warn("Erreur calcul date (arriver) pour vÈlo/marche", e);
         }
     }
 
@@ -3353,7 +3353,7 @@ function processSimpleRoute(data, mode, modeInfo, searchTime) {
     if (leg?.steps) {
         leg.steps.forEach(step => {
             const distanceText = step.localizedValues?.distance?.text || '';
-            const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer √† v√©lo" : "Marcher");
+            const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer ‡ vÈlo" : "Marcher");
             const duration = formatGoogleDuration(step.staticDuration); 
             const maneuver = step.navigationInstruction?.maneuver || 'DEFAULT';
             aggregatedStep.subSteps.push({ instruction, distance: distanceText, duration, maneuver });
@@ -3427,29 +3427,29 @@ function setupResultTabs(itineraries) {
 // ... (suite de la Partie 1)
 //
 // *** MODIFICATION V52 (Partie 2) ***
-// 1. (Logique de titrage V52 - sera remplac√©e par V56)
+// 1. (Logique de titrage V52 - sera remplacÈe par V56)
 //
 // *** MODIFICATION V53 (Partie 2) ***
-// 1. (Corrections de filtrage V53 - sera remplac√©e par V56)
+// 1. (Corrections de filtrage V53 - sera remplacÈe par V56)
 //
 // *** MODIFICATION V56 (Partie 2) ***
-// 1. Logique de titrage dans `renderItineraryResults` enti√®rement r√©vis√©e
+// 1. Logique de titrage dans `renderItineraryResults` entiËrement rÈvisÈe
 //    pour lireSigma
 //
 // *** MODIFICATION V57.1 (Partie 2) ***
-// 1. Correction du SyntaxError: "Illegal continue statement" (remplac√© par "return")
+// 1. Correction du SyntaxError: "Illegal continue statement" (remplacÈ par "return")
 //    dans la fonction `initializeRouteFilter`.
 // ===================================================================
 
-// Anciennes fonctions de rendu (getItineraryType, renderItineraryResults) supprim√©es.
+// Anciennes fonctions de rendu (getItineraryType, renderItineraryResults) supprimÈes.
 
 /**
- * *** MODIFI√â V44 ***
- * Helper pour d√©terminer le style Leaflet (couleur, hachures)
- * en fonction d'une √âTAPE d'itin√©raire.
+ * *** MODIFI… V44 ***
+ * Helper pour dÈterminer le style Leaflet (couleur, hachures)
+ * en fonction d'une …TAPE d'itinÈraire.
  */
 function getLeafletStyleForStep(step) {
-    // V√©rifie le type simple (v√©lo/marche)
+    // VÈrifie le type simple (vÈlo/marche)
     if (step.type === 'BIKE') {
         return {
             color: 'var(--secondary)', // Gris
@@ -3462,10 +3462,10 @@ function getLeafletStyleForStep(step) {
             color: 'var(--primary)', // Bleu (couleur primaire)
             weight: 5,
             opacity: 0.8,
-            dashArray: '10, 10' // Hachur√©
+            dashArray: '10, 10' // HachurÈ
         };
     }
-    // V√©rifie le type Bus
+    // VÈrifie le type Bus
     if (step.type === 'BUS') {
         const busColor = step.routeColor || 'var(--primary)'; // Fallback
         return {
@@ -3475,12 +3475,12 @@ function getLeafletStyleForStep(step) {
         };
     }
     
-    // Fallback pour les types Google (au cas o√π)
+    // Fallback pour les types Google (au cas o˘)
     if (step.travelMode === 'BICYCLE') return getLeafletStyleForStep({type: 'BIKE'});
     if (step.travelMode === 'WALK') return getLeafletStyleForStep({type: 'WALK'});
     if (step.travelMode === 'TRANSIT') return getLeafletStyleForStep({type: 'BUS', routeColor: step.routeColor});
 
-    // Style par d√©faut
+    // Style par dÈfaut
     return {
         color: 'var(--primary)',
         weight: 5,
@@ -3489,14 +3489,14 @@ function getLeafletStyleForStep(step) {
 }
 
 // V221: getEncodedPolylineValue, getPolylineLatLngs, isWaitStep, extractStepPolylines
-// sont maintenant import√©s depuis map/routeDrawing.js
+// sont maintenant importÈs depuis map/routeDrawing.js
 
 /**
- * ‚úÖ V62: AM√âLIORATION - Ajoute les marqueurs de D√©but, Fin, Correspondance et Arr√™ts interm√©diaires
- * - Ronds verts pour le d√©but
+ * ? V62: AM…LIORATION - Ajoute les marqueurs de DÈbut, Fin, Correspondance et ArrÍts intermÈdiaires
+ * - Ronds verts pour le dÈbut
  * - Ronds rouges pour la fin
  * - Ronds jaunes pour les correspondances
- * - Petits ronds blancs pour les arr√™ts interm√©diaires
+ * - Petits ronds blancs pour les arrÍts intermÈdiaires
  */
 function addItineraryMarkers(itinerary, map, markerLayer) {
     if (!itinerary || !Array.isArray(itinerary.steps) || !map || !markerLayer) return;
@@ -3516,12 +3516,12 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         const isLastBus = index === busSteps.length - 1;
         const stepStops = [];
 
-        // Arr√™t de d√©part
+        // ArrÍt de dÈpart
         if (step.departureStop) {
             stepStops.push({ name: step.departureStop, role: isFirstBus ? 'boarding' : 'transfer' });
         }
 
-        // Arr√™ts interm√©diaires - Essayer plusieurs sources
+        // ArrÍts intermÈdiaires - Essayer plusieurs sources
         let intermediateStopsData = [];
         
         // Source 1: intermediateStops du step (noms)
@@ -3533,7 +3533,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
             }));
         }
         
-        // Source 2: Si le step contient les stopTimes avec coordonn√©es (du router local)
+        // Source 2: Si le step contient les stopTimes avec coordonnÈes (du router local)
         if (intermediateStopsData.length === 0 && Array.isArray(step.stopTimes)) {
             intermediateStopsData = step.stopTimes.slice(1, -1).map(st => {
                 const stopObj = dataManager?.getStop?.(st.stop_id);
@@ -3545,7 +3545,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
             });
         }
         
-        // Ajouter les arr√™ts interm√©diaires
+        // Ajouter les arrÍts intermÈdiaires
         intermediateStopsData.forEach(stop => {
             if (stop.name) {
                 stepStops.push({ 
@@ -3557,25 +3557,25 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
             }
         });
 
-        // Arr√™t d'arriv√©e
+        // ArrÍt d'arrivÈe
         if (step.arrivalStop) {
             stepStops.push({ name: step.arrivalStop, role: isLastBus ? 'alighting' : 'transfer' });
         }
 
-        // R√©soudre les coordonn√©es pour chaque arr√™t
+        // RÈsoudre les coordonnÈes pour chaque arrÍt
         stepStops.forEach(stop => {
             let coords = null;
             
-            // Utiliser les coordonn√©es directes si disponibles
+            // Utiliser les coordonnÈes directes si disponibles
             if (stop.directLat && stop.directLng) {
                 coords = { lat: stop.directLat, lng: stop.directLng };
             } else {
-                // Sinon, r√©soudre via le dataManager
+                // Sinon, rÈsoudre via le dataManager
                 coords = resolveStopCoordinates(stop.name, dataManager);
             }
             
             if (!coords) {
-                console.log(`‚ö†Ô∏è Coordonn√©es non trouv√©es pour: ${stop.name}`);
+                console.log(`?? CoordonnÈes non trouvÈes pour: ${stop.name}`);
                 return;
             }
 
@@ -3606,7 +3606,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         return;
     }
 
-    // Cr√©er les marqueurs avec z-index appropri√©
+    // CrÈer les marqueurs avec z-index appropriÈ
     stopPoints.forEach(point => {
         const icon = createStopDivIcon(point.role);
         if (!icon) return;
@@ -3626,7 +3626,7 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         markerLayer.addLayer(marker);
     });
     
-    console.log(`üìç ${stopPoints.length} marqueurs ajout√©s (${stopPoints.filter(p => p.role === 'intermediate').length} arr√™ts interm√©diaires)`);
+    console.log(`?? ${stopPoints.length} marqueurs ajoutÈs (${stopPoints.filter(p => p.role === 'intermediate').length} arrÍts intermÈdiaires)`);
 }
 
 function addFallbackItineraryMarkers(itinerary, markerLayer) {
@@ -3675,8 +3675,8 @@ function addFallbackItineraryMarkers(itinerary, markerLayer) {
 
 
 /**
- * *** MODIFI√â V46 (Marqueurs) ***
- * Dessine un trac√© sur la carte des r√©sultats PC
+ * *** MODIFI… V46 (Marqueurs) ***
+ * Dessine un tracÈ sur la carte des rÈsultats PC
  */
 function drawRouteOnResultsMap(itinerary) {
     // Accepter un tableau ou un objet unique
@@ -3717,7 +3717,7 @@ function drawRouteOnResultsMap(itinerary) {
     });
 
     if (stepLayers.length > 0) {
-        // Cr√©er un groupe avec toutes les couches d'√©tapes
+        // CrÈer un groupe avec toutes les couches d'Ètapes
         currentResultsRouteLayer = L.featureGroup(stepLayers).addTo(resultsMapRenderer.map);
         
         // Ajouter les marqueurs
@@ -3733,19 +3733,19 @@ function drawRouteOnResultsMap(itinerary) {
 
 
 /**
- * *** MODIFI√â V46 (Ic√¥nes Man≈ìuvre + Filtre Bruit) ***
- * G√©n√®re le HTML des d√©tails pour l'accord√©on PC (Bus)
+ * *** MODIFI… V46 (IcÙnes Manúuvre + Filtre Bruit) ***
+ * GÈnËre le HTML des dÈtails pour l'accordÈon PC (Bus)
  */
 function renderItineraryDetailHTML(itinerary) {
     
     const stepsHtml = itinerary.steps.map((step, index) => {
-        // ‚úÖ V45: Logique de marche (et v√©lo) restaur√©e avec <details>
+        // ? V45: Logique de marche (et vÈlo) restaurÈe avec <details>
         if (step.type === 'WALK' || step.type === 'BIKE') {
             const hasSubSteps = step.subSteps && step.subSteps.length > 0;
             const icon = (step.type === 'BIKE') ? ICONS.BICYCLE : ICONS.WALK;
             const stepClass = (step.type === 'BIKE') ? 'bicycle' : 'walk';
 
-            // ‚úÖ V46: Filtrer les √©tapes "STRAIGHT" trop courtes
+            // ? V46: Filtrer les Ètapes "STRAIGHT" trop courtes
             const filteredSubSteps = (step.subSteps || []).filter(subStep => {
                 const distanceMatch = subStep.distance.match(/(\d+)\s*m/);
                 if (subStep.maneuver === 'STRAIGHT' && distanceMatch && parseInt(distanceMatch[1]) < 100) {
@@ -3765,7 +3765,7 @@ function renderItineraryDetailHTML(itinerary) {
                         ${hasSubSteps ? `
                         <details class="intermediate-stops">
                             <summary>
-                                <span>Voir les √©tapes</span>
+                                <span>Voir les Ètapes</span>
                                 <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                             </summary>
                             <ul class="intermediate-stops-list walk-steps">
@@ -3794,9 +3794,9 @@ function renderItineraryDetailHTML(itinerary) {
             
             let stopCountLabel = 'Direct';
             if (intermediateStopCount > 1) {
-                stopCountLabel = `${intermediateStopCount} arr√™ts`;
+                stopCountLabel = `${intermediateStopCount} arrÍts`;
             } else if (intermediateStopCount === 1) {
-                stopCountLabel = `1 arr√™t`;
+                stopCountLabel = `1 arrÍt`;
             }
 
             const lineColor = step.routeColor || 'var(--border)';
@@ -3808,9 +3808,9 @@ function renderItineraryDetailHTML(itinerary) {
             const departureTimeLabel = getSafeTimeLabel(step.departureTime);
             const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
             
-            // ‚úÖ V227: D√©terminer si c'est un terminus - bas√© sur le nom de l'arr√™t
+            // ? V227: DÈterminer si c'est un terminus - basÈ sur le nom de l'arrÍt
             const isTerminusArrival = arrivalStopLabel?.toLowerCase().includes('terminus') || arrivalStopLabel?.toLowerCase().includes('gare');
-            const arrivalLabel = isTerminusArrival ? 'Arriv√©e au terminus' : 'Descente √†';
+            const arrivalLabel = isTerminusArrival ? 'ArrivÈe au terminus' : 'Descente ‡';
             
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
@@ -3821,7 +3821,7 @@ function renderItineraryDetailHTML(itinerary) {
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
                         <div class="step-stop-point stop-context">
-                            <span class="stop-label">Mont√©e</span>
+                            <span class="stop-label">MontÈe</span>
                             <span class="step-time"><strong>${departureStopLabel}</strong></span>
                             <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
@@ -3835,11 +3835,11 @@ function renderItineraryDetailHTML(itinerary) {
                             ${hasIntermediateStops ? `
                             <ul class="intermediate-stops-list" style="--line-color: ${lineColor};">
                                 ${step.intermediateStops.map(stop => {
-                                    const name = typeof stop === 'string' ? stop : (stop?.name || stop?.stop_name || 'Arr√™t');
+                                    const name = typeof stop === 'string' ? stop : (stop?.name || stop?.stop_name || 'ArrÍt');
                                     return `<li>${name}</li>`;
                                 }).join('')}
                             </ul>
-                            ` : `<ul class="intermediate-stops-list" style="--line-color: ${lineColor};"><li>(La liste d√©taill√©e des arr√™ts n'est pas disponible)</li></ul>`}
+                            ` : `<ul class="intermediate-stops-list" style="--line-color: ${lineColor};"><li>(La liste dÈtaillÈe des arrÍts n'est pas disponible)</li></ul>`}
                         </details>
                         ` : ''}
                         
@@ -3859,8 +3859,8 @@ function renderItineraryDetailHTML(itinerary) {
 
 
 /**
- * *** MODIFI√â V48 (Zoom Mobile) ***
- * Remplit l'√©cran 2 (D√©tail Mobile)
+ * *** MODIFI… V48 (Zoom Mobile) ***
+ * Remplit l'Ècran 2 (DÈtail Mobile)
  * NE FAIT PLUS le fitBounds, mais RETOURNE la couche
  */
 function renderItineraryDetail(itinerary) {
@@ -3873,7 +3873,7 @@ function renderItineraryDetail(itinerary) {
 
     let stepsHtml = '';
 
-    // ‚úÖ V45: Logique de marche (et v√©lo) restaur√©e avec <details>
+    // ? V45: Logique de marche (et vÈlo) restaurÈe avec <details>
     stepsHtml = itinerary.steps.map((step, index) => {
         const lineColor = (step.type === 'BUS') ? (step.routeColor || 'var(--border)') : 'var(--text-secondary)';
         
@@ -3882,9 +3882,9 @@ function renderItineraryDetail(itinerary) {
             const icon = (step.type === 'BIKE') ? ICONS.BICYCLE : ICONS.WALK;
             const stepClass = (step.type === 'BIKE') ? 'bicycle' : 'walk';
 
-            // ‚úÖ V46: Filtrer les √©tapes "STRAIGHT" trop courtes
+            // ? V46: Filtrer les Ètapes "STRAIGHT" trop courtes
             const filteredSubSteps = (step.subSteps || []).filter(subStep => {
-                // Tente d'extraire les m√®tres
+                // Tente d'extraire les mËtres
                 const distanceMatch = subStep.distance.match(/(\d+)\s*m/);
                 // Si c'est "STRAIGHT" ET que la distance est < 100m, on cache
                 if (subStep.maneuver === 'STRAIGHT' && distanceMatch && parseInt(distanceMatch[1]) < 100) {
@@ -3904,7 +3904,7 @@ function renderItineraryDetail(itinerary) {
                         ${hasSubSteps ? `
                         <details class="intermediate-stops">
                             <summary>
-                                <span>Voir les √©tapes</span>
+                                <span>Voir les Ètapes</span>
                                 <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                             </summary>
                             <ul class="intermediate-stops-list walk-steps">
@@ -3933,9 +3933,9 @@ function renderItineraryDetail(itinerary) {
             
             let stopCountLabel = 'Direct';
             if (intermediateStopCount > 1) {
-                stopCountLabel = `${intermediateStopCount} arr√™ts`;
+                stopCountLabel = `${intermediateStopCount} arrÍts`;
             } else if (intermediateStopCount === 1) {
-                stopCountLabel = `1 arr√™t`;
+                stopCountLabel = `1 arrÍt`;
             }
 
             const badgeLabel = getSafeRouteBadgeLabel(step.routeShortName);
@@ -3946,9 +3946,9 @@ function renderItineraryDetail(itinerary) {
             const departureTimeLabel = getSafeTimeLabel(step.departureTime);
             const arrivalTimeLabel = getSafeTimeLabel(step.arrivalTime);
 
-            // ‚úÖ V227: D√©terminer si c'est un terminus - bas√© sur le nom de l'arr√™t
+            // ? V227: DÈterminer si c'est un terminus - basÈ sur le nom de l'arrÍt
             const isTerminusArrival = arrivalStopLabel?.toLowerCase().includes('terminus') || arrivalStopLabel?.toLowerCase().includes('gare');
-            const arrivalLabel = isTerminusArrival ? 'Arriv√©e au terminus' : 'Descente √†';
+            const arrivalLabel = isTerminusArrival ? 'ArrivÈe au terminus' : 'Descente ‡';
 
             return `
                 <div class="step-detail bus" style="--line-color: ${lineColor};">
@@ -3959,7 +3959,7 @@ function renderItineraryDetail(itinerary) {
                         <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
                         
                         <div class="step-stop-point stop-context">
-                            <span class="stop-label">Mont√©e</span>
+                            <span class="stop-label">MontÈe</span>
                             <span class="step-time"><strong>${departureStopLabel}</strong></span>
                             <span class="step-time-detail">(${departureTimeLabel})</span>
                         </div>
@@ -3973,11 +3973,11 @@ function renderItineraryDetail(itinerary) {
                             ${hasIntermediateStops ? `
                             <ul class="intermediate-stops-list" style="--line-color: ${lineColor};">
                                 ${step.intermediateStops.map(stop => {
-                                    const name = typeof stop === 'string' ? stop : (stop?.name || stop?.stop_name || 'Arr√™t');
+                                    const name = typeof stop === 'string' ? stop : (stop?.name || stop?.stop_name || 'ArrÍt');
                                     return `<li>${name}</li>`;
                                 }).join('')}
                             </ul>
-                            ` : `<ul class="intermediate-stops-list" style="--line-color: ${lineColor};"><li>(La liste d√©taill√©e des arr√™ts n'est pas disponible)</li></ul>`}
+                            ` : `<ul class="intermediate-stops-list" style="--line-color: ${lineColor};"><li>(La liste dÈtaillÈe des arrÍts n'est pas disponible)</li></ul>`}
                         </details>
                         ` : ''}
                         
@@ -3995,9 +3995,9 @@ function renderItineraryDetail(itinerary) {
     detailPanelContent.innerHTML = stepsHtml;
     resetDetailPanelScroll();
 
-    // 2. Mettre √† jour le r√©sum√©
+    // 2. Mettre ‡ jour le rÈsumÈ
     if(detailMapSummary) {
-        // ‚úÖ CORRECTION: Affiche les temps calcul√©s pour V√©lo/Marche
+        // ? CORRECTION: Affiche les temps calculÈs pour VÈlo/Marche
         const timeHtml = (itinerary.departureTime === '~')
             ? `<span class="route-time" style="color: var(--text-secondary); font-weight: 500;">(Trajet)</span>`
             : `<span class="route-time">${itinerary.departureTime} &gt; ${itinerary.arrivalTime}</span>`;
@@ -4008,13 +4008,13 @@ function renderItineraryDetail(itinerary) {
         `;
     }
 
-    // 3. Dessiner le trac√© sur la carte
-    if (detailMapRenderer.map && itinerary.steps) { // V44: Bas√© sur les √©tapes
+    // 3. Dessiner le tracÈ sur la carte
+    if (detailMapRenderer.map && itinerary.steps) { // V44: BasÈ sur les Ètapes
         if (currentDetailRouteLayer) {
             detailMapRenderer.map.removeLayer(currentDetailRouteLayer);
             currentDetailRouteLayer = null;
         }
-        // ‚úÖ V46: Vider les anciens marqueurs
+        // ? V46: Vider les anciens marqueurs
         if (currentDetailMarkerLayer) {
             currentDetailMarkerLayer.clearLayers();
         }
@@ -4028,7 +4028,7 @@ function renderItineraryDetail(itinerary) {
 
             if (!polylinesToDraw.length) {
                 if (!isWaitStep(step)) {
-                    console.warn('renderItineraryDetail: √©tape sans polylines', { stepType: step.type, step });
+                    console.warn('renderItineraryDetail: Ètape sans polylines', { stepType: step.type, step });
                 }
                 return;
             }
@@ -4036,7 +4036,7 @@ function renderItineraryDetail(itinerary) {
             polylinesToDraw.forEach(polyline => {
                 const latLngs = getPolylineLatLngs(polyline);
                 if (!latLngs || !latLngs.length) {
-                    console.warn('renderItineraryDetail: √©tape sans coordonn√©es', { stepType: step.type, step });
+                    console.warn('renderItineraryDetail: Ètape sans coordonnÈes', { stepType: step.type, step });
                     return;
                 }
 
@@ -4045,44 +4045,44 @@ function renderItineraryDetail(itinerary) {
                     coordinates: latLngs.map(([lat, lng]) => [lng, lat])
                 };
 
-                console.log('renderItineraryDetail: couche ajout√©e', {
+                console.log('renderItineraryDetail: couche ajoutÈe', {
                     stepType: step.type,
                     pointCount: latLngs.length
                 });
                 const stepLayer = L.geoJSON(geoJson, {
-                    style: style // Utiliser le style dynamique de l'√©tape
+                    style: style // Utiliser le style dynamique de l'Ètape
                 });
                 stepLayers.push(stepLayer);
             });
         });
 
         if (stepLayers.length > 0) {
-            // Cr√©er un groupe avec toutes les couches d'√©tapes
+            // CrÈer un groupe avec toutes les couches d'Ètapes
             currentDetailRouteLayer = L.featureGroup(stepLayers).addTo(detailMapRenderer.map);
             
-            // ‚úÖ V46: Ajouter les marqueurs
+            // ? V46: Ajouter les marqueurs
             addItineraryMarkers(itinerary, detailMapRenderer.map, currentDetailMarkerLayer);
 
-            // ‚úÖ V48 (MODIFICATION IMPL√âMENT√âE): La ligne fitBounds est SUPPRIM√âE d'ici
+            // ? V48 (MODIFICATION IMPL…MENT…E): La ligne fitBounds est SUPPRIM…E d'ici
         } else {
-            console.warn('renderItineraryDetail: aucune couche trac√©e (liste vide)', {
+            console.warn('renderItineraryDetail: aucune couche tracÈe (liste vide)', {
                 itineraryId: itinerary.tripId || itinerary.trip?.trip_id || itinerary.id || null
             });
         }
     }
     
-    // ‚úÖ V48 (MODIFICATION IMPL√âMENT√âE): 
-    // On retourne la couche qui vient d'√™tre cr√©√©e
+    // ? V48 (MODIFICATION IMPL…MENT…E): 
+    // On retourne la couche qui vient d'Ítre crÈÈe
     return currentDetailRouteLayer;
 }
 
-// === Fonctions de formatage maintenant import√©es depuis utils/formatters.js ===
+// === Fonctions de formatage maintenant importÈes depuis utils/formatters.js ===
 // formatGoogleTime, formatGoogleDuration, parseGoogleDuration
 // isMeaningfulTime, parseTimeStringToMinutes, formatMinutesToTimeString
 // addSecondsToTimeString, subtractSecondsFromTimeString
 
 
-// --- Fonctions de l'application (logique m√©tier GTFS) ---
+// --- Fonctions de l'application (logique mÈtier GTFS) ---
 
 function renderInfoTraficCard() {
     if (!dataManager || !infoTraficList) return;
@@ -4119,21 +4119,21 @@ function buildFicheHoraireList() {
         
         if (groupName === 'Lignes R') {
             linksHtml = `
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R1, R2, R3 La Feuilleraie <> ESAT / Les Gourdoux <> Tr√©lissac Les Garennes / Les Pinots <> P+R Aquacap</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R4, R5 Route de Payench√© <> Coll√®ge Jean Moulin / Les Mondines / Cl√©ment Laval <> Coll√®ge Jean Moulin</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R6, R7 Maison des Compagnons <> Gour de l‚ÄôArche poste / Le Charpe <> Gour de l‚ÄôArche poste</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R8, R9 Jaunour <> Boulazac centre commercial / St√®le de Lesparat <> Place du 8 mai</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R10, R11 Notre Dame de Sanilhac poste <> Centre de la communication / H√©liodore <> Place du 8 mai</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R12 Le Change <> Boulazac centre commercial</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R13, R14 Coursac <> Razac sur l‚ÄôIsle / La Chapelle Gonaguet <>Razac sur l‚ÄôIsle</a>
-                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R15 Boulazac Isle Manoire <> Halte ferroviaire Niversac</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R1, R2, R3 La Feuilleraie <> ESAT / Les Gourdoux <> TrÈlissac Les Garennes / Les Pinots <> P+R Aquacap</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R4, R5 Route de PayenchÈ <> CollËge Jean Moulin / Les Mondines / ClÈment Laval <> CollËge Jean Moulin</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R6, R7 Maison des Compagnons <> Gour de líArche poste / Le Charpe <> Gour de líArche poste</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R8, R9 Jaunour <> Boulazac centre commercial / StËle de Lesparat <> Place du 8 mai</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R10, R11 Notre Dame de Sanilhac poste <> Centre de la communication / HÈliodore <> Place du 8 mai</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Ligne R12 Le Change <> Boulazac centre commercial</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R13, R14 Coursac <> Razac sur líIsle / La Chapelle Gonaguet <>Razac sur líIsle</a>
+                <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Ligne R15 Boulazac Isle Manoire <> Halte ferroviaire Niversac</a>
             `;
         } else {
             routes.sort((a, b) => a.route_short_name.localeCompare(b.route_short_name, undefined, {numeric: true}));
             routes.forEach(route => {
                 let pdfName = PDF_FILENAME_MAP[route.route_short_name];
                 let pdfPath = pdfName ? `/data/fichehoraire/${pdfName}` : '#';
-                if (!pdfName) console.warn(`PDF non mapp√© pour ${route.route_short_name}.`);
+                if (!pdfName) console.warn(`PDF non mappÈ pour ${route.route_short_name}.`);
                 const longName = ROUTE_LONG_NAME_MAP[route.route_short_name] || (route.route_long_name ? route.route_long_name.replace(/<->/g, '<=>') : '');
                 const displayName = `Ligne ${route.route_short_name} ${longName}`.trim();
                 linksHtml += `<a href="${pdfPath}" target="_blank" rel="noopener noreferrer">${displayName}</a>`;
@@ -4224,7 +4224,7 @@ function showMapView() {
 }
 
 function showDashboardHall() {
-    // V265: Changement visuel IMM√âDIAT via requestAnimationFrame
+    // V265: Changement visuel IMM…DIAT via requestAnimationFrame
     requestAnimationFrame(() => {
         // Cacher les conteneurs lourds visuellement d'abord
         if (mapContainer) mapContainer.classList.add('hidden');
@@ -4244,7 +4244,7 @@ function showDashboardHall() {
         document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
     });
 
-    // V265: Diff√©rer le nettoyage lourd pour UI instantan√©e
+    // V265: DiffÈrer le nettoyage lourd pour UI instantanÈe
     setTimeout(() => {
         resetDetailViewState();
         if (dataManager) renderAlertBanner();
@@ -4256,31 +4256,31 @@ function showResultsView() {
     itineraryResultsContainer.classList.remove('hidden');
     resetDetailViewState();
     mapContainer.classList.add('hidden');
-    // V67: Cacher header/footer Perimap sur la vue itin√©raire
+    // V67: Cacher header/footer Perimap sur la vue itinÈraire
     document.body.classList.add('itinerary-view-active');
-    // Ne pas verrouiller le scroll pour permettre de voir tous les itin√©raires
+    // Ne pas verrouiller le scroll pour permettre de voir tous les itinÈraires
 
     if (resultsListContainer) {
-        resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itin√©raire en cours...</p>';
+        resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinÈraire en cours...</p>';
     }
     
-    // V151: Invalider la carte PC avec plusieurs d√©lais pour s'assurer qu'elle s'affiche
+    // V151: Invalider la carte PC avec plusieurs dÈlais pour s'assurer qu'elle s'affiche
     if (resultsMapRenderer && resultsMapRenderer.map) {
-        // D√©lai imm√©diat
+        // DÈlai immÈdiat
         setTimeout(() => {
             resultsMapRenderer.map.invalidateSize();
         }, 50);
-        // D√©lai apr√®s le rendu complet
+        // DÈlai aprËs le rendu complet
         setTimeout(() => {
             resultsMapRenderer.map.invalidateSize();
-            console.log('üó∫Ô∏è Carte PC invalid√©e (300ms)');
+            console.log('??? Carte PC invalidÈe (300ms)');
         }, 300);
     }
 }
 
 /**
- * *** MODIFI√â V48 (Zoom Mobile) ***
- * Accepte la couche du trajet et g√®re le zoom au bon moment.
+ * *** MODIFI… V48 (Zoom Mobile) ***
+ * Accepte la couche du trajet et gËre le zoom au bon moment.
  */
 function showDetailView(routeLayer) {
     if (!itineraryDetailContainer) return;
@@ -4291,7 +4291,7 @@ function showDetailView(routeLayer) {
     initBottomSheetControls();
     cancelBottomSheetDrag();
     
-    // V270: Reset au niveau 0 et appliquer IMM√âDIATEMENT la classe
+    // V270: Reset au niveau 0 et appliquer IMM…DIATEMENT la classe
     currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
     if (detailBottomSheet) {
         detailBottomSheet.classList.remove('sheet-level-0', 'sheet-level-1', 'sheet-level-2');
@@ -4309,7 +4309,7 @@ function showDetailView(routeLayer) {
         requestAnimationFrame(() => itineraryDetailBackdrop.classList.add('is-active'));
     }
 
-    // Invalide la carte des d√©tails
+    // Invalide la carte des dÈtails
     if (detailMapRenderer && detailMapRenderer.map) {
         detailMapRenderer.map.invalidateSize();
     }
@@ -4317,7 +4317,7 @@ function showDetailView(routeLayer) {
     // V270: Ajouter is-active - le CSS appliquera sheet-level-0 automatiquement
     itineraryDetailContainer.classList.add('is-active');
     
-    // Zoomer sur le trajet apr√®s un frame
+    // Zoomer sur le trajet aprËs un frame
     requestAnimationFrame(() => {
         if (routeLayer && detailMapRenderer.map) {
             try {
@@ -4326,21 +4326,21 @@ function showDetailView(routeLayer) {
                     detailMapRenderer.map.fitBounds(bounds, { padding: [20, 20] });
                 }
             } catch (e) {
-                console.error("Erreur lors du fitBounds sur la carte d√©tail:", e);
+                console.error("Erreur lors du fitBounds sur la carte dÈtail:", e);
             }
         } else if (detailMapRenderer.map) {
-            console.warn('showItineraryDetailView: pas de routeLayer, centrage sur P√©rigueux');
+            console.warn('showItineraryDetailView: pas de routeLayer, centrage sur PÈrigueux');
             detailMapRenderer.map.setView([45.1845, 0.7211], 13);
         }
     });
 }
 
 
-// *** NOUVELLE FONCTION V33 + V264 (Optimis√©e) ***
+// *** NOUVELLE FONCTION V33 + V264 (OptimisÈe) ***
 function hideDetailView() {
     if (!itineraryDetailContainer) return;
     
-    // 1. Lancer l'animation de fermeture imm√©diatement (GPU-optimis√©e)
+    // 1. Lancer l'animation de fermeture immÈdiatement (GPU-optimisÈe)
     if (itineraryDetailBackdrop) {
         itineraryDetailBackdrop.classList.remove('is-active');
     }
@@ -4350,7 +4350,7 @@ function hideDetailView() {
     // 2. Annuler tout drag en cours
     cancelBottomSheetDrag();
     
-    // 3. D√©bloquer le scroll IMM√âDIATEMENT (pas d'attente)
+    // 3. DÈbloquer le scroll IMM…DIATEMENT (pas d'attente)
     document.body.classList.remove('detail-view-open');
     
     // 4. Attendre la transition CSS AVANT de nettoyer le contenu
@@ -4415,9 +4415,9 @@ function showDashboardView(viewName) {
 
     // V27/V28 : On scrolle le body, pas le dashboard-main
     window.scrollTo({ top: 0, behavior: 'auto' });
-    // Correctif: garantir que les classes de verrouillage (utilis√©es pour les vues plein √©cran)
-    // sont retir√©es quand on affiche une sous-vue interne (horaires, info-trafic) afin
-    // de pr√©server l'en-t√™te et le scroll.
+    // Correctif: garantir que les classes de verrouillage (utilisÈes pour les vues plein Ècran)
+    // sont retirÈes quand on affiche une sous-vue interne (horaires, info-trafic) afin
+    // de prÈserver l'en-tÍte et le scroll.
     document.body.classList.remove('view-map-locked');
     document.body.classList.remove('view-is-locked');
     
@@ -4439,12 +4439,12 @@ function showDashboardView(viewName) {
 }
 
 
-// --- Fonctions de l'application (logique m√©tier GTFS) ---
+// --- Fonctions de l'application (logique mÈtier GTFS) ---
 
 function checkAndSetupTimeMode() {
     timeManager.setMode('real');
     timeManager.play();
-    console.log('‚è∞ Mode TEMPS R√âEL activ√©.');
+    console.log('? Mode TEMPS R…EL activÈ.');
 }
 
 function initializeRouteFilter() {
@@ -4469,7 +4469,7 @@ function initializeRouteFilter() {
     Object.entries(LINE_CATEGORIES).forEach(([categoryId, categoryInfo]) => {
         const routes = routesByCategory[categoryId];
         
-        // ‚úÖ V57.1 (CORRECTION BUG) : 'continue' remplac√© par 'return'
+        // ? V57.1 (CORRECTION BUG) : 'continue' remplacÈ par 'return'
         if (routes.length === 0) return; 
 
         const categoryHeader = document.createElement('div');
@@ -4494,8 +4494,8 @@ function initializeRouteFilter() {
             itemDiv.className = 'route-checkbox-item';
             
             // *** CORRECTION V30 (BUG ##) ***
-            // Le '#' est retir√© des variables. Il est appliqu√©
-            // directement et uniquement dans la cha√Æne innerHTML.
+            // Le '#' est retirÈ des variables. Il est appliquÈ
+            // directement et uniquement dans la chaÓne innerHTML.
             const routeColor = route.route_color ? route.route_color : '3388ff';
             const textColor = route.route_text_color ? route.route_text_color : 'ffffff';
             
@@ -4541,11 +4541,11 @@ function handleRouteFilterChange() {
         const checkbox = document.getElementById(`route-${route.route_id}`);
         if (checkbox && checkbox.checked) { 
             visibleRoutes.add(route.route_id);
-            // üìä ANALYTICS: Tracker les lignes consult√©es/activ√©es
+            // ?? ANALYTICS: Tracker les lignes consultÈes/activÈes
             analyticsManager.trackRouteClick(route.route_id, route.route_short_name);
         }
     });
-    // Afficher les trac√©s avec geoJson existant ou g√©n√©r√© √† partir des shapes
+    // Afficher les tracÈs avec geoJson existant ou gÈnÈrÈ ‡ partir des shapes
     const geoJsonData = dataManager.geoJson;
     if (geoJsonData) {
         mapRenderer.displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes);
@@ -4570,7 +4570,7 @@ function handleSearchInput(e) {
 function displaySearchResults(stops, query) {
     searchResultsContainer.innerHTML = '';
     if (stops.length === 0) {
-        searchResultsContainer.innerHTML = `<div class="search-result-item">Aucun arr√™t trouv√©.</div>`;
+        searchResultsContainer.innerHTML = `<div class="search-result-item">Aucun arrÍt trouvÈ.</div>`;
         searchResultsContainer.classList.remove('hidden');
         return;
     }
@@ -4596,7 +4596,7 @@ function onSearchResultClick(stop) {
 }
 
 /**
- * Fonction de mise √† jour principale (pour la carte temps r√©el)
+ * Fonction de mise ‡ jour principale (pour la carte temps rÈel)
  */
 function updateData() {
     if (!timeManager || !tripScheduler || !busPositionCalculator || !mapRenderer) {
@@ -4710,12 +4710,13 @@ if (typeof window !== 'undefined') {
                 { departureTime: '13:22', arrivalTime: '14:43', type: 'BUS' }
             ];
 
-            console.log('--- DEBUG PARTIR (tri croissant d√©part) ---');
+            console.log('--- DEBUG PARTIR (tri croissant dÈpart) ---');
             console.table(sortItinerariesByDeparture(sampleDepart).map(it => ({ dep: it.departureTime, arr: it.arrivalTime })));
 
-            console.log('--- DEBUG ARRIVER (cible 15:00, tri arriv√©e d√©croissante) ---');
+            console.log('--- DEBUG ARRIVER (cible 15:00, tri arrivÈe dÈcroissante) ---');
             const rankedArrive = rankArrivalItineraries(sampleArrive, { type: 'arriver', hour: '15', minute: '00' });
             console.table(rankedArrive.map(it => ({ dep: it.departureTime, arr: it.arrivalTime })));
         }
     });
 }
+

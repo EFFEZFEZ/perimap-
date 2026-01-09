@@ -1,18 +1,18 @@
-Ôªø/*
- * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
- * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
+/*
+ * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
+ * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
  */
 /**
  * postgres.js
- * Adaptateur PostgreSQL pour la m√©moire utilisateur
+ * Adaptateur PostgreSQL pour la mÈmoire utilisateur
  * 
- * üî¥ STATUT: D√âSACTIV√â - Code pr√©par√© pour le futur
+ * ?? STATUT: D…SACTIV… - Code prÈparÈ pour le futur
  * 
- * PostgreSQL est recommand√© pour:
+ * PostgreSQL est recommandÈ pour:
  * - Production avec plusieurs serveurs
- * - Grandes quantit√©s de donn√©es
- * - Requ√™tes complexes
- * - Extensions g√©ographiques (PostGIS)
+ * - Grandes quantitÈs de donnÈes
+ * - RequÍtes complexes
+ * - Extensions gÈographiques (PostGIS)
  */
 
 import { StorageInterface } from './store.js';
@@ -40,10 +40,10 @@ export class PostgresStore extends StorageInterface {
   }
 
   /**
-   * Connexion √† la base de donn√©es
+   * Connexion ‡ la base de donnÈes
    */
   async connect() {
-    // NOTE: En production, d√©commenter et installer pg
+    // NOTE: En production, dÈcommenter et installer pg
     /*
     const { Pool } = await import('pg');
     
@@ -60,11 +60,11 @@ export class PostgresStore extends StorageInterface {
     client.release();
     */
 
-    // Cr√©er les tables
+    // CrÈer les tables
     await this.createTables();
     
     this.isConnected = true;
-    console.log(`üêò PostgreSQL connect√©`);
+    console.log(`?? PostgreSQL connectÈ`);
     return true;
   }
 
@@ -80,7 +80,7 @@ export class PostgresStore extends StorageInterface {
   }
 
   /**
-   * V√©rification de sant√©
+   * VÈrification de santÈ
    */
   async healthCheck() {
     if (!this.pool) {
@@ -102,11 +102,11 @@ export class PostgresStore extends StorageInterface {
   }
 
   /**
-   * Cr√©ation des tables
+   * CrÈation des tables
    */
   async createTables() {
     const schema = `
-      -- Extension pour UUID si n√©cessaire
+      -- Extension pour UUID si nÈcessaire
       CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
       -- Utilisateurs
@@ -146,7 +146,7 @@ export class PostgresStore extends StorageInterface {
       );
       CREATE INDEX IF NOT EXISTS idx_fav_user ON favorites(user_id);
 
-      -- Statistiques d'utilisation des arr√™ts
+      -- Statistiques d'utilisation des arrÍts
       CREATE TABLE IF NOT EXISTS stop_usage (
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         stop_id TEXT NOT NULL,
@@ -169,16 +169,16 @@ export class PostgresStore extends StorageInterface {
       CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
     `;
 
-    // NOTE: En production, ex√©cuter le schema
+    // NOTE: En production, exÈcuter le schema
     /*
     await this.pool.query(schema);
     */
     
-    console.log('üìä Tables PostgreSQL cr√©√©es');
+    console.log('?? Tables PostgreSQL crÈÈes');
   }
 
   /**
-   * Helper pour ex√©cuter des requ√™tes
+   * Helper pour exÈcuter des requÍtes
    */
   async query(text, params = []) {
     /*
@@ -196,7 +196,7 @@ export class PostgresStore extends StorageInterface {
   // === UTILISATEURS ===
 
   async createUser(userData) {
-    const id = userData.id || null; // Laisser PostgreSQL g√©n√©rer si null
+    const id = userData.id || null; // Laisser PostgreSQL gÈnÈrer si null
     
     /*
     const result = await this.query(`
@@ -309,7 +309,7 @@ export class PostgresStore extends StorageInterface {
       searchData.selectedResult,
     ]);
 
-    // Nettoyer les anciennes entr√©es
+    // Nettoyer les anciennes entrÈes
     await this.query(`
       DELETE FROM search_history
       WHERE user_id = $1 AND id NOT IN (
@@ -440,7 +440,7 @@ export class PostgresStore extends StorageInterface {
     return true;
   }
 
-  // === PR√âF√âRENCES ===
+  // === PR…F…RENCES ===
 
   async getPreferences(userId) {
     const user = await this.getUser(userId);
@@ -530,7 +530,7 @@ export class PostgresStore extends StorageInterface {
   }
 
   /**
-   * Statistiques de la base de donn√©es
+   * Statistiques de la base de donnÈes
    */
   async getDbStats() {
     /*
@@ -550,4 +550,5 @@ export class PostgresStore extends StorageInterface {
 }
 
 export default PostgresStore;
+
 

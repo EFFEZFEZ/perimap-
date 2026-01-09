@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * utils/gtfsLoader.js
  * Chargement et parsing des fichiers GTFS
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 import { createReadStream, existsSync, readdirSync } from 'fs';
@@ -15,7 +15,7 @@ import { join } from 'path';
 /**
  * Parse un fichier CSV
  * @param {string} filePath - Chemin du fichier
- * @returns {Promise<Array>} DonnÃ©es parsÃ©es
+ * @returns {Promise<Array>} Données parsées
  */
 export async function parseCSV(filePath) {
   // NOTE: En production, utiliser csv-parse
@@ -43,20 +43,20 @@ export async function parseCSV(filePath) {
 }
 
 /**
- * Charge tous les fichiers GTFS d'un rÃ©pertoire
+ * Charge tous les fichiers GTFS d'un répertoire
  * 
- * @param {string} gtfsDir - Chemin vers le rÃ©pertoire GTFS
- * @returns {Promise<Object>} DonnÃ©es GTFS
+ * @param {string} gtfsDir - Chemin vers le répertoire GTFS
+ * @returns {Promise<Object>} Données GTFS
  */
 export async function loadGtfsData(gtfsDir) {
-  console.log(`ðŸ“‚ Chargement GTFS depuis ${gtfsDir}...`);
+  console.log(`?? Chargement GTFS depuis ${gtfsDir}...`);
 
   if (!existsSync(gtfsDir)) {
-    throw new Error(`RÃ©pertoire GTFS non trouvÃ©: ${gtfsDir}`);
+    throw new Error(`Répertoire GTFS non trouvé: ${gtfsDir}`);
   }
 
   const files = readdirSync(gtfsDir);
-  console.log(`   Fichiers trouvÃ©s: ${files.join(', ')}`);
+  console.log(`   Fichiers trouvés: ${files.join(', ')}`);
 
   const data = {
     stops: [],
@@ -69,7 +69,7 @@ export async function loadGtfsData(gtfsDir) {
     agency: [],
   };
 
-  // Mapping fichier -> propriÃ©tÃ©
+  // Mapping fichier -> propriété
   const fileMapping = {
     'stops.txt': 'stops',
     'routes.txt': 'routes',
@@ -88,9 +88,9 @@ export async function loadGtfsData(gtfsDir) {
     if (existsSync(filePath)) {
       console.log(`   Chargement ${filename}...`);
       data[prop] = await parseCSV(filePath);
-      console.log(`   -> ${data[prop].length} entrÃ©es`);
+      console.log(`   -> ${data[prop].length} entrées`);
     } else {
-      console.log(`   âš ï¸ ${filename} non trouvÃ©`);
+      console.log(`   ?? ${filename} non trouvé`);
     }
   }
 
@@ -99,13 +99,13 @@ export async function loadGtfsData(gtfsDir) {
   data.stopTimes = processStopTimes(data.stopTimes);
   data.calendar = processCalendar(data.calendar);
 
-  console.log('âœ… GTFS chargÃ©');
+  console.log('? GTFS chargé');
   
   return data;
 }
 
 /**
- * Traite les arrÃªts
+ * Traite les arrêts
  */
 function processStops(stops) {
   return stops.map(stop => ({
@@ -149,7 +149,7 @@ function processCalendar(calendar) {
 
 /**
  * Parse une heure GTFS (HH:MM:SS) en secondes depuis minuit
- * GÃ¨re les heures > 24h (services de nuit)
+ * Gère les heures > 24h (services de nuit)
  * 
  * @param {string} timeStr - Heure au format HH:MM:SS
  * @returns {number} Secondes depuis minuit
@@ -216,4 +216,5 @@ export default {
   formatGtfsDate,
   parseGtfsDate,
 };
+
 

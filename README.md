@@ -1,235 +1,235 @@
-﻿<p align="center">
-  <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="Périmap Logo" width="120" height="120">
+<p align="center">
+  <img src="https://i.ibb.co/99PZh9Zq/export6-removebg-preview.webp" alt="P�rimap Logo" width="120" height="120">
 </p>
 
-<h1 align="center">🚌 Périmap</h1>
+<h1 align="center">?? P�rimap</h1>
 
 <p align="center">
-  <strong>L'application moderne et gratuite pour les transports en commun de Périgueux</strong>
+  <strong>L'application moderne et gratuite pour les transports en commun de P�rigueux</strong>
 </p>
 
 <p align="center">
-  <a href="https://perimap.fr">🌐 perimap.fr</a> •
-  <a href="https://instagram.com/perimap.fr">📸 Instagram</a> •
-  <a href="https://facebook.com/perimap.fr">👍 Facebook</a>
+  <a href="https://perimap.fr">?? perimap.fr</a> �
+  <a href="https://instagram.com/perimap.fr">?? Instagram</a> �
+  <a href="https://facebook.com/perimap.fr">?? Facebook</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-3.26.0-22c55e?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/PWA-Ready-00c8ff?style=flat-square" alt="PWA">
-  <img src="https://img.shields.io/badge/GTFS-Péribus-orange?style=flat-square" alt="GTFS">
+  <img src="https://img.shields.io/badge/GTFS-P�ribus-orange?style=flat-square" alt="GTFS">
   <img src="https://img.shields.io/badge/license-Proprietary-red?style=flat-square" alt="License">
 </p>
 
 ---
 
-## 📖 Table d des matières
+## ?? Table d des mati�res
 
 1. [Pourquoi ce projet ?](#-pourquoi-ce-projet-)
-2. [Fonctionnalités actives](#-fonctionnalités-actives)
-3. [Comment ça fonctionne](#-comment-ça-fonctionne)
+2. [Fonctionnalit�s actives](#-fonctionnalit�s-actives)
+3. [Comment �a fonctionne](#-comment-�a-fonctionne)
 4. [Architecture technique](#-architecture-technique)
-5. [Installation et Développement](#-installation--développement)
+5. [Installation et D�veloppement](#-installation--d�veloppement)
 6. [En construction](#-en-construction)
 7. [Roadmap](#-roadmap)
-8. [Identité visuelle](#-identité-visuelle)
+8. [Identit� visuelle](#-identit�-visuelle)
 9. [Contribuer](#-contribuer)
 
 ---
 
-## 💡 Pourquouoi ce projet ?
+## ?? Pourquouoi ce projet ?
 
 ### L'origine
 
-Je suis un utilisateur quotidien du réseau **Péribus** à Périgueux. Comme beaucoup, j'utilisais l'application officielle pour planifier mes trajets. Mais je rencontrais régulièrement des **frustrations** :
+Je suis un utilisateur quotidien du r�seau **P�ribus** � P�rigueux. Comme beaucoup, j'utilisais l'application officielle pour planifier mes trajets. Mais je rencontrais r�guli�rement des **frustrations** :
 
-- ❌ Inerface peu intuitive et datée
-- ❌ Teps de chargement longs
-- ❌ Pa de visualisation claire des lignes sur une carte
-- ❌ Dfficile de savoir où est le bus en temps réel
-- ❌ Ps de mode hors-ligne
+- ? Inerface peu intuitive et dat�e
+- ? Teps de chargement longs
+- ? Pa de visualisation claire des lignes sur une carte
+- ? Dfficile de savoir o� est le bus en temps r�el
+- ? Ps de mode hors-ligne
 
 ### La solution
 
-J'ai décidé de créer **Périmap** : une application web moderne, rapide et gratuite qui offre une **meilleure expérience utilisateur** tout en utilisant les mêmes données officielles GTFS du réseau Péribus.
+J'ai d�cid� de cr�er **P�rimap** : une application web moderne, rapide et gratuite qui offre une **meilleure exp�rience utilisateur** tout en utilisant les m�mes donn�es officielles GTFS du r�seau P�ribus.
 
 ### Les objectifs
 
 | Objectif | Statut |
 |----------|--------|
-| Interface moderne et intuitive | ✅ |
-| Carte interactive avec toutes les lignes | ✅ |
-| Position des bus en temps réel (estimée) | ✅ |
-| Calcul d'itinéraire multimodal | ✅ i|
-| Fonctionne hors-ligne | ✅  |
-| 100% gratuit, sans pub, sans tracking | ✅ |
-| Open source | ✅- |
+| Interface moderne et intuitive | ? |
+| Carte interactive avec toutes les lignes | ? |
+| Position des bus en temps r�el (estim�e) | ? |
+| Calcul d'itin�raire multimodal | ? i|
+| Fonctionne hors-ligne | ?  |
+| 100% gratuit, sans pub, sans tracking | ? |
+| Open source | ?- |
 
 ---
 
-## ✅ Fonctionnalités actives
+## ? Fonctionnalit�s actives
 
-### 🗺️ Cartenal interactive
+### ??? Cartenal interactive
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Toutes les lignes** | 13 lignes Péribus avec leurs couleurs officielles |
-| **Tous les arrêts** | ~1300 arrêts cliquables avec infos |
-| **Tracés des lignes** | Polylines fidèles aux trajets réels |
-| **Mode sombre** | Carte adaptée au thème choisi |
-| **Géolocalisation** | Centrage sur votre position |
+| **Toutes les lignes** | 13 lignes P�ribus avec leurs couleurs officielles |
+| **Tous les arr�ts** | ~1300 arr�ts cliquables avec infos |
+| **Trac�s des lignes** | Polylines fid�les aux trajets r�els |
+| **Mode sombre** | Carte adapt�e au th�me choisi |
+| **G�olocalisation** | Centrage sur votre position |
 
-### 🚌us en temps réel
+### ??us en temps r�el
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Position estimée** | Calcul basé sur les horaires GTFS + interpolation |
-| **Animation fluide** | Les bus se déplacent sur la carte |
-| **Direction affichée** | Flèche indiquant le sens de circulation |
-| **Infos au clic** | Ligne, direction, prochain arrêt |
+| **Position estim�e** | Calcul bas� sur les horaires GTFS + interpolation |
+| **Animation fluide** | Les bus se d�placent sur la carte |
+| **Direction affich�e** | Fl�che indiquant le sens de circulation |
+| **Infos au clic** | Ligne, direction, prochain arr�t |
 
-> ⚠️ L positions sont **estimées** à partir des horaires théoriques, pas du GPS réel des bus.
+> ?? L positions sont **estim�es** � partir des horaires th�oriques, pas du GPS r�el des bus.
 
-### 🧭alcul d'itinéraire
+### ??alcul d'itin�raire
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Multimodal** | Bus Péribus + marche à pied |
-| **Autocomplétion** | Recherche intelligente des lieux |
-| **Plusieurs options** | Jusqu'à 5 itinéraires proposés |
-| **Détail complet** | Horaires, correspondances, durée de marche |
-| **Tracé sur carte** | Visualisation du trajet complet |
+| **Multimodal** | Bus P�ribus + marche � pied |
+| **Autocompl�tion** | Recherche intelligente des lieux |
+| **Plusieurs options** | Jusqu'� 5 itin�raires propos�s |
+| **D�tail complet** | Horaires, correspondances, dur�e de marche |
+| **Trac� sur carte** | Visualisation du trajet complet |
 
-### 📅 Haires
+### ?? Haires
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Par arrêt** | Tous les passages à un arrêt |
+| **Par arr�t** | Tous les passages � un arr�t |
 | **Par ligne** | Horaires complets d'une ligne |
-| **Temps réel** | Affichage "dans X min" |
-| **Fiches horaires** | PDF officiels téléchargeables |
+| **Temps r�el** | Affichage "dans X min" |
+| **Fiches horaires** | PDF officiels t�l�chargeables |
 
-### 📱 P (Progressive Web App)
+### ?? P (Progressive Web App)
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Installable** | Ajoutez l'app sur votre écran d'accueil |
+| **Installable** | Ajoutez l'app sur votre �cran d'accueil |
 | **Hors-ligne** | Fonctionne sans connexion internet |
-| **Rapide** | Données en cache, chargement instantané |
-| **Mises à jour auto** | Toujours la dernière version |
+| **Rapide** | Donn�es en cache, chargement instantan� |
+| **Mises � jour auto** | Toujours la derni�re version |
 
-### Mi🎨 Interface
+### Mi?? Interface
 
-| Fonctionnalité | Description |
+| Fonctionnalit� | Description |
 |----------------|-------------|
-| **Mode sombre/clair** | Selon vos préférences ou automatique |
-| **Responsive** | Adapté mobile, tablette, desktop |
-| **Animations fluides** | Transitions soignées |
-| **Accessibilité** | Contrastes respectés, navigation clavier |
+| **Mode sombre/clair** | Selon vos pr�f�rences ou automatique |
+| **Responsive** | Adapt� mobile, tablette, desktop |
+| **Animations fluides** | Transitions soign�es |
+| **Accessibilit�** | Contrastes respect�s, navigation clavier |
 
 ---
 
-## ⚙️ Comment ça fonctionne
+## ?? Comment �a fonctionne
 
-### Achitecture simplifiée
+### Achitecture simplifi�e
 
 ```
 
                         UTILISATEUR                               
-┌─────────────────────────────────────────────────────────────────┐                    (navigateur web/PWA)                          
-││
-│                              │
-└─────────────────────────────┬───────────────────────────────────┘                              
-│
-                      FRONTEND▼ (Vanilla JS)                       
-┌─────────────────────────────────────────────────────────────────┐       
-│    Carte          Itinéraire      Horaires                │
-│  ┌─────────────┐  ┌──────────────┐Le┌─────────────────────────┐a│flet.js     UI/UX           GTFS Parser             
-│  │       ││││     ││
-││││  ││ ││
-│  └─────────────┘  └──────────────┘  └─────────────────────────┘ │                       
-└─────────────────────────────┬───────────────────────────────────┘          
-                              │                  
-  ┌───────────────────┼───────────────────┐
-  DONNÉES ▼GTFS      API Googl▼e        OpenStreet▼Map          
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────────────┐(statiques)       (via Vercel)      (tuiles carte)         
-│                 │ │                 │ │                         │
-│   stops.txt     │ │  Places API     │ │ C  ARTO Dark/Light     │
-│   routes.txt    │ │  Routes API     │ │ Leaflet.js           │
-│  • trips.txt    │ │  • Geocode API  │ │  •                      │ 
-│  • stop_times   │ │  •              │ │  •                      │  
-│  • calendar     │ │  •(proxy sécuris│é│                         │ 
-│  • shapes       │ │   clé cachée)   │ │                         │
-│  •││││ │
-│``•`││││ │
-└─────────────────┘└─────────────────┘└─────────────────────────┘
-### Flux de données
++-----------------------------------------------------------------+                    (navigateur web/PWA)                          
+��
+�                              �
++-----------------------------------------------------------------+                              
+�
+                      FRONTEND? (Vanilla JS)                       
++-----------------------------------------------------------------+       
+�    Carte          Itin�raire      Horaires                �
+�  +-------------+  +--------------+Le+-------------------------+a�flet.js     UI/UX           GTFS Parser             
+�  �       ����     ��
+����  �� ��
+�  +-------------+  +--------------+  +-------------------------+ �                       
++-----------------------------------------------------------------+          
+                              �                  
+  +-------------------+-------------------+
+  DONN�ES ?GTFS      API Googl?e        OpenStreet?Map          
++-----------------+ +-----------------+ +-------------------------+(statiques)       (via Vercel)      (tuiles carte)         
+�                 � �                 � �                         �
+�   stops.txt     � �  Places API     � � C  ARTO Dark/Light     �
+�   routes.txt    � �  Routes API     � � Leaflet.js           �
+�  � trips.txt    � �  � Geocode API  � �  �                      � 
+�  � stop_times   � �  �              � �  �                      �  
+�  � calendar     � �  �(proxy s�curis��                         � 
+�  � shapes       � �   cl� cach�e)   � �                         �
+�  ����� �
+�``�`���� �
++-----------------++-----------------++-------------------------+
+### Flux de donn�es
 
 #### 1 Chargement initial
 ```
-Utilis️⃣ateur ouvre l'app
-     Service Worker vérifie le cache
-     Charge les données GTFS (bundle JSON optimisé)
-    → Construit les index en mémoire
-    → Affiche la carte avec les lignes
-```→
-→
-#### 2 Calcul d'itinéraire
+Utilis??ateur ouvre l'app
+     Service Worker v�rifie le cache
+     Charge les donn�es GTFS (bundle JSON optimis�)
+    ? Construit les index en m�moire
+    ? Affiche la carte avec les lignes
+```?
+?
+#### 2 Calcul d'itin�raire
 ```
-Utilis️⃣ateur saisit origine/destination
-     Autocomplétion via Google Places API (proxy Vercel)
-     Sélection des lieux
-    → Recherche des arrêts GTFS proches
-    → Algorithme hybride :
-    →     GTFS local pour les bus
-    →     Google Routes API pour la marche
-     Aff•ichage des résultats classés
-     Tra•cé sur la carte
-```→
-→
+Utilis??ateur saisit origine/destination
+     Autocompl�tion via Google Places API (proxy Vercel)
+     S�lection des lieux
+    ? Recherche des arr�ts GTFS proches
+    ? Algorithme hybride :
+    ?     GTFS local pour les bus
+    ?     Google Routes API pour la marche
+     Aff�ichage des r�sultats class�s
+     Tra�c� sur la carte
+```?
+?
 #### 3 Position des bus
 ```
-Toutes️⃣ les 5 secondes :
-     Récupère l'heure actuelle
+Toutes?? les 5 secondes :
+     R�cup�re l'heure actuelle
      Pour chaque trip actif :
-    →     Trouve la position entre 2 arrêts
-    →     Interpole les coordonnées
-        • Calcule l'orientation
-     Ani•me les marqueurs sur la carte
-```•
-→
-### Technologies utilisées
+    ?     Trouve la position entre 2 arr�ts
+    ?     Interpole les coordonn�es
+        � Calcule l'orientation
+     Ani�me les marqueurs sur la carte
+```�
+?
+### Technologies utilis�es
 
-| Catégorie | Technologie | Rôle |
+| Cat�gorie | Technologie | R�le |
 |-----------|-------------|------|
 | **Frontend** | JavaScript ES6+ (Vanilla) | Logique applicative |
 | **Carte** | Leaflet.js | Affichage cartographique |
-| **Tuiles** | CARTO (basé OSM) | Fond de carte |
-| **Données transport** | GTFS Péribus | Horaires, arrêts, lignes |
-| **Géocodage** | Google Places API | Autocomplétion adresses |
-| **Itinéraires piétons** | Google Routes API | Trajets à pied |
-| **Hébergement** | Vercel | CDN + Serverless Functions |
+| **Tuiles** | CARTO (bas� OSM) | Fond de carte |
+| **Donn�es transport** | GTFS P�ribus | Horaires, arr�ts, lignes |
+| **G�ocodage** | Google Places API | Autocompl�tion adresses |
+| **Itin�raires pi�tons** | Google Routes API | Trajets � pied |
+| **H�bergement** | Vercel | CDN + Serverless Functions |
 | **PWA** | Service Worker | Cache et offline |
 
-### Sécurité des APIs
+### S�curit� des APIs
 
-Les clés API Google ne sont **jamais exposées** côté client :
+Les cl�s API Google ne sont **jamais expos�es** c�t� client :
 
 ```
 Client                    Vercel (Serverless)              Google
                                                             
     POST /api/places                                        
-  │  {query: "Gare"}             │                            │
-  │ >                            ││
-  │                              │   + API Key (env secret)   │
-  │ ──────────────────────────── │                            │ >
-  │                              │                            │
-  │                              │ ────────────────────────── │ Résultats                
-  │                              │ <│
-  │         Résultats filtrés    │                            │
-  │ <                            │──────────────────────────│
-  │ ```││
-│────────────────────────────││
+  �  {query: "Gare"}             �                            �
+  � >                            ��
+  �                              �   + API Key (env secret)   �
+  � ---------------------------- �                            � >
+  �                              �                            �
+  �                              � -------------------------- � R�sultats                
+  �                              � <�
+  �         R�sultats filtr�s    �                            �
+  � <                            �--------------------------�
+  � ```��
+�----------------------------��
 ---
 ---
 
@@ -240,72 +240,72 @@ Client                    Vercel (Serverless)              Google
 perimap/
   public/                    # Application frontend
     index.html               # Page principale (SPA)
-├── 📁   about.html               # À propos + Admin
-│   ├── mentions-legales.html    # Légal
-│   ├── style.css                # Styles (~10K lignes)
-│   ├── manifest.json            # PWA manifest
-│   ├── service-worker.js        # Cache et offline
-│   ├──
-│   ├──  js/                   # JavaScript
-│   │    app.js               # Point d'entrée, init
-│   ├── 📁   main.js              # Logique principale
-│   │   ├── config.js            # Configuration runtime
-│   │   ├── dataManager.js       # Gestion données GTFS
-│   │   ├── mapRenderer.js       # Carte Leaflet
-│   │   ├── apiManager.js        # APIs Google
-│   │   ├── timeManager.js       # Gestion temps
-│   │   ├── tripScheduler.js     # Positions bus
-│   │   ├── uiManager.js         # UI et thèmes
-│   │   ├── router.js            # Calcul itinéraires
-│   │   ├──  workers/          # Web Workers
-│   │   ├──  utils/            # Utilitaires
-│   │   ├── 📁 ui/               # Composants UI
-│   │├──📁
-│   │  v└──i📁ews/                # Templates HTML
-│   │    carte.html
-│   ├── 📁   horaires.html
-│   │   ├── itineraire.html
-│   │   ├── ...
-│   │├──
-│   │  d└──ata/                 # Données
-│   │     gtfs/             # Données Péribus
-│   ├── 📁   map.geojson          # Tracés lignes
-│   │   ├── 📁line-status.json     # État trafic
-│   │├──
-│   │  i└──cons/                # Icônes PWA
-││
-│  a└──p📁i/                      # Serverless Functions (Vercel)
-│    places.js                # Proxy Google Places
-├── 📁   routes.js                # Proxy Google Routes
-│   ├── geocode.js               # Proxy Geocoding
-│   ├── admin-token.js           # Auth admin
-│├──
-│  s└──erver/                   #  BACKEND FUTUR (désactivé)
-│    ...                      # Voir section "En construction"
-├──📁🔴
-│  s└──cripts/                  # Scripts utilitaires
-│    preprocess-gtfs.mjs      # Prétraitement GTFS
-├──📁
-│ RE└──ADME.md                    # Ce fichier
-│```
-└──
++-- ??   about.html               # � propos + Admin
+�   +-- mentions-legales.html    # L�gal
+�   +-- style.css                # Styles (~10K lignes)
+�   +-- manifest.json            # PWA manifest
+�   +-- service-worker.js        # Cache et offline
+�   +--
+�   +--  js/                   # JavaScript
+�   �    app.js               # Point d'entr�e, init
+�   +-- ??   main.js              # Logique principale
+�   �   +-- config.js            # Configuration runtime
+�   �   +-- dataManager.js       # Gestion donn�es GTFS
+�   �   +-- mapRenderer.js       # Carte Leaflet
+�   �   +-- apiManager.js        # APIs Google
+�   �   +-- timeManager.js       # Gestion temps
+�   �   +-- tripScheduler.js     # Positions bus
+�   �   +-- uiManager.js         # UI et th�mes
+�   �   +-- router.js            # Calcul itin�raires
+�   �   +--  workers/          # Web Workers
+�   �   +--  utils/            # Utilitaires
+�   �   +-- ?? ui/               # Composants UI
+�   �+--??
+�   �  v+--i??ews/                # Templates HTML
+�   �    carte.html
+�   +-- ??   horaires.html
+�   �   +-- itineraire.html
+�   �   +-- ...
+�   �+--
+�   �  d+--ata/                 # Donn�es
+�   �     gtfs/             # Donn�es P�ribus
+�   +-- ??   map.geojson          # Trac�s lignes
+�   �   +-- ??line-status.json     # �tat trafic
+�   �+--
+�   �  i+--cons/                # Ic�nes PWA
+��
+�  a+--p??i/                      # Serverless Functions (Vercel)
+�    places.js                # Proxy Google Places
++-- ??   routes.js                # Proxy Google Routes
+�   +-- geocode.js               # Proxy Geocoding
+�   +-- admin-token.js           # Auth admin
+�+--
+�  s+--erver/                   #  BACKEND FUTUR (d�sactiv�)
+�    ...                      # Voir section "En construction"
++--????
+�  s+--cripts/                  # Scripts utilitaires
+�    preprocess-gtfs.mjs      # Pr�traitement GTFS
++--??
+� RE+--ADME.md                    # Ce fichier
+�```
++--
 ### Modules principaux
 
-| Module | Responsabilité |
+| Module | Responsabilit� |
 |--------|----------------|
 | app.js | Initialisation, chargement GTFS, routing SPA |
-| dataManager.js | Parsing GTFS, indexation, requêtes |
+| dataManager.js | Parsing GTFS, indexation, requ�tes |
 | mapRenderer.js | Carte Leaflet, marqueurs, polylines |
-| tripScheduler.js | Calcul positions bus en temps réel |
-| router.js | Algorithme d'itinéraire hybride |
+| tripScheduler.js | Calcul positions bus en temps r�el |
+| router.js | Algorithme d'itin�raire hybride |
 | apiManager.js | Appels API Google via proxies |
 
 ---
 ---
 
 
-## 🛠️ Installation et Développement
-### Prérequis
+## ??? Installation et D�veloppement
+### Pr�requis
 - Node.js 18+ (optionnel, pour scripts)
 - Serveur HTTP local (Live Server, Python...)
 - Navigateur moderne
@@ -318,7 +318,7 @@ git clone https://github.com/EFFEZFEZ/p-rimap-sans-api-.git
 cd p-rimap-sans-api-
 
 # 2. Lancer un serveur local
-# Option A : VS Code Live Server (recommandé)
+# Option A : VS Code Live Server (recommand�)
 # Option B : Python
 python -m http.server 8080 --directory public
 
@@ -327,18 +327,18 @@ python -m http.server 8080 --directory public
 
 ### Variables d'environnement (Vercel)
 
-Pour le déploiement, configurer dans Vercel :
+Pour le d�ploiement, configurer dans Vercel :
 
 ```env
-GOOGLE_API_KEY=votre_clé_google_api
+GOOGLE_API_KEY=votre_cl�_google_api
 ADMIN_TOKEN=token_pour_admin
 ```
 
-### Mise à jour des données GTFS
+### Mise � jour des donn�es GTFS
 
 ```bash
-# Télécharger les nouvelles données depuis le site Péribus
-# Puis lancer le prétraitement :
+# T�l�charger les nouvelles donn�es depuis le site P�ribus
+# Puis lancer le pr�traitement :
 node scripts/preprocess-gtfs.mjs
 ```
 
@@ -347,102 +347,102 @@ node scripts/preprocess-gtfs.mjs
 ##  En construction
 
 Le dossier server/ co
-ntient le code **préparé mais désactivé** pour un futur backend autonome.
+ntient le code **pr�par� mais d�sactiv�** pour un futur backend autonome.
 ###  Pourquoi un backend futur ?
 
-| Ac🤔tuellement | Futur envisagé |
+| Ac??tuellement | Futur envisag� |
 |--------------|----------------|
-| API Google (quota gratuit) | Notre propre système |
-| Dépendance externe | Autonomie totale |
-| Pas de personnalisation | Favoris, historique, préférences |
+| API Google (quota gratuit) | Notre propre syst�me |
+| D�pendance externe | Autonomie totale |
+| Pas de personnalisation | Favoris, historique, pr�f�rences |
 
-### Ce qui est préparé
+### Ce qui est pr�par�
 
-``` 📦
+``` ??
 server/
   core/
-     pathfinding/          #  Calcul d'itinéraires
-├── 📁      raptor.js            # Algorithme RAPTOR (référence mondiale)
-│   ├── 📁   astar.js             #🗺️ A* pour la marche
-│   │   ├── graph.js             # Graphe de transport
-│   │├──
-│   │  p└──laces/               #  Autocomplétion maison
-│   │    trie.js              # Structure Trie (recherche O(m))
-│   ├── 📁   fuzzy.js             #📍 Recherche floue (fautes de frappe)
-│   │   ├── indexer.js           # Indexation arrêts + POI
-│   │├──
-│   │  m└──emory/               #  Mémoire utilisateur
-│   │     store.js             # Interface stockage
-│   └── 📁    sqlite.js            💾# Adaptateur SQLite
-│       ├── postgres.js          # Adaptateur PostgreSQL
-│├──
-│  api/ └──                     # Routes REST
-│  middleware/               # Auth, CORS, Rate limiting
-├── 📁 utils/                    # Utilitaires
-├── 📁README.md                    # Documentation détaillée
-├──`📁``
-└── README.md                    # Documentation détaillée
+     pathfinding/          #  Calcul d'itin�raires
++-- ??      raptor.js            # Algorithme RAPTOR (r�f�rence mondiale)
+�   +-- ??   astar.js             #??? A* pour la marche
+�   �   +-- graph.js             # Graphe de transport
+�   �+--
+�   �  p+--laces/               #  Autocompl�tion maison
+�   �    trie.js              # Structure Trie (recherche O(m))
+�   +-- ??   fuzzy.js             #?? Recherche floue (fautes de frappe)
+�   �   +-- indexer.js           # Indexation arr�ts + POI
+�   �+--
+�   �  m+--emory/               #  M�moire utilisateur
+�   �     store.js             # Interface stockage
+�   +-- ??    sqlite.js            ??# Adaptateur SQLite
+�       +-- postgres.js          # Adaptateur PostgreSQL
+�+--
+�  api/ +--                     # Routes REST
+�  middleware/               # Auth, CORS, Rate limiting
++-- ?? utils/                    # Utilitaires
++-- ??README.md                    # Documentation d�taill�e
++--`??``
++-- README.md                    # Documentation d�taill�e
 ```
-###  Pourquoi c'est désactivé ?
-### ❓ Pourquoi c'est désactivé ?
+###  Pourquoi c'est d�sactiv� ?
+### ? Pourquoi c'est d�sactiv� ?
 
 | Raison | Explication |
 |--------|-------------|
-| **Serveur requis** | Nécessite un serveur 24/7 (~5-15 euros/mois) |
-| **Google fonctionne** | Le système actuel est gratuit et fiable |
-| **Priorité** | Focus sur les fonctionnalités utilisateur d'abord |
+| **Serveur requis** | N�cessite un serveur 24/7 (~5-15 euros/mois) |
+| **Google fonctionne** | Le syst�me actuel est gratuit et fiable |
+| **Priorit�** | Focus sur les fonctionnalit�s utilisateur d'abord |
 
-### 🔧 Comment l'activer (futur)
+### ?? Comment l'activer (futur)
 
 ```bash
 cd server
 npm install
 cp .env.example .env  # Configurer
-npm run build-graph   # Pré-calculer le graphe
-npm start             # Démarrer le serveur
+npm run build-graph   # Pr�-calculer le graphe
+npm start             # D�marrer le serveur
 ```
 
 ---
 
-## 🗺️ Roadmap
+## ??? Roadmap
 
-### ✅ Fait
+### ? Fait
 
 - [x] Carte interactive avec toutes les lignes
-- [x] Position des bus en temps réel (estimée)
-- [x] Calcul d'itinéraire multimodal
+- [x] Position des bus en temps r�el (estim�e)
+- [x] Calcul d'itin�raire multimodal
 - [x] Mode hors-ligne (PWA)
 - [x] Mode sombre/clair
-- [x] Horaires par arrêt et par ligne
+- [x] Horaires par arr�t et par ligne
 - [x] Fiches horaires PDF
 - [x] Page info trafic
 - [x] Page tarifs
 
-### 🔄 En cours
+### ?? En cours
 
-- [ ] Amélioration de la précision des positions bus
-- [ ] Optimisation du calcul d'itinéraire
+- [ ] Am�lioration de la pr�cision des positions bus
+- [ ] Optimisation du calcul d'itin�raire
 
-### 📋 Prévu (court terme)
+### ?? Pr�vu (court terme)
 
 - [ ] Notifications de perturbations
-- [ ] Widget "prochain bus" sur l'écran d'accueil
-- [ ] Partage d'itinéraire
+- [ ] Widget "prochain bus" sur l'�cran d'accueil
+- [ ] Partage d'itin�raire
 
-### 🔮 Prévu (long terme)
+### ?? Pr�vu (long terme)
 
-- [ ] Backend autonome (RAPTOR + autocomplétion maison)
+- [ ] Backend autonome (RAPTOR + autocompl�tion maison)
 - [ ] Comptes utilisateur (favoris, historique)
-- [ ] Intégration vélos en libre service (si disponible)
-- [ ] API temps réel officielle (si Péribus la fournit)
+- [ ] Int�gration v�los en libre service (si disponible)
+- [ ] API temps r�el officielle (si P�ribus la fournit)
 
 ---
-## 🎨 Identité visuelle
+## ?? Identit� visuelle
 ### Couleurs officielles
 
 | Couleur | Code | Usage |
 |---------|------|-------|
-| **Vert Périmap** | #22c55e | Primaire, boutons, liens |
+| **Vert P�rimap** | #22c55e | Primaire, boutons, liens |
 | **Cyan** | #00c8ff | Secondaire, accents |
 | **Gradient** | #22c55e vers #00c8ff | Signature visuelle |
 
@@ -478,7 +478,7 @@ Les contributions sont les bienvenues !
 ###  Comment contribuer
 
 1. **Fork** le projet
-2. **Créer** une branche (git checkout -b feature/ma-feature)
+2. **Cr�er** une branche (git checkout -b feature/ma-feature)
 3. **Commit** les changements (git commit -m 'Ajout de ma feature')
 4. **Push** (git push origin feature/ma-feature)
 5. **Ouvrir** une Pull Request
@@ -486,45 +486,45 @@ Les contributions sont les bienvenues !
 ### Signaler un bug
 
 Ouvrez une issue avec :
-- Description du problème
-- Étapes pour reproduire
-- Capture d'écran si possible
+- Description du probl�me
+- �tapes pour reproduire
+- Capture d'�cran si possible
 
 ---
 
-## 📜 Droits d'auteur et Licence
+## ?? Droits d'auteur et Licence
 
-**Copyright © 2025 Périmap. Tous droits réservés.**
+**Copyright � 2026 P�rimap. Tous droits r�serv�s.**
 
-Ce code source et tous les fichiers associés sont protégés par les lois sur le droit d'auteur.
+Ce code source et tous les fichiers associ�s sont prot�g�s par les lois sur le droit d'auteur.
 
-### ⚠️ Restrictions d'utilisation
+### ?? Restrictions d'utilisation
 
-Sans autorisation écrite préalable de l'auteur :
-- ❌ **Copie interdite** : Vous ne pouvez pas copier ce code
-- ❌ **Distribution interdite** : Vous ne pouvez pas le partager ou le redistribuer
-- ❌ **Modification interdite** : Vous ne pouvez pas le modifier ou l'adapter
-- ❌ **Usage commercial interdit** : Toute utilisation commerciale est interdite
+Sans autorisation �crite pr�alable de l'auteur :
+- ? **Copie interdite** : Vous ne pouvez pas copier ce code
+- ? **Distribution interdite** : Vous ne pouvez pas le partager ou le redistribuer
+- ? **Modification interdite** : Vous ne pouvez pas le modifier ou l'adapter
+- ? **Usage commercial interdit** : Toute utilisation commerciale est interdite
 
-**Exception** : Consultation à titre informatif uniquement.
+**Exception** : Consultation � titre informatif uniquement.
 
 Pour toute demande d'autorisation, veuillez contacter l'auteur.
 
-Voir les fichiers `COPYRIGHT` et `LICENSE` pour les détails complets.
+Voir les fichiers `COPYRIGHT` et `LICENSE` pour les d�tails complets.
 
 ---
 
 ##  Remerciements
 
-- **Péribus** pour les données GTFS ouvertes
-- **OpenStreetMap** pour les données cartographiques
-- **Leaflet.js** pour la bibliothèque de cartographie
-- La communauté open source
+- **P�ribus** pour les donn�es GTFS ouvertes
+- **OpenStreetMap** pour les donn�es cartographiques
+- **Leaflet.js** pour la biblioth�que de cartographie
+- La communaut� open source
 
 ---
 
 <p align="center">
-  <strong>Fait avec ❤️ à Périgueux</strong>
+  <strong>Fait avec ?? � P�rigueux</strong>
 </p>
 
 <p align="center">
@@ -532,6 +532,7 @@ Voir les fichiers `COPYRIGHT` et `LICENSE` pour les détails complets.
 </p>
 
 <p align="center">
-  <strong>Copyright © 2025 Périmap. Tous droits réservés.</strong>
+  <strong>Copyright � 2026 P�rimap. Tous droits r�serv�s.</strong>
 </p>
+
 

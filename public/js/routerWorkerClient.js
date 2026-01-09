@@ -1,6 +1,6 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 const WORKER_MODULE_PATH = './workers/routerWorker.js';
 
@@ -23,7 +23,7 @@ export class RouterWorkerClient {
         try {
             this.worker = new Worker(new URL(WORKER_MODULE_PATH, import.meta.url), { type: 'module' });
         } catch (error) {
-            console.warn('RouterWorkerClient: impossible de crÃ©er le worker', error);
+            console.warn('RouterWorkerClient: impossible de créer le worker', error);
             this.isSupported = false;
             return Promise.reject(error);
         }
@@ -131,4 +131,5 @@ function serializeWorkerIcons(icons) {
     });
     return safeIcons;
 }
+
 

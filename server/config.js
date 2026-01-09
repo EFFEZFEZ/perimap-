@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * config.js
- * Configuration centralisÃ©e du serveur Peribus
+ * Configuration centralisée du serveur Peribus
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 import { fileURLToPath } from 'url';
@@ -27,9 +27,9 @@ export const config = {
     corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3000,https://peribus.fr').split(','),
   },
 
-  // === BASE DE DONNÃ‰ES ===
+  // === BASE DE DONNÉES ===
   database: {
-    // SQLite par dÃ©faut, PostgreSQL en production
+    // SQLite par défaut, PostgreSQL en production
     url: process.env.DATABASE_URL || `sqlite:${join(__dirname, 'data', 'peribus.db')}`,
     // Pool de connexions (PostgreSQL uniquement)
     poolMin: 2,
@@ -46,7 +46,7 @@ export const config = {
 
   // === PATHFINDING ===
   pathfinding: {
-    // Distance max de marche (mÃ¨tres)
+    // Distance max de marche (mètres)
     maxWalkDistance: 1000,
     // Vitesse de marche (m/s) ~4.5 km/h
     walkSpeed: 1.25,
@@ -54,47 +54,47 @@ export const config = {
     maxTransfers: 3,
     // Temps de correspondance minimum (secondes)
     minTransferTime: 120,
-    // Nombre de rÃ©sultats Ã  retourner
+    // Nombre de résultats à retourner
     maxResults: 5,
-    // Rayon de recherche pour les arrÃªts proches (mÃ¨tres)
+    // Rayon de recherche pour les arrêts proches (mètres)
     nearbyStopRadius: 500,
-    // PÃ©nalitÃ© par correspondance (secondes) pour le tri
+    // Pénalité par correspondance (secondes) pour le tri
     transferPenalty: 300,
   },
 
-  // === AUTOCOMPLÃ‰TION ===
+  // === AUTOCOMPLÉTION ===
   places: {
     // Nombre max de suggestions
     maxSuggestions: 10,
-    // Longueur min de la requÃªte
+    // Longueur min de la requête
     minQueryLength: 2,
     // Score min pour la recherche floue (0-1)
     fuzzyThreshold: 0.3,
-    // Boost pour les lieux rÃ©cents de l'utilisateur
+    // Boost pour les lieux récents de l'utilisateur
     recentBoost: 1.5,
-    // Boost pour les arrÃªts frÃ©quentÃ©s
+    // Boost pour les arrêts fréquentés
     frequencyBoost: 1.2,
   },
 
-  // === MÃ‰MOIRE UTILISATEUR ===
+  // === MÉMOIRE UTILISATEUR ===
   userMemory: {
-    // Nombre max de recherches rÃ©centes par utilisateur
+    // Nombre max de recherches récentes par utilisateur
     maxRecentSearches: 50,
     // Nombre max de favoris par utilisateur
     maxFavorites: 20,
-    // DurÃ©e de rÃ©tention des donnÃ©es (jours)
+    // Durée de rétention des données (jours)
     retentionDays: 365,
-    // Anonymiser aprÃ¨s X jours d'inactivitÃ©
+    // Anonymiser après X jours d'inactivité
     anonymizeAfterDays: 90,
   },
 
   // === RATE LIMITING ===
   rateLimit: {
-    // FenÃªtre de temps (ms)
+    // Fenêtre de temps (ms)
     windowMs: 60 * 1000, // 1 minute
-    // RequÃªtes max par fenÃªtre
+    // Requêtes max par fenêtre
     maxRequests: 100,
-    // RequÃªtes max pour les recherches d'itinÃ©raires
+    // Requêtes max pour les recherches d'itinéraires
     maxRouteRequests: 20,
   },
 
@@ -104,9 +104,9 @@ export const config = {
     graphTtl: 24 * 60 * 60 * 1000, // 24h
     // TTL du cache des places (ms)
     placesTtl: 60 * 60 * 1000, // 1h
-    // TTL du cache des itinÃ©raires (ms)
+    // TTL du cache des itinéraires (ms)
     routesTtl: 5 * 60 * 1000, // 5 min
-    // Taille max du cache en mÃ©moire (Mo)
+    // Taille max du cache en mémoire (Mo)
     maxMemoryMb: 512,
   },
 
@@ -114,7 +114,7 @@ export const config = {
   externalApis: {
     google: {
       apiKey: process.env.GOOGLE_API_KEY || '',
-      enabled: false, // DÃ©sactivÃ© - on utilise notre propre systÃ¨me
+      enabled: false, // Désactivé - on utilise notre propre système
     },
   },
 
@@ -128,7 +128,7 @@ export const config = {
 };
 
 /**
- * Valide la configuration au dÃ©marrage
+ * Valide la configuration au démarrage
  */
 export function validateConfig() {
   const errors = [];
@@ -149,4 +149,5 @@ export function validateConfig() {
 }
 
 export default config;
+
 

@@ -1,51 +1,51 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * config.js
- * Centralise la rÃ©cupÃ©ration de configuration runtime.
+ * Centralise la récupération de configuration runtime.
  * 
- * âœ… V178: SÃ©curisation - La clÃ© API Google n'est plus exposÃ©e cÃ´tÃ© client.
+ * ? V178: Sécurisation - La clé API Google n'est plus exposée côté client.
  * Tous les appels Google passent par les proxies Vercel:
- * - /api/routes : Google Routes API (itinÃ©raires)
- * - /api/places : Google Places API (autocomplÃ©tion)
+ * - /api/routes : Google Routes API (itinéraires)
+ * - /api/places : Google Places API (autocomplétion)
  * - /api/geocode : Google Geocoding API (reverse geocode)
  */
 
 /**
- * Indique si le mode proxy est activÃ© (clÃ© API cÃ´tÃ© serveur)
+ * Indique si le mode proxy est activé (clé API côté serveur)
  * @returns {boolean} true si on utilise les proxies Vercel
  */
 export function useServerProxy() {
   // En production, on utilise toujours le proxy
-  // En dev local, on peut avoir une clÃ© dans window.__APP_CONFIG
+  // En dev local, on peut avoir une clé dans window.__APP_CONFIG
   if (window.__APP_CONFIG && window.__APP_CONFIG.googleApiKey) {
-    return false; // Mode dev avec clÃ© locale
+    return false; // Mode dev avec clé locale
   }
   return true; // Mode production avec proxy
 }
 
 /**
- * RÃ©cupÃ¨re la clÃ© API Google (uniquement pour dev local)
- * En production, retourne une chaÃ®ne vide car on utilise le proxy
- * @returns {string} La clÃ© API ou chaÃ®ne vide
+ * Récupère la clé API Google (uniquement pour dev local)
+ * En production, retourne une chaîne vide car on utilise le proxy
+ * @returns {string} La clé API ou chaîne vide
  */
 export function getGoogleApiKey() {
   // Mode dev uniquement
   if (window.__APP_CONFIG && window.__APP_CONFIG.googleApiKey) {
     return window.__APP_CONFIG.googleApiKey;
   }
-  // En production, pas de clÃ© cÃ´tÃ© client (proxy utilisÃ©)
+  // En production, pas de clé côté client (proxy utilisé)
   return '';
 }
 
 /**
- * RÃ©cupÃ¨re le token admin pour GitHub API
- * @returns {string} Le token ou chaÃ®ne vide
+ * Récupère le token admin pour GitHub API
+ * @returns {string} Le token ou chaîne vide
  */
 export function getAdminToken() {
-  // 1. Variable globale injectÃ©e (Vercel/index.html)
+  // 1. Variable globale injectée (Vercel/index.html)
   if (window.__ADMIN_TOKEN && window.__ADMIN_TOKEN !== '__VITE_ADMIN_TOKEN__') {
     return window.__ADMIN_TOKEN;
   }
@@ -85,4 +85,5 @@ export function getAppConfig() {
     maxBottomSheetLevels: 3
   };
 }
+
 

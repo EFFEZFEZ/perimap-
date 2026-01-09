@@ -1,6 +1,6 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 const DEFAULT_DATASET = {
     routes: [],
@@ -186,4 +186,5 @@ function preprocessStopTimesByStop(stopTimes = []) {
     });
     return bucket;
 }
+
 

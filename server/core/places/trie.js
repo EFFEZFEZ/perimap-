@@ -1,32 +1,32 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * trie.js
- * Structure de donnÃ©es Trie pour l'autocomplÃ©tion rapide
+ * Structure de données Trie pour l'autocomplétion rapide
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  * 
- * Un Trie (arbre prÃ©fixÃ©) permet des recherches en O(m) oÃ¹ m est
- * la longueur de la requÃªte, indÃ©pendamment du nombre de mots.
+ * Un Trie (arbre préfixé) permet des recherches en O(m) où m est
+ * la longueur de la requête, indépendamment du nombre de mots.
  * 
- * IdÃ©al pour l'autocomplÃ©tion avec des milliers d'arrÃªts/lieux.
+ * Idéal pour l'autocomplétion avec des milliers d'arrêts/lieux.
  */
 
 /**
- * NÅ“ud du Trie
+ * Nœud du Trie
  */
 class TrieNode {
   constructor() {
-    this.children = new Map(); // caractÃ¨re -> TrieNode
+    this.children = new Map(); // caractère -> TrieNode
     this.isEndOfWord = false;
-    this.data = []; // DonnÃ©es associÃ©es Ã  ce mot (plusieurs entrÃ©es possibles)
+    this.data = []; // Données associées à ce mot (plusieurs entrées possibles)
   }
 }
 
 /**
- * Structure Trie pour l'autocomplÃ©tion
+ * Structure Trie pour l'autocomplétion
  */
 export class Trie {
   constructor() {
@@ -38,7 +38,7 @@ export class Trie {
    * Normalise un texte pour la recherche
    * - Minuscules
    * - Supprime les accents
-   * - Supprime les caractÃ¨res spÃ©ciaux
+   * - Supprime les caractères spéciaux
    * 
    * @param {string} text
    * @returns {string}
@@ -48,17 +48,17 @@ export class Trie {
     
     return text
       .toLowerCase()
-      .normalize('NFD') // DÃ©compose les caractÃ¨res accentuÃ©s
+      .normalize('NFD') // Décompose les caractères accentués
       .replace(/[\u0300-\u036f]/g, '') // Supprime les diacritiques
       .replace(/[^a-z0-9\s]/g, '') // Garde uniquement lettres, chiffres, espaces
       .trim();
   }
 
   /**
-   * InsÃ¨re un mot dans le Trie
+   * Insère un mot dans le Trie
    * 
-   * @param {string} word - Mot Ã  insÃ©rer
-   * @param {Object} data - DonnÃ©es associÃ©es (arrÃªt, lieu, etc.)
+   * @param {string} word - Mot à insérer
+   * @param {Object} data - Données associées (arrêt, lieu, etc.)
    */
   insert(word, data) {
     const normalizedWord = this.normalize(word);
@@ -79,11 +79,11 @@ export class Trie {
   }
 
   /**
-   * InsÃ¨re plusieurs variantes d'un mot
-   * (mot complet, mots individuels, prÃ©fixes)
+   * Insère plusieurs variantes d'un mot
+   * (mot complet, mots individuels, préfixes)
    * 
-   * @param {string} text - Texte complet (ex: "Gare de PÃ©rigueux")
-   * @param {Object} data - DonnÃ©es associÃ©es
+   * @param {string} text - Texte complet (ex: "Gare de Périgueux")
+   * @param {Object} data - Données associées
    */
   insertWithVariants(text, data) {
     // 1. Texte complet
@@ -109,26 +109,26 @@ export class Trie {
   }
 
   /**
-   * Recherche les mots commenÃ§ant par un prÃ©fixe
+   * Recherche les mots commençant par un préfixe
    * 
-   * @param {string} prefix - PrÃ©fixe Ã  rechercher
-   * @param {number} maxResults - Nombre max de rÃ©sultats
-   * @returns {Array<Object>} DonnÃ©es des mots trouvÃ©s
+   * @param {string} prefix - Préfixe à rechercher
+   * @param {number} maxResults - Nombre max de résultats
+   * @returns {Array<Object>} Données des mots trouvés
    */
   search(prefix, maxResults = 10) {
     const normalizedPrefix = this.normalize(prefix);
     if (!normalizedPrefix) return [];
 
-    // Naviguer jusqu'au nÅ“ud du prÃ©fixe
+    // Naviguer jusqu'au nœud du préfixe
     let node = this.root;
     for (const char of normalizedPrefix) {
       if (!node.children.has(char)) {
-        return []; // PrÃ©fixe non trouvÃ©
+        return []; // Préfixe non trouvé
       }
       node = node.children.get(char);
     }
 
-    // Collecter toutes les donnÃ©es sous ce nÅ“ud
+    // Collecter toutes les données sous ce nœud
     const results = [];
     this.collectAllData(node, results, maxResults);
 
@@ -136,23 +136,23 @@ export class Trie {
   }
 
   /**
-   * Collecte rÃ©cursivement les donnÃ©es d'un sous-arbre
+   * Collecte récursivement les données d'un sous-arbre
    */
   collectAllData(node, results, maxResults) {
     if (results.length >= maxResults) return;
 
-    // Ajouter les donnÃ©es de ce nÅ“ud s'il termine un mot
+    // Ajouter les données de ce nœud s'il termine un mot
     if (node.isEndOfWord) {
       for (const data of node.data) {
         if (results.length >= maxResults) break;
-        // Ã‰viter les doublons (par ID)
+        // Éviter les doublons (par ID)
         if (!results.some(r => r.id === data.id)) {
           results.push(data);
         }
       }
     }
 
-    // Parcourir les enfants (ordre alphabÃ©tique pour cohÃ©rence)
+    // Parcourir les enfants (ordre alphabétique pour cohérence)
     const sortedChildren = Array.from(node.children.entries()).sort((a, b) => 
       a[0].localeCompare(b[0])
     );
@@ -164,7 +164,7 @@ export class Trie {
   }
 
   /**
-   * VÃ©rifie si un mot exact existe
+   * Vérifie si un mot exact existe
    * 
    * @param {string} word
    * @returns {boolean}
@@ -236,4 +236,5 @@ export class Trie {
 }
 
 export default Trie;
+
 

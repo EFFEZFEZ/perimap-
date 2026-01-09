@@ -4,7 +4,7 @@
  * Version légère optimisée pour Vercel Serverless
  * Utilise fetch natif avec headers stealth avancés
  * 
- * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
+ * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
  * 
  * PROTECTIONS ACTIVES:
  * ✅ Client Hints complets (Sec-Ch-Ua, Sec-Ch-Ua-Platform, etc.)
@@ -289,3 +289,4 @@ export default async function handler(req, res) {
         });
     }
 }
+

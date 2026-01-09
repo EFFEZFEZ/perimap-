@@ -1,21 +1,21 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * polyline.js - Utilitaires pour les polylines
  * 
- * Ce module gÃ¨re l'encodage, le dÃ©codage et l'extraction des polylines
- * utilisÃ©es pour tracer les itinÃ©raires sur la carte.
+ * Ce module gère l'encodage, le décodage et l'extraction des polylines
+ * utilisées pour tracer les itinéraires sur la carte.
  */
 
 import { isMissingTextValue } from './formatters.js';
 
-// === Encodage/DÃ©codage de polylines ===
+// === Encodage/Décodage de polylines ===
 
 /**
- * DÃ©code une polyline encodÃ©e en tableau de coordonnÃ©es [lat, lng]
- * @param {string} encoded - Polyline encodÃ©e
+ * Décode une polyline encodée en tableau de coordonnées [lat, lng]
+ * @param {string} encoded - Polyline encodée
  * @returns {Array} - Tableau de [lat, lng]
  */
 export function decodePolyline(encoded) {
@@ -59,9 +59,9 @@ export function decodePolyline(encoded) {
 }
 
 /**
- * Encode un tableau de coordonnÃ©es [lat, lng] en polyline
+ * Encode un tableau de coordonnées [lat, lng] en polyline
  * @param {Array} coordinates - Tableau de [lat, lng]
- * @returns {string} - Polyline encodÃ©e
+ * @returns {string} - Polyline encodée
  */
 export function encodePolyline(coordinates) {
     if (!Array.isArray(coordinates) || coordinates.length === 0) return '';
@@ -86,8 +86,8 @@ export function encodePolyline(coordinates) {
 
 /**
  * Encode un nombre pour la polyline
- * @param {number} num - Nombre Ã  encoder
- * @returns {string} - CaractÃ¨res encodÃ©s
+ * @param {number} num - Nombre à encoder
+ * @returns {string} - Caractères encodés
  */
 function encodeNumber(num) {
     let value = num < 0 ? ~(num << 1) : (num << 1);
@@ -105,8 +105,8 @@ function encodeNumber(num) {
 // === Extraction de polylines ===
 
 /**
- * RÃ©cupÃ¨re la valeur encodÃ©e d'une polyline
- * @param {*} polyline - Objet polyline ou chaÃ®ne
+ * Récupère la valeur encodée d'une polyline
+ * @param {*} polyline - Objet polyline ou chaîne
  * @returns {string|null}
  */
 export function getEncodedPolylineValue(polyline) {
@@ -116,8 +116,8 @@ export function getEncodedPolylineValue(polyline) {
 }
 
 /**
- * RÃ©cupÃ¨re les coordonnÃ©es lat/lng d'une polyline
- * @param {*} polyline - Objet polyline, tableau ou chaÃ®ne encodÃ©e
+ * Récupère les coordonnées lat/lng d'une polyline
+ * @param {*} polyline - Objet polyline, tableau ou chaîne encodée
  * @returns {Array|null} - Tableau de [lat, lng] ou null
  */
 export function getPolylineLatLngs(polyline) {
@@ -161,7 +161,7 @@ export function getPolylineLatLngs(polyline) {
         if (converted) return converted;
     }
     
-    // Cas: chaÃ®ne encodÃ©e
+    // Cas: chaîne encodée
     const encoded = getEncodedPolylineValue(polyline);
     if (encoded) {
         try {
@@ -174,11 +174,11 @@ export function getPolylineLatLngs(polyline) {
     return null;
 }
 
-// === VÃ©rification d'Ã©tapes ===
+// === Vérification d'étapes ===
 
 /**
- * VÃ©rifie si une Ã©tape est une Ã©tape d'attente
- * @param {Object} step - Ã‰tape Ã  vÃ©rifier
+ * Vérifie si une étape est une étape d'attente
+ * @param {Object} step - Étape à vérifier
  * @returns {boolean}
  */
 export function isWaitStep(step) {
@@ -194,8 +194,8 @@ export function isWaitStep(step) {
 }
 
 /**
- * Extrait les polylines d'une Ã©tape
- * @param {Object} step - Ã‰tape d'itinÃ©raire
+ * Extrait les polylines d'une étape
+ * @param {Object} step - Étape d'itinéraire
  * @returns {Array} - Tableau de polylines
  */
 export function extractStepPolylines(step) {
@@ -206,20 +206,20 @@ export function extractStepPolylines(step) {
         if (poly) collected.push(poly);
     };
     
-    // PrioritÃ© 1: BUS avec polyline directe
+    // Priorité 1: BUS avec polyline directe
     if (step.type === 'BUS') {
         pushIfValid(step?.polyline);
     }
-    // PrioritÃ© 2: Tableau polylines (WALK multi-segments)
+    // Priorité 2: Tableau polylines (WALK multi-segments)
     else if (Array.isArray(step.polylines) && step.polylines.length) {
         step.polylines.forEach(pushIfValid);
     }
-    // PrioritÃ© 3: Polyline unique
+    // Priorité 3: Polyline unique
     else {
         pushIfValid(step?.polyline);
     }
     
-    // Fallback: chercher dans les substeps si aucune polyline trouvÃ©e
+    // Fallback: chercher dans les substeps si aucune polyline trouvée
     if (collected.length === 0 && step.subSteps && step.subSteps.length > 0) {
         step.subSteps.forEach(subStep => {
             pushIfValid(subStep?.polyline);
@@ -229,9 +229,9 @@ export function extractStepPolylines(step) {
         });
     }
     
-    // Debug pour itinÃ©raires multi-correspondances
+    // Debug pour itinéraires multi-correspondances
     if (collected.length === 0 && step.type !== 'WAIT') {
-        console.warn('[Polyline] Aucune polyline trouvÃ©e pour step:', step.type, step.instruction);
+        console.warn('[Polyline] Aucune polyline trouvée pour step:', step.type, step.instruction);
     }
     
     return collected;
@@ -240,8 +240,8 @@ export function extractStepPolylines(step) {
 // === Style Leaflet ===
 
 /**
- * Retourne le style Leaflet pour une Ã©tape d'itinÃ©raire
- * @param {Object} step - Ã‰tape d'itinÃ©raire
+ * Retourne le style Leaflet pour une étape d'itinéraire
+ * @param {Object} step - Étape d'itinéraire
  * @returns {Object} - Options de style Leaflet
  */
 export function getLeafletStyleForStep(step) {
@@ -275,7 +275,7 @@ export function getLeafletStyleForStep(step) {
     if (step.travelMode === 'WALK') return getLeafletStyleForStep({ type: 'WALK' });
     if (step.travelMode === 'TRANSIT') return getLeafletStyleForStep({ type: 'BUS', routeColor: step.routeColor });
     
-    // Style par dÃ©faut
+    // Style par défaut
     return {
         color: 'var(--primary)',
         weight: 5,
@@ -292,4 +292,5 @@ export default {
     extractStepPolylines,
     getLeafletStyleForStep
 };
+
 

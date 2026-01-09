@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * api/index.js
  * Router principal de l'API
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 /*
@@ -29,13 +29,13 @@ router.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       routes: {
-        'POST /api/routes/compute': 'Calcul d\'itinÃ©raire',
-        'GET /api/routes/nearby-stops': 'ArrÃªts Ã  proximitÃ©',
+        'POST /api/routes/compute': 'Calcul d\'itinéraire',
+        'GET /api/routes/nearby-stops': 'Arrêts à proximité',
       },
       places: {
-        'GET /api/places/autocomplete': 'AutocomplÃ©tion de lieux',
-        'GET /api/places/nearby': 'Lieux Ã  proximitÃ©',
-        'GET /api/places/:id': 'DÃ©tails d\'un lieu',
+        'GET /api/places/autocomplete': 'Autocomplétion de lieux',
+        'GET /api/places/nearby': 'Lieux à proximité',
+        'GET /api/places/:id': 'Détails d\'un lieu',
       },
       user: {
         'GET /api/user': 'Profil utilisateur',
@@ -44,8 +44,8 @@ router.get('/', (req, res) => {
         'DELETE /api/user/favorites/:id': 'Supprimer un favori',
         'GET /api/user/history': 'Historique de recherche',
         'DELETE /api/user/history': 'Effacer l\'historique',
-        'GET /api/user/preferences': 'PrÃ©fÃ©rences',
-        'PATCH /api/user/preferences': 'Modifier les prÃ©fÃ©rences',
+        'GET /api/user/preferences': 'Préférences',
+        'PATCH /api/user/preferences': 'Modifier les préférences',
       },
     },
   });
@@ -61,4 +61,5 @@ const router = {
 };
 
 export default router;
+
 

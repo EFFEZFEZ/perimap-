@@ -1,14 +1,14 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * store.js
- * Interface de stockage pour la mÃ©moire utilisateur
+ * Interface de stockage pour la mémoire utilisateur
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  * 
- * DÃ©finit l'interface commune pour les diffÃ©rents backends
+ * Définit l'interface commune pour les différents backends
  * de stockage (SQLite, PostgreSQL, Redis, etc.)
  */
 
@@ -16,9 +16,9 @@
  * @typedef {Object} UserData
  * @property {string} id - ID unique de l'utilisateur
  * @property {string} [deviceId] - ID de l'appareil
- * @property {Date} createdAt - Date de crÃ©ation
- * @property {Date} lastSeenAt - DerniÃ¨re activitÃ©
- * @property {Object} preferences - PrÃ©fÃ©rences utilisateur
+ * @property {Date} createdAt - Date de création
+ * @property {Date} lastSeenAt - Dernière activité
+ * @property {Object} preferences - Préférences utilisateur
  */
 
 /**
@@ -26,10 +26,10 @@
  * @property {string} id - ID unique
  * @property {string} userId - ID utilisateur
  * @property {string} query - Texte de recherche
- * @property {Object} origin - Lieu de dÃ©part
- * @property {Object} destination - Lieu d'arrivÃ©e
+ * @property {Object} origin - Lieu de départ
+ * @property {Object} destination - Lieu d'arrivée
  * @property {Date} timestamp - Date/heure de la recherche
- * @property {Object} [selectedResult] - RÃ©sultat sÃ©lectionnÃ©
+ * @property {Object} [selectedResult] - Résultat sélectionné
  */
 
 /**
@@ -37,15 +37,15 @@
  * @property {string} id - ID unique
  * @property {string} userId - ID utilisateur
  * @property {string} placeId - ID du lieu
- * @property {string} name - Nom personnalisÃ©
+ * @property {string} name - Nom personnalisé
  * @property {string} type - Type (home, work, other)
- * @property {Object} place - DonnÃ©es du lieu
+ * @property {Object} place - Données du lieu
  * @property {Date} createdAt - Date d'ajout
  */
 
 /**
  * Interface abstraite pour le stockage
- * Ã€ implÃ©menter par les adaptateurs concrets (SQLite, PostgreSQL, etc.)
+ * À implémenter par les adaptateurs concrets (SQLite, PostgreSQL, etc.)
  */
 export class StorageInterface {
   constructor(options = {}) {
@@ -121,7 +121,7 @@ export class StorageInterface {
     throw new Error('Not implemented');
   }
 
-  // === PRÃ‰FÃ‰RENCES ===
+  // === PRÉFÉRENCES ===
 
   async getPreferences(userId) {
     throw new Error('Not implemented');
@@ -153,7 +153,7 @@ export class StorageInterface {
 }
 
 /**
- * Stockage en mÃ©moire (pour les tests ou environnements sans BDD)
+ * Stockage en mémoire (pour les tests ou environnements sans BDD)
  */
 export class InMemoryStore extends StorageInterface {
   constructor(options = {}) {
@@ -327,7 +327,7 @@ export class InMemoryStore extends StorageInterface {
     return true;
   }
 
-  // === PRÃ‰FÃ‰RENCES ===
+  // === PRÉFÉRENCES ===
 
   async getPreferences(userId) {
     const user = this.users.get(userId);
@@ -369,7 +369,7 @@ export class InMemoryStore extends StorageInterface {
   // === MAINTENANCE ===
 
   async cleanup(options = {}) {
-    // Pas grand chose Ã  faire en mÃ©moire
+    // Pas grand chose à faire en mémoire
     return { cleaned: 0 };
   }
 
@@ -390,7 +390,7 @@ export class InMemoryStore extends StorageInterface {
   }
 
   /**
-   * Export des donnÃ©es pour debug/sauvegarde
+   * Export des données pour debug/sauvegarde
    */
   export() {
     return {
@@ -403,4 +403,5 @@ export class InMemoryStore extends StorageInterface {
 }
 
 export default StorageInterface;
+
 

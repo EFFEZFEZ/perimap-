@@ -1,26 +1,26 @@
-Ôªø/*
- * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
- * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
+/*
+ * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
+ * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
  */
 /**
  * trafficInfo.js - Affichage des infos trafic et fiches horaires
  * 
- * Ce module g√®re le rendu des informations de trafic r√©seau
+ * Ce module gËre le rendu des informations de trafic rÈseau
  * et la liste des fiches horaires.
  */
 
 import { getCategoryForRoute, PDF_FILENAME_MAP, ROUTE_LONG_NAME_MAP } from '../config/routes.js';
 
-// Stockage des donn√©es de ligne pour le modal
+// Stockage des donnÈes de ligne pour le modal
 let lineDataCache = {};
-let perturbationsData = []; // Donn√©es des perturbations pour le popup du bandeau
+let perturbationsData = []; // DonnÈes des perturbations pour le popup du bandeau
 
 /**
- * Rend la carte d'info trafic avec l'√©tat des lignes
+ * Rend la carte d'info trafic avec l'Ètat des lignes
  * @param {Object} dataManager - Instance du DataManager
- * @param {Object} lineStatuses - √âtat des lignes {route_id: {status, message}}
+ * @param {Object} lineStatuses - …tat des lignes {route_id: {status, message}}
  * @param {HTMLElement} container - Conteneur pour les lignes
- * @param {HTMLElement} countElement - √âl√©ment pour afficher le nombre d'alertes
+ * @param {HTMLElement} countElement - …lÈment pour afficher le nombre d'alertes
  */
 export function renderInfoTraficCard(dataManager, lineStatuses, container, countElement) {
     if (!dataManager || !container) return;
@@ -64,7 +64,7 @@ export function renderInfoTraficCard(dataManager, lineStatuses, container, count
                 alertCount++;
             }
             
-            // Stocker les donn√©es de la ligne pour le modal
+            // Stocker les donnÈes de la ligne pour le modal
             const lineKey = route.route_short_name;
             lineDataCache[lineKey] = {
                 routeId: route.route_id,
@@ -77,7 +77,7 @@ export function renderInfoTraficCard(dataManager, lineStatuses, container, count
                 category: categoryData.name
             };
             
-            // Ic√¥ne de statut - affich√©e uniquement si pas normal (utilise .status-icon du CSS)
+            // IcÙne de statut - affichÈe uniquement si pas normal (utilise .status-icon du CSS)
             const statusIcon = state.status !== 'normal' ? '<span class="status-icon"></span>' : '';
             
             badgesHtml += `
@@ -99,7 +99,7 @@ export function renderInfoTraficCard(dataManager, lineStatuses, container, count
         container.appendChild(groupDiv);
     }
     
-    // Ajouter les √©v√©nements de clic sur les badges
+    // Ajouter les ÈvÈnements de clic sur les badges
     setupLineClickListeners(container);
     
     if (countElement) {
@@ -126,12 +126,12 @@ function setupLineClickListeners(container) {
 }
 
 /**
- * Affiche le modal de d√©tail d'une ligne
+ * Affiche le modal de dÈtail d'une ligne
  */
 function showLineDetailModal(lineData) {
     let modal = document.getElementById('line-detail-modal');
     
-    // Cr√©er le modal s'il n'existe pas
+    // CrÈer le modal s'il n'existe pas
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'line-detail-modal';
@@ -156,7 +156,7 @@ function showLineDetailModal(lineData) {
                         <p class="line-detail-reason"></p>
                     </div>
                     <div class="line-detail-section">
-                        <h4>Informations compl√©mentaires :</h4>
+                        <h4>Informations complÈmentaires :</h4>
                         <p class="line-detail-info"></p>
                     </div>
                 </div>
@@ -164,12 +164,12 @@ function showLineDetailModal(lineData) {
         `;
         document.body.appendChild(modal);
         
-        // √âv√©nements de fermeture
+        // …vÈnements de fermeture
         modal.querySelector('.line-detail-backdrop').addEventListener('click', hideLineDetailModal);
         modal.querySelector('.line-detail-close').addEventListener('click', hideLineDetailModal);
     }
     
-    // Remplir les donn√©es
+    // Remplir les donnÈes
     const badge = modal.querySelector('.line-detail-badge');
     badge.textContent = lineData.shortName;
     badge.style.backgroundColor = lineData.color;
@@ -180,11 +180,11 @@ function showLineDetailModal(lineData) {
     // Status
     const statusDiv = modal.querySelector('.line-detail-status');
     const statusLabels = {
-        'normal': { label: 'Trafic normal', class: 'status-normal', icon: '‚úì' },
+        'normal': { label: 'Trafic normal', class: 'status-normal', icon: '?' },
         'perturbation': { label: 'Perturbation en cours', class: 'status-perturbation', icon: '!' },
-        'retard': { label: 'Retards signal√©s', class: 'status-retard', icon: '‚è±' },
-        'annulation': { label: 'Service annul√©', class: 'status-annulation', icon: '‚úï' },
-        'travaux': { label: 'Travaux en cours', class: 'status-travaux', icon: '‚ö†' }
+        'retard': { label: 'Retards signalÈs', class: 'status-retard', icon: '?' },
+        'annulation': { label: 'Service annulÈ', class: 'status-annulation', icon: '?' },
+        'travaux': { label: 'Travaux en cours', class: 'status-travaux', icon: '?' }
     };
     const statusInfo = statusLabels[lineData.status] || statusLabels['normal'];
     statusDiv.className = `line-detail-status ${statusInfo.class}`;
@@ -195,11 +195,11 @@ function showLineDetailModal(lineData) {
     const infoEl = modal.querySelector('.line-detail-info');
     
     if (lineData.status === 'normal') {
-        reasonEl.textContent = 'Aucune perturbation signal√©e';
+        reasonEl.textContent = 'Aucune perturbation signalÈe';
         infoEl.textContent = 'Le trafic est normal sur cette ligne.';
     } else {
         reasonEl.textContent = lineData.message || 'Information non disponible';
-        infoEl.textContent = 'Nous vous conseillons de pr√©voir un temps de trajet suppl√©mentaire. Consultez les horaires en temps r√©el pour plus de d√©tails.';
+        infoEl.textContent = 'Nous vous conseillons de prÈvoir un temps de trajet supplÈmentaire. Consultez les horaires en temps rÈel pour plus de dÈtails.';
     }
     
     // Afficher le modal
@@ -208,7 +208,7 @@ function showLineDetailModal(lineData) {
 }
 
 /**
- * Cache le modal de d√©tail
+ * Cache le modal de dÈtail
  */
 function hideLineDetailModal() {
     const modal = document.getElementById('line-detail-modal');
@@ -218,13 +218,13 @@ function hideLineDetailModal() {
     }
 }
 
-// Exposer la fonction pour fermer le modal depuis l'ext√©rieur
+// Exposer la fonction pour fermer le modal depuis l'extÈrieur
 export { hideLineDetailModal };
 
 /**
- * Met √† jour le bandeau d'actualit√©s du hall avec les perturbations
+ * Met ‡ jour le bandeau d'actualitÈs du hall avec les perturbations
  * @param {Object} dataManager - Instance du DataManager
- * @param {Object} lineStatuses - √âtat des lignes
+ * @param {Object} lineStatuses - …tat des lignes
  */
 export function updateNewsBanner(dataManager, lineStatuses) {
     const banner = document.querySelector('.news-banner');
@@ -252,7 +252,7 @@ export function updateNewsBanner(dataManager, lineStatuses) {
                     message: state.message
                 });
                 
-                // D√©terminer la s√©v√©rit√© max
+                // DÈterminer la sÈvÈritÈ max
                 if (state.status === 'annulation') maxSeverity = 'annulation';
                 else if (state.status === 'perturbation' && maxSeverity !== 'annulation') maxSeverity = 'perturbation';
                 else if (state.status === 'retard' && maxSeverity === 'normal') maxSeverity = 'retard';
@@ -260,45 +260,45 @@ export function updateNewsBanner(dataManager, lineStatuses) {
         }
     }
     
-    // Appliquer le style selon la s√©v√©rit√©
+    // Appliquer le style selon la sÈvÈritÈ
     banner.classList.remove('severity-normal', 'severity-perturbation', 'severity-retard', 'severity-annulation');
     banner.classList.add(`severity-${maxSeverity}`);
     
     if (perturbationsData.length === 0) {
         // Pas de perturbations
-        textEl.textContent = 'Trafic normal sur l\'ensemble du r√©seau P√©ribus';
+        textEl.textContent = 'Trafic normal sur l\'ensemble du rÈseau PÈribus';
         textEl.classList.remove('marquee-text');
         banner.classList.remove('has-perturbations');
-        if (labelEl) labelEl.textContent = 'Actualit√©s';
+        if (labelEl) labelEl.textContent = 'ActualitÈs';
         if (iconEl) {
             iconEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
         }
     } else {
         // Il y a des perturbations - construire le texte
-        const linesText = perturbationsData.map(p => `Ligne ${p.shortName}`).join(' ‚Ä¢ ');
-        textEl.innerHTML = `<span class="marquee-inner">${linesText} ‚Äî Cliquez pour voir les d√©tails</span>`;
+        const linesText = perturbationsData.map(p => `Ligne ${p.shortName}`).join(' ï ');
+        textEl.innerHTML = `<span class="marquee-inner">${linesText} ó Cliquez pour voir les dÈtails</span>`;
         textEl.classList.add('marquee-text');
         banner.classList.add('has-perturbations');
         if (labelEl) labelEl.textContent = `${perturbationsData.length} alerte${perturbationsData.length > 1 ? 's' : ''}`;
         
-        // Ic√¥ne d'alerte
+        // IcÙne d'alerte
         if (iconEl) {
             iconEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
         }
         
-        // V√©rifier si le texte d√©passe et activer le d√©filement
+        // VÈrifier si le texte dÈpasse et activer le dÈfilement
         setTimeout(() => {
             const inner = textEl.querySelector('.marquee-inner');
             if (inner && inner.scrollWidth > textEl.clientWidth) {
                 textEl.classList.add('marquee-active');
-                // Calculer la dur√©e bas√©e sur la longueur
+                // Calculer la durÈe basÈe sur la longueur
                 const duration = Math.max(10, inner.scrollWidth / 50);
                 inner.style.animationDuration = `${duration}s`;
             }
         }, 100);
     }
     
-    // Rendre le bandeau cliquable pour voir le d√©tail
+    // Rendre le bandeau cliquable pour voir le dÈtail
     banner.style.cursor = perturbationsData.length > 0 ? 'pointer' : 'default';
     banner.onclick = perturbationsData.length > 0 ? (e) => {
         // Ne pas ouvrir si on clique sur le lien "Voir"
@@ -308,14 +308,14 @@ export function updateNewsBanner(dataManager, lineStatuses) {
 }
 
 /**
- * Affiche le popup de d√©tail des perturbations du bandeau
+ * Affiche le popup de dÈtail des perturbations du bandeau
  */
 function showBannerDetailModal() {
     if (perturbationsData.length === 0) return;
     
     let modal = document.getElementById('banner-detail-modal');
     
-    // Cr√©er le modal s'il n'existe pas
+    // CrÈer le modal s'il n'existe pas
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'banner-detail-modal';
@@ -341,7 +341,7 @@ function showBannerDetailModal() {
         `;
         document.body.appendChild(modal);
         
-        // √âv√©nements de fermeture
+        // …vÈnements de fermeture
         modal.querySelector('.banner-detail-backdrop').addEventListener('click', hideBannerDetailModal);
         modal.querySelector('.banner-detail-close').addEventListener('click', hideBannerDetailModal);
         modal.querySelector('.banner-detail-link').addEventListener('click', hideBannerDetailModal);
@@ -364,12 +364,12 @@ function showBannerDetailModal() {
                     <span class="banner-line-badge" style="background-color: ${p.color}; color: ${p.textColor};">${p.shortName}</span>
                     <span class="banner-status-tag ${statusInfo.class}">${statusInfo.label}</span>
                 </div>
-                <p class="banner-perturbation-message">${p.message || 'Perturbation signal√©e sur cette ligne.'}</p>
+                <p class="banner-perturbation-message">${p.message || 'Perturbation signalÈe sur cette ligne.'}</p>
             </div>
         `;
     }).join('');
     
-    // Mettre √† jour le header avec le nombre
+    // Mettre ‡ jour le header avec le nombre
     modal.querySelector('.banner-detail-header h3').textContent = 
         `${perturbationsData.length} perturbation${perturbationsData.length > 1 ? 's' : ''} en cours`;
     
@@ -379,7 +379,7 @@ function showBannerDetailModal() {
 }
 
 /**
- * Cache le modal de d√©tail du bandeau
+ * Cache le modal de dÈtail du bandeau
  */
 function hideBannerDetailModal() {
     const modal = document.getElementById('banner-detail-modal');
@@ -452,12 +452,12 @@ export function buildFicheHoraireList(dataManager, container) {
         container.appendChild(accordionGroup);
     }
 
-    // Attacher les event listeners aux accord√©ons
+    // Attacher les event listeners aux accordÈons
     setupAccordionListeners(container);
 }
 
 /**
- * Configure les listeners pour les accord√©ons
+ * Configure les listeners pour les accordÈons
  */
 function setupAccordionListeners(container) {
     container.querySelectorAll('.accordion-header').forEach(header => {
@@ -489,18 +489,18 @@ function getPdfPathForRoute(routeShortName) {
 }
 
 /**
- * Construit le HTML pour les lignes R (cas sp√©cial avec groupement)
+ * Construit le HTML pour les lignes R (cas spÈcial avec groupement)
  */
 function buildRLinesHtml() {
     return `
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R1, R2, R3 La Feuilleraie <> ESAT / Les Gourdoux <> Tr√©lissac Les Garennes / Les Pinots <> P+R Aquacap</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R4, R5 Route de Payench√© <> Coll√®ge Jean Moulin / Les Mondines / Cl√©ment Laval <> Coll√®ge Jean Moulin</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R6, R7 Maison des Compagnons <> Gour de l'Arche poste / Le Charpe <> Gour de l'Arche poste</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R8, R9 Jaunour <> Boulazac centre commercial / St√®le de Lesparat <> Place du 8 mai</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R10, R11 Notre Dame de Sanilhac poste <> Centre de la communication / H√©liodore <> Place du 8 mai</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R12 Le Change <> Boulazac centre commercial</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Lignes R13, R14 Coursac <> Razac sur l'Isle / La Chapelle Gonaguet <> Razac sur l'Isle</a>
-        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2025.pdf" target="_blank" rel="noopener noreferrer">Ligne R15 Boulazac Isle Manoire <> Halte ferroviaire Niversac</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R1, R2, R3 La Feuilleraie <> ESAT / Les Gourdoux <> TrÈlissac Les Garennes / Les Pinots <> P+R Aquacap</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R4, R5 Route de PayenchÈ <> CollËge Jean Moulin / Les Mondines / ClÈment Laval <> CollËge Jean Moulin</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R6, R7 Maison des Compagnons <> Gour de l'Arche poste / Le Charpe <> Gour de l'Arche poste</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R8, R9 Jaunour <> Boulazac centre commercial / StËle de Lesparat <> Place du 8 mai</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R10, R11 Notre Dame de Sanilhac poste <> Centre de la communication / HÈliodore <> Place du 8 mai</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Ligne R12 Le Change <> Boulazac centre commercial</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Lignes R13, R14 Coursac <> Razac sur l'Isle / La Chapelle Gonaguet <> Razac sur l'Isle</a>
+        <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2026.pdf" target="_blank" rel="noopener noreferrer">Ligne R15 Boulazac Isle Manoire <> Halte ferroviaire Niversac</a>
     `;
 }
 
@@ -508,4 +508,5 @@ export default {
     renderInfoTraficCard,
     buildFicheHoraireList
 };
+
 

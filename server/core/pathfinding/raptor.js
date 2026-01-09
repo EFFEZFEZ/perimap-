@@ -1,29 +1,29 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * raptor.js
- * ImplÃ©mentation de l'algorithme RAPTOR (Round-Based Public Transit Routing)
+ * Implémentation de l'algorithme RAPTOR (Round-Based Public Transit Routing)
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  * 
- * RAPTOR est l'algorithme de rÃ©fÃ©rence pour le calcul d'itinÃ©raires
- * en transport en commun. Il est utilisÃ© par de nombreux systÃ¨mes
+ * RAPTOR est l'algorithme de référence pour le calcul d'itinéraires
+ * en transport en commun. Il est utilisé par de nombreux systèmes
  * comme OpenTripPlanner, Navitia, etc.
  * 
  * Avantages:
- * - TrÃ¨s rapide (temps rÃ©el < 100ms)
- * - GÃ¨re les correspondances de maniÃ¨re optimale
- * - Retourne les itinÃ©raires Pareto-optimaux
+ * - Très rapide (temps réel < 100ms)
+ * - Gère les correspondances de manière optimale
+ * - Retourne les itinéraires Pareto-optimaux
  * 
- * RÃ©fÃ©rence: https://www.microsoft.com/en-us/research/publication/round-based-public-transit-routing/
+ * Référence: https://www.microsoft.com/en-us/research/publication/round-based-public-transit-routing/
  */
 
 /**
  * @typedef {Object} Stop
- * @property {string} id - ID unique de l'arrÃªt
- * @property {string} name - Nom de l'arrÃªt
+ * @property {string} id - ID unique de l'arrêt
+ * @property {string} name - Nom de l'arrêt
  * @property {number} lat - Latitude
  * @property {number} lon - Longitude
  */
@@ -31,18 +31,18 @@
 /**
  * @typedef {Object} StopTime
  * @property {string} tripId - ID du voyage
- * @property {string} stopId - ID de l'arrÃªt
- * @property {number} arrivalTime - Heure d'arrivÃ©e (secondes depuis minuit)
- * @property {number} departureTime - Heure de dÃ©part (secondes depuis minuit)
- * @property {number} stopSequence - Ordre de l'arrÃªt dans le voyage
+ * @property {string} stopId - ID de l'arrêt
+ * @property {number} arrivalTime - Heure d'arrivée (secondes depuis minuit)
+ * @property {number} departureTime - Heure de départ (secondes depuis minuit)
+ * @property {number} stopSequence - Ordre de l'arrêt dans le voyage
  */
 
 /**
  * @typedef {Object} Journey
  * @property {Array} legs - Segments du trajet
- * @property {number} departureTime - Heure de dÃ©part
- * @property {number} arrivalTime - Heure d'arrivÃ©e
- * @property {number} duration - DurÃ©e totale (secondes)
+ * @property {number} departureTime - Heure de départ
+ * @property {number} arrivalTime - Heure d'arrivée
+ * @property {number} duration - Durée totale (secondes)
  * @property {number} transfers - Nombre de correspondances
  */
 
@@ -58,7 +58,7 @@ export class RaptorAlgorithm {
       maxWalkDistance: options.maxWalkDistance || 1000, // Distance max de marche (m)
       walkSpeed: options.walkSpeed || 1.25, // Vitesse de marche (m/s)
       minTransferTime: options.minTransferTime || 120, // Temps min de correspondance (s)
-      transferPenalty: options.transferPenalty || 300, // PÃ©nalitÃ© de correspondance (s)
+      transferPenalty: options.transferPenalty || 300, // Pénalité de correspondance (s)
       ...options,
     };
 
@@ -69,17 +69,17 @@ export class RaptorAlgorithm {
   }
 
   /**
-   * Construit les index nÃ©cessaires pour RAPTOR
+   * Construit les index nécessaires pour RAPTOR
    */
   buildIndexes() {
     const { stops, stopTimes, routes, trips } = this.graph;
 
-    // Index des arrÃªts
+    // Index des arrêts
     stops.forEach((stop, index) => {
       this.stopsIndex.set(stop.stop_id, index);
     });
 
-    // Routes par arrÃªt
+    // Routes par arrêt
     const routeStops = new Map(); // route_id -> Set<stop_id>
     stopTimes.forEach(st => {
       const trip = trips.find(t => t.trip_id === st.trip_id);
@@ -91,7 +91,7 @@ export class RaptorAlgorithm {
       routeStops.get(trip.route_id).add(st.stop_id);
     });
 
-    // Inverser: pour chaque arrÃªt, quelles routes y passent
+    // Inverser: pour chaque arrêt, quelles routes y passent
     routeStops.forEach((stopIds, routeId) => {
       stopIds.forEach(stopId => {
         if (!this.routesAtStop.has(stopId)) {
@@ -124,27 +124,27 @@ export class RaptorAlgorithm {
       });
     });
 
-    console.log(`ðŸ“Š RAPTOR indexes built: ${this.stopsIndex.size} stops, ${this.routesAtStop.size} stop-routes`);
+    console.log(`?? RAPTOR indexes built: ${this.stopsIndex.size} stops, ${this.routesAtStop.size} stop-routes`);
   }
 
   /**
-   * Calcule les itinÃ©raires optimaux entre deux points
+   * Calcule les itinéraires optimaux entre deux points
    * 
-   * @param {string} originStopId - ID de l'arrÃªt de dÃ©part
-   * @param {string} destStopId - ID de l'arrÃªt d'arrivÃ©e
-   * @param {number} departureTime - Heure de dÃ©part (secondes depuis minuit)
+   * @param {string} originStopId - ID de l'arrêt de départ
+   * @param {string} destStopId - ID de l'arrêt d'arrivée
+   * @param {number} departureTime - Heure de départ (secondes depuis minuit)
    * @param {string} dateStr - Date au format YYYYMMDD
-   * @returns {Journey[]} Liste des itinÃ©raires Pareto-optimaux
+   * @returns {Journey[]} Liste des itinéraires Pareto-optimaux
    */
   computeJourneys(originStopId, destStopId, departureTime, dateStr) {
     const { maxRounds, minTransferTime } = this.options;
 
     // Tableaux RAPTOR
-    // Ï„[k][p] = meilleure heure d'arrivÃ©e Ã  l'arrÃªt p avec exactement k correspondances
+    // t[k][p] = meilleure heure d'arrivée à l'arrêt p avec exactement k correspondances
     const tau = [];
-    // Ï„*[p] = meilleure heure d'arrivÃ©e Ã  l'arrÃªt p (tous rounds confondus)
+    // t*[p] = meilleure heure d'arrivée à l'arrêt p (tous rounds confondus)
     const tauStar = new Map();
-    // Marquage des arrÃªts modifiÃ©s Ã  chaque round
+    // Marquage des arrêts modifiés à chaque round
     const marked = new Set();
     // Reconstruction du chemin
     const journeyPointer = new Map(); // stop_id -> { round, tripId, boardStop, alightStop }
@@ -159,10 +159,10 @@ export class RaptorAlgorithm {
       tauStar.set(stop.stop_id, Infinity);
     });
 
-    // ArrÃªt de dÃ©part: arrivÃ©e au temps de dÃ©part
+    // Arrêt de départ: arrivée au temps de départ
     const originIndex = this.stopsIndex.get(originStopId);
     if (originIndex === undefined) {
-      console.error(`ArrÃªt de dÃ©part non trouvÃ©: ${originStopId}`);
+      console.error(`Arrêt de départ non trouvé: ${originStopId}`);
       return [];
     }
 
@@ -172,10 +172,10 @@ export class RaptorAlgorithm {
 
     // Rounds RAPTOR
     for (let k = 1; k <= maxRounds; k++) {
-      // Copier les valeurs du round prÃ©cÃ©dent
+      // Copier les valeurs du round précédent
       tau[k] = [...tau[k - 1]];
 
-      // Collecter les routes Ã  scanner
+      // Collecter les routes à scanner
       const routesToScan = new Set();
       marked.forEach(stopId => {
         const routes = this.routesAtStop.get(stopId) || [];
@@ -188,19 +188,19 @@ export class RaptorAlgorithm {
         this.scanRoute(k, routeId, departureTime, dateStr, tau, tauStar, marked, journeyPointer);
       });
 
-      // Transferts Ã  pied (si implÃ©mentÃ©s)
+      // Transferts à pied (si implémentés)
       // this.processFootpaths(k, tau, tauStar, marked);
 
-      // Si aucun arrÃªt n'a Ã©tÃ© amÃ©liorÃ©, on peut arrÃªter
+      // Si aucun arrêt n'a été amélioré, on peut arrêter
       if (marked.size === 0) {
         break;
       }
     }
 
-    // RÃ©cupÃ©rer le meilleur temps d'arrivÃ©e Ã  destination
+    // Récupérer le meilleur temps d'arrivée à destination
     const destIndex = this.stopsIndex.get(destStopId);
     if (destIndex === undefined) {
-      console.error(`ArrÃªt de destination non trouvÃ©: ${destStopId}`);
+      console.error(`Arrêt de destination non trouvé: ${destStopId}`);
       return [];
     }
 
@@ -211,32 +211,32 @@ export class RaptorAlgorithm {
   }
 
   /**
-   * Scanne une route pour amÃ©liorer les temps d'arrivÃ©e
+   * Scanne une route pour améliorer les temps d'arrivée
    */
   scanRoute(k, routeId, queryTime, dateStr, tau, tauStar, marked, journeyPointer) {
     const routeTrips = this.stopTimesIndex.get(routeId);
     if (!routeTrips) return;
 
-    // Prendre le premier trip comme rÃ©fÃ©rence pour l'ordre des arrÃªts
+    // Prendre le premier trip comme référence pour l'ordre des arrêts
     const firstTripStopTimes = routeTrips.values().next().value;
     if (!firstTripStopTimes || firstTripStopTimes.length === 0) return;
 
     // Pour chaque trip de la route
     routeTrips.forEach((tripStopTimes, tripId) => {
-      // VÃ©rifier si le trip est actif Ã  cette date
-      // (simplifiÃ© - en vrai il faut vÃ©rifier calendar/calendar_dates)
+      // Vérifier si le trip est actif à cette date
+      // (simplifié - en vrai il faut vérifier calendar/calendar_dates)
       
       let boardingStop = null;
       let boardingTime = null;
 
-      // Parcourir les arrÃªts du trip dans l'ordre
+      // Parcourir les arrêts du trip dans l'ordre
       for (const st of tripStopTimes) {
         const stopIndex = this.stopsIndex.get(st.stop_id);
         if (stopIndex === undefined) continue;
 
         // Est-ce qu'on peut monter ici?
         if (boardingStop === null) {
-          // On peut monter si on peut atteindre cet arrÃªt avant le dÃ©part du bus
+          // On peut monter si on peut atteindre cet arrêt avant le départ du bus
           const arrivalAtStop = tau[k - 1][stopIndex];
           if (arrivalAtStop !== Infinity && arrivalAtStop <= st.departure_time) {
             boardingStop = st.stop_id;
@@ -244,7 +244,7 @@ export class RaptorAlgorithm {
           }
         }
 
-        // Est-ce qu'on peut descendre ici et amÃ©liorer le temps?
+        // Est-ce qu'on peut descendre ici et améliorer le temps?
         if (boardingStop !== null) {
           const newArrival = st.arrival_time;
           
@@ -273,13 +273,13 @@ export class RaptorAlgorithm {
   }
 
   /**
-   * Reconstruit les journeys Ã  partir des pointeurs
+   * Reconstruit les journeys à partir des pointeurs
    */
   reconstructJourneys(destStopId, tau, journeyPointer) {
     const journeys = [];
     const destIndex = this.stopsIndex.get(destStopId);
 
-    // Pour chaque round, vÃ©rifier si on a un chemin
+    // Pour chaque round, vérifier si on a un chemin
     for (let k = 1; k < tau.length; k++) {
       if (tau[k][destIndex] === Infinity) continue;
 
@@ -320,13 +320,13 @@ export class RaptorAlgorithm {
       }
     }
 
-    // Filtrer les journeys dominÃ©s (Pareto)
+    // Filtrer les journeys dominés (Pareto)
     return this.filterParetoOptimal(journeys);
   }
 
   /**
-   * Filtre les itinÃ©raires pour ne garder que les Pareto-optimaux
-   * (non dominÃ©s en termes de temps d'arrivÃ©e et nombre de correspondances)
+   * Filtre les itinéraires pour ne garder que les Pareto-optimaux
+   * (non dominés en termes de temps d'arrivée et nombre de correspondances)
    */
   filterParetoOptimal(journeys) {
     const dominated = new Set();
@@ -338,7 +338,7 @@ export class RaptorAlgorithm {
         const ji = journeys[i];
         const jj = journeys[j];
 
-        // j domine i si j est meilleur ou Ã©gal sur tous les critÃ¨res et strictement meilleur sur au moins un
+        // j domine i si j est meilleur ou égal sur tous les critères et strictement meilleur sur au moins un
         if (
           jj.arrivalTime <= ji.arrivalTime &&
           jj.transfers <= ji.transfers &&
@@ -353,7 +353,7 @@ export class RaptorAlgorithm {
   }
 
   /**
-   * Trouve les arrÃªts accessibles Ã  pied depuis un point
+   * Trouve les arrêts accessibles à pied depuis un point
    * 
    * @param {number} lat - Latitude
    * @param {number} lon - Longitude
@@ -386,15 +386,15 @@ export class RaptorAlgorithm {
    * Calcule la distance Haversine entre deux points
    */
   haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Rayon de la Terre en mÃ¨tres
-    const Ï†1 = (lat1 * Math.PI) / 180;
-    const Ï†2 = (lat2 * Math.PI) / 180;
-    const Î”Ï† = ((lat2 - lat1) * Math.PI) / 180;
-    const Î”Î» = ((lon2 - lon1) * Math.PI) / 180;
+    const R = 6371000; // Rayon de la Terre en mètres
+    const f1 = (lat1 * Math.PI) / 180;
+    const f2 = (lat2 * Math.PI) / 180;
+    const ?f = ((lat2 - lat1) * Math.PI) / 180;
+    const ?? = ((lon2 - lon1) * Math.PI) / 180;
 
     const a =
-      Math.sin(Î”Ï† / 2) * Math.sin(Î”Ï† / 2) +
-      Math.cos(Ï†1) * Math.cos(Ï†2) * Math.sin(Î”Î» / 2) * Math.sin(Î”Î» / 2);
+      Math.sin(?f / 2) * Math.sin(?f / 2) +
+      Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -402,4 +402,5 @@ export class RaptorAlgorithm {
 }
 
 export default RaptorAlgorithm;
+
 

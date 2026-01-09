@@ -1,21 +1,21 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * middleware/auth.js
  * Authentification et identification des utilisateurs
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  * 
- * StratÃ©gies d'authentification:
- * 1. Device ID (anonyme) - Par dÃ©faut
- * 2. JWT Token (optionnel pour fonctionnalitÃ©s avancÃ©es)
+ * Stratégies d'authentification:
+ * 1. Device ID (anonyme) - Par défaut
+ * 2. JWT Token (optionnel pour fonctionnalités avancées)
  */
 
 /**
  * Middleware d'identification par Device ID
- * CrÃ©e ou rÃ©cupÃ¨re un utilisateur basÃ© sur le header X-Device-ID
+ * Crée ou récupère un utilisateur basé sur le header X-Device-ID
  */
 export function deviceIdAuth(userMemory) {
   return async (req, res, next) => {
@@ -42,7 +42,7 @@ export function deviceIdAuth(userMemory) {
 
 /**
  * Middleware qui requiert une identification
- * Ã€ utiliser sur les routes qui nÃ©cessitent un utilisateur
+ * À utiliser sur les routes qui nécessitent un utilisateur
  */
 export function requireAuth() {
   return (req, res, next) => {
@@ -57,8 +57,8 @@ export function requireAuth() {
 }
 
 /**
- * GÃ©nÃ¨re un Device ID unique
- * Ã€ utiliser cÃ´tÃ© client si pas de device ID existant
+ * Génère un Device ID unique
+ * À utiliser côté client si pas de device ID existant
  */
 export function generateDeviceId() {
   const timestamp = Date.now().toString(36);
@@ -67,8 +67,8 @@ export function generateDeviceId() {
 }
 
 /**
- * Middleware JWT (optionnel, pour fonctionnalitÃ©s avancÃ©es)
- * Ã€ implÃ©menter si besoin d'authentification plus forte
+ * Middleware JWT (optionnel, pour fonctionnalités avancées)
+ * À implémenter si besoin d'authentification plus forte
  */
 export function jwtAuth(secret) {
   return async (req, res, next) => {
@@ -92,7 +92,7 @@ export function jwtAuth(secret) {
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         return res.status(401).json({
-          error: 'Token expirÃ©',
+          error: 'Token expiré',
           code: 'TOKEN_EXPIRED',
         });
       }
@@ -108,7 +108,7 @@ export function jwtAuth(secret) {
 }
 
 /**
- * GÃ©nÃ¨re un JWT token
+ * Génère un JWT token
  */
 export function generateJwtToken(payload, secret, expiresIn = '7d') {
   /*
@@ -137,7 +137,7 @@ export function isValidDeviceId(deviceId) {
     return true;
   }
 
-  // Accepter les strings alphanumÃ©riques de longueur raisonnable
+  // Accepter les strings alphanumériques de longueur raisonnable
   return /^[a-zA-Z0-9_-]{8,64}$/.test(deviceId);
 }
 
@@ -149,4 +149,5 @@ export default {
   generateJwtToken,
   isValidDeviceId,
 };
+
 

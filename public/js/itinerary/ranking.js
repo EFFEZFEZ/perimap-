@@ -1,25 +1,25 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * ranking.js - VERSION V223
- * Logique de dÃ©duplication, tri et filtrage pour les itinÃ©raires.
+ * Logique de déduplication, tri et filtrage pour les itinéraires.
  * 
- * âœ… V223: Fix filtrage mode arriver - utilise arrivalTime au lieu de departureTime
- *    Un bus partant Ã  14h28 mais arrivant Ã  16h30 n'est plus incorrectement filtrÃ©
+ * ? V223: Fix filtrage mode arriver - utilise arrivalTime au lieu de departureTime
+ *    Un bus partant à 14h28 mais arrivant à 16h30 n'est plus incorrectement filtré
  */
 
 import { parseTimeStringToMinutes } from '../utils/formatters.js';
 
-// V120: Configuration minimum d'itinÃ©raires bus
+// V120: Configuration minimum d'itinéraires bus
 const MIN_BUS_ITINERARIES = 5;
 
 /**
- * DÃ©duplique les itinÃ©raires par structure de trajet (mÃªme sÃ©quence bus/arrÃªts).
- * En mode "partir", garde le premier dÃ©part pour chaque structure.
+ * Déduplique les itinéraires par structure de trajet (même séquence bus/arrêts).
+ * En mode "partir", garde le premier départ pour chaque structure.
  * En mode "arriver", garde les 3 meilleurs horaires par structure (plus de choix).
- * V115: AmÃ©lioration - en mode arriver, on garde plusieurs variantes horaires
+ * V115: Amélioration - en mode arriver, on garde plusieurs variantes horaires
  */
 export function deduplicateItineraries(list, searchMode = 'partir') {
   if (!Array.isArray(list)) return [];
@@ -41,7 +41,7 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
       return;
     }
     
-    // Trier les variantes par heure de dÃ©part
+    // Trier les variantes par heure de départ
     variants.sort((a, b) => {
       const depA = parseTimeToMinutes(a.departureTime);
       const depB = parseTimeToMinutes(b.departureTime);
@@ -49,25 +49,25 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
     });
     
     if (searchMode === 'arriver') {
-      // V115: En mode arriver, on garde les 3 derniers dÃ©parts (les plus proches de l'heure demandÃ©e)
-      // Cela donne plus de choix Ã  l'utilisateur
+      // V115: En mode arriver, on garde les 3 derniers départs (les plus proches de l'heure demandée)
+      // Cela donne plus de choix à l'utilisateur
       const MAX_VARIANTS_ARRIVER = 3;
       const startIdx = Math.max(0, variants.length - MAX_VARIANTS_ARRIVER);
       result.push(...variants.slice(startIdx));
     } else {
-      // En mode partir, on veut le premier dÃ©part seulement
+      // En mode partir, on veut le premier départ seulement
       result.push(variants[0]);
     }
   });
   
-  console.log(`ðŸ”„ DÃ©duplication (${searchMode}): ${list.length} â†’ ${result.length} itinÃ©raires`);
+  console.log(`?? Déduplication (${searchMode}): ${list.length} ? ${result.length} itinéraires`);
   
   return result;
 }
 
 /**
- * CrÃ©e une signature basÃ©e sur la STRUCTURE du trajet, pas les horaires.
- * Deux trajets avec les mÃªmes bus/arrÃªts mais horaires diffÃ©rents ont la mÃªme signature.
+ * Crée une signature basée sur la STRUCTURE du trajet, pas les horaires.
+ * Deux trajets avec les mêmes bus/arrêts mais horaires différents ont la même signature.
  */
 function createRouteSignature(it) {
   if (!it) return 'null';
@@ -99,7 +99,7 @@ function normalizeStopName(name) {
 }
 
 /**
- * Parse une chaÃ®ne de temps en minutes (wrapper pour compatibilitÃ©)
+ * Parse une chaîne de temps en minutes (wrapper pour compatibilité)
  */
 function parseTimeToMinutes(timeStr) {
   if (!timeStr || typeof timeStr !== 'string') return Infinity;
@@ -108,10 +108,10 @@ function parseTimeToMinutes(timeStr) {
 }
 
 /**
- * Filtre les itinÃ©raires expirÃ©s (dÃ©part dans le passÃ©).
+ * Filtre les itinéraires expirés (départ dans le passé).
  * Fonctionne pour les deux modes.
  * Si searchTime est fourni et la date est dans le futur, on ne filtre pas.
- * V70: AmÃ©lioration - ne filtre que si la recherche est pour aujourd'hui ET l'heure est passÃ©e
+ * V70: Amélioration - ne filtre que si la recherche est pour aujourd'hui ET l'heure est passée
  */
 export function filterExpiredDepartures(itineraries, searchTime = null) {
   if (!Array.isArray(itineraries)) return [];
@@ -135,7 +135,7 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   
   // Si date invalide, ne pas filtrer
   if (isNaN(searchDate.getTime())) {
-    console.warn('âš ï¸ filterExpiredDepartures: date invalide, pas de filtrage');
+    console.warn('?? filterExpiredDepartures: date invalide, pas de filtrage');
     return itineraries;
   }
   
@@ -143,63 +143,63 @@ export function filterExpiredDepartures(itineraries, searchTime = null) {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const searchDateStr = `${searchDate.getFullYear()}-${String(searchDate.getMonth() + 1).padStart(2, '0')}-${String(searchDate.getDate()).padStart(2, '0')}`;
   
-  // V205: Filtrer par rapport Ã  l'heure demandÃ©e (pas l'heure courante)
-  // Objectif: montrer une liste croissante Ã  partir de l'heure choisie, mÃªme si la requÃªte est faite aprÃ¨s minuit
+  // V205: Filtrer par rapport à l'heure demandée (pas l'heure courante)
+  // Objectif: montrer une liste croissante à partir de l'heure choisie, même si la requête est faite après minuit
   
   // Si date FUTURE, on ne filtre rien (on suppose tous les horaires valides pour ce jour)
   if (searchDateStr !== todayStr) {
-    console.log(`ðŸ“… V205: Recherche pour ${searchDateStr} (â‰  aujourd'hui ${todayStr}) â†’ pas de filtrage horaire`);
+    console.log(`?? V205: Recherche pour ${searchDateStr} (? aujourd'hui ${todayStr}) ? pas de filtrage horaire`);
     return itineraries;
   }
   
-  // V220: En mode ARRIVER, filtrer par rapport Ã  l'heure ACTUELLE (pas l'heure demandÃ©e)
-  // Car l'heure demandÃ©e est l'heure d'arrivÃ©e, pas de dÃ©part
+  // V220: En mode ARRIVER, filtrer par rapport à l'heure ACTUELLE (pas l'heure demandée)
+  // Car l'heure demandée est l'heure d'arrivée, pas de départ
   const isArriveMode = searchTime.type === 'arriver';
   
   let requestMinutes;
   if (isArriveMode) {
     // V223: Mode arriver - on filtre les bus qui ARRIVENT avant l'heure actuelle
-    // (pas ceux qui PARTENT avant l'heure actuelle, car un bus parti Ã  14h peut arriver Ã  16h)
+    // (pas ceux qui PARTENT avant l'heure actuelle, car un bus parti à 14h peut arriver à 16h)
     const now = new Date();
     requestMinutes = now.getHours() * 60 + now.getMinutes();
-    console.log(`ðŸ• V223: Mode ARRIVER - Filtrage des trajets qui arrivent avant ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} (heure actuelle)`);
+    console.log(`?? V223: Mode ARRIVER - Filtrage des trajets qui arrivent avant ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} (heure actuelle)`);
   } else {
-    // Mode partir: filtrer les bus avant l'heure demandÃ©e
+    // Mode partir: filtrer les bus avant l'heure demandée
     const reqHour = parseInt(searchTime.hour) || 0;
     const reqMinute = parseInt(searchTime.minute) || 0;
     requestMinutes = reqHour * 60 + reqMinute;
-    console.log(`ðŸ• V205: Filtrage des trajets avant ${reqHour}:${String(reqMinute).padStart(2,'0')} (heure demandÃ©e)`);
+    console.log(`?? V205: Filtrage des trajets avant ${reqHour}:${String(reqMinute).padStart(2,'0')} (heure demandée)`);
   }
   
   const filtered = itineraries.filter(it => {
-    // V142: Ne jamais filtrer vÃ©lo/marche - ils n'ont pas d'horaire fixe
+    // V142: Ne jamais filtrer vélo/marche - ils n'ont pas d'horaire fixe
     const type = it?.type;
     if (type === 'BIKE' || type === 'WALK' || it?._isBike || it?._isWalk) {
       return true;
     }
     
-    // V223: En mode arriver, utiliser l'heure d'ARRIVÃ‰E pour le filtrage
-    // Un bus qui part Ã  14h mais arrive Ã  16h30 est valide si on veut arriver avant 17h40
+    // V223: En mode arriver, utiliser l'heure d'ARRIVÉE pour le filtrage
+    // Un bus qui part à 14h mais arrive à 16h30 est valide si on veut arriver avant 17h40
     const timeToCheck = isArriveMode ? it?.arrivalTime : it?.departureTime;
     if (!timeToCheck || timeToCheck === '~' || timeToCheck === '--:--') return true;
     
     const timeMinutes = parseTimeToMinutes(timeToCheck);
     if (timeMinutes === Infinity) return true;
     
-    // Garder si l'heure >= heure actuelle/demandÃ©e (avec 2 min de marge nÃ©gative)
+    // Garder si l'heure >= heure actuelle/demandée (avec 2 min de marge négative)
     return timeMinutes >= (requestMinutes - 2);
   });
   
   const removed = itineraries.length - filtered.length;
   if (removed > 0) {
-    console.log(`ðŸš« ${removed} trajet(s) passÃ©(s) filtrÃ©(s)`);
+    console.log(`?? ${removed} trajet(s) passé(s) filtré(s)`);
   }
   
   return filtered;
 }
 
 /**
- * En mode "arriver", filtre les trajets qui arrivent APRÃˆS l'heure demandÃ©e.
+ * En mode "arriver", filtre les trajets qui arrivent APRÈS l'heure demandée.
  */
 export function filterLateArrivals(itineraries, targetHour, targetMinute) {
   if (!Array.isArray(itineraries)) return [];
@@ -213,15 +213,15 @@ export function filterLateArrivals(itineraries, targetHour, targetMinute) {
     const arrMinutes = parseTimeToMinutes(arrTime);
     if (arrMinutes === Infinity) return true;
     
-    // Garder si arrivÃ©e <= heure cible
+    // Garder si arrivée <= heure cible
     return arrMinutes <= targetMinutes;
   });
 }
 
 /**
- * Trie et classe les itinÃ©raires pour le mode "arriver".
- * V142: Tri par type (BUS d'abord) puis par heure d'arrivÃ©e DÃ‰CROISSANTE
- * L'utilisateur veut arriver Ã  16h -> les trajets BUS les plus proches de 16h en premier
+ * Trie et classe les itinéraires pour le mode "arriver".
+ * V142: Tri par type (BUS d'abord) puis par heure d'arrivée DÉCROISSANTE
+ * L'utilisateur veut arriver à 16h -> les trajets BUS les plus proches de 16h en premier
  */
 export function rankArrivalItineraries(itineraries, searchTime) {
   if (!searchTime || searchTime.type !== 'arriver') return itineraries;
@@ -231,43 +231,43 @@ export function rankArrivalItineraries(itineraries, searchTime) {
   const targetMinute = parseInt(searchTime.minute) || 0;
   const targetMinutes = targetHour * 60 + targetMinute;
   
-  console.log(`ðŸŽ¯ rankArrivalItineraries: cible ${String(targetHour).padStart(2,'0')}:${String(targetMinute).padStart(2,'0')} (${targetMinutes}min), ${itineraries.length} itinÃ©raires`);
+  console.log(`?? rankArrivalItineraries: cible ${String(targetHour).padStart(2,'0')}:${String(targetMinute).padStart(2,'0')} (${targetMinutes}min), ${itineraries.length} itinéraires`);
   
-  // V142: SÃ©parer par type pour garder BUS en premier
+  // V142: Séparer par type pour garder BUS en premier
   const busItins = itineraries.filter(it => it.type !== 'BIKE' && it.type !== 'WALK' && !it._isBike && !it._isWalk);
   const bikeItins = itineraries.filter(it => it.type === 'BIKE' || it._isBike);
   const walkItins = itineraries.filter(it => it.type === 'WALK' || it._isWalk);
   
-  // Trier les bus par arrivÃ©e DÃ‰CROISSANTE (plus proche de l'heure cible en premier)
+  // Trier les bus par arrivée DÉCROISSANTE (plus proche de l'heure cible en premier)
   busItins.sort((a, b) => {
     const arrA = parseTimeToMinutes(a.arrivalTime);
     const arrB = parseTimeToMinutes(b.arrivalTime);
     
-    // Filtrer les arrivÃ©es aprÃ¨s l'heure demandÃ©e (trop tard)
+    // Filtrer les arrivées après l'heure demandée (trop tard)
     const aValid = arrA <= targetMinutes;
     const bValid = arrB <= targetMinutes;
     if (aValid !== bValid) return aValid ? -1 : 1;
     
-    // Trier par arrivÃ©e DÃ‰CROISSANTE (15h55 > 15h45 > 15h30)
+    // Trier par arrivée DÉCROISSANTE (15h55 > 15h45 > 15h30)
     return arrB - arrA;
   });
 
-  // Recomposer: BUS triÃ©s, puis BIKE, puis WALK
+  // Recomposer: BUS triés, puis BIKE, puis WALK
   const sorted = [...busItins, ...bikeItins, ...walkItins];
 
-  console.log('ðŸ“‹ Tri ARRIVER (BUS d\'abord, arrivÃ©e dÃ©croissante):', sorted.slice(0, 5).map(it => `${it.type}:${it.arrivalTime}`).join(', '));
+  console.log('?? Tri ARRIVER (BUS d\'abord, arrivée décroissante):', sorted.slice(0, 5).map(it => `${it.type}:${it.arrivalTime}`).join(', '));
 
   return sorted;
 }
 
 /**
- * Trie les itinÃ©raires pour le mode "partir".
- * PrioritÃ©: premier dÃ©part (>= heure demandÃ©e), moins de correspondances, durÃ©e totale plus courte.
+ * Trie les itinéraires pour le mode "partir".
+ * Priorité: premier départ (>= heure demandée), moins de correspondances, durée totale plus courte.
  */
 /**
- * V64: Limite les trajets vÃ©lo et piÃ©ton Ã  un seul de chaque.
+ * V64: Limite les trajets vélo et piéton à un seul de chaque.
  * Ces modes n'ont pas d'horaires (on peut partir quand on veut),
- * donc avoir plusieurs rÃ©sultats est inutile.
+ * donc avoir plusieurs résultats est inutile.
  * V120: Garantit au minimum MIN_BUS_ITINERARIES trajets bus si disponibles
  */
 export function limitBikeWalkItineraries(itineraries, minBusRequired = MIN_BUS_ITINERARIES) {
@@ -284,40 +284,40 @@ export function limitBikeWalkItineraries(itineraries, minBusRequired = MIN_BUS_I
       if (!firstBike) {
         firstBike = it;
       }
-      // Ignorer les doublons vÃ©lo
+      // Ignorer les doublons vélo
     } else if (type === 'WALK' || it?._isWalk) {
       if (!firstWalk) {
         firstWalk = it;
       }
-      // Ignorer les doublons piÃ©ton
+      // Ignorer les doublons piéton
     } else {
       // Bus/Transit : garder tous
       busItineraries.push(it);
     }
   }
   
-  // V120: Log si on a moins de bus que le minimum souhaitÃ©
+  // V120: Log si on a moins de bus que le minimum souhaité
   if (busItineraries.length < minBusRequired && busItineraries.length > 0) {
-    console.log(`âš ï¸ V120: Seulement ${busItineraries.length} trajet(s) bus trouvÃ©(s) (minimum souhaitÃ©: ${minBusRequired})`);
+    console.log(`?? V120: Seulement ${busItineraries.length} trajet(s) bus trouvé(s) (minimum souhaité: ${minBusRequired})`);
   }
   
-  // Reconstruire la liste : BUS d'abord, puis vÃ©lo, puis piÃ©ton
+  // Reconstruire la liste : BUS d'abord, puis vélo, puis piéton
   const result = [...busItineraries];
   if (firstBike) result.push(firstBike);
   if (firstWalk) result.push(firstWalk);
   
   const removed = itineraries.length - result.length;
   if (removed > 0) {
-    console.log(`ðŸš´ V64: ${removed} trajet(s) vÃ©lo/piÃ©ton en double supprimÃ©(s)`);
+    console.log(`?? V64: ${removed} trajet(s) vélo/piéton en double supprimé(s)`);
   }
   
-  console.log(`ðŸ“Š V120: ${busItineraries.length} bus, ${firstBike ? 1 : 0} vÃ©lo, ${firstWalk ? 1 : 0} marche`);
+  console.log(`?? V120: ${busItineraries.length} bus, ${firstBike ? 1 : 0} vélo, ${firstWalk ? 1 : 0} marche`);
   
   return result;
 }
 
 /**
- * V120: Compte le nombre d'itinÃ©raires bus dans une liste
+ * V120: Compte le nombre d'itinéraires bus dans une liste
  */
 export function countBusItineraries(itineraries) {
   if (!Array.isArray(itineraries)) return 0;
@@ -328,7 +328,7 @@ export function countBusItineraries(itineraries) {
 }
 
 /**
- * V120: Retourne le minimum d'itinÃ©raires bus configurÃ©
+ * V120: Retourne le minimum d'itinéraires bus configuré
  */
 export function getMinBusItineraries() {
   return MIN_BUS_ITINERARIES;
@@ -337,10 +337,10 @@ export function getMinBusItineraries() {
 export function rankDepartureItineraries(itineraries) {
   if (!Array.isArray(itineraries) || !itineraries.length) return itineraries;
   
-  console.log(`ðŸŽ¯ rankDepartureItineraries: ${itineraries.length} itinÃ©raires Ã  trier`);
+  console.log(`?? rankDepartureItineraries: ${itineraries.length} itinéraires à trier`);
   
-  // Debug: afficher tous les itinÃ©raires avant tri
-  console.log('ðŸ“‹ Avant tri (heures de dÃ©part):', itineraries.map(it => it.departureTime).join(', '));
+  // Debug: afficher tous les itinéraires avant tri
+  console.log('?? Avant tri (heures de départ):', itineraries.map(it => it.departureTime).join(', '));
   
   const scored = itineraries.map(it => {
     const steps = Array.isArray(it.steps) ? it.steps : [];
@@ -348,7 +348,7 @@ export function rankDepartureItineraries(itineraries) {
     const transfers = Math.max(0, busSteps.length - 1);
     const depMinutes = parseTimeToMinutes(it.departureTime);
     
-    // DurÃ©e totale en minutes
+    // Durée totale en minutes
     let durationMin = 0;
     const durationMatch = (it.duration || '').match(/(\d+)/);
     if (durationMatch) durationMin = parseInt(durationMatch[1], 10);
@@ -362,17 +362,17 @@ export function rankDepartureItineraries(itineraries) {
     };
   });
 
-  // Trier: plus tÃ´t d'abord
+  // Trier: plus tôt d'abord
   scored.sort((a, b) => {
-    // D'abord par heure de dÃ©part (plus tÃ´t = meilleur)
+    // D'abord par heure de départ (plus tôt = meilleur)
     if (a.depMinutes !== b.depMinutes) return a.depMinutes - b.depMinutes;
     // Puis par nombre de correspondances
     if (a.transfers !== b.transfers) return a.transfers - b.transfers;
-    // Enfin par durÃ©e totale
+    // Enfin par durée totale
     return a.durationMin - b.durationMin;
   });
 
-  console.log('ðŸ“‹ AprÃ¨s tri PARTIR (du plus tÃ´t au plus tard):', scored.slice(0, 8).map(s => ({
+  console.log('?? Après tri PARTIR (du plus tôt au plus tard):', scored.slice(0, 8).map(s => ({
     dep: s.depTime,
     depMin: s.depMinutes,
     arr: s.it.arrivalTime,
@@ -381,4 +381,5 @@ export function rankDepartureItineraries(itineraries) {
 
   return scored.map(x => x.it);
 }
+
 

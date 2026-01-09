@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * utils/cache.js
- * SystÃ¨me de cache en mÃ©moire
+ * Système de cache en mémoire
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 /**
@@ -14,8 +14,8 @@
  */
 export class LRUCache {
   /**
-   * @param {number} maxSize - Nombre max d'entrÃ©es
-   * @param {number} ttlMs - DurÃ©e de vie des entrÃ©es (ms)
+   * @param {number} maxSize - Nombre max d'entrées
+   * @param {number} ttlMs - Durée de vie des entrées (ms)
    */
   constructor(maxSize = 1000, ttlMs = 3600000) {
     this.maxSize = maxSize;
@@ -33,13 +33,13 @@ export class LRUCache {
     
     if (!entry) return undefined;
 
-    // VÃ©rifier l'expiration
+    // Vérifier l'expiration
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
       return undefined;
     }
 
-    // LRU: dÃ©placer Ã  la fin (le plus rÃ©cent)
+    // LRU: déplacer à la fin (le plus récent)
     this.cache.delete(key);
     this.cache.set(key, entry);
 
@@ -50,13 +50,13 @@ export class LRUCache {
    * Stocke une valeur dans le cache
    * @param {string} key
    * @param {*} value
-   * @param {number} [customTtlMs] - TTL personnalisÃ©
+   * @param {number} [customTtlMs] - TTL personnalisé
    */
   set(key, value, customTtlMs = null) {
-    // Supprimer si dÃ©jÃ  existant
+    // Supprimer si déjà existant
     this.cache.delete(key);
 
-    // Ã‰viction si plein (supprimer le plus ancien)
+    // Éviction si plein (supprimer le plus ancien)
     while (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);
@@ -69,7 +69,7 @@ export class LRUCache {
   }
 
   /**
-   * Supprime une entrÃ©e
+   * Supprime une entrée
    * @param {string} key
    */
   delete(key) {
@@ -77,7 +77,7 @@ export class LRUCache {
   }
 
   /**
-   * VÃ©rifie si une clÃ© existe (et n'est pas expirÃ©e)
+   * Vérifie si une clé existe (et n'est pas expirée)
    * @param {string} key
    * @returns {boolean}
    */
@@ -93,8 +93,8 @@ export class LRUCache {
   }
 
   /**
-   * Nettoie les entrÃ©es expirÃ©es
-   * @returns {number} Nombre d'entrÃ©es supprimÃ©es
+   * Nettoie les entrées expirées
+   * @returns {number} Nombre d'entrées supprimées
    */
   cleanup() {
     const now = Date.now();
@@ -138,20 +138,20 @@ export class LRUCache {
 }
 
 /**
- * Cache pour les itinÃ©raires
- * ClÃ© basÃ©e sur origine, destination, et heure arrondie
+ * Cache pour les itinéraires
+ * Clé basée sur origine, destination, et heure arrondie
  */
 export class RouteCache extends LRUCache {
   constructor(options = {}) {
     super(
       options.maxSize || 500,
-      options.ttlMs || 5 * 60 * 1000 // 5 minutes par dÃ©faut
+      options.ttlMs || 5 * 60 * 1000 // 5 minutes par défaut
     );
     this.roundMinutes = options.roundMinutes || 5;
   }
 
   /**
-   * GÃ©nÃ¨re une clÃ© de cache pour un itinÃ©raire
+   * Génère une clé de cache pour un itinéraire
    */
   generateKey(origin, destination, time) {
     // Arrondir l'heure aux X minutes
@@ -173,7 +173,7 @@ export class RouteCache extends LRUCache {
   }
 
   /**
-   * Obtient un itinÃ©raire en cache
+   * Obtient un itinéraire en cache
    */
   getRoute(origin, destination, time) {
     const key = this.generateKey(origin, destination, time);
@@ -181,7 +181,7 @@ export class RouteCache extends LRUCache {
   }
 
   /**
-   * Stocke un itinÃ©raire
+   * Stocke un itinéraire
    */
   setRoute(origin, destination, time, itineraries) {
     const key = this.generateKey(origin, destination, time);
@@ -196,12 +196,12 @@ export class PlacesCache extends LRUCache {
   constructor(options = {}) {
     super(
       options.maxSize || 1000,
-      options.ttlMs || 60 * 60 * 1000 // 1 heure par dÃ©faut
+      options.ttlMs || 60 * 60 * 1000 // 1 heure par défaut
     );
   }
 
   /**
-   * GÃ©nÃ¨re une clÃ© normalisÃ©e pour une requÃªte
+   * Génère une clé normalisée pour une requête
    */
   normalizeQuery(query) {
     return query
@@ -252,7 +252,7 @@ export class CacheManager {
       ttlMs: this.options.placesTtl,
     });
 
-    // Nettoyage pÃ©riodique
+    // Nettoyage périodique
     this.cleanupTimer = setInterval(
       () => this.cleanup(),
       this.options.cleanupInterval
@@ -267,7 +267,7 @@ export class CacheManager {
     const placesCleaned = this.placesCache.cleanup();
     
     if (routeCleaned > 0 || placesCleaned > 0) {
-      console.log(`ðŸ§¹ Cache cleanup: ${routeCleaned} routes, ${placesCleaned} places`);
+      console.log(`?? Cache cleanup: ${routeCleaned} routes, ${placesCleaned} places`);
     }
   }
 
@@ -280,7 +280,7 @@ export class CacheManager {
   }
 
   /**
-   * ArrÃªte le nettoyage pÃ©riodique
+   * Arrête le nettoyage périodique
    */
   stop() {
     if (this.cleanupTimer) {
@@ -306,4 +306,5 @@ export default {
   PlacesCache,
   CacheManager,
 };
+
 

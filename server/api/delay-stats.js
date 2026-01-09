@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
+ * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 
@@ -286,3 +286,4 @@ export default router;
 
 // Version non-commentée avec export vide pour l'instant
 export default {};
+

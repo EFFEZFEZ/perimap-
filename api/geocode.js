@@ -1,6 +1,6 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 export default async function handler(req, res) {
     // CORS headers (optionnellement restreints via ALLOWED_ORIGINS)
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     const longitude = lon ?? lng ?? req.query?.longitude;
 
     if (!latitude || !longitude) {
-        res.status(400).json({ error: 'ParamÃ¨tres lat et lng obligatoires.' });
+        res.status(400).json({ error: 'Paramètres lat et lng obligatoires.' });
         return;
     }
 
@@ -67,4 +67,5 @@ export default async function handler(req, res) {
         res.status(502).json({ error: 'Geocode proxy error', details: error.message });
     }
 }
+
 

@@ -1,15 +1,15 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * Proxy API pour Google Routes
- * Masque la clÃ© API cÃ´tÃ© serveur (Vercel Edge Function)
+ * Masque la clé API côté serveur (Vercel Edge Function)
  * 
- * Endpoints supportÃ©s:
- * - POST /api/routes?action=directions : Calcul d'itinÃ©raire
- * - POST /api/routes?action=walking : ItinÃ©raire piÃ©ton
- * - POST /api/routes?action=bicycle : ItinÃ©raire vÃ©lo
+ * Endpoints supportés:
+ * - POST /api/routes?action=directions : Calcul d'itinéraire
+ * - POST /api/routes?action=walking : Itinéraire piéton
+ * - POST /api/routes?action=bicycle : Itinéraire vélo
  */
 
 export default async function handler(req, res) {
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     if (origin && originAllowed) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     } else if (!origin) {
-        // RequÃªte serveur-Ã -serveur (pas d'Origin)
+        // Requête serveur-à-serveur (pas d'Origin)
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method !== 'POST') {
-        res.status(405).json({ error: 'MÃ©thode non autorisÃ©e. Utilisez POST.' });
+        res.status(405).json({ error: 'Méthode non autorisée. Utilisez POST.' });
         return;
     }
 
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     const { action } = req.query;
     
     if (!action || !['directions', 'walking', 'bicycle'].includes(action)) {
-        res.status(400).json({ error: 'ParamÃ¨tre action invalide. Valeurs: directions, walking, bicycle' });
+        res.status(400).json({ error: 'Paramètre action invalide. Valeurs: directions, walking, bicycle' });
         return;
     }
 
@@ -70,18 +70,18 @@ export default async function handler(req, res) {
         const body = req.body;
 
         if (!body || !body.origin || !body.destination) {
-            res.status(400).json({ error: 'Corps de requÃªte invalide: origin et destination requis.' });
+            res.status(400).json({ error: 'Corps de requête invalide: origin et destination requis.' });
             return;
         }
 
-        // DÃ©finir le FieldMask selon le type de route
+        // Définir le FieldMask selon le type de route
         let fieldMask = 'routes.duration,routes.distanceMeters,routes.polyline';
         
         if (action === 'directions') {
-            // Pour le transit, on veut les Ã©tapes dÃ©taillÃ©es
+            // Pour le transit, on veut les étapes détaillées
             fieldMask = 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps';
         } else {
-            // Pour marche/vÃ©lo, on veut aussi la polyline des legs
+            // Pour marche/vélo, on veut aussi la polyline des legs
             fieldMask = 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.polyline';
         }
 
@@ -109,4 +109,5 @@ export default async function handler(req, res) {
         res.status(502).json({ error: 'Routes proxy error', details: error.message });
     }
 }
+
 

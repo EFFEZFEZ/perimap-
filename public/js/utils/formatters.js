@@ -1,24 +1,24 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * formatters.js - Fonctions utilitaires de formatage
  * 
  * Ce module centralise toutes les fonctions de formatage de temps,
- * durÃ©es, distances, et autres valeurs textuelles.
+ * durées, distances, et autres valeurs textuelles.
  */
 
 // === Constantes ===
 
 const PLACEHOLDER_TIME_VALUES = new Set(['--:--', '~']);
-const PLACEHOLDER_TEXT_VALUES = new Set(['undefined', 'null', '--', '--:--', 'â€”', 'n/a', 'na']);
+const PLACEHOLDER_TEXT_VALUES = new Set(['undefined', 'null', '--', '--:--', '—', 'n/a', 'na']);
 
 // === Fonctions de validation ===
 
 /**
- * VÃ©rifie si une valeur temporelle est significative
- * @param {string} value - Valeur Ã  vÃ©rifier
+ * Vérifie si une valeur temporelle est significative
+ * @param {string} value - Valeur à vérifier
  * @returns {boolean}
  */
 export function isMeaningfulTime(value) {
@@ -29,8 +29,8 @@ export function isMeaningfulTime(value) {
 }
 
 /**
- * VÃ©rifie si une valeur texte est manquante ou placeholder
- * @param {*} value - Valeur Ã  vÃ©rifier
+ * Vérifie si une valeur texte est manquante ou placeholder
+ * @param {*} value - Valeur à vérifier
  * @returns {boolean}
  */
 export function isMissingTextValue(value) {
@@ -40,26 +40,26 @@ export function isMissingTextValue(value) {
     if (!trimmed) return true;
     const normalized = trimmed.toLowerCase();
     if (PLACEHOLDER_TEXT_VALUES.has(normalized)) return true;
-    if (/^[-â€“â€”\s:._]+$/.test(trimmed)) return true;
+    if (/^[-–—\s:._]+$/.test(trimmed)) return true;
     return normalized === 'inconnu' || normalized === 'unknown';
 }
 
-// === Fonctions de formatage sÃ©curisÃ© ===
+// === Fonctions de formatage sécurisé ===
 
 /**
- * Retourne un label d'arrÃªt sÃ©curisÃ© (avec fallback)
- * @param {*} value - Valeur Ã  afficher
- * @param {string} fallback - Valeur par dÃ©faut
+ * Retourne un label d'arrêt sécurisé (avec fallback)
+ * @param {*} value - Valeur à afficher
+ * @param {string} fallback - Valeur par défaut
  * @returns {string}
  */
-export function getSafeStopLabel(value, fallback = 'ArrÃªt Ã  prÃ©ciser') {
+export function getSafeStopLabel(value, fallback = 'Arrêt à préciser') {
     return isMissingTextValue(value) ? fallback : value;
 }
 
 /**
- * Retourne un label de temps sÃ©curisÃ© (avec fallback)
- * @param {*} value - Valeur Ã  afficher
- * @param {string} fallback - Valeur par dÃ©faut
+ * Retourne un label de temps sécurisé (avec fallback)
+ * @param {*} value - Valeur à afficher
+ * @param {string} fallback - Valeur par défaut
  * @returns {string}
  */
 export function getSafeTimeLabel(value, fallback = '--:--') {
@@ -67,9 +67,9 @@ export function getSafeTimeLabel(value, fallback = '--:--') {
 }
 
 /**
- * Retourne un label de badge de route sÃ©curisÃ©
- * @param {*} value - Valeur Ã  afficher
- * @param {string} fallback - Valeur par dÃ©faut
+ * Retourne un label de badge de route sécurisé
+ * @param {*} value - Valeur à afficher
+ * @param {string} fallback - Valeur par défaut
  * @returns {string}
  */
 export function getSafeRouteBadgeLabel(value, fallback = 'BUS') {
@@ -77,8 +77,8 @@ export function getSafeRouteBadgeLabel(value, fallback = 'BUS') {
 }
 
 /**
- * VÃ©rifie si un arrÃªt a des mÃ©tadonnÃ©es (nom ou heure)
- * @param {string} stopName - Nom de l'arrÃªt
+ * Vérifie si un arrêt a des métadonnées (nom ou heure)
+ * @param {string} stopName - Nom de l'arrêt
  * @param {string} timeValue - Heure
  * @returns {boolean}
  */
@@ -89,7 +89,7 @@ export function hasStopMetadata(stopName, timeValue) {
 // === Fonctions de parsing de temps ===
 
 /**
- * Parse une chaÃ®ne de temps (HH:MM) en minutes
+ * Parse une chaîne de temps (HH:MM) en minutes
  * @param {string} value - Temps au format HH:MM
  * @returns {number|null}
  */
@@ -104,7 +104,7 @@ export function parseTimeStringToMinutes(value) {
 }
 
 /**
- * Formate des minutes en chaÃ®ne de temps HH:MM
+ * Formate des minutes en chaîne de temps HH:MM
  * @param {number} totalMinutes - Nombre de minutes
  * @returns {string|null}
  */
@@ -118,9 +118,9 @@ export function formatMinutesToTimeString(totalMinutes) {
 }
 
 /**
- * Ajoute des secondes Ã  une chaÃ®ne de temps
+ * Ajoute des secondes à une chaîne de temps
  * @param {string} timeStr - Temps au format HH:MM
- * @param {number} seconds - Secondes Ã  ajouter
+ * @param {number} seconds - Secondes à ajouter
  * @returns {string|null}
  */
 export function addSecondsToTimeString(timeStr, seconds) {
@@ -131,9 +131,9 @@ export function addSecondsToTimeString(timeStr, seconds) {
 }
 
 /**
- * Soustrait des secondes d'une chaÃ®ne de temps
+ * Soustrait des secondes d'une chaîne de temps
  * @param {string} timeStr - Temps au format HH:MM
- * @param {number} seconds - Secondes Ã  soustraire
+ * @param {number} seconds - Secondes à soustraire
  * @returns {string|null}
  */
 export function subtractSecondsFromTimeString(timeStr, seconds) {
@@ -144,8 +144,8 @@ export function subtractSecondsFromTimeString(timeStr, seconds) {
 }
 
 /**
- * Calcule la diffÃ©rence en minutes entre deux temps
- * @param {string} startTime - Temps de dÃ©but (HH:MM)
+ * Calcule la différence en minutes entre deux temps
+ * @param {string} startTime - Temps de début (HH:MM)
  * @param {string} endTime - Temps de fin (HH:MM)
  * @returns {number|null}
  */
@@ -178,8 +178,8 @@ export function formatGoogleTime(isoTime) {
 }
 
 /**
- * Formate une durÃ©e Google (ex: "1800s") en "30 min"
- * @param {string} durationString - DurÃ©e au format Google
+ * Formate une durée Google (ex: "1800s") en "30 min"
+ * @param {string} durationString - Durée au format Google
  * @returns {string}
  */
 export function formatGoogleDuration(durationString) {
@@ -202,8 +202,8 @@ export function formatGoogleDuration(durationString) {
 }
 
 /**
- * Parse une durÃ©e Google (ex: "1800s") en nombre de secondes
- * @param {string} durationString - DurÃ©e au format Google
+ * Parse une durée Google (ex: "1800s") en nombre de secondes
+ * @param {string} durationString - Durée au format Google
  * @returns {number}
  */
 export function parseGoogleDuration(durationString) {
@@ -218,7 +218,7 @@ export function parseGoogleDuration(durationString) {
 // === Fonctions de formatage d'horloge ===
 
 /**
- * Formate des secondes en chaÃ®ne HH:MM:SS
+ * Formate des secondes en chaîne HH:MM:SS
  * @param {number} seconds - Secondes depuis minuit
  * @returns {string}
  */
@@ -230,8 +230,8 @@ export function formatSecondsToClockString(seconds) {
 }
 
 /**
- * Formate une date en chaÃ®ne locale courte (ex: "lun. 28 nov.")
- * @param {Date} date - Date Ã  formater
+ * Formate une date en chaîne locale courte (ex: "lun. 28 nov.")
+ * @param {Date} date - Date à formater
  * @returns {string}
  */
 export function formatDateShort(date) {
@@ -243,8 +243,8 @@ export function formatDateShort(date) {
 }
 
 /**
- * Formate une date pour le sÃ©lecteur de date
- * @param {Date} dateObj - Date Ã  formater
+ * Formate une date pour le sélecteur de date
+ * @param {Date} dateObj - Date à formater
  * @param {number} offset - Offset en jours depuis aujourd'hui
  * @returns {string}
  */
@@ -274,4 +274,5 @@ export default {
     formatDateShort,
     formatDateLabel
 };
+
 

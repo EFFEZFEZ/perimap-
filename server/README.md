@@ -120,4 +120,5 @@ GOOGLE_API_KEY=xxx
 ---
 
 **Note**: Ce code est préparé mais non testé en production.
-Dernière mise à jour: Décembre 2025
+Dernière mise à jour: Décembre 2026
+

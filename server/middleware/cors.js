@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * middleware/cors.js
  * Configuration CORS
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 import { config } from '../config.js';
@@ -21,19 +21,19 @@ export function setupCors(app) {
 
   const corsOptions = {
     origin: (origin, callback) => {
-      // Autoriser les requÃªtes sans origin (ex: mobile apps)
+      // Autoriser les requêtes sans origin (ex: mobile apps)
       if (!origin) {
         return callback(null, true);
       }
 
-      // VÃ©rifier si l'origin est autorisÃ©e
+      // Vérifier si l'origin est autorisée
       const allowedOrigins = config.server.corsOrigins;
       
       if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
         return callback(null, true);
       }
 
-      // En dÃ©veloppement, autoriser localhost
+      // En développement, autoriser localhost
       if (config.server.env === 'development' && origin.includes('localhost')) {
         return callback(null, true);
       }
@@ -63,8 +63,9 @@ export function setupCors(app) {
   app.use(cors(corsOptions));
   */
 
-  console.log('ðŸ”’ CORS configurÃ©');
+  console.log('?? CORS configuré');
 }
 
 export default setupCors;
+
 

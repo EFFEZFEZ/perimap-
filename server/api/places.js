@@ -1,12 +1,12 @@
-ï»¿/*
- * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
- * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
+/*
+ * Copyright (c) 2026 Périmap. Tous droits réservés.
+ * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
  * api/places.js
- * API d'autocomplÃ©tion de lieux
+ * API d'autocomplétion de lieux
  * 
- * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
+ * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 /*
@@ -16,14 +16,14 @@ const router = Router();
 
 /**
  * GET /api/places/autocomplete
- * Recherche de lieux par texte (autocomplÃ©tion)
+ * Recherche de lieux par texte (autocomplétion)
  * 
  * Query:
  * - q: string (requis) - Texte de recherche
- * - lat: number (optionnel) - Latitude pour boost proximitÃ©
- * - lon: number (optionnel) - Longitude pour boost proximitÃ©
- * - types: string (optionnel) - Types de lieux sÃ©parÃ©s par virgule (stop,poi,address)
- * - limit: number (optionnel, dÃ©faut 10)
+ * - lat: number (optionnel) - Latitude pour boost proximité
+ * - lon: number (optionnel) - Longitude pour boost proximité
+ * - types: string (optionnel) - Types de lieux séparés par virgule (stop,poi,address)
+ * - limit: number (optionnel, défaut 10)
  */
 /*
 router.get('/autocomplete', async (req, res, next) => {
@@ -33,11 +33,11 @@ router.get('/autocomplete', async (req, res, next) => {
 
     if (!q || q.length < 2) {
       return res.status(400).json({
-        error: 'RequÃªte trop courte (min 2 caractÃ¨res)',
+        error: 'Requête trop courte (min 2 caractères)',
       });
     }
 
-    // Contexte utilisateur pour personnaliser les rÃ©sultats
+    // Contexte utilisateur pour personnaliser les résultats
     let userContext = null;
     if (req.userId && userMemory) {
       userContext = await userMemory.getUserContext(req.userId);
@@ -48,7 +48,7 @@ router.get('/autocomplete', async (req, res, next) => {
       userContext,
     };
 
-    // Position pour boost proximitÃ©
+    // Position pour boost proximité
     if (lat && lon) {
       searchOptions.location = {
         lat: parseFloat(lat),
@@ -76,14 +76,14 @@ router.get('/autocomplete', async (req, res, next) => {
 
 /**
  * GET /api/places/nearby
- * Recherche de lieux Ã  proximitÃ© d'une position
+ * Recherche de lieux à proximité d'une position
  * 
  * Query:
  * - lat: number (requis)
  * - lon: number (requis)
- * - radius: number (optionnel, dÃ©faut 500m)
+ * - radius: number (optionnel, défaut 500m)
  * - types: string (optionnel)
- * - limit: number (optionnel, dÃ©faut 10)
+ * - limit: number (optionnel, défaut 10)
  */
 /*
 router.get('/nearby', async (req, res, next) => {
@@ -125,7 +125,7 @@ router.get('/nearby', async (req, res, next) => {
 
 /**
  * GET /api/places/:id
- * DÃ©tails d'un lieu spÃ©cifique
+ * Détails d'un lieu spécifique
  */
 /*
 router.get('/:id', async (req, res, next) => {
@@ -137,7 +137,7 @@ router.get('/:id', async (req, res, next) => {
 
     if (!place) {
       return res.status(404).json({
-        error: 'Lieu non trouvÃ©',
+        error: 'Lieu non trouvé',
       });
     }
 
@@ -150,7 +150,7 @@ router.get('/:id', async (req, res, next) => {
 
 /**
  * GET /api/places/reverse
- * GÃ©ocodage inverse (coordonnÃ©es -> adresse)
+ * Géocodage inverse (coordonnées -> adresse)
  */
 /*
 router.get('/reverse', async (req, res, next) => {
@@ -172,7 +172,7 @@ router.get('/reverse', async (req, res, next) => {
     );
 
     if (nearby.length === 0) {
-      // Fallback: retourner les coordonnÃ©es
+      // Fallback: retourner les coordonnées
       return res.json({
         place: {
           id: `coords_${lat}_${lon}`,
@@ -199,4 +199,5 @@ export default router;
 // Placeholder
 const router = {};
 export default router;
+
 
