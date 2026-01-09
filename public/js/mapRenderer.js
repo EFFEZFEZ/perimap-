@@ -37,6 +37,7 @@
 
 import { normalizeStopNameForComparison, shouldHideDestinationAtStop } from './utils/stopName.mjs';
 import { realtimeManager } from './realtimeManager.js';
+import { analyticsManager } from './analyticsManager.js';
 
 const LIGHT_TILE_CONFIG = Object.freeze({
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -673,6 +674,9 @@ export class MapRenderer {
     async onStopClick(masterStop) {
         const currentSeconds = this.timeManager.getCurrentSeconds();
         const currentDate = this.timeManager.getCurrentDate();
+
+        // 📊 ANALYTICS: Tracker le clic sur l'arrêt
+        analyticsManager.trackStopClick(masterStop.stop_id, masterStop.stop_name);
 
         console.log(`🚏 Clic sur arrêt: ${masterStop.stop_name}`);
         

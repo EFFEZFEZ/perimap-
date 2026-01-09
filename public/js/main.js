@@ -26,6 +26,7 @@ import { UIManager } from './uiManager.js';
 import { createGeolocationManager } from './geolocationManager.js';
 import { loadBaseLayout } from './viewLoader.js';
 import { realtimeManager } from './realtimeManager.js';
+import { analyticsManager } from './analyticsManager.js';
 
 // === Imports des modules extraits (V221) ===
 import { 
@@ -4509,7 +4510,11 @@ function handleRouteFilterChange() {
     visibleRoutes.clear();
     dataManager.routes.forEach(route => {
         const checkbox = document.getElementById(`route-${route.route_id}`);
-        if (checkbox && checkbox.checked) { visibleRoutes.add(route.route_id); }
+        if (checkbox && checkbox.checked) { 
+            visibleRoutes.add(route.route_id);
+            // 📊 ANALYTICS: Tracker les lignes consultées/activées
+            analyticsManager.trackRouteClick(route.route_id, route.route_short_name);
+        }
     });
     // Afficher les tracés avec geoJson existant ou généré à partir des shapes
     const geoJsonData = dataManager.geoJson;

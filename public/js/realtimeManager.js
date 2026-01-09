@@ -2,10 +2,17 @@
  * realtimeManager.js - Gestion des horaires temps réel Péribus
  * Scrape hawk.perimouv.fr pour obtenir les prochains passages en temps réel
  * 
+ * V2 - OPTIMISÉ AVEC PRÉCHARGEMENT INTELLIGENT:
+ * - Précharge les horaires des lignes principales au démarrage
+ * - Utilise les données analytiques pour optimiser les chargements
+ * - Cache agressif pour éviter les appels API répétés
+ * 
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  */
 
 import { getHawkKeyForStop, getHawkKeysForStopPlace, isRealtimeEnabled, loadStopIdMapping } from './config/stopKeyMapping.js';
+import { analyticsManager } from './analyticsManager.js';
+import { LINE_CATEGORIES } from './config/routes.js';
 
 export class RealtimeManager {
     constructor() {
@@ -15,6 +22,7 @@ export class RealtimeManager {
         // Cache des données temps réel par arrêt
         this.cache = new Map();
         this.cacheMaxAge = 30 * 1000; // 30 secondes
+        this.preloadedStops = new Set(); // Arrêts préchargés
         
         // État
         this.isAvailable = false;
@@ -27,17 +35,146 @@ export class RealtimeManager {
         this.stats = {
             requests: 0,
             successes: 0,
-            failures: 0
+            failures: 0,
+            preloadRequests: 0,
+            preloadSuccesses: 0,
+            preloadFailures: 0
         };
+
+        // Configuration du préchargement
+        this.preloadConfig = {
+            mainLinesOnly: true, // Précharger seulement lignes majeures au démarrage
+            preloadTopStops: true, // Précharger les arrêts les plus consultés
+            maxPreloadRequests: 50, // Limiter le nombre de préchargements parallèles
+            delayBetweenRequests: 100 // 100ms entre les requêtes pour éviter surcharge
+        };
+
+        this.isPreloading = false;
     }
 
     /**
      * Initialise le manager avec les données GTFS
      * @param {Array} stops - Liste des arrêts GTFS
+     * @param {boolean} [autoPreload=true] - Lancer le préchargement automatiquement
      */
-    init(stops) {
+    init(stops, autoPreload = true) {
         this.stops = stops;
         loadStopIdMapping(stops);
+
+        // Lancer le préchargement intelligent en arrière-plan
+        if (autoPreload) {
+            // Attendre un peu pour ne pas bloquer le démarrage de l'app
+            setTimeout(() => this.preloadMainLinesAndTopStops(), 500);
+        }
+    }
+
+    /**
+     * Précharge les horaires des lignes principales et arrêts fréquents
+     * S'exécute en arrière-plan sans bloquer l'interface
+     */
+    async preloadMainLinesAndTopStops() {
+        if (this.isPreloading) {
+            console.warn('[Realtime] Préchargement déjà en cours');
+            return;
+        }
+
+        this.isPreloading = true;
+        console.log('[Realtime] 🚀 Démarrage du préchargement intelligent...');
+
+        try {
+            const stopsToPreload = new Set();
+
+            // 1. Ajouter tous les arrêts des lignes majeures (A, B, C, D, express)
+            if (this.preloadConfig.mainLinesOnly && this.stops) {
+                const mainLines = [
+                    ...LINE_CATEGORIES.majeures.lines,
+                    ...LINE_CATEGORIES.express.lines
+                ];
+
+                this.stops.forEach(stop => {
+                    const stopRoutes = stop.routes ? stop.routes.split(',') : [];
+                    const hasMainLine = stopRoutes.some(route => mainLines.includes(route));
+                    if (hasMainLine && isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
+                        stopsToPreload.add(stop);
+                    }
+                });
+
+                console.log(`[Realtime] ${stopsToPreload.size} arrêts des lignes majeures à précharger`);
+            }
+
+            // 2. Ajouter les arrêts les plus consultés (selon analytics)
+            if (this.preloadConfig.preloadTopStops && analyticsManager) {
+                const topStops = analyticsManager.getTopStops(20);
+                topStops.forEach(topStop => {
+                    if (this.stops) {
+                        const stop = this.stops.find(s => s.stop_id === topStop.stopId);
+                        if (stop && isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
+                            stopsToPreload.add(stop);
+                        }
+                    }
+                });
+
+                console.log(`[Realtime] +${topStops.length} arrêts populaires à précharger`);
+            }
+
+            // 3. Lancer le préchargement par batch pour éviter surcharge
+            const stopsArray = Array.from(stopsToPreload).slice(0, this.preloadConfig.maxPreloadRequests);
+            const batchSize = 10;
+            let successCount = 0;
+            let failureCount = 0;
+
+            for (let i = 0; i < stopsArray.length; i += batchSize) {
+                const batch = stopsArray.slice(i, i + batchSize);
+                const promises = batch.map((stop, index) => {
+                    return new Promise(resolve => {
+                        // Délai pour éviter surcharge serveur
+                        setTimeout(async () => {
+                            try {
+                                await this.getRealtimeForStop(stop.stop_id, stop.stop_code);
+                                this.preloadedStops.add(stop.stop_id);
+                                successCount++;
+                                resolve();
+                            } catch (error) {
+                                failureCount++;
+                                resolve();
+                            }
+                        }, index * this.preloadConfig.delayBetweenRequests);
+                    });
+                });
+
+                await Promise.all(promises);
+                console.log(`[Realtime] Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(stopsArray.length / batchSize)} complété`);
+            }
+
+            this.stats.preloadRequests = stopsArray.length;
+            this.stats.preloadSuccesses = successCount;
+            this.stats.preloadFailures = failureCount;
+
+            console.log(`[Realtime] ✅ Préchargement terminé: ${successCount} succès, ${failureCount} erreurs`);
+        } catch (error) {
+            console.error('[Realtime] Erreur lors du préchargement:', error);
+        } finally {
+            this.isPreloading = false;
+        }
+    }
+
+    /**
+     * Obtient l'état du préchargement
+     */
+    getPreloadStatus() {
+        return {
+            isPreloading: this.isPreloading,
+            preloadedStopsCount: this.preloadedStops.size,
+            stats: {
+                preloadRequests: this.stats.preloadRequests,
+                preloadSuccesses: this.stats.preloadSuccesses,
+                preloadFailures: this.stats.preloadFailures,
+                totalRequests: this.stats.requests,
+                totalSuccesses: this.stats.successes,
+                totalFailures: this.stats.failures
+            },
+            cacheSize: this.cache.size
+        };
     }
 
     /**
