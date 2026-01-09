@@ -338,13 +338,13 @@ export class DataExporter {
      * Arrêts les plus fréquentés (depuis analyticsManager)
      */
     static getStopStats() {
-        if (typeof analyticsManager === 'undefined') {
+        if (!window.analyticsManager) {
             console.warn('analyticsManager non disponible');
             return null;
         }
 
         // Récupérer les clicks par arrêt
-        const stops = analyticsManager.stopClickStats || new Map();
+        const stops = window.analyticsManager.stopClickStats || new Map();
         
         const stats = Array.from(stops.entries())
             .map(([stopId, count]) => ({
@@ -367,12 +367,12 @@ export class DataExporter {
      * Retards par ligne et heure
      */
     static getDelayStats() {
-        if (typeof delayManager === 'undefined') {
+        if (!window.delayManager) {
             console.warn('delayManager non disponible');
             return null;
         }
 
-        const stats = delayManager.getDelayStats();
+        const stats = window.delayManager.getDelayStats();
 
         console.log('\n📈 RETARDS PAR LIGNE:');
         stats.lineStats.forEach(line => {
@@ -416,8 +416,11 @@ Ligne ${line.lineId}:
      * Exporter retards en CSV
      */
     static exportDelaysToCSV() {
-        const stats = delayManager.getDelayStats();
-        if (!stats) return;
+        const stats = window.delayManager?.getDelayStats();
+        if (!stats) {
+            console.warn('delayManager non disponible pour export');
+            return;
+        }
 
         // CSV par ligne
         let csv = 'Ligne,Retard Moyen (sec),Retard Max (sec),Majeurs,Observations\n';
@@ -440,11 +443,12 @@ Ligne ${line.lineId}:
      * Exporter tout en JSON
      */
     static exportAllJSON() {
+        const dm = window.delayManager;
         const data = {
             timestamp: new Date().toISOString(),
             stops: this.getStopStats(),
-            delays: delayManager.getDelayStats(),
-            rawHistory: delayManager.delayHistory.slice(-1000) // Dernier 1000
+            delays: dm?.getDelayStats() || null,
+            rawHistory: dm?.delayHistory?.slice(-1000) || [] // Dernier 1000
         };
 
         const json = JSON.stringify(data, null, 2);

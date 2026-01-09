@@ -473,7 +473,11 @@ async function initializeApp() {
         tripScheduler = new TripScheduler(dataManager, delayManager);
         busPositionCalculator = new BusPositionCalculator(dataManager, delayManager);
         
-        // Initialiser la console d'analytics (admin seulement via Alt+D)
+        // Exposer les managers pour le data exporter
+        window.delayManager = delayManager;
+        window.analyticsManager = analyticsManager;
+        
+        // Initialiser la console d'analytics (Alt+D)
         const dataExporterUI = new DataExporterUI();
         dataExporterUI.init();
         window.dataExporterUI = dataExporterUI;

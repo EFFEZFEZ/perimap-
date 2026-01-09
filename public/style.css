@@ -4673,6 +4673,9 @@ body.dark-theme .install-tip-steps section {
     border: none !important;
     width: 32px !important;
     height: 32px !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 1000 !important;
 }
 .bus-icon-rect div {
     transition: all 0.2s ease;
@@ -4689,6 +4692,8 @@ body.dark-theme .install-tip-steps section {
     font-size: 11px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     box-sizing: border-box;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 .bus-icon-rect:hover div {
     transform: scale(1.15);
