@@ -4667,8 +4667,19 @@ body.dark-theme .install-tip-steps section {
     transition: none !important; /* V49: Supprime l'animation de 1000ms */
 }
 
+/* V301 - Optimisation tactile des popups */
+.leaflet-popup {
+    touch-action: none; /* Empêche le popup de capturer les gestes de pan */
+    will-change: transform; /* GPU acceleration */
+}
+
+.leaflet-popup-pane {
+    pointer-events: none; /* Le pane ne capture pas les events */
+}
 
 .leaflet-popup-content-wrapper {
+    pointer-events: auto; /* Seul le contenu est interactif */
+    touch-action: pan-x pan-y; /* Permet le scroll dans le popup */
     border-radius: 16px !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
     border: 1px solid var(--border) !important;
@@ -4685,8 +4696,16 @@ body.dark-theme .install-tip-steps section {
     width: auto !important;
     background: transparent; 
 }
+.leaflet-popup-tip-container {
+    pointer-events: none; /* Le tip ne capture pas les events */
+}
 .leaflet-popup-tip {
     background: var(--bg-primary) !important;
+    pointer-events: none;
+}
+.leaflet-popup-close-button {
+    pointer-events: auto !important; /* Le bouton fermer reste cliquable */
+    z-index: 10;
 }
 
 .bus-icon-rect {

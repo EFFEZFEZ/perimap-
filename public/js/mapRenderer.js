@@ -143,12 +143,22 @@ export class MapRenderer {
             autoClose: true,
             closeOnClick: true,
             closeButton: true,
-            autoPan: true
+            autoPan: false, // Désactiver l'autopan pour éviter les saccades
+            autoPanPadding: [0, 0]
         });
 
         // Quand le popup est fermé, on désélectionne le bus
         this.busPopup.on('remove', () => {
             this.selectedBusId = null;
+        });
+        
+        // Tracker les mouvements de carte pour suspendre les updates
+        this.isMapMoving = false;
+        this.map.on('movestart zoomstart', () => {
+            this.isMapMoving = true;
+        });
+        this.map.on('moveend zoomend', () => {
+            this.isMapMoving = false;
         });
     }
 
@@ -406,15 +416,24 @@ export class MapRenderer {
             }
         });
         
-        // 3. (V24) Mettre à jour le popup s'il est ouvert
-        if (this.selectedBusId && this.busMarkers[this.selectedBusId]) {
+        // 3. (V24) Mettre à jour le popup s'il est ouvert (sauf pendant les mouvements)
+        if (this.selectedBusId && this.busMarkers[this.selectedBusId] && !this.isMapMoving) {
             const selectedMarkerData = this.busMarkers[this.selectedBusId];
             
-            // Mettre à jour le contenu
-            this.updateBusPopupContent(this.busPopupDomElement, selectedMarkerData.bus, tripScheduler);
-            
-            // Mettre à jour la position du popup
-            this.busPopup.setLatLng(selectedMarkerData.marker.getLatLng());
+            // Utiliser requestAnimationFrame pour éviter les saccades
+            if (!this._popupUpdateScheduled) {
+                this._popupUpdateScheduled = true;
+                requestAnimationFrame(() => {
+                    this._popupUpdateScheduled = false;
+                    if (this.selectedBusId && this.busMarkers[this.selectedBusId] && !this.isMapMoving) {
+                        const markerData = this.busMarkers[this.selectedBusId];
+                        // Mettre à jour le contenu
+                        this.updateBusPopupContent(this.busPopupDomElement, markerData.bus, tripScheduler);
+                        // Mettre à jour la position du popup
+                        this.busPopup.setLatLng(markerData.marker.getLatLng());
+                    }
+                });
+            }
         }
 
         // Nettoyage final des couches
