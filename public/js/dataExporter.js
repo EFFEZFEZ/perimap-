@@ -22,7 +22,7 @@ export class DataExporterUI {
     }
 
     /**
-     * Initialiser (aucun bouton visible sauf en mode admin)
+     * Initialiser (aucun bouton visible, accès via Alt+D)
      */
     init() {
         // Créer le panneau (caché par défaut)
@@ -34,23 +34,21 @@ export class DataExporterUI {
 
         this.attachEvents();
 
-        // Charger CSS seulement si admin
-        if (this.isAdminMode) {
-            this.loadCSS();
-        }
+        // Charger le CSS (toujours, pour que le panneau fonctionne)
+        this.loadCSS();
 
         // Ajouter un bouton au menu admin s'il existe
-        this.addToAdminMenu();
-
-        // Keyboard shortcut: Alt+D pour admin
         if (this.isAdminMode) {
-            document.addEventListener('keydown', (e) => {
-                if (e.altKey && e.key.toLowerCase() === 'd') {
-                    this.toggle();
-                }
-            });
-            console.log('[DataExporter] ✅ Console admin initialisée (Alt+D)');
+            this.addToAdminMenu();
         }
+
+        // Keyboard shortcut: Alt+D pour tout le monde
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key.toLowerCase() === 'd') {
+                this.toggle();
+            }
+        });
+        console.log('[DataExporter] ✅ Console analytique initialisée (Alt+D)');
     }
 
     /**

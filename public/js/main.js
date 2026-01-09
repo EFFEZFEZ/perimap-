@@ -19,7 +19,6 @@ import { TimeManager } from './timeManager.js';
 import { TripScheduler } from './tripScheduler.js';
 import { BusPositionCalculator } from './busPositionCalculator.js';
 import { delayManager } from './delayManager.js';
-import { DelayStatsUI } from './delayStatsUI.js';
 import { DataExporter, DataExporterUI } from './dataExporter.js';
 import { MapRenderer } from './mapRenderer.js';
 import { ApiManager } from './apiManager.js';
@@ -474,11 +473,7 @@ async function initializeApp() {
         tripScheduler = new TripScheduler(dataManager, delayManager);
         busPositionCalculator = new BusPositionCalculator(dataManager, delayManager);
         
-        // Initialiser l'interface des statistiques de retard
-        const delayStatsUI = new DelayStatsUI(delayManager);
-        delayStatsUI.init();
-        
-        // Initialiser la console d'analytics
+        // Initialiser la console d'analytics (admin seulement via Alt+D)
         const dataExporterUI = new DataExporterUI();
         dataExporterUI.init();
         window.dataExporterUI = dataExporterUI;
