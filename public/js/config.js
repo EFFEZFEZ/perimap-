@@ -17,9 +17,22 @@
 
 /**
  * Détermine le mode backend à utiliser
+ * ✅ V310: FORCÉ SUR OTP (Oracle Cloud) - Google désactivé
  * @returns {'vercel' | 'otp' | 'google'} Le mode backend
  */
 export function getBackendMode() {
+  // ✅ V310: FORCER LE MODE OTP (Oracle Cloud backend)
+  console.log('[Config] 🔧 getBackendMode() appelé');
+  console.log('[Config] 📍 URL actuelle:', window.location.href);
+  console.log('[Config] 📍 Origin:', window.location.origin);
+  console.log('[Config] 📍 Hostname:', window.location.hostname);
+  console.log('[Config] 📍 Port:', window.location.port);
+  
+  // FORCER OTP pour tous les environnements
+  console.log('[Config] ✅ MODE FORCÉ: otp (Oracle Cloud backend)');
+  return 'otp';
+  
+  /* DÉSACTIVÉ - Code original commenté
   // 1. Configuration explicite via window.__APP_CONFIG
   if (window.__APP_CONFIG?.backendMode) {
     return window.__APP_CONFIG.backendMode;
@@ -38,6 +51,7 @@ export function getBackendMode() {
   
   // 4. Par défaut: proxy Vercel (production)
   return 'vercel';
+  */
 }
 
 /**
@@ -103,38 +117,59 @@ export const API_ENDPOINTS = {
 
 /**
  * URLs des APIs du serveur Express (OTP/Photon)
+ * ✅ V310: /api/places supporte ?q= et ?input=
  */
 export const OTP_API_ENDPOINTS = {
   routes: '/api/routes',
-  places: '/api/places/autocomplete',
+  places: '/api/places',
   reverse: '/api/places/reverse',
   realtime: '/api/realtime'
 };
 
 /**
  * Retourne les endpoints appropriés selon le mode backend
+ * ✅ V310: LOGS DÉTAILLÉS
  * @returns {Object} Endpoints API
  */
 export function getApiEndpoints() {
-  if (useOtpBackend()) {
+  const useOtp = useOtpBackend();
+  console.log('[Config] 🔧 getApiEndpoints() - useOtpBackend():', useOtp);
+  if (useOtp) {
+    console.log('[Config] ✅ Utilisation OTP_API_ENDPOINTS:', JSON.stringify(OTP_API_ENDPOINTS));
     return OTP_API_ENDPOINTS;
   }
+  console.log('[Config] ⚠️ Utilisation API_ENDPOINTS (Google):', JSON.stringify(API_ENDPOINTS));
   return API_ENDPOINTS;
 }
 
 /**
  * Retourne la configuration globale de l'application
+ * ✅ V310: LOGS DÉTAILLÉS
  * @returns {Object} Configuration avec googleApiKey, adminToken, etc.
  */
 export function getAppConfig() {
+  console.log('[Config] ═══════════════════════════════════════');
+  console.log('[Config] 🔧 getAppConfig() appelé');
+  
   const mode = getBackendMode();
+  const useProxy = useServerProxy();
+  const useOtp = useOtpBackend();
+  const endpoints = getApiEndpoints();
+  
+  console.log('[Config] 📦 Résultats:');
+  console.log('[Config]   - backendMode:', mode);
+  console.log('[Config]   - useProxy:', useProxy);
+  console.log('[Config]   - useOtp:', useOtp);
+  console.log('[Config]   - apiEndpoints:', JSON.stringify(endpoints));
+  console.log('[Config] ═══════════════════════════════════════');
+  
   return {
     googleApiKey: getGoogleApiKey(),
     adminToken: getAdminToken(),
-    useProxy: useServerProxy(),
-    useOtp: useOtpBackend(),
+    useProxy: useProxy,
+    useOtp: useOtp,
     backendMode: mode,
-    apiEndpoints: getApiEndpoints(),
+    apiEndpoints: endpoints,
     arrivalPageSize: 6,
     minBusItineraries: 3,
     maxBottomSheetLevels: 3
