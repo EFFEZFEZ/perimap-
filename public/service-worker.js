@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v272'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v272: Bottom sheet SNCF-style (1 niveau à la fois, no flash)
+const CACHE_VERSION = 'v274'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v274: fix GTFS-RT hawk realtime
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
