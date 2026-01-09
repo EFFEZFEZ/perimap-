@@ -10,15 +10,44 @@
 
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { cpSync, existsSync } from 'fs';
+
+// Plugin pour copier les dossiers statiques après le build
+function copyStaticFolders() {
+  return {
+    name: 'copy-static-folders',
+    closeBundle() {
+      const folders = ['views', 'data', 'icons'];
+      folders.forEach(folder => {
+        const src = resolve(__dirname, 'public', folder);
+        const dest = resolve(__dirname, 'dist', folder);
+        if (existsSync(src)) {
+          cpSync(src, dest, { recursive: true });
+          console.log(`✓ Copié: ${folder}/`);
+        }
+      });
+    }
+  };
+}
 
 export default defineConfig({
+  // Plugin pour copier views/, data/, icons/ après le build
+  plugins: [copyStaticFolders()],
+  
   // Dossier source = public (pour garder la compatibilité)
   root: 'public',
+  
+  // Copier les assets statiques (views, data, icons, etc.)
+  publicDir: false, // Désactivé car root = public déjà
   
   // Dossier de sortie pour le build
   build: {
     outDir: '../dist',
     emptyOutDir: true,
+    
+    // IMPORTANT: Copier tous les fichiers statiques non-traités par Vite
+    copyPublicDir: true,
+    assetsInlineLimit: 0, // Ne pas inliner les assets
     
     // Minification aggressive
     minify: 'terser',
