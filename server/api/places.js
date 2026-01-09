@@ -37,8 +37,11 @@ const GRAND_PERIGUEUX_CENTER = {
 // Initialiser le cache des suggestions au démarrage
 await loadAutocompleteCache();
 
-router.get('/autocomplete', async (req, res) => {
-  const { q, lat, lon, limit = 10 } = req.query;
+// Fonction partagée pour l'autocomplétion
+async function handleAutocomplete(req, res) {
+  // Support pour ?input= (frontend) et ?q= (standard)
+  const q = req.query.q || req.query.input;
+  const { lat, lon, limit = 10 } = req.query;
 
   if (!q || q.length < 1) {
     return res.status(400).json({ error: 'Requête trop courte (min 1 caractère)' });
@@ -144,7 +147,13 @@ router.get('/autocomplete', async (req, res) => {
     logger.error('[places] autocomplete error', error);
     res.json({ suggestions: [] });
   }
-});
+}
+
+// Route principale: /api/places?input=... (compatibilité frontend)
+router.get('/', handleAutocomplete);
+
+// Route standard: /api/places/autocomplete?q=...
+router.get('/autocomplete', handleAutocomplete);
 
 /**
  * Détermine la priorité d'affichage selon le type

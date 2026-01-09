@@ -59,6 +59,14 @@
   ],
   "rewrites": [
     {
+      "source": "/api/places/:path*",
+      "destination": "http://79.72.24.141/api/places/:path*"
+    },
+    {
+      "source": "/api/routes/:path*",
+      "destination": "http://79.72.24.141/api/routes/:path*"
+    },
+    {
       "source": "/carte",
       "destination": "/index.html"
     },
