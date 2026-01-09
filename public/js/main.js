@@ -2270,7 +2270,11 @@ function renderSuggestions(suggestions, container, onSelect) {
             if (inputElement) {
                 inputElement.value = suggestion.description;
             }
-            onSelect(suggestion.placeId); 
+            // V313: En mode OTP/Photon, les coordonnées sont directement dans la suggestion
+            // On passe l'objet coordinates si disponible, sinon le placeId Google
+            const selectionValue = suggestion.coordinates || suggestion.placeId;
+            console.log('[renderSuggestions] Sélection:', suggestion.description, '→', selectionValue);
+            onSelect(selectionValue); 
             container.innerHTML = ''; 
             container.style.display = 'none';
         });
