@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v275'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v275: debug realtime API
+const CACHE_VERSION = 'v277'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v277: meilleure différenciation menus
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -55,8 +55,11 @@ const SECONDARY_ASSETS = [
   '/js/uiManager.js',
   '/js/viewLoader.js',
   '/js/config.js',
+  '/js/realtimeManager.js',
+  '/js/analyticsManager.js',
   '/js/config/icons.js',
   '/js/config/routes.js',
+  '/js/config/stopKeyMapping.js',
   '/js/utils/formatters.js',
   '/js/utils/geo.js',
   '/js/utils/stopName.mjs',
@@ -74,7 +77,13 @@ const SECONDARY_ASSETS = [
   '/views/horaires.html',
   '/views/carte.html',
   '/views/itineraire.html',
-  '/views/trafic.html'
+  '/views/trafic.html',
+  '/views/tarifs-achat.html',
+  '/views/tarifs-amendes.html',
+  '/views/tarifs-billettique.html',
+  '/views/tarifs-grille.html',
+  '/css/brand.css',
+  '/css/line-pages.css'
 ];
 
 // Patterns pour Network-Only
