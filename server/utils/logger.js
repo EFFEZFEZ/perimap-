@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * utils/logger.js
- * Système de logging
+ * SystÃ¨me de logging
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 /**
@@ -81,7 +77,7 @@ export class Logger {
     // Message
     parts.push(message);
 
-    // Arguments supplémentaires
+    // Arguments supplÃ©mentaires
     if (args.length > 0) {
       for (const arg of args) {
         if (typeof arg === 'object') {
@@ -132,7 +128,7 @@ export class Logger {
   }
 
   /**
-   * Crée un sous-logger avec un nom étendu
+   * CrÃ©e un sous-logger avec un nom Ã©tendu
    */
   child(subName) {
     return new Logger(`${this.name}:${subName}`, {
@@ -144,7 +140,7 @@ export class Logger {
 }
 
 /**
- * Crée un logger
+ * CrÃ©e un logger
  * @param {string} name - Nom du module
  * @param {Object} options - Options
  * @returns {Logger}
@@ -158,7 +154,7 @@ export function createLogger(name, options = {}) {
 }
 
 /**
- * Logger par défaut
+ * Logger par dÃ©faut
  */
 export const defaultLogger = createLogger('app');
 
@@ -168,5 +164,3 @@ export default {
   defaultLogger,
   LOG_LEVELS,
 };
-
-

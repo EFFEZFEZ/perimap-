@@ -1,203 +1,374 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
- */
+// Copyright ¬© 2025 P√©rimap - Tous droits r√©serv√©s
 /**
  * api/places.js
- * API d'autocomplÈtion de lieux
- * 
- * ?? STATUT: D…SACTIV… - Code prÈparÈ pour le futur
+ * Recherche de lieux: Photon (si disponible) ou fallback GTFS local
  */
 
-/*
 import { Router } from 'express';
+import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { createLogger } from '../utils/logger.js';
+import { autocomplete as smartAutocomplete, loadAutocompleteCache } from '../utils/autocompleteProvider.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const router = Router();
+const logger = createLogger('places-api');
+
+// Utiliser Photon public par d√©faut (komoot.io) - fonctionne partout
+const PHOTON_BASE_URL = process.env.PHOTON_BASE_URL || 'https://photon.komoot.io';
+
+// Limites g√©ographiques de la Dordogne (d√©partement 24)
+const DORDOGNE_BOUNDS = {
+  south: 44.69,   // Sud de la Dordogne
+  north: 45.68,   // Nord de la Dordogne
+  west: 0.01,     // Ouest de la Dordogne
+  east: 1.54      // Est de la Dordogne
+};
+
+// Centre de Grand P√©rigueux (biais pour les recherches)
+const GRAND_PERIGUEUX_CENTER = {
+  lat: 45.1839,
+  lon: 0.7212
+};
+
+// Initialiser le cache des suggestions au d√©marrage
+await loadAutocompleteCache();
+
+router.get('/autocomplete', async (req, res) => {
+  const { q, lat, lon, limit = 10 } = req.query;
+
+  if (!q || q.length < 1) {
+    return res.status(400).json({ error: 'Requ√™te trop courte (min 1 caract√®re)' });
+  }
+
+  try {
+    const searchLat = lat ? Number(lat) : GRAND_PERIGUEUX_CENTER.lat;
+    const searchLon = lon ? Number(lon) : GRAND_PERIGUEUX_CENTER.lon;
+    const maxLimit = Number(limit);
+
+    // === 1. R√©cup√©rer les r√©sultats Photon (villes, rues, lieux) ===
+    let photonResults = [];
+    try {
+      const params = new URLSearchParams({ 
+        q, 
+        limit: '15',  // On demande plus pour filtrer ensuite
+        lat: String(searchLat),
+        lon: String(searchLon)
+      });
+
+      const url = `${PHOTON_BASE_URL}/api?${params.toString()}`;
+      const response = await Promise.race([
+        fetch(url),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+      ]);
+      
+      if (response.ok) {
+        const data = await response.json();
+        photonResults = (data.features || [])
+          .filter(f => {
+            const lat = f.geometry.coordinates[1];
+            const lon = f.geometry.coordinates[0];
+            // Filtre g√©ographique Dordogne
+            return lat >= DORDOGNE_BOUNDS.south && lat <= DORDOGNE_BOUNDS.north &&
+                   lon >= DORDOGNE_BOUNDS.west && lon <= DORDOGNE_BOUNDS.east;
+          })
+          .map(f => {
+            const props = f.properties;
+            const type = props.type || props.osm_value || 'place';
+            
+            // Construire une description lisible
+            let description = props.name || '';
+            if (props.street && !description.includes(props.street)) {
+              description = description ? `${description}, ${props.street}` : props.street;
+            }
+            if (props.housenumber && props.street) {
+              description = `${props.housenumber} ${props.street}`;
+              if (props.name && props.name !== props.street) {
+                description = `${props.name}, ${description}`;
+              }
+            }
+            
+            return {
+              lat: f.geometry.coordinates[1],
+              lon: f.geometry.coordinates[0],
+              description: description || 'Lieu',
+              city: props.city || props.locality || '',
+              type: type,
+              priority: getCategoryPriority(type),
+              source: 'photon'
+            };
+          });
+      }
+    } catch (err) {
+      logger.debug(`[places] Photon: ${err.message}`);
+    }
+
+    // === 2. R√©cup√©rer les arr√™ts de bus GTFS ===
+    const gtfsResults = await smartAutocomplete(q, { 
+      limit: 15,
+      lat: searchLat,
+      lon: searchLon
+    });
+
+    // === 3. Fusionner et trier intelligemment ===
+    const allResults = [...photonResults, ...gtfsResults];
+    
+    // D√©dupliquer par proximit√© g√©ographique + nom similaire
+    const deduplicated = deduplicateResults(allResults);
+    
+    // Trier par priorit√© (villes > POIs > adresses > arr√™ts) puis par pertinence
+    deduplicated.sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority;
+      // √Ä priorit√© √©gale, pr√©f√©rer les correspondances exactes
+      const aExact = a.description.toLowerCase().startsWith(q.toLowerCase()) ? 0 : 1;
+      const bExact = b.description.toLowerCase().startsWith(q.toLowerCase()) ? 0 : 1;
+      return aExact - bExact;
+    });
+
+    // Retourner les meilleurs r√©sultats
+    const finalResults = deduplicated.slice(0, maxLimit).map(r => ({
+      lat: r.lat,
+      lon: r.lon,
+      description: r.description,
+      city: r.city || '',
+      type: r.type,
+      source: r.source
+    }));
+
+    res.json({ suggestions: finalResults });
+    
+  } catch (error) {
+    logger.error('[places] autocomplete error', error);
+    res.json({ suggestions: [] });
+  }
+});
 
 /**
- * GET /api/places/autocomplete
- * Recherche de lieux par texte (autocomplÈtion)
- * 
- * Query:
- * - q: string (requis) - Texte de recherche
- * - lat: number (optionnel) - Latitude pour boost proximitÈ
- * - lon: number (optionnel) - Longitude pour boost proximitÈ
- * - types: string (optionnel) - Types de lieux sÈparÈs par virgule (stop,poi,address)
- * - limit: number (optionnel, dÈfaut 10)
+ * D√©termine la priorit√© d'affichage selon le type
+ * 1 = Villes (affich√©es en premier)
+ * 2 = POIs / Lieux importants
+ * 3 = Adresses / Rues
+ * 4 = Arr√™ts de transport
  */
-/*
-router.get('/autocomplete', async (req, res, next) => {
+function getCategoryPriority(type) {
+  const t = (type || '').toLowerCase();
+  
+  // Villes et localit√©s
+  if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb', 'municipality', 'administrative'].includes(t)) {
+    return 1;
+  }
+  // POIs et lieux importants
+  if (['amenity', 'shop', 'leisure', 'tourism', 'historic', 'building', 'school', 'hospital', 'university', 'college', 'supermarket', 'mall'].includes(t)) {
+    return 2;
+  }
+  // Adresses et rues
+  if (['street', 'road', 'way', 'house', 'residential', 'address', 'highway'].includes(t)) {
+    return 3;
+  }
+  // Arr√™ts de transport (GTFS)
+  if (['stop', 'transport', 'bus_stop', 'station'].includes(t)) {
+    return 4;
+  }
+  return 3; // Par d√©faut: priorit√© moyenne
+}
+
+/**
+ * D√©duplique les r√©sultats par proximit√© g√©ographique et similarit√© de nom
+ */
+function deduplicateResults(results) {
+  const dominated = new Set();
+  const deduplicated = [];
+  
+  for (let i = 0; i < results.length; i++) {
+    if (dominated.has(i)) continue;
+    
+    const current = results[i];
+    let dominated_by_current = false;
+    
+    for (let j = i + 1; j < results.length; j++) {
+      if (dominated.has(j)) continue;
+      
+      const other = results[j];
+      const distance = haversineDistanceMeters(current.lat, current.lon, other.lat, other.lon);
+      const nameSimilarity = calculateNameSimilarity(current.description, other.description);
+      
+      // Si tr√®s proches g√©ographiquement ET noms similaires ‚Üí doublon
+      if (distance < 100 && nameSimilarity > 0.7) {
+        // Garder celui avec la meilleure priorit√©
+        if (current.priority <= other.priority) {
+          dominated.add(j);
+        } else {
+          dominated.add(i);
+          dominated_by_current = true;
+          break;
+        }
+      }
+      // Si m√™me nom exact mais positions diff√©rentes ‚Üí garder les deux (arr√™ts diff√©rents)
+    }
+    
+    if (!dominated_by_current) {
+      deduplicated.push(current);
+    }
+  }
+  
+  return deduplicated;
+}
+
+/**
+ * Calcule la similarit√© entre deux noms (0-1)
+ */
+function calculateNameSimilarity(name1, name2) {
+  const n1 = (name1 || '').toLowerCase().trim();
+  const n2 = (name2 || '').toLowerCase().trim();
+  
+  if (n1 === n2) return 1.0;
+  if (n1.includes(n2) || n2.includes(n1)) return 0.9;
+  
+  // Jaccard sur les mots
+  const words1 = new Set(n1.split(/[\s\-_,]+/).filter(w => w.length > 2));
+  const words2 = new Set(n2.split(/[\s\-_,]+/).filter(w => w.length > 2));
+  
+  if (words1.size === 0 || words2.size === 0) return 0;
+  
+  const intersection = [...words1].filter(w => words2.has(w)).length;
+  const union = new Set([...words1, ...words2]).size;
+  
+  return intersection / union;
+}
+
+/**
+ * Trie les suggestions par cat√©gorie (hi√©rarchie logique)
+ * 1. Villes
+ * 2. Noms de lieux / enseignes (POIs)
+ * 3. Adresses (rues, b√¢timents)
+ * 4. Autres
+ */
+function sortByCategory(suggestions) {
+  const cities = [];
+  const pois = [];
+  const addresses = [];
+  const other = [];
+
+  suggestions.forEach(s => {
+    const t = (s.type || '').toLowerCase();
+    
+    // Cat√©gorie 1: Villes et localit√©s
+    if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb'].includes(t)) {
+      cities.push(s);
+    }
+    // Cat√©gorie 2: POIs et enseignes
+    else if (['amenity', 'shop', 'leisure', 'tourism', 'historic', 'building', 'public_transport'].includes(t)) {
+      pois.push(s);
+    }
+    // Cat√©gorie 3: Adresses et rues
+    else if (['street', 'road', 'way', 'house', 'residential'].includes(t)) {
+      addresses.push(s);
+    }
+    // Cat√©gorie 4: Autres
+    else {
+      other.push(s);
+    }
+  });
+
+  // Retourner dans l'ordre de priorit√©
+  return [...cities, ...pois, ...addresses, ...other];
+}
+
+/**
+ * Recherche floue simple dans les arr√™ts locaux
+ */
+function fuzzySearchStops(query, limit = 8) {
+  const q = query.toLowerCase().trim();
+  if (q.length < 2) return [];
+  
+  const scored = stopsCache
+    .map(stop => ({
+      ...stop,
+      score: fuzzyScore(q, stop.name.toLowerCase())
+    }))
+    .filter(s => s.score > 0.3)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+  
+  return scored.map(s => ({
+    lat: s.lat,
+    lon: s.lon,
+    description: s.name,
+    city: 'P√©rigueux',
+    type: 'stop'
+  }));
+}
+
+router.get('/reverse', async (req, res) => {
+  const { lat, lon } = req.query;
+  if (!lat || !lon) {
+    return res.status(400).json({ error: 'lat et lon requis' });
+  }
   try {
-    const { places, userMemory } = req.app.locals;
-    const { q, lat, lon, types, limit = 10 } = req.query;
-
-    if (!q || q.length < 2) {
-      return res.status(400).json({
-        error: 'RequÍte trop courte (min 2 caractËres)',
-      });
+    const params = new URLSearchParams({ lat, lon, limit: '1' });
+    const url = `${PHOTON_BASE_URL}/reverse?${params.toString()}`;
+    try {
+      const response = await Promise.race([
+        fetch(url),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+      ]);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const feature = data.features?.[0];
+        if (feature) {
+          return res.json({ 
+            place: {
+              lat: feature.geometry.coordinates[1],
+              lon: feature.geometry.coordinates[0],
+              description: feature.properties.name || 'Localisation',
+              city: feature.properties.city || ''
+            }
+          });
+        }
+      }
+    } catch (err) {
+      logger.debug(`[places] Photon reverse unavailable: ${err.message}`);
     }
-
-    // Contexte utilisateur pour personnaliser les rÈsultats
-    let userContext = null;
-    if (req.userId && userMemory) {
-      userContext = await userMemory.getUserContext(req.userId);
-    }
-
-    // Options de recherche
-    const searchOptions = {
-      userContext,
-    };
-
-    // Position pour boost proximitÈ
-    if (lat && lon) {
-      searchOptions.location = {
+    
+    // Fallback: retourner le point de d√©part
+    res.json({ 
+      place: {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-      };
-    }
-
-    // Filtrer par types
-    if (types) {
-      searchOptions.types = types.split(',');
-    }
-
-    // Recherche
-    const suggestions = places.search(q, searchOptions);
-
-    res.json({
-      suggestions: suggestions.slice(0, parseInt(limit)),
-      query: q,
+        description: 'Localisation',
+        city: ''
+      }
     });
-
   } catch (error) {
-    next(error);
+    logger.error('[places] reverse error', error);
+    res.json({ place: { lat: parseFloat(lat), lon: parseFloat(lon), description: 'Localisation' } });
   }
 });
 
-/**
- * GET /api/places/nearby
- * Recherche de lieux ‡ proximitÈ d'une position
- * 
- * Query:
- * - lat: number (requis)
- * - lon: number (requis)
- * - radius: number (optionnel, dÈfaut 500m)
- * - types: string (optionnel)
- * - limit: number (optionnel, dÈfaut 10)
- */
-/*
-router.get('/nearby', async (req, res, next) => {
-  try {
-    const { places } = req.app.locals;
-    const { lat, lon, radius = 500, types, limit = 10 } = req.query;
+function mapPhotonFeatureToSuggestion(feature) {
+  return {
+    lat: feature.geometry.coordinates[1],
+    lon: feature.geometry.coordinates[0],
+    description: feature.properties.name || '',
+    city: feature.properties.city || ''
+  };
+}
 
-    if (!lat || !lon) {
-      return res.status(400).json({
-        error: 'lat et lon requis',
-      });
-    }
-
-    const options = {
-      radius: parseInt(radius),
-      limit: parseInt(limit),
-    };
-
-    if (types) {
-      options.types = types.split(',');
-    }
-
-    const nearby = places.searchNearby(
-      parseFloat(lat),
-      parseFloat(lon),
-      options
-    );
-
-    res.json({
-      places: nearby,
-      center: { lat: parseFloat(lat), lon: parseFloat(lon) },
-      radius: parseInt(radius),
-    });
-
-  } catch (error) {
-    next(error);
-  }
-});
-
-/**
- * GET /api/places/:id
- * DÈtails d'un lieu spÈcifique
- */
-/*
-router.get('/:id', async (req, res, next) => {
-  try {
-    const { places } = req.app.locals;
-    const { id } = req.params;
-
-    const place = places.getPlace(id);
-
-    if (!place) {
-      return res.status(404).json({
-        error: 'Lieu non trouvÈ',
-      });
-    }
-
-    res.json({ place });
-
-  } catch (error) {
-    next(error);
-  }
-});
-
-/**
- * GET /api/places/reverse
- * GÈocodage inverse (coordonnÈes -> adresse)
- */
-/*
-router.get('/reverse', async (req, res, next) => {
-  try {
-    const { places } = req.app.locals;
-    const { lat, lon } = req.query;
-
-    if (!lat || !lon) {
-      return res.status(400).json({
-        error: 'lat et lon requis',
-      });
-    }
-
-    // Trouver le lieu le plus proche
-    const nearby = places.searchNearby(
-      parseFloat(lat),
-      parseFloat(lon),
-      { radius: 100, limit: 1 }
-    );
-
-    if (nearby.length === 0) {
-      // Fallback: retourner les coordonnÈes
-      return res.json({
-        place: {
-          id: `coords_${lat}_${lon}`,
-          type: 'coordinates',
-          name: `${parseFloat(lat).toFixed(5)}, ${parseFloat(lon).toFixed(5)}`,
-          lat: parseFloat(lat),
-          lon: parseFloat(lon),
-        },
-      });
-    }
-
-    res.json({
-      place: nearby[0],
-    });
-
-  } catch (error) {
-    next(error);
-  }
-});
+// Haversine distance (meters)
+function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+  function toRad(v) { return v * Math.PI / 180; }
+  const R = 6371000; // Earth radius in meters
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 
 export default router;
-*/
-
-// Placeholder
-const router = {};
-export default router;
-
-

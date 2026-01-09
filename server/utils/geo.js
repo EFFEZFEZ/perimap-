@@ -1,16 +1,12 @@
-/*
- * Copyright (c) 2026 P�rimap. Tous droits r�serv�s.
- * Ce code ne peut �tre ni copi�, ni distribu�, ni modifi� sans l'autorisation �crite de l'auteur.
- */
 /**
  * utils/geo.js
- * Utilitaires g�ographiques
+ * Utilitaires géographiques
  * 
- * ?? STATUT: D�SACTIV� - Code pr�par� pour le futur
+ * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
 /**
- * Rayon de la Terre en m�tres
+ * Rayon de la Terre en mètres
  */
 export const EARTH_RADIUS = 6371000;
 
@@ -21,17 +17,17 @@ export const EARTH_RADIUS = 6371000;
  * @param {number} lon1 - Longitude du point 1
  * @param {number} lat2 - Latitude du point 2
  * @param {number} lon2 - Longitude du point 2
- * @returns {number} Distance en m�tres
+ * @returns {number} Distance en mètres
  */
 export function haversineDistance(lat1, lon1, lat2, lon2) {
-  const f1 = (lat1 * Math.PI) / 180;
-  const f2 = (lat2 * Math.PI) / 180;
-  const ?f = ((lat2 - lat1) * Math.PI) / 180;
-  const ?? = ((lon2 - lon1) * Math.PI) / 180;
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
   const a =
-    Math.sin(?f / 2) * Math.sin(?f / 2) +
-    Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return EARTH_RADIUS * c;
@@ -44,55 +40,55 @@ export function haversineDistance(lat1, lon1, lat2, lon2) {
  * @param {number} lon1
  * @param {number} lat2
  * @param {number} lon2
- * @returns {number} Cap en degr�s (0-360)
+ * @returns {number} Cap en degrés (0-360)
  */
 export function bearing(lat1, lon1, lat2, lon2) {
-  const f1 = (lat1 * Math.PI) / 180;
-  const f2 = (lat2 * Math.PI) / 180;
-  const ?? = ((lon2 - lon1) * Math.PI) / 180;
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-  const y = Math.sin(??) * Math.cos(f2);
+  const y = Math.sin(Δλ) * Math.cos(φ2);
   const x =
-    Math.cos(f1) * Math.sin(f2) -
-    Math.sin(f1) * Math.cos(f2) * Math.cos(??);
+    Math.cos(φ1) * Math.sin(φ2) -
+    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
   
-  const ? = Math.atan2(y, x);
-  return ((? * 180) / Math.PI + 360) % 360;
+  const θ = Math.atan2(y, x);
+  return ((θ * 180) / Math.PI + 360) % 360;
 }
 
 /**
- * Calcule un point � une distance et un cap donn�s
+ * Calcule un point à une distance et un cap donnés
  * 
- * @param {number} lat - Latitude de d�part
- * @param {number} lon - Longitude de d�part
- * @param {number} distance - Distance en m�tres
- * @param {number} bearingDeg - Cap en degr�s
+ * @param {number} lat - Latitude de départ
+ * @param {number} lon - Longitude de départ
+ * @param {number} distance - Distance en mètres
+ * @param {number} bearingDeg - Cap en degrés
  * @returns {{lat: number, lon: number}}
  */
 export function destinationPoint(lat, lon, distance, bearingDeg) {
-  const f1 = (lat * Math.PI) / 180;
-  const ?1 = (lon * Math.PI) / 180;
-  const ? = (bearingDeg * Math.PI) / 180;
-  const d = distance / EARTH_RADIUS;
+  const φ1 = (lat * Math.PI) / 180;
+  const λ1 = (lon * Math.PI) / 180;
+  const θ = (bearingDeg * Math.PI) / 180;
+  const δ = distance / EARTH_RADIUS;
 
-  const f2 = Math.asin(
-    Math.sin(f1) * Math.cos(d) +
-    Math.cos(f1) * Math.sin(d) * Math.cos(?)
+  const φ2 = Math.asin(
+    Math.sin(φ1) * Math.cos(δ) +
+    Math.cos(φ1) * Math.sin(δ) * Math.cos(θ)
   );
   
-  const ?2 = ?1 + Math.atan2(
-    Math.sin(?) * Math.sin(d) * Math.cos(f1),
-    Math.cos(d) - Math.sin(f1) * Math.sin(f2)
+  const λ2 = λ1 + Math.atan2(
+    Math.sin(θ) * Math.sin(δ) * Math.cos(φ1),
+    Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2)
   );
 
   return {
-    lat: (f2 * 180) / Math.PI,
-    lon: (?2 * 180) / Math.PI,
+    lat: (φ2 * 180) / Math.PI,
+    lon: (λ2 * 180) / Math.PI,
   };
 }
 
 /**
- * Calcule le centre d'un ensemble de points (centro�de)
+ * Calcule le centre d'un ensemble de points (centroïde)
  * 
  * @param {Array<{lat: number, lon: number}>} points
  * @returns {{lat: number, lon: number}}
@@ -101,7 +97,7 @@ export function centroid(points) {
   if (points.length === 0) return { lat: 0, lon: 0 };
   if (points.length === 1) return { lat: points[0].lat, lon: points[0].lon };
 
-  // Pour un calcul pr�cis sur une sph�re
+  // Pour un calcul précis sur une sphère
   let x = 0, y = 0, z = 0;
 
   for (const point of points) {
@@ -153,7 +149,7 @@ export function boundingBox(points) {
 }
 
 /**
- * V�rifie si un point est dans une bounding box
+ * Vérifie si un point est dans une bounding box
  * 
  * @param {number} lat
  * @param {number} lon
@@ -170,16 +166,16 @@ export function isInBoundingBox(lat, lon, bbox) {
 }
 
 /**
- * �tend une bounding box d'un certain rayon
+ * Étend une bounding box d'un certain rayon
  * 
  * @param {{minLat: number, maxLat: number, minLon: number, maxLon: number}} bbox
  * @param {number} radiusMeters
  * @returns {{minLat: number, maxLat: number, minLon: number, maxLon: number}}
  */
 export function expandBoundingBox(bbox, radiusMeters) {
-  // Approximation: 1 degr� de latitude � 111km
+  // Approximation: 1 degré de latitude ≈ 111km
   const latDelta = radiusMeters / 111000;
-  // 1 degr� de longitude varie selon la latitude
+  // 1 degré de longitude varie selon la latitude
   const avgLat = (bbox.minLat + bbox.maxLat) / 2;
   const lonDelta = radiusMeters / (111000 * Math.cos((avgLat * Math.PI) / 180));
 
@@ -192,10 +188,10 @@ export function expandBoundingBox(bbox, radiusMeters) {
 }
 
 /**
- * Calcule le temps de marche estim�
+ * Calcule le temps de marche estimé
  * 
  * @param {number} distanceMeters
- * @param {number} walkSpeedMps - Vitesse de marche en m/s (d�faut: 1.25 = ~4.5 km/h)
+ * @param {number} walkSpeedMps - Vitesse de marche en m/s (défaut: 1.25 = ~4.5 km/h)
  * @returns {number} Temps en secondes
  */
 export function estimateWalkTime(distanceMeters, walkSpeedMps = 1.25) {
@@ -206,7 +202,7 @@ export function estimateWalkTime(distanceMeters, walkSpeedMps = 1.25) {
  * Simplifie une polyline en utilisant l'algorithme Douglas-Peucker
  * 
  * @param {Array<[number, number]>} points - [[lon, lat], ...]
- * @param {number} tolerance - Tol�rance en degr�s
+ * @param {number} tolerance - Tolérance en degrés
  * @returns {Array<[number, number]>}
  */
 export function simplifyPolyline(points, tolerance = 0.0001) {
@@ -274,5 +270,3 @@ export default {
   estimateWalkTime,
   simplifyPolyline,
 };
-
-

@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * core/places/index.js
- * Export principal du module d'autocomplétion de lieux
+ * Export principal du module d'autocomplÃ©tion de lieux
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 import { Trie } from './trie.js';
@@ -14,12 +10,12 @@ import { FuzzySearcher, fuzzyMatch, normalizeText } from './fuzzy.js';
 import { PlacesIndexer } from './indexer.js';
 
 /**
- * Moteur d'autocomplétion de lieux
- * Combine la recherche par préfixe (Trie) et la recherche floue
+ * Moteur d'autocomplÃ©tion de lieux
+ * Combine la recherche par prÃ©fixe (Trie) et la recherche floue
  */
 export class PlacesEngine {
   /**
-   * @param {Array} stops - Arrêts GTFS
+   * @param {Array} stops - ArrÃªts GTFS
    * @param {Object} options - Options de configuration
    */
   constructor(stops = [], options = {}) {
@@ -41,13 +37,13 @@ export class PlacesEngine {
    * Construit l'index de recherche
    */
   async buildIndex() {
-    console.log('?? Construction de l\'index de places...');
+    console.log('ðŸ”§ Construction de l\'index de places...');
     const startTime = Date.now();
 
-    // Indexer les arrêts GTFS
+    // Indexer les arrÃªts GTFS
     this.indexer.indexStops(this.stops);
 
-    // Ajouter les POI par défaut
+    // Ajouter les POI par dÃ©faut
     this.indexer.addDefaultPOIs();
 
     // Construire l'index de recherche floue
@@ -55,7 +51,7 @@ export class PlacesEngine {
 
     this.isReady = true;
     const elapsed = Date.now() - startTime;
-    console.log(`? Index de places prêt en ${elapsed}ms`);
+    console.log(`âœ… Index de places prÃªt en ${elapsed}ms`);
 
     this.indexer.logStats();
     return this;
@@ -84,24 +80,24 @@ export class PlacesEngine {
     const normalizedQuery = normalizeText(query);
     const results = new Map(); // id -> {place, score, source}
 
-    // 1. Recherche par préfixe (Trie) - très rapide
+    // 1. Recherche par prÃ©fixe (Trie) - trÃ¨s rapide
     const trieResults = this.indexer.trie.search(normalizedQuery, 20);
     trieResults.forEach(place => {
       results.set(place.id, {
         place,
-        score: 1.0, // Score max pour match préfixe
+        score: 1.0, // Score max pour match prÃ©fixe
         source: 'trie',
       });
     });
 
-    // 2. Recherche floue si pas assez de résultats
+    // 2. Recherche floue si pas assez de rÃ©sultats
     if (results.size < this.options.maxSuggestions) {
       const fuzzyResults = this.indexer.fuzzySearcher.search(query);
       fuzzyResults.forEach(({ item: place, score }) => {
         if (!results.has(place.id)) {
           results.set(place.id, {
             place,
-            score: score * 0.9, // Légèrement moins bon que le préfixe
+            score: score * 0.9, // LÃ©gÃ¨rement moins bon que le prÃ©fixe
             source: 'fuzzy',
           });
         }
@@ -113,7 +109,7 @@ export class PlacesEngine {
       this.applyUserBoosts(results, userContext);
     }
 
-    // 4. Appliquer le boost de proximité
+    // 4. Appliquer le boost de proximitÃ©
     if (location) {
       this.applyProximityBoost(results, location);
     }
@@ -123,12 +119,12 @@ export class PlacesEngine {
       .sort((a, b) => b.score - a.score)
       .slice(0, this.options.maxSuggestions);
 
-    // 6. Formater les résultats
+    // 6. Formater les rÃ©sultats
     return sorted.map(({ place, score }) => this.formatSuggestion(place, score));
   }
 
   /**
-   * Applique les boosts basés sur l'historique utilisateur
+   * Applique les boosts basÃ©s sur l'historique utilisateur
    */
   applyUserBoosts(results, userContext) {
     const { recentSearches = [], favorites = [], frequentStops = {} } = userContext;
@@ -140,16 +136,16 @@ export class PlacesEngine {
         result.isFavorite = true;
       }
 
-      // Boost pour les recherches récentes
+      // Boost pour les recherches rÃ©centes
       const recentIndex = recentSearches.findIndex(r => r.placeId === id);
       if (recentIndex !== -1) {
-        // Plus récent = plus de boost
+        // Plus rÃ©cent = plus de boost
         const recencyBoost = this.options.recentBoost * (1 - recentIndex / recentSearches.length);
         result.score *= recencyBoost;
         result.isRecent = true;
       }
 
-      // Boost pour les arrêts fréquemment utilisés
+      // Boost pour les arrÃªts frÃ©quemment utilisÃ©s
       if (frequentStops[id]) {
         const frequencyBoost = 1 + (Math.log(frequentStops[id]) / 10) * this.options.frequencyBoost;
         result.score *= frequencyBoost;
@@ -158,7 +154,7 @@ export class PlacesEngine {
   }
 
   /**
-   * Applique un boost basé sur la proximité géographique
+   * Applique un boost basÃ© sur la proximitÃ© gÃ©ographique
    */
   applyProximityBoost(results, location) {
     results.forEach(result => {
@@ -167,8 +163,8 @@ export class PlacesEngine {
         result.place.lat, result.place.lon
       );
 
-      // Boost inversement proportionnel à la distance
-      // Max boost (1.3x) à 0m, pas de boost au-delà de 5km
+      // Boost inversement proportionnel Ã  la distance
+      // Max boost (1.3x) Ã  0m, pas de boost au-delÃ  de 5km
       if (distance < 5000) {
         const proximityBoost = 1 + (0.3 * (1 - distance / 5000));
         result.score *= proximityBoost;
@@ -190,7 +186,7 @@ export class PlacesEngine {
       score: Math.round(score * 100) / 100,
     };
 
-    // Ajouter des infos supplémentaires selon le type
+    // Ajouter des infos supplÃ©mentaires selon le type
     if (place.type === 'stop') {
       suggestion.stopId = place.metadata?.stopId;
       suggestion.icon = 'bus';
@@ -203,7 +199,7 @@ export class PlacesEngine {
   }
 
   /**
-   * Retourne l'icône pour une catégorie de POI
+   * Retourne l'icÃ´ne pour une catÃ©gorie de POI
    */
   getCategoryIcon(category) {
     const icons = {
@@ -219,7 +215,7 @@ export class PlacesEngine {
   }
 
   /**
-   * Recherche les lieux à proximité d'une position
+   * Recherche les lieux Ã  proximitÃ© d'une position
    * 
    * @param {number} lat
    * @param {number} lon
@@ -231,7 +227,7 @@ export class PlacesEngine {
 
     let results = this.indexer.findNearby(lat, lon, radius);
 
-    // Filtrer par type si spécifié
+    // Filtrer par type si spÃ©cifiÃ©
     if (types && types.length > 0) {
       results = results.filter(r => types.includes(r.place.type));
     }
@@ -254,7 +250,7 @@ export class PlacesEngine {
   }
 
   /**
-   * Ajoute un lieu personnalisé
+   * Ajoute un lieu personnalisÃ©
    */
   addCustomPlace(place) {
     this.indexer.addPlace({
@@ -273,14 +269,14 @@ export class PlacesEngine {
    */
   haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000;
-    const f1 = (lat1 * Math.PI) / 180;
-    const f2 = (lat2 * Math.PI) / 180;
-    const ?f = ((lat2 - lat1) * Math.PI) / 180;
-    const ?? = ((lon2 - lon1) * Math.PI) / 180;
+    const Ï†1 = (lat1 * Math.PI) / 180;
+    const Ï†2 = (lat2 * Math.PI) / 180;
+    const Î”Ï† = ((lat2 - lat1) * Math.PI) / 180;
+    const Î”Î» = ((lon2 - lon1) * Math.PI) / 180;
 
     const a =
-      Math.sin(?f / 2) * Math.sin(?f / 2) +
-      Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
+      Math.sin(Î”Ï† / 2) * Math.sin(Î”Ï† / 2) +
+      Math.cos(Ï†1) * Math.cos(Ï†2) * Math.sin(Î”Î» / 2) * Math.sin(Î”Î» / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -304,5 +300,3 @@ export { FuzzySearcher, fuzzyMatch, fuzzySearch, normalizeText } from './fuzzy.j
 export { PlacesIndexer } from './indexer.js';
 
 export default PlacesEngine;
-
-

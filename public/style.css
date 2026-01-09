@@ -1475,6 +1475,8 @@ body.view-map-locked {
     position: fixed !important;
     width: 100% !important;
     height: 100% !important;
+    height: 100vh !important; /* Fallback pour navigateurs sans dvh */
+    height: 100dvh !important; /* V304: Dynamic viewport height pour mobile */
     top: 0 !important;
     left: 0 !important;
 }
@@ -1488,16 +1490,21 @@ body.view-map-locked #map-container {
     bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
+    height: 100vh !important; /* Fallback */
     height: 100dvh !important; /* Dynamic viewport height pour mobile */
     z-index: 10; /* V131: Réduit pour ne pas cacher les contrôles */
 }
 
 body.view-map-locked #map-view {
     height: 100% !important;
+    min-height: 100vh; /* V304: Fallback */
+    min-height: 100dvh; /* V304: Garantir hauteur minimum */
 }
 
 body.view-map-locked #map {
     height: 100% !important;
+    min-height: 0; /* V304: Permettre au flex de fonctionner */
+}
 }
 
 /* V64: Cacher la scrollbar sur la vue carte */

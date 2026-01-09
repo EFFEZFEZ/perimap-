@@ -318,43 +318,64 @@ export class RealtimeManager {
 
     /**
      * Fusionne les horaires GTFS statiques avec les données temps réel
+     * V304: Amélioration de la logique de fusion pour éviter les conflits
+     * 
      * @param {Array} staticDepartures - Départs GTFS statiques [{time, routeId, destination, ...}]
      * @param {Object} realtimeData - Données temps réel du scraper
      * @returns {Array} Départs enrichis avec isRealtime flag
      */
     mergeWithStatic(staticDepartures, realtimeData) {
+        // V304: Si pas de données temps réel, retourner les statiques tels quels
         if (!realtimeData || !realtimeData.schedules || realtimeData.schedules.length === 0) {
-            // Pas de données temps réel, retourner les statiques
             return staticDepartures.map(dep => ({ ...dep, isRealtime: false }));
         }
 
+        // V304: Créer une copie des données RT indexées par ligne + destination
+        const rtByLineAndDest = new Map();
+        realtimeData.schedules.forEach((rt, index) => {
+            const key = `${this.normalizeLigne(rt.ligne)}_${this.normalizeDestination(rt.destination)}`;
+            if (!rtByLineAndDest.has(key)) {
+                rtByLineAndDest.set(key, []);
+            }
+            rtByLineAndDest.get(key).push({ ...rt, _index: index });
+        });
+
         const merged = [];
-        const usedRealtime = new Set();
+        const usedRealtimeIndices = new Set();
 
-        // Pour chaque départ statique, chercher une correspondance temps réel
+        // V304: Pour chaque départ statique, chercher une correspondance RT précise
         for (const staticDep of staticDepartures) {
+            const staticLigne = this.normalizeLigne(staticDep.routeShortName || staticDep.routeId);
+            const staticDest = this.normalizeDestination(staticDep.destination);
+            const key = `${staticLigne}_${staticDest}`;
+            
             let matchedRealtime = null;
-
-            // Chercher un match par ligne et destination
-            for (let i = 0; i < realtimeData.schedules.length; i++) {
-                if (usedRealtime.has(i)) continue;
-
-                const rt = realtimeData.schedules[i];
-                
-                // Matcher par ligne (A, B, C, D, etc.)
-                const rtLigne = this.normalizeLigne(rt.ligne);
-                const staticLigne = this.normalizeLigne(staticDep.routeShortName || staticDep.routeId);
-
-                if (rtLigne === staticLigne) {
-                    // Match trouvé !
+            
+            // Chercher d'abord un match par ligne + destination
+            const candidates = rtByLineAndDest.get(key) || [];
+            for (const rt of candidates) {
+                if (!usedRealtimeIndices.has(rt._index)) {
                     matchedRealtime = rt;
-                    usedRealtime.add(i);
+                    usedRealtimeIndices.add(rt._index);
                     break;
+                }
+            }
+            
+            // V304: Si pas de match exact, chercher par ligne seule
+            if (!matchedRealtime) {
+                for (const rt of realtimeData.schedules) {
+                    if (usedRealtimeIndices.has(rt._index)) continue;
+                    const rtLigne = this.normalizeLigne(rt.ligne);
+                    if (rtLigne === staticLigne) {
+                        matchedRealtime = rt;
+                        usedRealtimeIndices.add(realtimeData.schedules.indexOf(rt));
+                        break;
+                    }
                 }
             }
 
             if (matchedRealtime) {
-                // Utiliser le temps réel
+                // V304: Utiliser le temps réel, conserver les infos statiques
                 const realtimeMinutes = this.parseTemps(matchedRealtime.temps);
                 merged.push({
                     ...staticDep,
@@ -362,7 +383,8 @@ export class RealtimeManager {
                     realtimeMinutes: realtimeMinutes,
                     realtimeText: matchedRealtime.temps,
                     realtimeDestination: matchedRealtime.destination,
-                    realtimeQuai: matchedRealtime.quai
+                    realtimeQuai: matchedRealtime.quai,
+                    realtimeIsTheoretical: matchedRealtime.theoretical || false
                 });
             } else {
                 // Garder le statique
@@ -373,9 +395,9 @@ export class RealtimeManager {
             }
         }
 
-        // Ajouter les temps réel non matchés (bus supplémentaires)
+        // V304: Ajouter les temps réel non matchés (bus supplémentaires ou retardés)
         for (let i = 0; i < realtimeData.schedules.length; i++) {
-            if (!usedRealtime.has(i)) {
+            if (!usedRealtimeIndices.has(i)) {
                 const rt = realtimeData.schedules[i];
                 merged.push({
                     routeId: rt.ligne,
@@ -385,12 +407,13 @@ export class RealtimeManager {
                     realtimeMinutes: this.parseTemps(rt.temps),
                     realtimeText: rt.temps,
                     realtimeQuai: rt.quai,
+                    realtimeIsTheoretical: rt.theoretical || false,
                     isExtraRealtime: true // Bus non prévu dans le GTFS statique
                 });
             }
         }
 
-        // Trier par temps (temps réel d'abord si disponible)
+        // V304: Trier par temps (temps réel en priorité pour le calcul)
         merged.sort((a, b) => {
             const timeA = a.isRealtime ? a.realtimeMinutes : this.getMinutesFromTime(a.time);
             const timeB = b.isRealtime ? b.realtimeMinutes : this.getMinutesFromTime(b.time);
@@ -406,6 +429,24 @@ export class RealtimeManager {
     normalizeLigne(ligne) {
         if (!ligne) return '';
         return String(ligne).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    /**
+     * V304: Normalise le nom d'une destination pour comparaison
+     * Extrait le premier mot significatif pour le matching
+     */
+    normalizeDestination(dest) {
+        if (!dest) return '';
+        // Supprimer les accents, mettre en majuscules, garder alphanumérique et espaces
+        const normalized = String(dest)
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toUpperCase()
+            .replace(/[^A-Z0-9\s]/g, '')
+            .trim();
+        // Retourner le premier mot significatif (ignore les articles)
+        const words = normalized.split(/\s+/).filter(w => w.length > 2);
+        return words[0] || normalized;
     }
 
     /**

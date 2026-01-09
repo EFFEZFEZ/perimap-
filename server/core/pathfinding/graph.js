@@ -1,36 +1,32 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * graph.js
  * Gestion du graphe de transport pour le pathfinding
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  * 
- * Ce module gère:
- * - La construction du graphe à partir des données GTFS
- * - La sérialisation/désérialisation pour le cache
- * - Les optimisations pour réduire la mémoire
+ * Ce module gÃ¨re:
+ * - La construction du graphe Ã  partir des donnÃ©es GTFS
+ * - La sÃ©rialisation/dÃ©sÃ©rialisation pour le cache
+ * - Les optimisations pour rÃ©duire la mÃ©moire
  */
 
 import { createHash } from 'crypto';
 
 /**
  * @typedef {Object} TransportGraph
- * @property {Array} stops - Arrêts
+ * @property {Array} stops - ArrÃªts
  * @property {Array} routes - Lignes
  * @property {Array} trips - Voyages
  * @property {Array} stopTimes - Horaires
  * @property {Array} calendar - Calendrier
  * @property {Array} calendarDates - Exceptions de calendrier
  * @property {Map} transfersIndex - Index des correspondances
- * @property {string} hash - Hash des données pour le cache
+ * @property {string} hash - Hash des donnÃ©es pour le cache
  */
 
 export class TransportGraph {
   constructor() {
-    // Données GTFS de base
+    // DonnÃ©es GTFS de base
     this.stops = [];
     this.routes = [];
     this.trips = [];
@@ -39,7 +35,7 @@ export class TransportGraph {
     this.calendarDates = [];
     this.shapes = [];
 
-    // Index optimisés
+    // Index optimisÃ©s
     this.stopsById = new Map();
     this.routesById = new Map();
     this.tripsById = new Map();
@@ -49,22 +45,22 @@ export class TransportGraph {
     this.routesByStop = new Map();
     this.transfersIndex = new Map();
 
-    // Métadonnées
+    // MÃ©tadonnÃ©es
     this.buildDate = null;
     this.hash = null;
     this.stats = {};
   }
 
   /**
-   * Charge les données GTFS dans le graphe
+   * Charge les donnÃ©es GTFS dans le graphe
    * 
-   * @param {Object} gtfsData - Données GTFS parsées
+   * @param {Object} gtfsData - DonnÃ©es GTFS parsÃ©es
    */
   loadFromGtfs(gtfsData) {
-    console.log('?? Chargement du graphe depuis GTFS...');
+    console.log('ðŸ“‚ Chargement du graphe depuis GTFS...');
     const startTime = Date.now();
 
-    // Copier les données
+    // Copier les donnÃ©es
     this.stops = gtfsData.stops || [];
     this.routes = gtfsData.routes || [];
     this.trips = gtfsData.trips || [];
@@ -81,7 +77,7 @@ export class TransportGraph {
     this.buildDate = new Date().toISOString();
 
     const elapsed = Date.now() - startTime;
-    console.log(`? Graphe chargé en ${elapsed}ms`);
+    console.log(`âœ… Graphe chargÃ© en ${elapsed}ms`);
     this.logStats();
   }
 
@@ -89,7 +85,7 @@ export class TransportGraph {
    * Construit tous les index pour des recherches rapides
    */
   buildIndexes() {
-    console.log('?? Construction des index...');
+    console.log('ðŸ”§ Construction des index...');
 
     // Index par ID
     this.stops.forEach(stop => {
@@ -129,10 +125,10 @@ export class TransportGraph {
       stopTimes.sort((a, b) => a.stop_sequence - b.stop_sequence);
     });
 
-    // Routes par arrêt
+    // Routes par arrÃªt
     this.buildRoutesAtStopIndex();
 
-    // Index des correspondances (transferts entre arrêts proches)
+    // Index des correspondances (transferts entre arrÃªts proches)
     this.buildTransfersIndex();
 
     // Statistiques
@@ -146,12 +142,12 @@ export class TransportGraph {
   }
 
   /**
-   * Construit l'index des routes par arrêt
+   * Construit l'index des routes par arrÃªt
    */
   buildRoutesAtStopIndex() {
     this.routesByStop.clear();
 
-    // Pour chaque trip, obtenir la route et les arrêts
+    // Pour chaque trip, obtenir la route et les arrÃªts
     this.tripsByRoute.forEach((trips, routeId) => {
       const stopsSet = new Set();
       
@@ -170,12 +166,12 @@ export class TransportGraph {
   }
 
   /**
-   * Construit l'index des correspondances (arrêts à distance de marche)
+   * Construit l'index des correspondances (arrÃªts Ã  distance de marche)
    * 
-   * @param {number} maxDistance - Distance max en mètres (défaut: 300m)
+   * @param {number} maxDistance - Distance max en mÃ¨tres (dÃ©faut: 300m)
    */
   buildTransfersIndex(maxDistance = 300) {
-    console.log(`?? Construction des correspondances (max ${maxDistance}m)...`);
+    console.log(`ðŸ”„ Construction des correspondances (max ${maxDistance}m)...`);
     this.transfersIndex.clear();
 
     const stopsArray = Array.from(this.stopsById.values());
@@ -211,11 +207,11 @@ export class TransportGraph {
       }
     }
 
-    console.log(`? ${transferCount} correspondances trouvées`);
+    console.log(`âœ… ${transferCount} correspondances trouvÃ©es`);
   }
 
   /**
-   * Obtient les correspondances possibles depuis un arrêt
+   * Obtient les correspondances possibles depuis un arrÃªt
    * 
    * @param {string} stopId
    * @returns {Array<{toStopId: string, distance: number, walkTime: number}>}
@@ -225,7 +221,7 @@ export class TransportGraph {
   }
 
   /**
-   * Obtient les routes passant par un arrêt
+   * Obtient les routes passant par un arrÃªt
    * 
    * @param {string} stopId
    * @returns {string[]} IDs des routes
@@ -235,32 +231,32 @@ export class TransportGraph {
   }
 
   /**
-   * Vérifie si un service est actif à une date donnée
+   * VÃ©rifie si un service est actif Ã  une date donnÃ©e
    * 
    * @param {string} serviceId
    * @param {string} dateStr - Date au format YYYYMMDD
    * @returns {boolean}
    */
   isServiceActive(serviceId, dateStr) {
-    // Vérifier les exceptions
+    // VÃ©rifier les exceptions
     const exception = this.calendarDates.find(
       cd => cd.service_id === serviceId && cd.date === dateStr
     );
     
     if (exception) {
-      return exception.exception_type === '1'; // 1 = ajouté, 2 = supprimé
+      return exception.exception_type === '1'; // 1 = ajoutÃ©, 2 = supprimÃ©
     }
 
-    // Vérifier le calendrier régulier
+    // VÃ©rifier le calendrier rÃ©gulier
     const calendar = this.calendar.find(c => c.service_id === serviceId);
     if (!calendar) return false;
 
-    // Vérifier la plage de dates
+    // VÃ©rifier la plage de dates
     if (dateStr < calendar.start_date || dateStr > calendar.end_date) {
       return false;
     }
 
-    // Vérifier le jour de la semaine
+    // VÃ©rifier le jour de la semaine
     const date = this.parseGtfsDate(dateStr);
     const dayOfWeek = date.getDay();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -269,7 +265,7 @@ export class TransportGraph {
   }
 
   /**
-   * Obtient les trips actifs pour une route à une date donnée
+   * Obtient les trips actifs pour une route Ã  une date donnÃ©e
    * 
    * @param {string} routeId
    * @param {string} dateStr
@@ -295,21 +291,21 @@ export class TransportGraph {
    */
   haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000;
-    const f1 = (lat1 * Math.PI) / 180;
-    const f2 = (lat2 * Math.PI) / 180;
-    const ?f = ((lat2 - lat1) * Math.PI) / 180;
-    const ?? = ((lon2 - lon1) * Math.PI) / 180;
+    const Ï†1 = (lat1 * Math.PI) / 180;
+    const Ï†2 = (lat2 * Math.PI) / 180;
+    const Î”Ï† = ((lat2 - lat1) * Math.PI) / 180;
+    const Î”Î» = ((lon2 - lon1) * Math.PI) / 180;
 
     const a =
-      Math.sin(?f / 2) * Math.sin(?f / 2) +
-      Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
+      Math.sin(Î”Ï† / 2) * Math.sin(Î”Ï† / 2) +
+      Math.cos(Ï†1) * Math.cos(Ï†2) * Math.sin(Î”Î» / 2) * Math.sin(Î”Î» / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
   }
 
   /**
-   * Calcule un hash des données pour le cache
+   * Calcule un hash des donnÃ©es pour le cache
    */
   computeHash() {
     const dataString = JSON.stringify({
@@ -325,7 +321,7 @@ export class TransportGraph {
   }
 
   /**
-   * Sérialise le graphe pour le cache
+   * SÃ©rialise le graphe pour le cache
    */
   serialize() {
     return {
@@ -344,7 +340,7 @@ export class TransportGraph {
   }
 
   /**
-   * Désérialise le graphe depuis le cache
+   * DÃ©sÃ©rialise le graphe depuis le cache
    */
   deserialize(cached) {
     if (cached.version !== 1) {
@@ -367,8 +363,8 @@ export class TransportGraph {
    * Affiche les statistiques du graphe
    */
   logStats() {
-    console.log('?? Statistiques du graphe:');
-    console.log(`   - Arrêts: ${this.stats.stops}`);
+    console.log('ðŸ“Š Statistiques du graphe:');
+    console.log(`   - ArrÃªts: ${this.stats.stops}`);
     console.log(`   - Lignes: ${this.stats.routes}`);
     console.log(`   - Voyages: ${this.stats.trips}`);
     console.log(`   - Horaires: ${this.stats.stopTimes}`);
@@ -377,7 +373,7 @@ export class TransportGraph {
   }
 
   /**
-   * Estime la mémoire utilisée par le graphe
+   * Estime la mÃ©moire utilisÃ©e par le graphe
    */
   estimateMemory() {
     const roughSize = JSON.stringify({
@@ -395,5 +391,3 @@ export class TransportGraph {
 }
 
 export default TransportGraph;
-
-

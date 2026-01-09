@@ -1,177 +1,207 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
+// Copyright Â© 2025 PÃ©rimap - Tous droits rÃ©servÃ©s
 /**
  * api/routes.js
- * API de calcul d'itinéraires
+ * API d'itinÃ©raires - Proxy vers OpenTripPlanner avec enrichissement GTFS
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ARCHITECTURE SERVEUR-CENTRALISÃ‰E:
+ * - Le serveur interroge OTP et enrichit les rÃ©ponses avec les couleurs GTFS
+ * - Le client reÃ§oit des donnÃ©es complÃ¨tes prÃªtes Ã  afficher
+ * - AUCUN fallback cÃ´tÃ© client - erreurs explicites si OTP Ã©choue
  */
 
-/*
 import { Router } from 'express';
-import { validateCoordinates, parseTime } from '../utils/validation.js';
+import { planItinerary, OtpError, OTP_ERROR_CODES } from '../services/otpService.js';
 
 const router = Router();
 
+// Modes supportÃ©s
+const SUPPORTED_MODES = ['TRANSIT', 'WALK', 'BICYCLE'];
+
 /**
- * POST /api/routes/compute
- * Calcule un itinéraire entre deux points
- * 
- * Body:
- * {
- *   origin: { lat: number, lon: number, name?: string },
- *   destination: { lat: number, lon: number, name?: string },
- *   departureTime?: string (ISO 8601),
- *   arrivalTime?: string (ISO 8601),
- *   options?: {
- *     maxWalkDistance?: number,
- *     maxTransfers?: number,
- *     preferLessWalking?: boolean,
- *     wheelchairAccessible?: boolean,
- *   }
- * }
+ * POST /api/routes
+ * Planifie un itinÃ©raire via OTP avec enrichissement des couleurs GTFS
  */
-/*
-router.post('/compute', async (req, res, next) => {
+router.post('/', async (req, res) => {
   try {
-    const { pathfinding, userMemory } = req.app.locals;
-    const { origin, destination, departureTime, arrivalTime, options = {} } = req.body;
-
-    // Validation
-    if (!origin || !destination) {
-      return res.status(400).json({
-        error: 'origin et destination requis',
-      });
-    }
-
-    if (!validateCoordinates(origin) || !validateCoordinates(destination)) {
-      return res.status(400).json({
-        error: 'Coordonnées invalides (lat, lon requis)',
-      });
-    }
-
-    // Déterminer l'heure de départ
-    let time;
-    if (departureTime) {
-      time = new Date(departureTime);
-    } else if (arrivalTime) {
-      // TODO: Implémenter la recherche par heure d'arrivée
-      time = new Date(arrivalTime);
-    } else {
-      time = new Date();
-    }
-
-    // Calculer les itinéraires
-    const itineraries = await pathfinding.computeItineraries(
+    const {
       origin,
       destination,
       time,
+      timeType = 'departure',
+      mode = 'TRANSIT',
+      maxWalkDistance = 1000,
+      maxTransfers = 3,
+      options = {}
+    } = req.body || {};
+
+    // Validation basique
+    if (!isValidCoord(origin) || !isValidCoord(destination)) {
+      return res.status(400).json({ 
+        error: 'CoordonnÃ©es invalides',
+        code: 'INVALID_COORDINATES',
+        details: 'origin et destination doivent contenir lat et lon valides'
+      });
+    }
+
+    if (!SUPPORTED_MODES.includes(mode)) {
+      return res.status(400).json({ 
+        error: 'Mode de transport invalide',
+        code: 'INVALID_MODE',
+        details: `Modes supportÃ©s: ${SUPPORTED_MODES.join(', ')}`
+      });
+    }
+
+    // Appel au service OTP enrichi
+    const result = await planItinerary({
+      origin,
+      destination,
+      time,
+      timeType,
+      mode,
+      maxWalkDistance,
+      maxTransfers,
       options
-    );
+    });
 
-    // Enregistrer la recherche si l'utilisateur est identifié
-    const userId = req.userId;
-    if (userId && userMemory) {
-      await userMemory.recordSearch(userId, {
-        origin,
-        destination,
-        selectedResult: itineraries[0],
-      });
-    }
-
-    res.json({
-      itineraries,
-      searchTime: time.toISOString(),
-      count: itineraries.length,
+    // RÃ©ponse succÃ¨s avec mÃ©tadonnÃ©es
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({
+      success: true,
+      routes: result.routes,
+      metadata: result.metadata
     });
 
   } catch (error) {
-    next(error);
+    // Erreur OTP structurÃ©e
+    if (error instanceof OtpError) {
+      const statusCode = getHttpStatusForOtpError(error.code);
+      return res.status(statusCode).json({
+        success: false,
+        error: error.message,
+        code: error.code,
+        details: error.details
+      });
+    }
+
+    // Erreur inattendue
+    console.error('[routes] Erreur inattendue:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erreur interne du serveur',
+      code: 'INTERNAL_ERROR'
+    });
   }
 });
 
 /**
- * GET /api/routes/nearby-stops
- * Trouve les arrêts à proximité d'un point
- * 
- * Query:
- * - lat: number (requis)
- * - lon: number (requis)
- * - radius: number (optionnel, défaut 500m)
- * - limit: number (optionnel, défaut 10)
+ * GET /api/routes/health
+ * VÃ©rifie l'Ã©tat du service de routage
  */
-/*
-router.get('/nearby-stops', async (req, res, next) => {
-  try {
-    const { pathfinding } = req.app.locals;
-    const { lat, lon, radius = 500, limit = 10 } = req.query;
-
-    if (!lat || !lon) {
-      return res.status(400).json({
-        error: 'lat et lon requis',
-      });
-    }
-
-    const nearbyStops = pathfinding.raptor.findNearbyStops(
-      parseFloat(lat),
-      parseFloat(lon)
-    );
-
-    const filtered = nearbyStops
-      .filter(s => s.distance <= parseInt(radius))
-      .slice(0, parseInt(limit));
-
-    res.json({
-      stops: filtered.map(({ stop, distance, walkTime }) => ({
-        id: stop.stop_id,
-        name: stop.stop_name,
-        lat: stop.stop_lat,
-        lon: stop.stop_lon,
-        distance,
-        walkTime,
-      })),
-      count: filtered.length,
-    });
-
-  } catch (error) {
-    next(error);
-  }
+router.get('/health', async (_req, res) => {
+  const { checkOtpHealth } = await import('../services/otpService.js');
+  const health = await checkOtpHealth();
+  
+  res.json({
+    service: 'routes',
+    otp: health.ok ? 'connected' : 'disconnected',
+    otpVersion: health.version || null,
+    otpError: health.error || null
+  });
 });
 
-/**
- * GET /api/routes/stop/:id/departures
- * Obtient les prochains départs d'un arrêt
- */
-/*
-router.get('/stop/:id/departures', async (req, res, next) => {
-  try {
-    const { gtfsData } = req.app.locals;
-    const { id } = req.params;
-    const { limit = 10, time } = req.query;
+// === HELPERS ===
 
-    const referenceTime = time ? new Date(time) : new Date();
-    
-    // TODO: Implémenter getNextDepartures
-    const departures = [];
+function isValidCoord(obj) {
+  if (!obj || typeof obj.lat !== 'number' || typeof obj.lon !== 'number') return false;
+  return obj.lat >= -90 && obj.lat <= 90 && obj.lon >= -180 && obj.lon <= 180;
+}
 
-    res.json({
-      stopId: id,
-      departures,
-      referenceTime: referenceTime.toISOString(),
-    });
-
-  } catch (error) {
-    next(error);
+function getHttpStatusForOtpError(code) {
+  switch (code) {
+    case OTP_ERROR_CODES.NO_ROUTE:
+      return 404;
+    case OTP_ERROR_CODES.DATE_OUT_OF_RANGE:
+      return 400;
+    case OTP_ERROR_CODES.LOCATION_NOT_FOUND:
+      return 404;
+    case OTP_ERROR_CODES.INVALID_REQUEST:
+      return 400;
+    case OTP_ERROR_CODES.TIMEOUT:
+      return 504;
+    case OTP_ERROR_CODES.CONNECTION_ERROR:
+      return 502;
+    default:
+      return 500;
   }
-});
+}
+
+function buildOtpMode(mode) {
+  if (mode === 'WALK') return 'WALK';
+  if (mode === 'BICYCLE') return 'BICYCLE';
+  // Transit par dÃ©faut: ajouter WALK pour accÃ¨s/egress
+  return 'TRANSIT,WALK';
+}
+
+function mapItineraryToClient(itinerary) {
+  const legs = Array.isArray(itinerary.legs) ? itinerary.legs : [];
+
+  const mappedLegs = legs.map((leg) => {
+    const isTransit = leg.mode === 'BUS' || leg.mode === 'TRAM' || leg.mode === 'SUBWAY' || leg.transitLeg;
+
+    return {
+      mode: leg.mode,
+      duration: toSeconds(leg.duration),
+      distanceMeters: Math.round(leg.distance || 0),
+      polyline: leg.legGeometry?.points || null,
+      // Horaires bruts OTP (en ms epoch) pour affichage HH:MM cÃ´tÃ© front
+      startTime: leg.startTime || null,
+      endTime: leg.endTime || null,
+      from: {
+        name: leg.from?.name,
+        lat: leg.from?.lat,
+        lon: leg.from?.lon,
+        stopId: leg.from?.stopId, // âœ… AJOUT: stop ID pour reconstruction polyline GTFS
+      },
+      to: {
+        name: leg.to?.name,
+        lat: leg.to?.lat,
+        lon: leg.to?.lon,
+        stopId: leg.to?.stopId, // âœ… AJOUT: stop ID pour reconstruction polyline GTFS
+      },
+      transitDetails: isTransit
+        ? {
+            headsign: leg.headsign,
+            routeShortName: leg.routeShortName,
+            routeLongName: leg.routeLongName,
+            agencyName: leg.agencyName,
+            tripId: leg.tripId,
+            routeId: leg.routeId, // âœ… AJOUT: route ID pour rÃ©cupÃ©rer shape GTFS
+            shapeId: leg.shapeId || leg.trip?.shapeId,
+          }
+        : undefined,
+      steps: [], // Compat avec l'ancien frontend (liste attendue)
+    };
+  });
+
+  const totalDistance = mappedLegs.reduce((acc, l) => acc + (l.distanceMeters || 0), 0);
+  const totalDuration = toSeconds(itinerary.duration);
+
+  return {
+    duration: totalDuration,
+    distanceMeters: Math.round(totalDistance),
+    polyline: itinerary.legs?.[0]?.legGeometry?.points || null,
+    startTime: itinerary.startTime || null,
+    endTime: itinerary.endTime || null,
+    legs: mappedLegs,
+    fare: itinerary.fare?.fare?.regular?.cents
+      ? { currency: itinerary.fare.fare.regular.currency, amountCents: itinerary.fare.fare.regular.cents }
+      : undefined,
+  };
+}
+
+function toSeconds(value) {
+  if (typeof value === 'number') return Math.round(value);
+  return 0;
+}
 
 export default router;
-*/
-
-// Placeholder
-const router = {};
-export default router;
-
-

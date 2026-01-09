@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * core/memory/index.js
- * Export principal du module de mémoire utilisateur
+ * Export principal du module de mÃ©moire utilisateur
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 import { StorageInterface, InMemoryStore } from './store.js';
@@ -14,12 +10,12 @@ import { SQLiteStore } from './sqlite.js';
 import { PostgresStore } from './postgres.js';
 
 /**
- * Gestionnaire de mémoire utilisateur
- * Abstrait les opérations de stockage et ajoute la logique métier
+ * Gestionnaire de mÃ©moire utilisateur
+ * Abstrait les opÃ©rations de stockage et ajoute la logique mÃ©tier
  */
 export class UserMemoryStore {
   /**
-   * @param {Object} dbConfig - Configuration de la base de données
+   * @param {Object} dbConfig - Configuration de la base de donnÃ©es
    * @param {Object} options - Options de configuration
    */
   constructor(dbConfig, options = {}) {
@@ -31,30 +27,30 @@ export class UserMemoryStore {
       ...options,
     };
 
-    // Sélectionner le backend de stockage
+    // SÃ©lectionner le backend de stockage
     this.store = this.createStore(dbConfig);
     this.isReady = false;
   }
 
   /**
-   * Crée le store approprié selon la configuration
+   * CrÃ©e le store appropriÃ© selon la configuration
    */
   createStore(dbConfig) {
     const url = dbConfig.url || '';
 
     if (url.startsWith('postgres://') || url.startsWith('postgresql://')) {
-      console.log('?? Backend: PostgreSQL');
+      console.log('ðŸ“¦ Backend: PostgreSQL');
       return new PostgresStore(url, this.options);
     }
 
     if (url.startsWith('sqlite:') || url.endsWith('.db')) {
       const path = url.replace('sqlite:', '');
-      console.log('?? Backend: SQLite');
+      console.log('ðŸ“¦ Backend: SQLite');
       return new SQLiteStore(path, this.options);
     }
 
-    // Fallback: stockage en mémoire
-    console.log('?? Backend: Mémoire (données non persistantes)');
+    // Fallback: stockage en mÃ©moire
+    console.log('ðŸ“¦ Backend: MÃ©moire (donnÃ©es non persistantes)');
     return new InMemoryStore(this.options);
   }
 
@@ -62,10 +58,10 @@ export class UserMemoryStore {
    * Initialise la connexion
    */
   async initialize() {
-    console.log('?? Initialisation de la mémoire utilisateur...');
+    console.log('ðŸ”§ Initialisation de la mÃ©moire utilisateur...');
     await this.store.connect();
     this.isReady = true;
-    console.log('? Mémoire utilisateur prête');
+    console.log('âœ… MÃ©moire utilisateur prÃªte');
     return this;
   }
 
@@ -80,8 +76,8 @@ export class UserMemoryStore {
   // === GESTION DES UTILISATEURS ===
 
   /**
-   * Obtient ou crée un utilisateur par device ID
-   * C'est la méthode principale pour identifier un utilisateur
+   * Obtient ou crÃ©e un utilisateur par device ID
+   * C'est la mÃ©thode principale pour identifier un utilisateur
    */
   async getOrCreateUser(deviceId) {
     if (!deviceId) {
@@ -92,19 +88,19 @@ export class UserMemoryStore {
     let user = await this.store.getUserByDevice(deviceId);
     
     if (user) {
-      // Mettre à jour last_seen
+      // Mettre Ã  jour last_seen
       await this.store.updateUser(user.id, {});
       return user;
     }
 
-    // Créer un nouvel utilisateur
+    // CrÃ©er un nouvel utilisateur
     user = await this.store.createUser({ deviceId });
-    console.log(`?? Nouvel utilisateur créé: ${user.id}`);
+    console.log(`ðŸ‘¤ Nouvel utilisateur crÃ©Ã©: ${user.id}`);
     return user;
   }
 
   /**
-   * Obtient le contexte utilisateur pour l'autocomplétion
+   * Obtient le contexte utilisateur pour l'autocomplÃ©tion
    */
   async getUserContext(userId) {
     const [favorites, history, frequentStops] = await Promise.all([
@@ -128,7 +124,7 @@ export class UserMemoryStore {
   // === HISTORIQUE DE RECHERCHE ===
 
   /**
-   * Enregistre une recherche d'itinéraire
+   * Enregistre une recherche d'itinÃ©raire
    */
   async recordSearch(userId, searchData) {
     const entry = await this.store.addSearchHistory(userId, {
@@ -148,7 +144,7 @@ export class UserMemoryStore {
       selectedResult: searchData.selectedResult,
     });
 
-    // Enregistrer l'utilisation des arrêts si ce sont des stops
+    // Enregistrer l'utilisation des arrÃªts si ce sont des stops
     if (searchData.origin?.type === 'stop') {
       await this.store.recordStopUsage(userId, searchData.origin.id);
     }
@@ -181,15 +177,15 @@ export class UserMemoryStore {
   async addFavorite(userId, place, options = {}) {
     const favorites = await this.store.getFavorites(userId);
     
-    // Vérifier la limite
+    // VÃ©rifier la limite
     if (favorites.length >= this.options.maxFavorites) {
       throw new Error(`Limite de ${this.options.maxFavorites} favoris atteinte`);
     }
 
-    // Vérifier si déjà en favori
+    // VÃ©rifier si dÃ©jÃ  en favori
     const existing = favorites.find(f => f.placeId === place.id);
     if (existing) {
-      // Mettre à jour le nom si différent
+      // Mettre Ã  jour le nom si diffÃ©rent
       if (options.name && options.name !== existing.name) {
         return this.store.updateFavorite(existing.id, { name: options.name });
       }
@@ -218,11 +214,11 @@ export class UserMemoryStore {
   }
 
   /**
-   * Définit un lieu comme domicile ou travail
+   * DÃ©finit un lieu comme domicile ou travail
    */
   async setHomeOrWork(userId, place, type) {
     if (!['home', 'work'].includes(type)) {
-      throw new Error('Type doit être "home" ou "work"');
+      throw new Error('Type doit Ãªtre "home" ou "work"');
     }
 
     // Supprimer l'ancien si existant
@@ -246,29 +242,29 @@ export class UserMemoryStore {
       .then(favs => favs.find(f => f.id === favoriteId));
     
     if (!favorite) {
-      throw new Error('Favori non trouvé');
+      throw new Error('Favori non trouvÃ©');
     }
 
     return this.store.deleteFavorite(favoriteId);
   }
 
-  // === PRÉFÉRENCES ===
+  // === PRÃ‰FÃ‰RENCES ===
 
   /**
-   * Obtient les préférences utilisateur
+   * Obtient les prÃ©fÃ©rences utilisateur
    */
   async getPreferences(userId) {
     return this.store.getPreferences(userId);
   }
 
   /**
-   * Met à jour les préférences
+   * Met Ã  jour les prÃ©fÃ©rences
    */
   async updatePreferences(userId, preferences) {
-    // Valider les préférences
+    // Valider les prÃ©fÃ©rences
     const validKeys = [
       'defaultMode',        // 'transit', 'walk', 'bike'
-      'maxWalkDistance',    // en mètres
+      'maxWalkDistance',    // en mÃ¨tres
       'preferLessWalking',  // boolean
       'preferFewerTransfers', // boolean
       'wheelchairAccessible', // boolean
@@ -290,7 +286,7 @@ export class UserMemoryStore {
   // === STATISTIQUES ===
 
   /**
-   * Obtient les arrêts fréquemment utilisés
+   * Obtient les arrÃªts frÃ©quemment utilisÃ©s
    */
   async getFrequentStops(userId, limit = 10) {
     return this.store.getFrequentStops(userId, limit);
@@ -299,35 +295,35 @@ export class UserMemoryStore {
   // === MAINTENANCE ===
 
   /**
-   * Exécute les tâches de maintenance
+   * ExÃ©cute les tÃ¢ches de maintenance
    */
   async runMaintenance() {
-    console.log('?? Maintenance de la mémoire utilisateur...');
+    console.log('ðŸ”§ Maintenance de la mÃ©moire utilisateur...');
 
-    // Nettoyer les données anciennes
+    // Nettoyer les donnÃ©es anciennes
     const cleanResult = await this.store.cleanup({
       daysOld: this.options.retentionDays,
     });
-    console.log(`   - ${cleanResult.cleaned} entrées supprimées`);
+    console.log(`   - ${cleanResult.cleaned} entrÃ©es supprimÃ©es`);
 
     // Anonymiser les utilisateurs inactifs
     const anonResult = await this.store.anonymizeOldData(
       this.options.anonymizeAfterDays
     );
-    console.log(`   - ${anonResult.anonymized} utilisateurs anonymisés`);
+    console.log(`   - ${anonResult.anonymized} utilisateurs anonymisÃ©s`);
 
     return { ...cleanResult, ...anonResult };
   }
 
   /**
-   * Vérification de santé
+   * VÃ©rification de santÃ©
    */
   async healthCheck() {
     return this.store.healthCheck();
   }
 
   /**
-   * Export des données utilisateur (RGPD)
+   * Export des donnÃ©es utilisateur (RGPD)
    */
   async exportUserData(userId) {
     const [user, favorites, history, preferences, frequentStops] = await Promise.all([
@@ -349,7 +345,7 @@ export class UserMemoryStore {
   }
 
   /**
-   * Suppression complète d'un utilisateur (RGPD)
+   * Suppression complÃ¨te d'un utilisateur (RGPD)
    */
   async deleteUserData(userId) {
     return this.store.deleteUser(userId);
@@ -362,5 +358,3 @@ export { SQLiteStore } from './sqlite.js';
 export { PostgresStore } from './postgres.js';
 
 export default UserMemoryStore;
-
-

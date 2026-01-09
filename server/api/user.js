@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * api/user.js
  * API de gestion utilisateur
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 /*
@@ -16,7 +12,7 @@ const router = Router();
 
 /**
  * Middleware pour identifier l'utilisateur
- * Utilise le header X-Device-ID ou crée un nouvel utilisateur
+ * Utilise le header X-Device-ID ou crÃ©e un nouvel utilisateur
  */
 /*
 router.use(async (req, res, next) => {
@@ -98,7 +94,7 @@ router.post('/favorites', async (req, res, next) => {
       });
     }
 
-    // Cas spéciaux: domicile et travail
+    // Cas spÃ©ciaux: domicile et travail
     if (type === 'home' || type === 'work') {
       const favorite = await userMemory.setHomeOrWork(req.userId, place, type);
       return res.json({ favorite });
@@ -126,7 +122,7 @@ router.delete('/favorites/:id', async (req, res, next) => {
     await userMemory.removeFavorite(req.userId, req.params.id);
     res.json({ success: true });
   } catch (error) {
-    if (error.message.includes('non trouvé')) {
+    if (error.message.includes('non trouvÃ©')) {
       return res.status(404).json({ error: error.message });
     }
     next(error);
@@ -171,11 +167,11 @@ router.delete('/history', async (req, res, next) => {
   }
 });
 
-// === PRÉFÉRENCES ===
+// === PRÃ‰FÃ‰RENCES ===
 
 /**
  * GET /api/user/preferences
- * Préférences utilisateur
+ * PrÃ©fÃ©rences utilisateur
  */
 /*
 router.get('/preferences', async (req, res, next) => {
@@ -190,7 +186,7 @@ router.get('/preferences', async (req, res, next) => {
 
 /**
  * PATCH /api/user/preferences
- * Modifier les préférences
+ * Modifier les prÃ©fÃ©rences
  */
 /*
 router.patch('/preferences', async (req, res, next) => {
@@ -207,7 +203,7 @@ router.patch('/preferences', async (req, res, next) => {
 
 /**
  * GET /api/user/stats
- * Statistiques utilisateur (arrêts fréquents, etc.)
+ * Statistiques utilisateur (arrÃªts frÃ©quents, etc.)
  */
 /*
 router.get('/stats', async (req, res, next) => {
@@ -227,7 +223,7 @@ router.get('/stats', async (req, res, next) => {
 
 /**
  * GET /api/user/export
- * Exporter toutes les données utilisateur (RGPD)
+ * Exporter toutes les donnÃ©es utilisateur (RGPD)
  */
 /*
 router.get('/export', async (req, res, next) => {
@@ -244,14 +240,14 @@ router.get('/export', async (req, res, next) => {
 
 /**
  * DELETE /api/user
- * Supprimer le compte (RGPD - droit à l'oubli)
+ * Supprimer le compte (RGPD - droit Ã  l'oubli)
  */
 /*
 router.delete('/', async (req, res, next) => {
   try {
     const { userMemory } = req.app.locals;
     await userMemory.deleteUserData(req.userId);
-    res.json({ success: true, message: 'Compte supprimé' });
+    res.json({ success: true, message: 'Compte supprimÃ©' });
   } catch (error) {
     next(error);
   }
@@ -263,5 +259,3 @@ export default router;
 // Placeholder
 const router = {};
 export default router;
-
-

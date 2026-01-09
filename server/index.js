@@ -1,161 +1,117 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
- */
+// Copyright ¬© 2025 P√©rimap - Tous droits r√©serv√©s
 /**
  * index.js
- * Point d'entrÈe du serveur Peribus
+ * Point d'entr√©e du serveur Perimap (Express + OTP/Photon proxies)
  * 
- * ?? STATUT: D…SACTIV… - Code prÈparÈ pour le futur
- * 
- * Pour activer:
- * 1. Configurer les variables d'environnement (.env)
- * 2. ExÈcuter: npm install
- * 3. ExÈcuter: npm run build-graph
- * 4. ExÈcuter: npm start
+ * Architecture serveur-centralis√©e:
+ * - Chargement des couleurs GTFS au d√©marrage (routes.txt)
+ * - Enrichissement des r√©ponses OTP avec les donn√©es GTFS
+ * - Le client ne fait plus de parsing GTFS
  */
 
-// ============================================================
-// ?? D…SACTIV… - DÈcommenter pour activer le serveur
-// ============================================================
-
-/*
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
+import { join, dirname } from 'path';
+import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 import { config, validateConfig } from './config.js';
 import { createLogger } from './utils/logger.js';
-import { setupRateLimit } from './middleware/rateLimit.js';
-import { setupCors } from './middleware/cors.js';
 import apiRouter from './api/index.js';
-import { PathfindingEngine } from './core/pathfinding/index.js';
-import { PlacesEngine } from './core/places/index.js';
-import { UserMemoryStore } from './core/memory/index.js';
-import { loadGtfsData } from './utils/gtfsLoader.js';
+import { loadRouteAttributes } from './utils/gtfsLoader.js';
+import { checkOtpHealth } from './services/otpService.js';
 
 const logger = createLogger('server');
 
 async function startServer() {
   try {
-    // Valider la configuration
     validateConfig();
-    logger.info('? Configuration validÈe');
+    logger.info('‚úÖ Configuration valid√©e');
 
-    // CrÈer l'application Express
+    // ‚úÖ NOUVEAU: Charger les couleurs GTFS au d√©marrage
+    logger.info(`üìÇ Chargement des donn√©es GTFS...`);
+    const routeColors = await loadRouteAttributes();
+    logger.info(`‚úÖ ${routeColors.size} routes charg√©es avec leurs couleurs`);
+    
+    // V√©rifier la connectivit√© OTP (non bloquant)
+    checkOtpHealth().then(health => {
+      if (health.ok) {
+        logger.info(`‚úÖ OTP connect√© (version: ${health.version})`);
+      } else {
+        logger.warn(`‚ö†Ô∏è OTP non accessible: ${health.error}`);
+      }
+    });
+
     const app = express();
 
-    // Middleware de sÈcuritÈ
-    app.use(helmet());
+    app.use(helmet({ contentSecurityPolicy: false }));
     app.use(compression());
     app.use(express.json({ limit: '1mb' }));
-    
-    // CORS
-    setupCors(app);
-    
-    // Rate limiting
-    setupRateLimit(app);
+    app.use(express.urlencoded({ extended: true }));
 
-    // Charger les donnÈes GTFS
-    logger.info('?? Chargement des donnÈes GTFS...');
-    const gtfsData = await loadGtfsData(config.paths.gtfs);
-    logger.info(`? ${gtfsData.stops.length} arrÍts chargÈs`);
+    app.use(cors({
+      origin: config.server.corsOrigins,
+      methods: ['GET', 'POST', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    }));
 
-    // Initialiser les moteurs
-    logger.info('?? Initialisation des moteurs...');
-    
-    const pathfindingEngine = new PathfindingEngine(gtfsData, config.pathfinding);
-    await pathfindingEngine.buildGraph();
-    logger.info('? Moteur de pathfinding prÍt');
+    // Headers pour √©viter le cache agressif du navigateur
+    app.use((req, res, next) => {
+      if (req.path.endsWith('.js') || req.path.endsWith('.css')) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      }
+      next();
+    });
 
-    const placesEngine = new PlacesEngine(gtfsData.stops, config.places);
-    await placesEngine.buildIndex();
-    logger.info('? Moteur de places prÍt');
+    // Servir les fichiers statiques du frontend (chemin robuste)
+    const candidates = [
+      join(__dirname, 'public'),           // Dockerfile: COPY public ./public ‚Üí __dirname=/app
+      join(__dirname, '..', 'public')      // Ex√©cution locale: /server ‚Üí ../public
+    ];
+    const publicDir = candidates.find(p => existsSync(p)) || candidates[0];
+    app.use(express.static(publicDir));
 
-    const userMemory = new UserMemoryStore(config.database, config.userMemory);
-    await userMemory.initialize();
-    logger.info('? MÈmoire utilisateur prÍte');
-
-    // Injecter les moteurs dans l'app
-    app.locals.pathfinding = pathfindingEngine;
-    app.locals.places = placesEngine;
-    app.locals.userMemory = userMemory;
-    app.locals.gtfsData = gtfsData;
-
-    // Routes API
     app.use('/api', apiRouter);
 
-    // Health check
-    app.get('/health', (req, res) => {
-      res.json({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-      });
+    app.get('/health', (_req, res) => {
+      res.json({ status: 'ok', timestamp: new Date().toISOString(), uptime: process.uptime() });
     });
 
-    // Gestion des erreurs
-    app.use((err, req, res, next) => {
-      logger.error('Erreur non gÈrÈe:', err);
-      res.status(500).json({
-        error: 'Erreur interne du serveur',
-        message: config.server.env === 'development' ? err.message : undefined,
-      });
+    // Servir index.html pour la route racine
+    app.get('/', (_req, res) => {
+      res.sendFile(join(publicDir, 'index.html'));
     });
 
-    // DÈmarrer le serveur
+    // Fallback SPA: toutes les routes non-API renvoient index.html
+    app.get(/^\/(?!api).+/, (_req, res) => {
+      res.sendFile(join(publicDir, 'index.html'));
+    });
+
+    app.use((err, _req, res, _next) => {
+      logger.error('Erreur non g√©r√©e:', err);
+      res.status(500).json({ error: 'Erreur interne du serveur' });
+    });
+
     const server = app.listen(config.server.port, config.server.host, () => {
-      logger.info(`?? Serveur Peribus dÈmarrÈ sur http://${config.server.host}:${config.server.port}`);
-      logger.info(`?? Environnement: ${config.server.env}`);
+      logger.info(`üöÄ Serveur Perimap sur http://${config.server.host}:${config.server.port}`);
     });
 
-    // Gestion de l'arrÍt propre
     process.on('SIGTERM', () => {
-      logger.info('SIGTERM reÁu, arrÍt du serveur...');
-      server.close(() => {
-        userMemory.close();
-        process.exit(0);
-      });
+      logger.info('SIGTERM re√ßu, arr√™t du serveur...');
+      server.close(() => process.exit(0));
     });
-
   } catch (error) {
-    logger.error('? Erreur au dÈmarrage:', error);
+    logger.error('‚ùå Erreur au d√©marrage:', error);
     process.exit(1);
   }
 }
 
 startServer();
-*/
-
-// ============================================================
-// Message d'information quand le fichier est exÈcutÈ
-// ============================================================
-
-console.log(`
-+---------------------------------------------------------------+
-¶                                                               ¶
-¶   ?? PERIBUS SERVER - Module Backend                          ¶
-¶                                                               ¶
-¶   ?? STATUT: D…SACTIV…                                        ¶
-¶                                                               ¶
-¶   Ce serveur est prÈparÈ pour une utilisation future.         ¶
-¶   Il fournira:                                                ¶
-¶   - ???  Pathfinding (calcul d'itinÈraires)                    ¶
-¶   - ?? AutocomplÈtion de lieux                                ¶
-¶   - ?? MÈmoire utilisateur (favoris, historique)              ¶
-¶                                                               ¶
-¶   Pour activer:                                               ¶
-¶   1. DÈcommenter le code dans index.js                        ¶
-¶   2. npm install                                              ¶
-¶   3. npm run build-graph                                      ¶
-¶   4. npm start                                                ¶
-¶                                                               ¶
-¶   Voir README.md pour plus d'informations.                    ¶
-¶                                                               ¶
-+---------------------------------------------------------------+
-`);
-
-

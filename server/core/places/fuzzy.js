@@ -1,37 +1,33 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * fuzzy.js
- * Recherche floue (fuzzy search) pour l'autocomplétion
+ * Recherche floue (fuzzy search) pour l'autocomplÃ©tion
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  * 
- * La recherche floue permet de trouver des résultats même avec
+ * La recherche floue permet de trouver des rÃ©sultats mÃªme avec
  * des fautes de frappe ou des variations d'orthographe.
  * 
- * Algorithmes implémentés:
- * - Distance de Levenshtein (édition)
- * - Score de similarité
+ * Algorithmes implÃ©mentÃ©s:
+ * - Distance de Levenshtein (Ã©dition)
+ * - Score de similaritÃ©
  * - Matching partiel
  */
 
 /**
- * Calcul de la distance de Levenshtein optimisée
- * (nombre minimum d'opérations pour transformer une chaîne en une autre)
+ * Calcul de la distance de Levenshtein optimisÃ©e
+ * (nombre minimum d'opÃ©rations pour transformer une chaÃ®ne en une autre)
  * 
- * @param {string} a - Première chaîne
- * @param {string} b - Deuxième chaîne
- * @returns {number} Distance d'édition
+ * @param {string} a - PremiÃ¨re chaÃ®ne
+ * @param {string} b - DeuxiÃ¨me chaÃ®ne
+ * @returns {number} Distance d'Ã©dition
  */
 export function levenshteinDistance(a, b) {
   if (!a || !b) return Math.max(a?.length || 0, b?.length || 0);
   
-  // Optimisation: si les chaînes sont identiques
+  // Optimisation: si les chaÃ®nes sont identiques
   if (a === b) return 0;
   
-  // Optimisation: utiliser la chaîne la plus courte comme base
+  // Optimisation: utiliser la chaÃ®ne la plus courte comme base
   if (a.length > b.length) [a, b] = [b, a];
 
   const lenA = a.length;
@@ -60,8 +56,8 @@ export function levenshteinDistance(a, b) {
 }
 
 /**
- * Calcule un score de similarité entre 0 et 1
- * (1 = identique, 0 = complètement différent)
+ * Calcule un score de similaritÃ© entre 0 et 1
+ * (1 = identique, 0 = complÃ¨tement diffÃ©rent)
  * 
  * @param {string} a
  * @param {string} b
@@ -78,12 +74,12 @@ export function similarityScore(a, b) {
 }
 
 /**
- * Vérifie si une chaîne correspond partiellement à une autre
- * avec une tolérance aux erreurs
+ * VÃ©rifie si une chaÃ®ne correspond partiellement Ã  une autre
+ * avec une tolÃ©rance aux erreurs
  * 
- * @param {string} query - Requête de recherche
+ * @param {string} query - RequÃªte de recherche
  * @param {string} target - Texte cible
- * @param {number} threshold - Seuil de similarité (0-1, défaut: 0.6)
+ * @param {number} threshold - Seuil de similaritÃ© (0-1, dÃ©faut: 0.6)
  * @returns {Object} {matches: boolean, score: number}
  */
 export function fuzzyMatch(query, target, threshold = 0.6) {
@@ -94,14 +90,14 @@ export function fuzzyMatch(query, target, threshold = 0.6) {
   const normalizedQuery = normalizeText(query);
   const normalizedTarget = normalizeText(target);
 
-  // Match exact ou préfixe
+  // Match exact ou prÃ©fixe
   if (normalizedTarget.startsWith(normalizedQuery)) {
     return { matches: true, score: 1 };
   }
 
-  // Match de sous-chaîne
+  // Match de sous-chaÃ®ne
   if (normalizedTarget.includes(normalizedQuery)) {
-    // Score basé sur la position (plus tôt = meilleur)
+    // Score basÃ© sur la position (plus tÃ´t = meilleur)
     const position = normalizedTarget.indexOf(normalizedQuery);
     const positionScore = 1 - (position / normalizedTarget.length) * 0.2;
     return { matches: true, score: 0.9 * positionScore };
@@ -118,7 +114,7 @@ export function fuzzyMatch(query, target, threshold = 0.6) {
     let bestWordScore = 0;
     
     for (const targetWord of targetWords) {
-      // Match préfixe du mot
+      // Match prÃ©fixe du mot
       if (targetWord.startsWith(queryWord)) {
         bestWordScore = Math.max(bestWordScore, 0.95);
         continue;
@@ -138,7 +134,7 @@ export function fuzzyMatch(query, target, threshold = 0.6) {
   }
 
   if (matchedWords === 0) {
-    // Dernier recours: similarité globale
+    // Dernier recours: similaritÃ© globale
     const globalScore = similarityScore(normalizedQuery, normalizedTarget);
     return {
       matches: globalScore >= threshold,
@@ -172,15 +168,15 @@ export function normalizeText(text) {
 }
 
 /**
- * Recherche floue dans une liste d'éléments
+ * Recherche floue dans une liste d'Ã©lÃ©ments
  * 
- * @param {string} query - Requête de recherche
- * @param {Array} items - Liste d'éléments
+ * @param {string} query - RequÃªte de recherche
+ * @param {Array} items - Liste d'Ã©lÃ©ments
  * @param {Object} options - Options
- * @param {string[]} options.keys - Propriétés à chercher
- * @param {number} options.threshold - Seuil de similarité
- * @param {number} options.limit - Nombre max de résultats
- * @returns {Array} Résultats triés par score
+ * @param {string[]} options.keys - PropriÃ©tÃ©s Ã  chercher
+ * @param {number} options.threshold - Seuil de similaritÃ©
+ * @param {number} options.limit - Nombre max de rÃ©sultats
+ * @returns {Array} RÃ©sultats triÃ©s par score
  */
 export function fuzzySearch(query, items, options = {}) {
   const {
@@ -220,15 +216,15 @@ export function fuzzySearch(query, items, options = {}) {
     }
   }
 
-  // Trier par score décroissant
+  // Trier par score dÃ©croissant
   results.sort((a, b) => b.score - a.score);
 
-  // Limiter les résultats
+  // Limiter les rÃ©sultats
   return results.slice(0, limit);
 }
 
 /**
- * Récupère une valeur imbriquée dans un objet
+ * RÃ©cupÃ¨re une valeur imbriquÃ©e dans un objet
  * Ex: getNestedValue({a: {b: 1}}, 'a.b') => 1
  */
 function getNestedValue(obj, path) {
@@ -246,11 +242,11 @@ function getNestedValue(obj, path) {
 }
 
 /**
- * Classe pour gérer les recherches floues avec cache
+ * Classe pour gÃ©rer les recherches floues avec cache
  */
 export class FuzzySearcher {
   /**
-   * @param {Array} items - Éléments à indexer
+   * @param {Array} items - Ã‰lÃ©ments Ã  indexer
    * @param {Object} options - Options
    */
   constructor(items = [], options = {}) {
@@ -267,7 +263,7 @@ export class FuzzySearcher {
   }
 
   /**
-   * Met à jour les éléments indexés
+   * Met Ã  jour les Ã©lÃ©ments indexÃ©s
    */
   setItems(items) {
     this.items = items;
@@ -275,7 +271,7 @@ export class FuzzySearcher {
   }
 
   /**
-   * Ajoute des éléments
+   * Ajoute des Ã©lÃ©ments
    */
   addItems(items) {
     this.items.push(...items);
@@ -288,7 +284,7 @@ export class FuzzySearcher {
   search(query) {
     if (!query || query.length < 2) return [];
 
-    // Vérifier le cache
+    // VÃ©rifier le cache
     const cacheKey = normalizeText(query);
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
@@ -299,7 +295,7 @@ export class FuzzySearcher {
 
     // Mettre en cache
     if (this.cache.size >= this.options.cacheSize) {
-      // Supprimer la plus ancienne entrée
+      // Supprimer la plus ancienne entrÃ©e
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);
     }
@@ -324,5 +320,3 @@ export default {
   normalizeText,
   FuzzySearcher,
 };
-
-

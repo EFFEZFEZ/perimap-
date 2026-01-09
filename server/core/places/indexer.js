@@ -1,16 +1,12 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
- */
 /**
  * indexer.js
- * Indexation des lieux pour l'autocomplÈtion
+ * Indexation des lieux pour l'autocompl√©tion
  * 
- * ?? STATUT: D…SACTIV… - Code prÈparÈ pour le futur
+ * üî¥ STATUT: D√âSACTIV√â - Code pr√©par√© pour le futur
  * 
- * Ce module gËre l'indexation de diffÈrentes sources de lieux:
- * - ArrÍts de bus (GTFS)
- * - Points d'intÈrÍt (POI) locaux
+ * Ce module g√®re l'indexation de diff√©rentes sources de lieux:
+ * - Arr√™ts de bus (GTFS)
+ * - Points d'int√©r√™t (POI) locaux
  * - Adresses (optionnel, avec Nominatim)
  */
 
@@ -24,20 +20,20 @@ import { FuzzySearcher, normalizeText } from './fuzzy.js';
  * @property {string} name - Nom du lieu
  * @property {number} lat - Latitude
  * @property {number} lon - Longitude
- * @property {Object} [metadata] - DonnÈes supplÈmentaires
+ * @property {Object} [metadata] - Donn√©es suppl√©mentaires
  */
 
 /**
- * CatÈgories de POI prÈdÈfinies
+ * Cat√©gories de POI pr√©d√©finies
  */
 export const POI_CATEGORIES = {
-  transport: ['gare', 'aÈroport', 'parking', 'station'],
-  education: ['Ècole', 'collËge', 'lycÈe', 'universitÈ', 'campus'],
-  sante: ['hÙpital', 'clinique', 'pharmacie', 'mÈdecin'],
-  commerce: ['supermarchÈ', 'centre commercial', 'marchÈ'],
-  loisirs: ['cinÈma', 'thÈ‚tre', 'musÈe', 'parc', 'piscine', 'stade'],
-  administration: ['mairie', 'prÈfecture', 'poste', 'tribunal'],
-  tourisme: ['cathÈdrale', 'ch‚teau', 'monument', 'office de tourisme'],
+  transport: ['gare', 'a√©roport', 'parking', 'station'],
+  education: ['√©cole', 'coll√®ge', 'lyc√©e', 'universit√©', 'campus'],
+  sante: ['h√¥pital', 'clinique', 'pharmacie', 'm√©decin'],
+  commerce: ['supermarch√©', 'centre commercial', 'march√©'],
+  loisirs: ['cin√©ma', 'th√©√¢tre', 'mus√©e', 'parc', 'piscine', 'stade'],
+  administration: ['mairie', 'pr√©fecture', 'poste', 'tribunal'],
+  tourisme: ['cath√©drale', 'ch√¢teau', 'monument', 'office de tourisme'],
 };
 
 /**
@@ -45,7 +41,7 @@ export const POI_CATEGORIES = {
  */
 export class PlacesIndexer {
   constructor() {
-    // Index Trie pour la recherche par prÈfixe
+    // Index Trie pour la recherche par pr√©fixe
     this.trie = new Trie();
     
     // Recherche floue pour les fautes de frappe
@@ -55,10 +51,10 @@ export class PlacesIndexer {
       limit: 20,
     });
 
-    // Tous les lieux indexÈs
+    // Tous les lieux index√©s
     this.places = new Map(); // id -> Place
 
-    // Index gÈographique simple (grille)
+    // Index g√©ographique simple (grille)
     this.geoIndex = new Map(); // "lat,lon" (arrondi) -> Place[]
 
     // Statistiques
@@ -71,21 +67,21 @@ export class PlacesIndexer {
   }
 
   /**
-   * Indexe les arrÍts de bus depuis les donnÈes GTFS
+   * Indexe les arr√™ts de bus depuis les donn√©es GTFS
    * 
-   * @param {Array} stops - Tableau des arrÍts GTFS
+   * @param {Array} stops - Tableau des arr√™ts GTFS
    */
   indexStops(stops) {
-    console.log(`?? Indexation de ${stops.length} arrÍts...`);
+    console.log(`üìç Indexation de ${stops.length} arr√™ts...`);
 
     for (const stop of stops) {
-      // Ignorer les arrÍts sans coordonnÈes
+      // Ignorer les arr√™ts sans coordonn√©es
       if (!stop.stop_lat || !stop.stop_lon) continue;
 
       const place = {
         id: `stop_${stop.stop_id}`,
         type: 'stop',
-        name: stop.stop_name || 'ArrÍt sans nom',
+        name: stop.stop_name || 'Arr√™t sans nom',
         lat: parseFloat(stop.stop_lat),
         lon: parseFloat(stop.stop_lon),
         metadata: {
@@ -100,16 +96,16 @@ export class PlacesIndexer {
       this.stats.stops++;
     }
 
-    console.log(`? ${this.stats.stops} arrÍts indexÈs`);
+    console.log(`‚úÖ ${this.stats.stops} arr√™ts index√©s`);
   }
 
   /**
-   * Indexe des points d'intÈrÍt personnalisÈs
+   * Indexe des points d'int√©r√™t personnalis√©s
    * 
    * @param {Array} pois - Tableau de POI
    */
   indexPOIs(pois) {
-    console.log(`??? Indexation de ${pois.length} POI...`);
+    console.log(`üèõÔ∏è Indexation de ${pois.length} POI...`);
 
     for (const poi of pois) {
       const place = {
@@ -132,39 +128,39 @@ export class PlacesIndexer {
       this.stats.pois++;
     }
 
-    console.log(`? ${this.stats.pois} POI indexÈs`);
+    console.log(`‚úÖ ${this.stats.pois} POI index√©s`);
   }
 
   /**
-   * Ajoute les POI par dÈfaut de PÈrigueux
+   * Ajoute les POI par d√©faut de P√©rigueux
    */
   addDefaultPOIs() {
     const defaultPOIs = [
       // Transport
-      { name: 'Gare de PÈrigueux', lat: 45.1856, lon: 0.7208, category: 'transport', alias: ['gare sncf', 'train'] },
+      { name: 'Gare de P√©rigueux', lat: 45.1856, lon: 0.7208, category: 'transport', alias: ['gare sncf', 'train'] },
       
       // Administration
-      { name: 'Mairie de PÈrigueux', lat: 45.1840, lon: 0.7218, category: 'administration', alias: ['hotel de ville'] },
-      { name: 'PrÈfecture de la Dordogne', lat: 45.1830, lon: 0.7195, category: 'administration' },
+      { name: 'Mairie de P√©rigueux', lat: 45.1840, lon: 0.7218, category: 'administration', alias: ['hotel de ville'] },
+      { name: 'Pr√©fecture de la Dordogne', lat: 45.1830, lon: 0.7195, category: 'administration' },
       
-      // SantÈ
-      { name: 'Centre Hospitalier de PÈrigueux', lat: 45.1920, lon: 0.7380, category: 'sante', alias: ['hopital', 'chu'] },
+      // Sant√©
+      { name: 'Centre Hospitalier de P√©rigueux', lat: 45.1920, lon: 0.7380, category: 'sante', alias: ['hopital', 'chu'] },
       
-      // …ducation
-      { name: 'UniversitÈ de PÈrigueux', lat: 45.1750, lon: 0.7300, category: 'education', alias: ['fac', 'campus'] },
-      { name: 'LycÈe Bertran de Born', lat: 45.1880, lon: 0.7160, category: 'education' },
+      // √âducation
+      { name: 'Universit√© de P√©rigueux', lat: 45.1750, lon: 0.7300, category: 'education', alias: ['fac', 'campus'] },
+      { name: 'Lyc√©e Bertran de Born', lat: 45.1880, lon: 0.7160, category: 'education' },
       
       // Commerce
       { name: 'Centre Commercial Auchan Boulazac', lat: 45.1750, lon: 0.7520, category: 'commerce', alias: ['auchan'] },
       { name: 'Centre Commercial Marsac', lat: 45.2050, lon: 0.6800, category: 'commerce' },
       
       // Tourisme
-      { name: 'CathÈdrale Saint-Front', lat: 45.1843, lon: 0.7226, category: 'tourisme', alias: ['cathedrale'] },
-      { name: 'MusÈe d\'Art et d\'ArchÈologie', lat: 45.1835, lon: 0.7215, category: 'tourisme', alias: ['musee vesunna'] },
+      { name: 'Cath√©drale Saint-Front', lat: 45.1843, lon: 0.7226, category: 'tourisme', alias: ['cathedrale'] },
+      { name: 'Mus√©e d\'Art et d\'Arch√©ologie', lat: 45.1835, lon: 0.7215, category: 'tourisme', alias: ['musee vesunna'] },
       { name: 'Tour Mataguerre', lat: 45.1850, lon: 0.7180, category: 'tourisme' },
       
       // Loisirs
-      { name: 'Stade Francis RongiÈras', lat: 45.1950, lon: 0.6950, category: 'loisirs', alias: ['stade csbj'] },
+      { name: 'Stade Francis Rongi√©ras', lat: 45.1950, lon: 0.6950, category: 'loisirs', alias: ['stade csbj'] },
       { name: 'Piscine Municipale', lat: 45.1900, lon: 0.7100, category: 'loisirs' },
       { name: 'Parc Gamenson', lat: 45.1780, lon: 0.7250, category: 'loisirs' },
     ];
@@ -173,7 +169,7 @@ export class PlacesIndexer {
   }
 
   /**
-   * Ajoute un lieu ‡ tous les index
+   * Ajoute un lieu √† tous les index
    * 
    * @param {Place} place
    */
@@ -184,7 +180,7 @@ export class PlacesIndexer {
     // Index Trie
     this.trie.insertWithVariants(place.name, place);
     
-    // Aliases si prÈsents
+    // Aliases si pr√©sents
     if (place.metadata?.alias) {
       const aliases = Array.isArray(place.metadata.alias) 
         ? place.metadata.alias 
@@ -195,7 +191,7 @@ export class PlacesIndexer {
       });
     }
 
-    // Index gÈographique
+    // Index g√©ographique
     const geoKey = this.getGeoKey(place.lat, place.lon);
     if (!this.geoIndex.has(geoKey)) {
       this.geoIndex.set(geoKey, []);
@@ -206,8 +202,8 @@ export class PlacesIndexer {
   }
 
   /**
-   * GÈnËre une clÈ gÈographique pour l'index spatial
-   * (grille de ~100m de cÙtÈ ‡ cette latitude)
+   * G√©n√®re une cl√© g√©ographique pour l'index spatial
+   * (grille de ~100m de c√¥t√© √† cette latitude)
    */
   getGeoKey(lat, lon, precision = 3) {
     const roundedLat = lat.toFixed(precision);
@@ -245,7 +241,7 @@ export class PlacesIndexer {
     // Trier par distance
     results.sort((a, b) => a.distance - b.distance);
     
-    // DÈdupliquer
+    // D√©dupliquer
     const seen = new Set();
     return results.filter(r => {
       if (seen.has(r.place.id)) return false;
@@ -256,12 +252,12 @@ export class PlacesIndexer {
 
   /**
    * Reconstruit l'index de recherche floue
-   * (‡ appeler aprËs avoir ajoutÈ tous les lieux)
+   * (√† appeler apr√®s avoir ajout√© tous les lieux)
    */
   rebuildFuzzyIndex() {
     const allPlaces = Array.from(this.places.values());
     this.fuzzySearcher.setItems(allPlaces);
-    console.log(`?? Index de recherche floue reconstruit (${allPlaces.length} lieux)`);
+    console.log(`üîç Index de recherche floue reconstruit (${allPlaces.length} lieux)`);
   }
 
   /**
@@ -269,14 +265,14 @@ export class PlacesIndexer {
    */
   haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000;
-    const f1 = (lat1 * Math.PI) / 180;
-    const f2 = (lat2 * Math.PI) / 180;
-    const ?f = ((lat2 - lat1) * Math.PI) / 180;
-    const ?? = ((lon2 - lon1) * Math.PI) / 180;
+    const œÜ1 = (lat1 * Math.PI) / 180;
+    const œÜ2 = (lat2 * Math.PI) / 180;
+    const ŒîœÜ = ((lat2 - lat1) * Math.PI) / 180;
+    const ŒîŒª = ((lon2 - lon1) * Math.PI) / 180;
 
     const a =
-      Math.sin(?f / 2) * Math.sin(?f / 2) +
-      Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
+      Math.sin(ŒîœÜ / 2) * Math.sin(ŒîœÜ / 2) +
+      Math.cos(œÜ1) * Math.cos(œÜ2) * Math.sin(ŒîŒª / 2) * Math.sin(ŒîŒª / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -286,17 +282,17 @@ export class PlacesIndexer {
    * Affiche les statistiques d'indexation
    */
   logStats() {
-    console.log('?? Statistiques d\'indexation:');
-    console.log(`   - ArrÍts: ${this.stats.stops}`);
+    console.log('üìä Statistiques d\'indexation:');
+    console.log(`   - Arr√™ts: ${this.stats.stops}`);
     console.log(`   - POI: ${this.stats.pois}`);
     console.log(`   - Adresses: ${this.stats.addresses}`);
     console.log(`   - Total: ${this.stats.total}`);
-    console.log(`   - Trie: ${this.trie.size()} entrÈes`);
-    console.log(`   - Cellules gÈo: ${this.geoIndex.size}`);
+    console.log(`   - Trie: ${this.trie.size()} entr√©es`);
+    console.log(`   - Cellules g√©o: ${this.geoIndex.size}`);
   }
 
   /**
-   * Exporte les donnÈes pour le cache
+   * Exporte les donn√©es pour le cache
    */
   export() {
     return {
@@ -307,7 +303,7 @@ export class PlacesIndexer {
   }
 
   /**
-   * Importe les donnÈes depuis le cache
+   * Importe les donn√©es depuis le cache
    */
   import(data) {
     this.places.clear();
@@ -318,7 +314,7 @@ export class PlacesIndexer {
     for (const place of data.places) {
       this.addPlace(place);
       
-      // Mettre ‡ jour les stats par type
+      // Mettre √† jour les stats par type
       if (place.type === 'stop') this.stats.stops++;
       else if (place.type === 'poi') this.stats.pois++;
       else if (place.type === 'address') this.stats.addresses++;
@@ -329,5 +325,3 @@ export class PlacesIndexer {
 }
 
 export default PlacesIndexer;
-
-

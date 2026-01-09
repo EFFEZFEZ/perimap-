@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * core/pathfinding/index.js
  * Export principal du module de pathfinding
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 import { RaptorAlgorithm } from './raptor.js';
@@ -14,12 +10,12 @@ import { AStarAlgorithm } from './astar.js';
 import { TransportGraph } from './graph.js';
 
 /**
- * Moteur de calcul d'itinéraires complet
+ * Moteur de calcul d'itinÃ©raires complet
  * Combine RAPTOR (transport) et A* (marche)
  */
 export class PathfindingEngine {
   /**
-   * @param {Object} gtfsData - Données GTFS chargées
+   * @param {Object} gtfsData - DonnÃ©es GTFS chargÃ©es
    * @param {Object} options - Options de configuration
    */
   constructor(gtfsData, options = {}) {
@@ -45,7 +41,7 @@ export class PathfindingEngine {
    * Construit le graphe et initialise les algorithmes
    */
   async buildGraph() {
-    console.log('?? Construction du moteur de pathfinding...');
+    console.log('ðŸ”§ Construction du moteur de pathfinding...');
     const startTime = Date.now();
 
     // Construire le graphe de transport
@@ -56,13 +52,13 @@ export class PathfindingEngine {
     this.raptor = new RaptorAlgorithm(this.graph, this.options);
     this.raptor.buildIndexes();
 
-    // Initialiser A* (pour les trajets à pied)
+    // Initialiser A* (pour les trajets Ã  pied)
     this.astar = new AStarAlgorithm({
       walkSpeed: this.options.walkSpeed,
       maxDistance: this.options.maxWalkDistance,
     });
 
-    // Construire le graphe piéton à partir des arrêts
+    // Construire le graphe piÃ©ton Ã  partir des arrÃªts
     const walkNodes = this.gtfsData.stops.map(stop => ({
       id: stop.stop_id,
       lat: parseFloat(stop.stop_lat),
@@ -72,18 +68,18 @@ export class PathfindingEngine {
 
     this.isReady = true;
     const elapsed = Date.now() - startTime;
-    console.log(`? Moteur de pathfinding prêt en ${elapsed}ms`);
+    console.log(`âœ… Moteur de pathfinding prÃªt en ${elapsed}ms`);
 
     return this;
   }
 
   /**
-   * Calcule les itinéraires entre deux points géographiques
+   * Calcule les itinÃ©raires entre deux points gÃ©ographiques
    * 
    * @param {Object} origin - {lat, lon, name?}
    * @param {Object} destination - {lat, lon, name?}
-   * @param {Date} departureTime - Heure de départ
-   * @returns {Array} Liste des itinéraires
+   * @param {Date} departureTime - Heure de dÃ©part
+   * @returns {Array} Liste des itinÃ©raires
    */
   async computeItineraries(origin, destination, departureTime) {
     if (!this.isReady) {
@@ -94,12 +90,12 @@ export class PathfindingEngine {
     const dateStr = this.formatGtfsDate(departureTime);
     const timeSeconds = this.timeToSeconds(departureTime);
 
-    // 1. Trouver les arrêts proches de l'origine et de la destination
+    // 1. Trouver les arrÃªts proches de l'origine et de la destination
     const originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     const destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
 
     if (originStops.length === 0 || destStops.length === 0) {
-      // Pas d'arrêts à proximité, retourner uniquement le trajet à pied
+      // Pas d'arrÃªts Ã  proximitÃ©, retourner uniquement le trajet Ã  pied
       const walkPath = this.astar.computeDirectPath(
         origin.lat, origin.lon,
         destination.lat, destination.lon
@@ -126,7 +122,7 @@ export class PathfindingEngine {
       return results;
     }
 
-    // 2. Pour chaque combinaison origine/destination, calculer l'itinéraire RAPTOR
+    // 2. Pour chaque combinaison origine/destination, calculer l'itinÃ©raire RAPTOR
     for (const originStop of originStops.slice(0, 3)) {
       for (const destStop of destStops.slice(0, 3)) {
         const adjustedDepartureTime = timeSeconds + originStop.walkTime;
@@ -152,19 +148,19 @@ export class PathfindingEngine {
       }
     }
 
-    // 3. Trier et filtrer les résultats
+    // 3. Trier et filtrer les rÃ©sultats
     const sorted = this.rankItineraries(results);
     return sorted.slice(0, this.options.maxResults);
   }
 
   /**
-   * Construit un itinéraire complet avec les segments de marche
+   * Construit un itinÃ©raire complet avec les segments de marche
    */
   buildItinerary(origin, destination, originStop, destStop, journey, baseTime) {
     const legs = [];
     let currentTime = new Date(baseTime);
 
-    // Segment de marche vers le premier arrêt
+    // Segment de marche vers le premier arrÃªt
     if (originStop.walkTime > 0) {
       legs.push({
         type: 'walk',
@@ -190,7 +186,7 @@ export class PathfindingEngine {
       const route = this.graph.routesById.get(leg.routeId);
       const trip = this.graph.tripsById.get(leg.tripId);
 
-      // Attente éventuelle
+      // Attente Ã©ventuelle
       const legDepartureTime = this.secondsToDate(baseTime, leg.departureTime);
       if (legDepartureTime > currentTime) {
         // Il y a une attente (correspondance)
@@ -278,11 +274,11 @@ export class PathfindingEngine {
   }
 
   /**
-   * Classe les itinéraires par qualité
+   * Classe les itinÃ©raires par qualitÃ©
    */
   rankItineraries(itineraries) {
     return itineraries.sort((a, b) => {
-      // Score = durée + pénalité par correspondance
+      // Score = durÃ©e + pÃ©nalitÃ© par correspondance
       const scoreA = a.totalDuration + a.transfers * this.options.transferPenalty;
       const scoreB = b.totalDuration + b.transfers * this.options.transferPenalty;
       return scoreA - scoreB;
@@ -290,7 +286,7 @@ export class PathfindingEngine {
   }
 
   /**
-   * Détermine le mode de transport d'une route
+   * DÃ©termine le mode de transport d'une route
    */
   getRouteMode(route) {
     if (!route) return 'bus';
@@ -354,5 +350,3 @@ export { AStarAlgorithm } from './astar.js';
 export { TransportGraph } from './graph.js';
 
 export default PathfindingEngine;
-
-

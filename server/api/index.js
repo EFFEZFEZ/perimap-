@@ -1,65 +1,33 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
+// Copyright Â© 2025 PÃ©rimap - Tous droits rÃ©servÃ©s
 /**
  * api/index.js
  * Router principal de l'API
- * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
  */
 
-/*
 import { Router } from 'express';
 import routesApi from './routes.js';
 import placesApi from './places.js';
-import userApi from './user.js';
+import realtimeApi from './realtime.js';
 
 const router = Router();
 
-// Routes de l'API
 router.use('/routes', routesApi);
 router.use('/places', placesApi);
-router.use('/user', userApi);
+router.use('/realtime', realtimeApi);
 
-// Documentation de l'API
 router.get('/', (req, res) => {
   res.json({
-    name: 'Peribus API',
+    name: 'Perimap API',
     version: '1.0.0',
     endpoints: {
-      routes: {
-        'POST /api/routes/compute': 'Calcul d\'itinéraire',
-        'GET /api/routes/nearby-stops': 'Arrêts à proximité',
-      },
+      routes: 'POST /api/routes',
       places: {
-        'GET /api/places/autocomplete': 'Autocomplétion de lieux',
-        'GET /api/places/nearby': 'Lieux à proximité',
-        'GET /api/places/:id': 'Détails d\'un lieu',
+        autocomplete: 'GET /api/places/autocomplete?q=...',
+        reverse: 'GET /api/places/reverse?lat=...&lon=...'
       },
-      user: {
-        'GET /api/user': 'Profil utilisateur',
-        'GET /api/user/favorites': 'Liste des favoris',
-        'POST /api/user/favorites': 'Ajouter un favori',
-        'DELETE /api/user/favorites/:id': 'Supprimer un favori',
-        'GET /api/user/history': 'Historique de recherche',
-        'DELETE /api/user/history': 'Effacer l\'historique',
-        'GET /api/user/preferences': 'Préférences',
-        'PATCH /api/user/preferences': 'Modifier les préférences',
-      },
+      realtime: 'GET /api/realtime'
     },
   });
 });
 
 export default router;
-*/
-
-// Placeholder pour l'export
-const router = {
-  use: () => {},
-  get: () => {},
-};
-
-export default router;
-
-

@@ -1,47 +1,43 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * astar.js
- * Implémentation de l'algorithme A* pour le calcul de chemins piétons
+ * ImplÃ©mentation de l'algorithme A* pour le calcul de chemins piÃ©tons
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  * 
- * A* est utilisé pour calculer les trajets à pied:
- * - De l'origine jusqu'à l'arrêt de bus le plus proche
- * - Entre deux arrêts lors d'une correspondance
- * - Du dernier arrêt jusqu'à la destination
+ * A* est utilisÃ© pour calculer les trajets Ã  pied:
+ * - De l'origine jusqu'Ã  l'arrÃªt de bus le plus proche
+ * - Entre deux arrÃªts lors d'une correspondance
+ * - Du dernier arrÃªt jusqu'Ã  la destination
  * 
- * Peut aussi être utilisé avec un graphe routier pour
- * le calcul d'itinéraires en voiture.
+ * Peut aussi Ãªtre utilisÃ© avec un graphe routier pour
+ * le calcul d'itinÃ©raires en voiture.
  */
 
 /**
  * @typedef {Object} Node
- * @property {string} id - Identifiant unique du nœud
+ * @property {string} id - Identifiant unique du nÅ“ud
  * @property {number} lat - Latitude
  * @property {number} lon - Longitude
  */
 
 /**
  * @typedef {Object} Edge
- * @property {string} from - ID du nœud de départ
- * @property {string} to - ID du nœud d'arrivée
- * @property {number} distance - Distance en mètres
- * @property {number} [duration] - Durée estimée en secondes
+ * @property {string} from - ID du nÅ“ud de dÃ©part
+ * @property {string} to - ID du nÅ“ud d'arrivÃ©e
+ * @property {number} distance - Distance en mÃ¨tres
+ * @property {number} [duration] - DurÃ©e estimÃ©e en secondes
  */
 
 /**
  * @typedef {Object} Path
- * @property {Node[]} nodes - Liste des nœuds du chemin
- * @property {number} distance - Distance totale en mètres
- * @property {number} duration - Durée totale en secondes
- * @property {Array<[number, number]>} coordinates - Coordonnées pour le tracé
+ * @property {Node[]} nodes - Liste des nÅ“uds du chemin
+ * @property {number} distance - Distance totale en mÃ¨tres
+ * @property {number} duration - DurÃ©e totale en secondes
+ * @property {Array<[number, number]>} coordinates - CoordonnÃ©es pour le tracÃ©
  */
 
 /**
- * File de priorité simple (min-heap)
+ * File de prioritÃ© simple (min-heap)
  */
 class PriorityQueue {
   constructor() {
@@ -115,13 +111,13 @@ export class AStarAlgorithm {
       ...options,
     };
 
-    // Graphe des nœuds et arêtes
+    // Graphe des nÅ“uds et arÃªtes
     this.nodes = new Map(); // id -> Node
     this.adjacency = new Map(); // id -> [{to, distance, duration}]
   }
 
   /**
-   * Ajoute un nœud au graphe
+   * Ajoute un nÅ“ud au graphe
    * @param {Node} node
    */
   addNode(node) {
@@ -132,9 +128,9 @@ export class AStarAlgorithm {
   }
 
   /**
-   * Ajoute une arête au graphe
+   * Ajoute une arÃªte au graphe
    * @param {Edge} edge
-   * @param {boolean} bidirectional - Si true, ajoute aussi l'arête inverse
+   * @param {boolean} bidirectional - Si true, ajoute aussi l'arÃªte inverse
    */
   addEdge(edge, bidirectional = true) {
     const duration = edge.duration || Math.round(edge.distance / this.options.walkSpeed);
@@ -155,15 +151,15 @@ export class AStarAlgorithm {
   }
 
   /**
-   * Construit un graphe simple à partir d'une liste de points
-   * Connecte chaque point à ses voisins les plus proches
+   * Construit un graphe simple Ã  partir d'une liste de points
+   * Connecte chaque point Ã  ses voisins les plus proches
    * 
    * @param {Node[]} points - Liste de points
    * @param {number} maxNeighbors - Nombre max de voisins par point
-   * @param {number} maxEdgeDistance - Distance max pour une arête (m)
+   * @param {number} maxEdgeDistance - Distance max pour une arÃªte (m)
    */
   buildGraphFromPoints(points, maxNeighbors = 5, maxEdgeDistance = 500) {
-    // Ajouter tous les nœuds
+    // Ajouter tous les nÅ“uds
     points.forEach(point => this.addNode(point));
 
     // Pour chaque point, trouver les voisins les plus proches
@@ -171,7 +167,7 @@ export class AStarAlgorithm {
       const neighbors = this.findNearestNeighbors(point, points, maxNeighbors, maxEdgeDistance);
       
       neighbors.forEach(neighbor => {
-        // Éviter les doublons (arêtes bidirectionnelles)
+        // Ã‰viter les doublons (arÃªtes bidirectionnelles)
         const existingEdges = this.adjacency.get(point.id) || [];
         if (!existingEdges.some(e => e.to === neighbor.id)) {
           this.addEdge({
@@ -183,7 +179,7 @@ export class AStarAlgorithm {
       });
     });
 
-    console.log(`?? A* graph built: ${this.nodes.size} nodes, ${this.countEdges()} edges`);
+    console.log(`ðŸ“Š A* graph built: ${this.nodes.size} nodes, ${this.countEdges()} edges`);
   }
 
   /**
@@ -211,36 +207,36 @@ export class AStarAlgorithm {
   }
 
   /**
-   * Compte le nombre total d'arêtes
+   * Compte le nombre total d'arÃªtes
    */
   countEdges() {
     let count = 0;
     this.adjacency.forEach(edges => {
       count += edges.length;
     });
-    return count / 2; // Arêtes bidirectionnelles comptées 2 fois
+    return count / 2; // ArÃªtes bidirectionnelles comptÃ©es 2 fois
   }
 
   /**
    * Calcule le chemin optimal entre deux points
    * 
-   * @param {string} startId - ID du nœud de départ
-   * @param {string} endId - ID du nœud d'arrivée
-   * @returns {Path|null} Le chemin trouvé ou null
+   * @param {string} startId - ID du nÅ“ud de dÃ©part
+   * @param {string} endId - ID du nÅ“ud d'arrivÃ©e
+   * @returns {Path|null} Le chemin trouvÃ© ou null
    */
   findPath(startId, endId) {
     const start = this.nodes.get(startId);
     const end = this.nodes.get(endId);
 
     if (!start || !end) {
-      console.error(`Nœuds non trouvés: ${startId} ou ${endId}`);
+      console.error(`NÅ“uds non trouvÃ©s: ${startId} ou ${endId}`);
       return null;
     }
 
     const openSet = new PriorityQueue();
-    const cameFrom = new Map(); // id -> id (nœud précédent)
-    const gScore = new Map(); // id -> coût réel depuis le départ
-    const fScore = new Map(); // id -> coût estimé total
+    const cameFrom = new Map(); // id -> id (nÅ“ud prÃ©cÃ©dent)
+    const gScore = new Map(); // id -> coÃ»t rÃ©el depuis le dÃ©part
+    const fScore = new Map(); // id -> coÃ»t estimÃ© total
 
     // Initialisation
     gScore.set(startId, 0);
@@ -279,13 +275,13 @@ export class AStarAlgorithm {
       }
     }
 
-    // Pas de chemin trouvé
+    // Pas de chemin trouvÃ©
     return null;
   }
 
   /**
-   * Calcule un chemin direct (ligne droite) entre deux coordonnées
-   * Utilisé quand il n'y a pas de graphe routier
+   * Calcule un chemin direct (ligne droite) entre deux coordonnÃ©es
+   * UtilisÃ© quand il n'y a pas de graphe routier
    * 
    * @param {number} startLat
    * @param {number} startLon
@@ -319,7 +315,7 @@ export class AStarAlgorithm {
   }
 
   /**
-   * Reconstruit le chemin à partir de la map cameFrom
+   * Reconstruit le chemin Ã  partir de la map cameFrom
    */
   reconstructPath(cameFrom, currentId, totalDistance) {
     const path = [];
@@ -346,14 +342,14 @@ export class AStarAlgorithm {
    */
   haversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371000;
-    const f1 = (lat1 * Math.PI) / 180;
-    const f2 = (lat2 * Math.PI) / 180;
-    const ?f = ((lat2 - lat1) * Math.PI) / 180;
-    const ?? = ((lon2 - lon1) * Math.PI) / 180;
+    const Ï†1 = (lat1 * Math.PI) / 180;
+    const Ï†2 = (lat2 * Math.PI) / 180;
+    const Î”Ï† = ((lat2 - lat1) * Math.PI) / 180;
+    const Î”Î» = ((lon2 - lon1) * Math.PI) / 180;
 
     const a =
-      Math.sin(?f / 2) * Math.sin(?f / 2) +
-      Math.cos(f1) * Math.cos(f2) * Math.sin(?? / 2) * Math.sin(?? / 2);
+      Math.sin(Î”Ï† / 2) * Math.sin(Î”Ï† / 2) +
+      Math.cos(Ï†1) * Math.cos(Ï†2) * Math.sin(Î”Î» / 2) * Math.sin(Î”Î» / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
@@ -361,5 +357,3 @@ export class AStarAlgorithm {
 }
 
 export default AStarAlgorithm;
-
-

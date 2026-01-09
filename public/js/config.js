@@ -7,23 +7,54 @@
  * Centralise la récupération de configuration runtime.
  * 
  * ✅ V178: Sécurisation - La clé API Google n'est plus exposée côté client.
- * Tous les appels Google passent par les proxies Vercel:
- * - /api/routes : Google Routes API (itinéraires)
- * - /api/places : Google Places API (autocomplétion)
- * - /api/geocode : Google Geocoding API (reverse geocode)
+ * ✅ V230: Support du serveur Express local (OTP/Photon) en plus de Vercel
+ * 
+ * Modes disponibles:
+ * - 'vercel': Proxies Vercel Edge → Google APIs (production Vercel)
+ * - 'otp': Serveur Express local → OTP + Photon (serveur dédié)
+ * - 'google': SDK Google Maps direct (dev local avec clé API)
  */
 
 /**
+ * Détermine le mode backend à utiliser
+ * @returns {'vercel' | 'otp' | 'google'} Le mode backend
+ */
+export function getBackendMode() {
+  // 1. Configuration explicite via window.__APP_CONFIG
+  if (window.__APP_CONFIG?.backendMode) {
+    return window.__APP_CONFIG.backendMode;
+  }
+  
+  // 2. Détection automatique basée sur l'URL du serveur
+  // Si on est sur localhost:3000 (serveur Express), utiliser OTP
+  if (window.location.port === '3000' && window.location.hostname === 'localhost') {
+    return 'otp';
+  }
+  
+  // 3. Si clé Google présente, mode dev direct
+  if (window.__APP_CONFIG?.googleApiKey) {
+    return 'google';
+  }
+  
+  // 4. Par défaut: proxy Vercel (production)
+  return 'vercel';
+}
+
+/**
  * Indique si le mode proxy est activé (clé API côté serveur)
- * @returns {boolean} true si on utilise les proxies Vercel
+ * @returns {boolean} true si on utilise les proxies Vercel ou OTP
  */
 export function useServerProxy() {
-  // En production, on utilise toujours le proxy
-  // En dev local, on peut avoir une clé dans window.__APP_CONFIG
-  if (window.__APP_CONFIG && window.__APP_CONFIG.googleApiKey) {
-    return false; // Mode dev avec clé locale
-  }
-  return true; // Mode production avec proxy
+  const mode = getBackendMode();
+  return mode === 'vercel' || mode === 'otp';
+}
+
+/**
+ * Indique si on utilise le backend OTP/Photon
+ * @returns {boolean} true si on utilise le serveur Express avec OTP
+ */
+export function useOtpBackend() {
+  return getBackendMode() === 'otp';
 }
 
 /**
@@ -62,7 +93,7 @@ export function getAdminToken() {
 }
 
 /**
- * URLs des proxies API Vercel
+ * URLs des proxies API Vercel (Google)
  */
 export const API_ENDPOINTS = {
   routes: '/api/routes',
@@ -71,15 +102,39 @@ export const API_ENDPOINTS = {
 };
 
 /**
+ * URLs des APIs du serveur Express (OTP/Photon)
+ */
+export const OTP_API_ENDPOINTS = {
+  routes: '/api/routes',
+  places: '/api/places/autocomplete',
+  reverse: '/api/places/reverse',
+  realtime: '/api/realtime'
+};
+
+/**
+ * Retourne les endpoints appropriés selon le mode backend
+ * @returns {Object} Endpoints API
+ */
+export function getApiEndpoints() {
+  if (useOtpBackend()) {
+    return OTP_API_ENDPOINTS;
+  }
+  return API_ENDPOINTS;
+}
+
+/**
  * Retourne la configuration globale de l'application
  * @returns {Object} Configuration avec googleApiKey, adminToken, etc.
  */
 export function getAppConfig() {
+  const mode = getBackendMode();
   return {
     googleApiKey: getGoogleApiKey(),
     adminToken: getAdminToken(),
     useProxy: useServerProxy(),
-    apiEndpoints: API_ENDPOINTS,
+    useOtp: useOtpBackend(),
+    backendMode: mode,
+    apiEndpoints: getApiEndpoints(),
     arrivalPageSize: 6,
     minBusItineraries: 3,
     maxBottomSheetLevels: 3

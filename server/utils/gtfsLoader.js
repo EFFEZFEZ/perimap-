@@ -1,220 +1,161 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
- */
+// Copyright ¬© 2025 P√©rimap - Tous droits r√©serv√©s
 /**
  * utils/gtfsLoader.js
- * Chargement et parsing des fichiers GTFS
+ * Chargement intelligent des attributs GTFS (couleurs, noms)
  * 
- * ?? STATUT: D…SACTIV… - Code prÈparÈ pour le futur
+ * √âTAPE 1 : G√®re les IDs pr√©fix√©s d'OTP (ex: "GrandPerigueux:A" -> "A")
+ * Algorithme de recherche "floue" en 3 √©tapes:
+ * 1. Correspondance exacte
+ * 2. Suppression du pr√©fixe (apr√®s ":")
+ * 3. Fallback gris si rien ne correspond
  */
 
-import { createReadStream, existsSync, readdirSync } from 'fs';
-import { join } from 'path';
+import fs from 'fs';
+import path from 'path';
+import csv from 'csv-parser';
+import { createLogger } from './logger.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-/**
- * Parse un fichier CSV
- * @param {string} filePath - Chemin du fichier
- * @returns {Promise<Array>} DonnÈes parsÈes
- */
-export async function parseCSV(filePath) {
-  // NOTE: En production, utiliser csv-parse
-  /*
-  const { parse } = await import('csv-parse');
-  
-  return new Promise((resolve, reject) => {
-    const records = [];
-    
-    createReadStream(filePath)
-      .pipe(parse({
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
-        relax_quotes: true,
-      }))
-      .on('data', (record) => records.push(record))
-      .on('end', () => resolve(records))
-      .on('error', reject);
-  });
-  */
-  
-  // Placeholder: lire le fichier comme texte simple
-  return [];
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-/**
- * Charge tous les fichiers GTFS d'un rÈpertoire
- * 
- * @param {string} gtfsDir - Chemin vers le rÈpertoire GTFS
- * @returns {Promise<Object>} DonnÈes GTFS
- */
-export async function loadGtfsData(gtfsDir) {
-  console.log(`?? Chargement GTFS depuis ${gtfsDir}...`);
+const logger = createLogger('gtfs-loader');
 
-  if (!existsSync(gtfsDir)) {
-    throw new Error(`RÈpertoire GTFS non trouvÈ: ${gtfsDir}`);
-  }
+const routeAttributes = new Map();
+let isLoaded = false;
 
-  const files = readdirSync(gtfsDir);
-  console.log(`   Fichiers trouvÈs: ${files.join(', ')}`);
+function normalizeHexColor(input, fallback) {
+    if (typeof input !== 'string') return fallback;
+    let raw = input.trim();
+    if (!raw) return fallback;
 
-  const data = {
-    stops: [],
-    routes: [],
-    trips: [],
-    stopTimes: [],
-    calendar: [],
-    calendarDates: [],
-    shapes: [],
-    agency: [],
-  };
+    // Supprime tous les # (on les rajoute √† la fin)
+    raw = raw.replace(/#/g, '').trim();
+    if (!raw) return fallback;
 
-  // Mapping fichier -> propriÈtÈ
-  const fileMapping = {
-    'stops.txt': 'stops',
-    'routes.txt': 'routes',
-    'trips.txt': 'trips',
-    'stop_times.txt': 'stopTimes',
-    'calendar.txt': 'calendar',
-    'calendar_dates.txt': 'calendarDates',
-    'shapes.txt': 'shapes',
-    'agency.txt': 'agency',
-  };
-
-  // Charger chaque fichier
-  for (const [filename, prop] of Object.entries(fileMapping)) {
-    const filePath = join(gtfsDir, filename);
-    
-    if (existsSync(filePath)) {
-      console.log(`   Chargement ${filename}...`);
-      data[prop] = await parseCSV(filePath);
-      console.log(`   -> ${data[prop].length} entrÈes`);
-    } else {
-      console.log(`   ?? ${filename} non trouvÈ`);
+    // Supporte RGB -> RRGGBB
+    if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+        raw = raw.split('').map((c) => c + c).join('');
     }
-  }
 
-  // Post-traitement
-  data.stops = processStops(data.stops);
-  data.stopTimes = processStopTimes(data.stopTimes);
-  data.calendar = processCalendar(data.calendar);
-
-  console.log('? GTFS chargÈ');
-  
-  return data;
+    if (!/^[0-9a-fA-F]{6}$/.test(raw)) return fallback;
+    return `#${raw.toUpperCase()}`;
 }
 
 /**
- * Traite les arrÍts
+ * Charge les attributs (couleur, texte, nom court) depuis routes.txt au d√©marrage
  */
-function processStops(stops) {
-  return stops.map(stop => ({
-    ...stop,
-    stop_lat: parseFloat(stop.stop_lat),
-    stop_lon: parseFloat(stop.stop_lon),
-    location_type: stop.location_type || '0',
-    wheelchair_boarding: stop.wheelchair_boarding || '0',
-  }));
+export async function loadRouteAttributes() {
+    return new Promise((resolve, reject) => {
+        // Chemin vers le fichier routes.txt
+        // __dirname = server/utils/, donc on remonte de 2 niveaux pour atteindre public/
+        // Chemin local: ../../public/data/gtfs/routes.txt
+        // Chemin Docker: ../public/data/gtfs/routes.txt (si structure diff√©rente)
+        const routesPath = path.join(__dirname, '../../public/data/gtfs/routes.txt');
+        
+        // Fallback Docker (si public est copi√© dans server/)
+        const alternativePath = path.join(__dirname, '../public/data/gtfs/routes.txt');
+        
+        // Fallback suppl√©mentaire
+        const fallbackPath = path.join(__dirname, '../data/gtfs/routes.txt');
+        
+        let finalPath = routesPath;
+        if (!fs.existsSync(routesPath)) {
+            if (fs.existsSync(alternativePath)) {
+                finalPath = alternativePath;
+            } else if (fs.existsSync(fallbackPath)) {
+                finalPath = fallbackPath;
+            } else {
+                logger.warn(`‚ö†Ô∏è Fichier routes.txt introuvable. Chemins test√©s: ${routesPath}, ${alternativePath}, ${fallbackPath}`);
+                resolve(); // On r√©sout quand m√™me pour ne pas bloquer le serveur
+                return;
+            }
+        }
+
+        logger.info(`üé® Chargement des couleurs depuis: ${finalPath}`);
+
+        fs.createReadStream(finalPath)
+            .pipe(csv())
+            .on('data', (data) => {
+                // Nettoyage et s√©curisation des couleurs (√©vite '#', '##RRGGBB', valeurs non-hex)
+                const color = normalizeHexColor(data.route_color, '#000000');
+                const textColor = normalizeHexColor(data.route_text_color, '#FFFFFF');
+
+                // On stocke l'ID exact
+                routeAttributes.set(data.route_id, {
+                    color: color,
+                    textColor: textColor,
+                    shortName: data.route_short_name || 'Bus',
+                    longName: data.route_long_name || ''
+                });
+            })
+            .on('end', () => {
+                isLoaded = true;
+                logger.info(`‚úÖ ${routeAttributes.size} routes charg√©es en m√©moire.`);
+                resolve(routeAttributes);
+            })
+            .on('error', (err) => {
+                logger.error('‚ùå Erreur lecture routes.txt:', err);
+                reject(err);
+            });
+    });
 }
 
 /**
- * Traite les horaires
- */
-function processStopTimes(stopTimes) {
-  return stopTimes.map(st => ({
-    ...st,
-    stop_sequence: parseInt(st.stop_sequence, 10),
-    arrival_time: parseGtfsTime(st.arrival_time),
-    departure_time: parseGtfsTime(st.departure_time),
-    pickup_type: st.pickup_type || '0',
-    drop_off_type: st.drop_off_type || '0',
-  }));
-}
-
-/**
- * Traite le calendrier
- */
-function processCalendar(calendar) {
-  return calendar.map(cal => ({
-    ...cal,
-    monday: cal.monday === '1',
-    tuesday: cal.tuesday === '1',
-    wednesday: cal.wednesday === '1',
-    thursday: cal.thursday === '1',
-    friday: cal.friday === '1',
-    saturday: cal.saturday === '1',
-    sunday: cal.sunday === '1',
-  }));
-}
-
-/**
- * Parse une heure GTFS (HH:MM:SS) en secondes depuis minuit
- * GËre les heures > 24h (services de nuit)
+ * Trouve les infos d'une route avec une recherche "floue" (Fuzzy matching)
+ * G√®re les cas "GrandPerigueux:A" vs "A"
  * 
- * @param {string} timeStr - Heure au format HH:MM:SS
- * @returns {number} Secondes depuis minuit
+ * √âTAPE 1 - Algorithme de matching:
+ * 1. Essai Correspondance Exacte : "A" == "A"
+ * 2. Essai Nettoyage de pr√©fixe : "GrandPerigueux:A" -> "A"
+ * 3. Essai Suffixe : "123_A" correspond √† "A"
+ * 4. Fallback : Gris #333333 + nom propre du routeId nettoy√©
  */
-export function parseGtfsTime(timeStr) {
-  if (!timeStr) return 0;
-  
-  const parts = timeStr.split(':');
-  if (parts.length !== 3) return 0;
+export function getRouteAttributes(otpRouteId) {
+    // Valeurs par d√©faut si le syst√®me n'est pas pr√™t ou ID vide
+    const defaultAttrs = { 
+        color: '#333333', 
+        textColor: '#FFFFFF', 
+        shortName: otpRouteId || 'Bus',
+        longName: ''
+    };
+    
+    if (!isLoaded || !otpRouteId) return defaultAttrs;
 
-  const hours = parseInt(parts[0], 10);
-  const minutes = parseInt(parts[1], 10);
-  const seconds = parseInt(parts[2], 10);
+    // √âTAPE 1: Essai Correspondance Exacte
+    if (routeAttributes.has(otpRouteId)) {
+        logger.debug(`[Route] Match exact: ${otpRouteId}`);
+        return routeAttributes.get(otpRouteId);
+    }
 
-  return hours * 3600 + minutes * 60 + seconds;
-}
+    // √âTAPE 2: Essai Nettoyage de pr√©fixe (ex: "GrandPerigueux:A" -> "A")
+    // On prend tout ce qui est apr√®s le dernier ":"
+    const parts = otpRouteId.split(':');
+    const cleanId = parts[parts.length - 1]; // Prend le dernier √©l√©ment
 
-/**
- * Formate des secondes en heure GTFS
- * 
- * @param {number} seconds - Secondes depuis minuit
- * @returns {string} Heure au format HH:MM:SS
- */
-export function formatGtfsTime(seconds) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+    if (routeAttributes.has(cleanId)) {
+        logger.debug(`[Route] Match avec pr√©fixe nettoy√©: ${otpRouteId} -> ${cleanId}`);
+        return routeAttributes.get(cleanId);
+    }
 
-  return [hours, minutes, secs]
-    .map(n => n.toString().padStart(2, '0'))
-    .join(':');
-}
+    // √âTAPE 3: Essai Suffixe (ex: ID "123_A" correspond √† "A")
+    for (const [storedId, attrs] of routeAttributes.entries()) {
+        if (otpRouteId.endsWith(`:${storedId}`) || storedId === cleanId) {
+            logger.debug(`[Route] Match suffixe: ${otpRouteId} -> ${storedId}`);
+            return attrs;
+        }
+    }
 
-/**
- * Formate une date au format GTFS (YYYYMMDD)
- * 
- * @param {Date} date
- * @returns {string}
- */
-export function formatGtfsDate(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}${month}${day}`;
-}
-
-/**
- * Parse une date GTFS
- * 
- * @param {string} dateStr - Date au format YYYYMMDD
- * @returns {Date}
- */
-export function parseGtfsDate(dateStr) {
-  const year = parseInt(dateStr.substring(0, 4), 10);
-  const month = parseInt(dateStr.substring(4, 6), 10) - 1;
-  const day = parseInt(dateStr.substring(6, 8), 10);
-  return new Date(year, month, day);
+    // Fallback : Si on a nettoy√© l'ID, on renvoie au moins l'ID propre comme nom court
+    logger.warn(`[Route] Pas de match pour ${otpRouteId}, utilisation du fallback gris`);
+    return { 
+        ...defaultAttrs, 
+        shortName: cleanId 
+    };
 }
 
 export default {
-  loadGtfsData,
-  parseGtfsTime,
-  formatGtfsTime,
-  formatGtfsDate,
-  parseGtfsDate,
+    loadRouteAttributes,
+    getRouteAttributes
 };
-
-

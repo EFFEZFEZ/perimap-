@@ -780,13 +780,23 @@ export class MapRenderer {
     }
 
     /**
-     * V25: Récupère les données temps réel et met à jour le popup si ouvert
+     * V25 + V304: Récupère les données temps réel et met à jour le popup si ouvert
+     * V304: Amélioration de la gestion des erreurs et du feedback utilisateur
      */
     async fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon) {
+        // V304: Timeout pour éviter les blocages
+        const REALTIME_TIMEOUT = 8000; // 8 secondes max
+        
         try {
-            // Utiliser getRealtimeForStopPlace pour les arrêts maîtres (StopPlace)
-            // Cela récupérera les données pour tous les quais de cet arrêt
-            const realtimeData = await realtimeManager.getRealtimeForStopPlace(masterStop.stop_id);
+            // Créer une promesse avec timeout
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout')), REALTIME_TIMEOUT)
+            );
+            
+            const fetchPromise = realtimeManager.getRealtimeForStopPlace(masterStop.stop_id);
+            
+            // Utiliser Promise.race pour limiter le temps d'attente
+            const realtimeData = await Promise.race([fetchPromise, timeoutPromise]);
             
             if (realtimeData && realtimeData.departures && realtimeData.departures.length > 0) {
                 console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
@@ -798,12 +808,13 @@ export class MapRenderer {
                         destination: d.destination,
                         temps: d.time,
                         quai: d.quay || '',
-                        realtime: d.realtime !== false
+                        realtime: d.realtime !== false,
+                        theoretical: d.theoretical || false
                     }))
                 };
                 
-                // Vérifier que le popup est toujours ouvert et au bon endroit
-                if (popup.isOpen()) {
+                // V304: Vérifier que le popup est toujours ouvert avant de le mettre à jour
+                if (popup && popup.isOpen && popup.isOpen()) {
                     const newContent = this.createStopPopupContent(
                         masterStop, 
                         departuresByLine, 
@@ -830,7 +841,13 @@ export class MapRenderer {
                 console.log(`📡 Pas de données temps réel pour ${masterStop.stop_name}`);
             }
         } catch (error) {
-            console.warn(`⚠️ Erreur temps réel pour ${masterStop.stop_name}:`, error.message);
+            // V304: Log silencieux des erreurs, ne pas interrompre l'expérience utilisateur
+            if (error.message === 'Timeout') {
+                console.warn(`⏱️ Timeout temps réel pour ${masterStop.stop_name}`);
+            } else {
+                console.warn(`⚠️ Erreur temps réel pour ${masterStop.stop_name}:`, error.message);
+            }
+            // Le popup reste avec les données statiques - c'est acceptable
         }
     }
 

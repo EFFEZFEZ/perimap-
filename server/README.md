@@ -1,8 +1,8 @@
-# 🚀 Peribus Backend Server (Future)
+# 🚀 Peribus Backend Server
 
-## État : 🔴 DÉSACTIVÉ (Code prêt pour le futur)
+## État : 🟢 ACTIF (Intégré avec le client)
 
-Ce dossier contient tout le code serveur préparé pour une future migration vers notre propre infrastructure backend.
+Ce dossier contient le serveur Express backend pour Peribus, intégré avec OpenTripPlanner et Photon pour le calcul d'itinéraires et la recherche de lieux.
 
 ## Fonctionnalités préparées
 
@@ -99,26 +99,50 @@ npm start            # Démarrage du serveur
 ## Variables d'environnement
 
 ```env
-# server/.env (à créer)
+# server/.env (à créer - voir .env.example)
 PORT=3000
-NODE_ENV=production
-DATABASE_URL=sqlite:./data/peribus.db
-# ou PostgreSQL:
-# DATABASE_URL=postgres://user:pass@host:5432/peribus
+NODE_ENV=development
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 
-# Optionnel - APIs externes (backup)
-GOOGLE_API_KEY=xxx
+# OpenTripPlanner
+OTP_BASE_URL=http://localhost:8888/otp/routers/default
+OTP_TIMEOUT_MS=15000
+
+# Photon (géocodage)
+PHOTON_BASE_URL=https://photon.komoot.io
+
+# GTFS Realtime (optionnel)
+GTFS_RT_URL=
 ```
 
-## Activation future
+## Activation
 
-1. Héberger sur un VPS (OVH, Scaleway, Oracle Cloud)
-2. Configurer les variables d'environnement
-3. Modifier `public/js/config.js` pour pointer vers le nouveau serveur
-4. Activer les routes API
+Le serveur est automatiquement détecté par le client quand il tourne sur `localhost:3000`.
+
+### Démarrage rapide
+
+```bash
+cd server
+npm install
+npm run dev  # Démarre avec hot-reload
+```
+
+### Prérequis
+
+- **Node.js >= 18.x**
+- **OpenTripPlanner** tournant sur port 8888 (optionnel mais recommandé)
+- Données GTFS dans `public/data/gtfs/`
+
+### Architecture client-serveur
+
+Le client (`public/js/apiManager.js`) détecte automatiquement le mode backend :
+
+| Mode | Détection | Description |
+|------|-----------|-------------|
+| `otp` | Port 3000, localhost | Serveur Express avec OTP + Photon |
+| `vercel` | Par défaut | Proxies Vercel → Google APIs |
+| `google` | Clé API présente | SDK Google Maps direct (dev) |
 
 ---
 
-**Note**: Ce code est préparé mais non testé en production.
-Dernière mise à jour: Décembre 2026
-
+**Dernière mise à jour**: Janvier 2026

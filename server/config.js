@@ -1,12 +1,8 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
 /**
  * config.js
- * Configuration centralisée du serveur Peribus
+ * Configuration centralisÃ©e du serveur Peribus
  * 
- * ?? STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ðŸ”´ STATUT: DÃ‰SACTIVÃ‰ - Code prÃ©parÃ© pour le futur
  */
 
 import { fileURLToPath } from 'url';
@@ -27,9 +23,9 @@ export const config = {
     corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3000,https://peribus.fr').split(','),
   },
 
-  // === BASE DE DONNÉES ===
+  // === BASE DE DONNÃ‰ES ===
   database: {
-    // SQLite par défaut, PostgreSQL en production
+    // SQLite par dÃ©faut, PostgreSQL en production
     url: process.env.DATABASE_URL || `sqlite:${join(__dirname, 'data', 'peribus.db')}`,
     // Pool de connexions (PostgreSQL uniquement)
     poolMin: 2,
@@ -46,7 +42,7 @@ export const config = {
 
   // === PATHFINDING ===
   pathfinding: {
-    // Distance max de marche (mètres)
+    // Distance max de marche (mÃ¨tres)
     maxWalkDistance: 1000,
     // Vitesse de marche (m/s) ~4.5 km/h
     walkSpeed: 1.25,
@@ -54,47 +50,47 @@ export const config = {
     maxTransfers: 3,
     // Temps de correspondance minimum (secondes)
     minTransferTime: 120,
-    // Nombre de résultats à retourner
+    // Nombre de rÃ©sultats Ã  retourner
     maxResults: 5,
-    // Rayon de recherche pour les arrêts proches (mètres)
+    // Rayon de recherche pour les arrÃªts proches (mÃ¨tres)
     nearbyStopRadius: 500,
-    // Pénalité par correspondance (secondes) pour le tri
+    // PÃ©nalitÃ© par correspondance (secondes) pour le tri
     transferPenalty: 300,
   },
 
-  // === AUTOCOMPLÉTION ===
+  // === AUTOCOMPLÃ‰TION ===
   places: {
     // Nombre max de suggestions
     maxSuggestions: 10,
-    // Longueur min de la requête
+    // Longueur min de la requÃªte
     minQueryLength: 2,
     // Score min pour la recherche floue (0-1)
     fuzzyThreshold: 0.3,
-    // Boost pour les lieux récents de l'utilisateur
+    // Boost pour les lieux rÃ©cents de l'utilisateur
     recentBoost: 1.5,
-    // Boost pour les arrêts fréquentés
+    // Boost pour les arrÃªts frÃ©quentÃ©s
     frequencyBoost: 1.2,
   },
 
-  // === MÉMOIRE UTILISATEUR ===
+  // === MÃ‰MOIRE UTILISATEUR ===
   userMemory: {
-    // Nombre max de recherches récentes par utilisateur
+    // Nombre max de recherches rÃ©centes par utilisateur
     maxRecentSearches: 50,
     // Nombre max de favoris par utilisateur
     maxFavorites: 20,
-    // Durée de rétention des données (jours)
+    // DurÃ©e de rÃ©tention des donnÃ©es (jours)
     retentionDays: 365,
-    // Anonymiser après X jours d'inactivité
+    // Anonymiser aprÃ¨s X jours d'inactivitÃ©
     anonymizeAfterDays: 90,
   },
 
   // === RATE LIMITING ===
   rateLimit: {
-    // Fenêtre de temps (ms)
+    // FenÃªtre de temps (ms)
     windowMs: 60 * 1000, // 1 minute
-    // Requêtes max par fenêtre
+    // RequÃªtes max par fenÃªtre
     maxRequests: 100,
-    // Requêtes max pour les recherches d'itinéraires
+    // RequÃªtes max pour les recherches d'itinÃ©raires
     maxRouteRequests: 20,
   },
 
@@ -104,9 +100,9 @@ export const config = {
     graphTtl: 24 * 60 * 60 * 1000, // 24h
     // TTL du cache des places (ms)
     placesTtl: 60 * 60 * 1000, // 1h
-    // TTL du cache des itinéraires (ms)
+    // TTL du cache des itinÃ©raires (ms)
     routesTtl: 5 * 60 * 1000, // 5 min
-    // Taille max du cache en mémoire (Mo)
+    // Taille max du cache en mÃ©moire (Mo)
     maxMemoryMb: 512,
   },
 
@@ -114,7 +110,7 @@ export const config = {
   externalApis: {
     google: {
       apiKey: process.env.GOOGLE_API_KEY || '',
-      enabled: false, // Désactivé - on utilise notre propre système
+      enabled: false, // DÃ©sactivÃ© - on utilise notre propre systÃ¨me
     },
   },
 
@@ -128,7 +124,7 @@ export const config = {
 };
 
 /**
- * Valide la configuration au démarrage
+ * Valide la configuration au dÃ©marrage
  */
 export function validateConfig() {
   const errors = [];
@@ -149,5 +145,3 @@ export function validateConfig() {
 }
 
 export default config;
-
-

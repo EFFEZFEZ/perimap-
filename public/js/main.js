@@ -4231,6 +4231,7 @@ function renderAlertBanner() {
 
 /**
  * Logique de changement de VUE
+ * V304: Amélioration du timing invalidateSize pour éviter les problèmes d'affichage
  */
 function showMapView() {
     dashboardContainer.classList.add('hidden');
@@ -4238,8 +4239,19 @@ function showMapView() {
     resetDetailViewState();
     mapContainer.classList.remove('hidden');
     document.body.classList.add('view-map-locked'); 
+    
+    // V304: Appeler invalidateSize avec un délai pour laisser le CSS s'appliquer
     if (mapRenderer && mapRenderer.map) {
+        // Premier appel immédiat
         mapRenderer.map.invalidateSize();
+        // Deuxième appel après que les styles soient complètement appliqués
+        requestAnimationFrame(() => {
+            mapRenderer.map.invalidateSize();
+            // Troisième appel pour les transitions CSS lentes
+            setTimeout(() => {
+                mapRenderer.map.invalidateSize();
+            }, 100);
+        });
     }
 }
 

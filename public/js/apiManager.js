@@ -3,8 +3,13 @@
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
- * apiManager.js - VERSION V222 (1 seul appel bus = économie maximale)
- * Gère tous les appels aux API externes (Google Places & Google Routes).
+ * apiManager.js - VERSION V230 (Support OTP/Photon + Google)
+ * Gère tous les appels aux API externes.
+ *
+ * ✅ V230: SUPPORT MULTI-BACKEND
+ * - Mode 'vercel': Proxies Vercel → Google APIs
+ * - Mode 'otp': Serveur Express → OTP + Photon (itinéraires + lieux)
+ * - Mode 'google': SDK Google Maps direct (dev)
  *
  * ✅ V222: 1 SEUL APPEL BUS (comme mode arrivée)
  * - Google retourne 5-6 alternatives avec computeAlternativeRoutes: true
@@ -26,17 +31,19 @@
  * 1. Ajout de la fonction `reverseGeocode` pour convertir lat/lng en place_id.
  */
 
-import { getAppConfig, API_ENDPOINTS } from './config.js';
+import { getAppConfig, API_ENDPOINTS, getApiEndpoints } from './config.js';
 
 export class ApiManager {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.sessionToken = null;
         
-        // ✅ V178: Configuration proxy
+        // ✅ V230: Configuration multi-backend
         const config = getAppConfig();
         this.useProxy = config.useProxy;
-        this.apiEndpoints = config.apiEndpoints || API_ENDPOINTS;
+        this.useOtp = config.useOtp || false;
+        this.backendMode = config.backendMode || 'vercel';
+        this.apiEndpoints = config.apiEndpoints || getApiEndpoints();
 
         // Zone du Grand Périgueux / Dordogne
         this.perigueuxBounds = {
@@ -241,6 +248,7 @@ export class ApiManager {
 
     /**
      * Récupère les suggestions d'autocomplétion
+     * ✅ V230: Support OTP/Photon backend
      * ✅ V181: Utilise le proxy Vercel /api/places en production
      * ✅ V48: Intègre les alias de lieux (Campus = Pôle Universitaire Grenadière)
      */
@@ -251,8 +259,38 @@ export class ApiManager {
         try {
             let results = [];
             
-            // ✅ V181: Mode proxy - utiliser l'endpoint Vercel
-            if (this.useProxy) {
+            // ✅ V230: Mode OTP - utiliser l'endpoint Photon du serveur Express
+            if (this.useOtp) {
+                console.log("🔍 Recherche autocomplétion (OTP/Photon):", inputString);
+                
+                const url = new URL(this.apiEndpoints.places, window.location.origin);
+                url.searchParams.set('q', inputString);
+                url.searchParams.set('lat', this.perigueuxCenter.lat);
+                url.searchParams.set('lon', this.perigueuxCenter.lng);
+                url.searchParams.set('limit', '10');
+                
+                const response = await fetch(url.toString());
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erreur OTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                // ✅ V230: Format OTP: { suggestions: [{lat, lon, description, city, type}] }
+                results = (data.suggestions || []).map(s => ({
+                    description: s.description + (s.city ? `, ${s.city}` : ''),
+                    // Pour OTP, on utilise les coordonnées directement (pas de placeId Google)
+                    placeId: null,
+                    coordinates: { lat: s.lat, lng: s.lon },
+                    type: s.type || 'place',
+                    source: s.source || 'photon'
+                }));
+                
+                console.log(`✅ ${results.length} suggestions trouvées (OTP/Photon)`);
+            }
+            // ✅ V181: Mode proxy Vercel - utiliser Google Places
+            else if (this.useProxy) {
                 console.log("🔍 Recherche autocomplétion (proxy):", inputString);
                 
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
@@ -505,14 +543,25 @@ export class ApiManager {
 
     /**
      * Récupère les coordonnées {lat,lng} pour un place_id en utilisant le Geocoder
+     * ✅ V230: Support OTP - coordonnées directes sans placeId
      * ✅ V49: Gère les alias avec pôles multimodaux (retourne aussi les arrêts GTFS)
      * ✅ V181: Utilise le proxy Vercel /api/places?placeId=... en production
-     * @param {string} placeId
+     * @param {string|object} placeIdOrCoords - placeId Google OU objet {lat, lng/lon}
      * @returns {Promise<{lat:number, lng:number, gtfsStops?:Array, searchRadius?:number}|null>}
      */
-    async getPlaceCoords(placeId) {
+    async getPlaceCoords(placeIdOrCoords) {
+        // ✅ V230: Si c'est déjà un objet avec coordonnées (mode OTP), le retourner directement
+        if (placeIdOrCoords && typeof placeIdOrCoords === 'object' && (placeIdOrCoords.lat || placeIdOrCoords.latitude)) {
+            const lat = placeIdOrCoords.lat || placeIdOrCoords.latitude;
+            const lng = placeIdOrCoords.lng || placeIdOrCoords.lon || placeIdOrCoords.longitude;
+            console.log(`✅ Coordonnées directes: ${lat}, ${lng}`);
+            return { lat, lng };
+        }
+        
+        const placeId = placeIdOrCoords;
+        
         // ✅ V49: Vérifier si c'est un alias avec pôle multimodal
-        if (placeId && placeId.startsWith('ALIAS_')) {
+        if (placeId && typeof placeId === 'string' && placeId.startsWith('ALIAS_')) {
             const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
             const aliasData = this.placeAliases[aliasKey];
             if (aliasData && aliasData.coordinates) {
@@ -528,7 +577,13 @@ export class ApiManager {
             }
         }
         
-        // ✅ V181: Mode proxy - utiliser l'endpoint Vercel
+        // ✅ V230: Mode OTP - pas de placeId Google, utiliser reverse geocode si nécessaire
+        if (this.useOtp) {
+            console.warn('getPlaceCoords (OTP): placeId non supporté, utilisez les coordonnées directes');
+            return null;
+        }
+        
+        // ✅ V181: Mode proxy Vercel - utiliser l'endpoint Google Places
         if (this.useProxy) {
             try {
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
@@ -594,23 +649,38 @@ export class ApiManager {
 
     /**
      * V188: MÉTHODE SNCF CONNECT
+     * ✅ V230: Support mode OTP (coordonnées directes)
      * - 2 appels API (maintenant + 20min) pour avoir ~5 horaires consécutifs
      * - Cache les résultats pour "Voir plus"
      * - Dédoublonne et trie par heure de départ
      */
     async fetchItinerary(fromPlaceId, toPlaceId, searchTime = null) {
         const startTime = performance.now();
-        console.log(`🧠 V188 RECHERCHE ITINÉRAIRE: ${fromPlaceId} → ${toPlaceId}`);
+        console.log(`🧠 V230 RECHERCHE ITINÉRAIRE (${this.backendMode}): ${typeof fromPlaceId === 'object' ? 'coords' : fromPlaceId} → ${typeof toPlaceId === 'object' ? 'coords' : toPlaceId}`);
         if (searchTime) {
             console.log(`⏰ Mode: ${searchTime.type || 'partir'}, Heure: ${searchTime.hour}:${searchTime.minute}`);
         }
         
-        // Convertir les alias en coordonnées
-        const fromIsAlias = fromPlaceId && fromPlaceId.startsWith('ALIAS_');
-        const toIsAlias = toPlaceId && toPlaceId.startsWith('ALIAS_');
-        
+        // ✅ V230: Gestion unifiée des coordonnées (OTP ou alias)
         let fromCoords = null;
         let toCoords = null;
+        
+        // Si les entrées sont déjà des objets avec coordonnées (mode OTP)
+        if (typeof fromPlaceId === 'object' && fromPlaceId?.coordinates) {
+            fromCoords = fromPlaceId.coordinates;
+        } else if (typeof fromPlaceId === 'object' && fromPlaceId?.lat) {
+            fromCoords = fromPlaceId;
+        }
+        
+        if (typeof toPlaceId === 'object' && toPlaceId?.coordinates) {
+            toCoords = toPlaceId.coordinates;
+        } else if (typeof toPlaceId === 'object' && toPlaceId?.lat) {
+            toCoords = toPlaceId;
+        }
+        
+        // Convertir les alias en coordonnées
+        const fromIsAlias = typeof fromPlaceId === 'string' && fromPlaceId.startsWith('ALIAS_');
+        const toIsAlias = typeof toPlaceId === 'string' && toPlaceId.startsWith('ALIAS_');
         
         const aliasPromises = [];
         if (fromIsAlias) aliasPromises.push(this.getPlaceCoords(fromPlaceId).then(c => { fromCoords = c; }));
@@ -839,11 +909,17 @@ export class ApiManager {
 
     /**
      * Méthode privée pour calculer uniquement le bus
+     * ✅ V230: Support OTP backend
      * ✅ V178: Utilise le proxy Vercel pour masquer la clé API
      * ✅ V48: Gère les alias via coordonnées
      * @private
      */
     async _fetchBusRoute(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
+        // ✅ V230: Mode OTP - utiliser le serveur Express avec OTP
+        if (this.useOtp) {
+            return this._fetchBusRouteOtp(fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords);
+        }
+        
         // ✅ V178: Utiliser le proxy Vercel
         const API_URL = this.useProxy 
             ? `${this.apiEndpoints.routes}?action=directions`
@@ -916,6 +992,150 @@ export class ApiManager {
 
         console.log(`✅ ${data.routes.length} itinéraire(s) bus trouvé(s)`);
         return data;
+    }
+
+    /**
+     * ✅ V230: Méthode privée pour calculer les itinéraires bus via OTP
+     * Appelle le serveur Express → OTP et convertit la réponse au format attendu
+     * @private
+     */
+    async _fetchBusRouteOtp(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
+        console.log("🚍 Recherche itinéraire OTP...");
+        
+        // Résoudre les coordonnées si nécessaire
+        let originCoords = fromCoords;
+        let destCoords = toCoords;
+        
+        if (!originCoords && fromPlaceId?.coordinates) {
+            originCoords = fromPlaceId.coordinates;
+        }
+        if (!destCoords && toPlaceId?.coordinates) {
+            destCoords = toPlaceId.coordinates;
+        }
+        
+        if (!originCoords || !destCoords) {
+            throw new Error("Coordonnées requises pour le mode OTP");
+        }
+        
+        // Construire le body pour l'API OTP
+        const body = {
+            origin: { lat: originCoords.lat, lon: originCoords.lng || originCoords.lon },
+            destination: { lat: destCoords.lat, lon: destCoords.lng || destCoords.lon },
+            mode: 'TRANSIT',
+            maxWalkDistance: 1000,
+            maxTransfers: 3,
+            options: {
+                numItineraries: 8  // Demander plusieurs alternatives
+            }
+        };
+        
+        // Ajouter l'heure de départ/arrivée
+        if (searchTime) {
+            const dateTime = this._buildDateTime(searchTime);
+            body.time = dateTime;
+            body.timeType = searchTime.type === 'arriver' ? 'arrival' : 'departure';
+        }
+        
+        const response = await fetch(this.apiEndpoints.routes, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("❌ Erreur API OTP:", errorData);
+            
+            if (errorData.code === 'NO_ROUTE' || response.status === 404) {
+                throw new Error("Aucun bus disponible");
+            }
+            throw new Error(errorData.error || `Erreur OTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success || !data.routes || data.routes.length === 0) {
+            throw new Error("Aucun itinéraire en bus trouvé");
+        }
+        
+        // ✅ Convertir le format OTP au format attendu par le client (proche de Google)
+        const routes = data.routes.map(route => this._convertOtpRouteToGoogleFormat(route));
+        
+        console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s)`);
+        return { routes };
+    }
+    
+    /**
+     * ✅ V230: Convertit un itinéraire OTP au format Google Routes pour compatibilité
+     * @private
+     */
+    _convertOtpRouteToGoogleFormat(otpRoute) {
+        const legs = otpRoute.legs || [];
+        
+        // Construire les steps à partir des legs OTP
+        const steps = legs.map(leg => {
+            const isTransit = ['BUS', 'TRAM', 'SUBWAY', 'RAIL'].includes(leg.mode);
+            
+            return {
+                travelMode: isTransit ? 'TRANSIT' : 'WALK',
+                distanceMeters: leg.distanceMeters || 0,
+                staticDuration: `${leg.duration}s`,
+                polyline: leg.polyline ? { encodedPolyline: leg.polyline } : null,
+                startLocation: { latLng: { latitude: leg.from?.lat, longitude: leg.from?.lon } },
+                endLocation: { latLng: { latitude: leg.to?.lat, longitude: leg.to?.lon } },
+                ...(isTransit && {
+                    transitDetails: {
+                        stopDetails: {
+                            departureStop: { name: leg.from?.name },
+                            arrivalStop: { name: leg.to?.name },
+                            departureTime: leg.startTime ? new Date(leg.startTime).toISOString() : null,
+                            arrivalTime: leg.endTime ? new Date(leg.endTime).toISOString() : null
+                        },
+                        localizedValues: {
+                            departureTime: { time: { text: this._formatTimeFromMs(leg.startTime) } },
+                            arrivalTime: { time: { text: this._formatTimeFromMs(leg.endTime) } }
+                        },
+                        transitLine: {
+                            nameShort: leg.routeShortName || leg.routeColor?.shortName || '',
+                            name: leg.routeLongName || '',
+                            color: leg.routeColor || '#3388ff',
+                            textColor: leg.routeTextColor || '#FFFFFF',
+                            vehicle: { type: leg.mode }
+                        },
+                        headsign: leg.headsign || ''
+                    }
+                })
+            };
+        });
+        
+        // Calculer les totaux
+        const totalDuration = otpRoute.duration || legs.reduce((acc, l) => acc + (l.duration || 0), 0);
+        const totalDistance = otpRoute.distanceMeters || legs.reduce((acc, l) => acc + (l.distanceMeters || 0), 0);
+        
+        return {
+            duration: `${totalDuration}s`,
+            distanceMeters: totalDistance,
+            polyline: otpRoute.polyline || legs[0]?.polyline || null,
+            legs: [{
+                steps,
+                polyline: otpRoute.polyline || legs.map(l => l.polyline).filter(Boolean)[0],
+                localizedValues: {
+                    departureTime: { time: { text: this._formatTimeFromMs(otpRoute.startTime) } },
+                    arrivalTime: { time: { text: this._formatTimeFromMs(otpRoute.endTime) } }
+                }
+            }]
+        };
+    }
+    
+    /**
+     * ✅ V230: Formate un timestamp ms en HH:MM
+     * @private
+     */
+    _formatTimeFromMs(timestampMs) {
+        if (!timestampMs) return '';
+        const d = new Date(timestampMs);
+        if (isNaN(d.getTime())) return '';
+        return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     }
 
     /**
