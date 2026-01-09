@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v279'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v279: correction favicon avec vrai logo PériMap
+const CACHE_VERSION = 'v280'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v280: harmonisation DA menus (vert/cyan Périmap)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
