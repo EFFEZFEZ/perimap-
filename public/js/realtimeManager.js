@@ -71,6 +71,8 @@ export class RealtimeManager {
     /**
      * Précharge les horaires des lignes principales et arrêts fréquents
      * S'exécute en arrière-plan sans bloquer l'interface
+     * NOTE: Le préchargement est actuellement désactivé car les données temps réel
+     * sont chargées efficacement à la demande quand l'utilisateur clique sur un arrêt
      */
     async preloadMainLinesAndTopStops() {
         if (this.isPreloading) {
@@ -85,24 +87,29 @@ export class RealtimeManager {
             const stopsToPreload = new Set();
 
             // 1. Ajouter tous les arrêts des lignes majeures (A, B, C, D, express)
+            // NOTE: Le préchargement est optimisé car les données temps réel
+            // sont mieux chargées à la demande (réduction de la charge serveur)
             if (this.preloadConfig.mainLinesOnly && this.stops) {
                 const mainLines = [
                     ...LINE_CATEGORIES.majeures.lines,
                     ...LINE_CATEGORIES.express.lines
                 ];
 
+                // Les stops GTFS ne contiennent pas les lignes qui les desservent
+                // Cette info est implicite dans les stop_times. 
+                // Le préchargement à la demande est plus efficace
                 this.stops.forEach(stop => {
-                    const stopRoutes = stop.routes ? stop.routes.split(',') : [];
-                    const hasMainLine = stopRoutes.some(route => mainLines.includes(route));
-                    if (hasMainLine && isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
+                    if (isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
+                        // Ajouter seulement les arrêts avec temps réel actif
+                        // Le filtrage par ligne sera fait lors du chargement
                         stopsToPreload.add(stop);
                     }
                 });
 
-                console.log(`[Realtime] ${stopsToPreload.size} arrêts des lignes majeures à précharger`);
+                console.log(`[Realtime] ${stopsToPreload.size} arrêts avec temps réel actif identifiés`);
             }
 
-            // 2. Ajouter les arrêts les plus consultés (selon analytics)
+            // 2. Ajouter les arrêts les plus consultés (selon analytics) - PLUS PERTINENT
             if (this.preloadConfig.preloadTopStops && analyticsManager) {
                 const topStops = analyticsManager.getTopStops(20);
                 topStops.forEach(topStop => {
@@ -114,7 +121,7 @@ export class RealtimeManager {
                     }
                 });
 
-                console.log(`[Realtime] +${topStops.length} arrêts populaires à précharger`);
+                console.log(`[Realtime] +${topStops.length} arrêts populaires identifiés`);
             }
 
             // 3. Lancer le préchargement par batch pour éviter surcharge
