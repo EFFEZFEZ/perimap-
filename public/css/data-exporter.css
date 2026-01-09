@@ -34,7 +34,7 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-    display: flex;
+    display: none; /* Caché par défaut */
     flex-direction: column;
     transform: translateY(120%);
     opacity: 0;
@@ -45,6 +45,7 @@
 }
 
 .data-exporter-panel.open {
+    display: flex; /* Visible quand ouvert */
     transform: translateY(0);
     opacity: 1;
 }
