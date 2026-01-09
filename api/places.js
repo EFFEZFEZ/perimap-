@@ -12,7 +12,8 @@ export const config = {
 };
 
 // URL du backend Oracle Cloud
-const ORACLE_BACKEND = 'http://79.72.24.141';
+// Note: Vercel Edge ne permet pas les IP directes, on utilise nip.io
+const ORACLE_BACKEND = 'http://79.72.24.141.nip.io';
 
 export default async function handler(request) {
     const url = new URL(request.url);
