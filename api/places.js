@@ -72,23 +72,17 @@ export default async function handler(request) {
             }
 
             const data = await response.json();
-            console.log('[places edge V312] Suggestions reçues:', data.suggestions?.length || 0);
-            console.log('[places edge V312] Première suggestion:', JSON.stringify(data.suggestions?.[0]));
+            console.log('[places edge V313] Suggestions reçues:', data.suggestions?.length || 0);
+            console.log('[places edge V313] Première suggestion:', JSON.stringify(data.suggestions?.[0]));
 
-            // Transforme le format Oracle en format attendu par le frontend
-            // Oracle retourne: { description, lat, lon, city, type, source }
-            const predictions = (data.suggestions || []).map(s => ({
-                description: s.description || s.label || s.name || '',
-                placeId: s.id || `photon_${s.lat}_${s.lon}`,
-                location: s.location || (s.lat && s.lon ? { lat: s.lat, lng: s.lon } : null),
-                type: s.type || 'address',
-                city: s.city || ''
-            })).filter(p => p.description);
+            // Passe les données Oracle directement - elles sont déjà au bon format
+            // Oracle retourne: { suggestions: [{description, lat, lon, city, type, source}] }
+            // C'est exactement ce que l'ApiManager attend en mode OTP
 
-            console.log('[places edge V312] Retourne', predictions.length, 'prédictions');
+            console.log('[places edge V313] Retourne', data.suggestions?.length || 0, 'suggestions');
 
             return new Response(
-                JSON.stringify({ predictions, source: 'oracle-cloud' }),
+                JSON.stringify({ suggestions: data.suggestions || [], source: 'oracle-cloud' }),
                 { 
                     status: 200, 
                     headers: { 
