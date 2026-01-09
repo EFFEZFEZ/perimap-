@@ -103,7 +103,8 @@ export const config = {
     // TTL du cache des itinéraires (ms)
     routesTtl: 5 * 60 * 1000, // 5 min
     // Taille max du cache en mémoire (Mo)
-    maxMemoryMb: 512,
+    // ⚠️ V308: Réduit de 512 à 256 pour éviter OOM sur VPS 1Go
+    maxMemoryMb: 256,
   },
 
   // === APIs EXTERNES (backup) ===

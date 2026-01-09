@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v308'; // ✅ v308: Ajustement position bus RT, temps d'arrivée RT dans popups
+const CACHE_VERSION = 'v309'; // ✅ v309: Réduction cache mémoire serveur pour VPS 1Go
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
