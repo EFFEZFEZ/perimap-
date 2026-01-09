@@ -1,17 +1,17 @@
-/*
- * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+﻿/*
+ * Copyright (c) 2026-2026 P├®rimap. Tous droits r├®serv├®s.
+ * Ce code ne peut ├¬tre ni copi├®, ni distribu├®, ni modifi├® sans l'autorisation ├®crite de l'auteur.
  */
 
 /**
  * api/delay-stats.js - API pour la collecte et analyse des statistiques de retard
  * 
  * Endpoints:
- * - POST /api/delay-stats : Recevoir et stocker les données de retard
- * - GET /api/delay-stats : Récupérer les statistiques compilées
- * - GET /api/delay-stats/export : Exporter les données (CSV)
+ * - POST /api/delay-stats : Recevoir et stocker les donn├®es de retard
+ * - GET /api/delay-stats : R├®cup├®rer les statistiques compil├®es
+ * - GET /api/delay-stats/export : Exporter les donn├®es (CSV)
  * 
- * 🔴 STATUT: PRÉPARÉ POUR LE FUTUR (Serveur actuellement désactivé)
+ * ­ƒö┤ STATUT: PR├ëPAR├ë POUR LE FUTUR (Serveur actuellement d├®sactiv├®)
  */
 
 /*
@@ -23,16 +23,16 @@ import { createLogger } from '../utils/logger.js';
 const router = Router();
 const logger = createLogger('delay-stats');
 
-// Base de données en fichier JSON (pour démarrage simple)
+// Base de donn├®es en fichier JSON (pour d├®marrage simple)
 const STATS_DIR = path.join(process.cwd(), 'data', 'delay-stats');
 const STATS_FILE = path.join(STATS_DIR, 'stats.json');
 
-// Initialiser le répertoire
+// Initialiser le r├®pertoire
 async function ensureStatsDir() {
     try {
         await fs.mkdir(STATS_DIR, { recursive: true });
     } catch (error) {
-        logger.error('Impossible de créer le répertoire de stats:', error);
+        logger.error('Impossible de cr├®er le r├®pertoire de stats:', error);
     }
 }
 
@@ -65,14 +65,14 @@ async function saveStats(stats) {
 
 /**
  * POST /api/delay-stats
- * Recevoir et stocker les données de retard depuis le client
+ * Recevoir et stocker les donn├®es de retard depuis le client
  */
 router.post('/', async (req, res) => {
     try {
         const { timestamp, stats, history } = req.body;
 
         if (!stats || !history) {
-            return res.status(400).json({ error: 'Données invalides' });
+            return res.status(400).json({ error: 'Donn├®es invalides' });
         }
 
         // Charger les stats existantes
@@ -86,12 +86,12 @@ router.post('/', async (req, res) => {
             })));
         }
 
-        // Garder seulement les 100 000 dernières observations
+        // Garder seulement les 100 000 derni├¿res observations
         if (currentStats.observations.length > 100000) {
             currentStats.observations = currentStats.observations.slice(-100000);
         }
 
-        // Mettre à jour les metadata
+        // Mettre ├á jour les metadata
         currentStats.updated = new Date().toISOString();
         currentStats.lastBatch = timestamp;
         currentStats.totalObservations = currentStats.observations.length;
@@ -100,24 +100,24 @@ router.post('/', async (req, res) => {
         const saved = await saveStats(currentStats);
 
         if (saved) {
-            logger.info(`✅ ${history.length} observations reçues et sauvegardées`);
+            logger.info(`Ô£à ${history.length} observations re├ºues et sauvegard├®es`);
             res.json({ 
                 success: true, 
-                message: 'Données reçues et sauvegardées',
+                message: 'Donn├®es re├ºues et sauvegard├®es',
                 totalObservations: currentStats.observations.length
             });
         } else {
             res.status(500).json({ error: 'Erreur lors de la sauvegarde' });
         }
     } catch (error) {
-        logger.error('Erreur lors de la réception des stats:', error);
+        logger.error('Erreur lors de la r├®ception des stats:', error);
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
 
 /**
  * GET /api/delay-stats
- * Récupérer les statistiques compilées
+ * R├®cup├®rer les statistiques compil├®es
  */
 router.get('/', async (req, res) => {
     try {
@@ -137,7 +137,7 @@ router.get('/', async (req, res) => {
             // Statistiques par heure
             byHour: compileByHour(stats.observations),
             
-            // Arrêts les plus affectés
+            // Arr├¬ts les plus affect├®s
             worstStops: compileWorstStops(stats.observations),
 
             lastUpdate: stats.updated
@@ -152,7 +152,7 @@ router.get('/', async (req, res) => {
 
 /**
  * GET /api/delay-stats/export
- * Exporter les données au format CSV
+ * Exporter les donn├®es au format CSV
  */
 router.get('/export', async (req, res) => {
     try {
@@ -169,7 +169,7 @@ router.get('/export', async (req, res) => {
             res.setHeader('Content-Disposition', 'attachment; filename="delay-stats.json"');
             res.json(stats.observations);
         } else {
-            res.status(400).json({ error: 'Format non supporté' });
+            res.status(400).json({ error: 'Format non support├®' });
         }
     } catch (error) {
         logger.error('Erreur lors de l\'export:', error);
@@ -201,7 +201,7 @@ function compileByLine(observations) {
         if (obs.isMajor) line.majorDelayCount++;
     });
 
-    // Formater en array trié
+    // Formater en array tri├®
     return Object.entries(byLine)
         .map(([lineId, data]) => ({
             lineId,
@@ -281,9 +281,7 @@ function generateCSV(observations) {
     return csv;
 }
 
-export default router;
-*/
 
-// Version non-commentée avec export vide pour l'instant
+// Version non-comment├®e avec export vide pour l'instant
 export default {};
 
