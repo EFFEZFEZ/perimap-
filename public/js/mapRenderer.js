@@ -137,14 +137,17 @@ export class MapRenderer {
             }
         });
 
-        /* V24 - Créer le popup global et son DOM */
-        this.busPopupDomElement = this.createBusPopupDomElement(); // Crée la structure
+        /* V302 - Popup global avec taille fixe */
+        this.busPopupDomElement = this.createBusPopupDomElement();
         this.busPopup = L.popup({
+            maxWidth: 280,
+            minWidth: 280,
             autoClose: true,
             closeOnClick: true,
             closeButton: true,
-            autoPan: false, // Désactiver l'autopan pour éviter les saccades
-            autoPanPadding: [0, 0]
+            autoPan: false, // Pas d'autopan pour éviter les saccades
+            autoPanPadding: [0, 0],
+            className: 'bus-popup-container' // Classe custom pour styles
         });
 
         // Quand le popup est fermé, on désélectionne le bus
