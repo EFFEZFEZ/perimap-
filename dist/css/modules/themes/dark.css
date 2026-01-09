@@ -1,0 +1,170 @@
+/**
+ * Dark Theme - Périmap
+ * 
+ * Variables et overrides pour le mode sombre
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VARIABLES DARK THEME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme {
+    /* Backgrounds */
+    --bg-main: #0f172a;
+    --bg-light: #1e293b;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    
+    /* Textes */
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    /* Bordures */
+    --border: #334155;
+    --border-light: #1e293b;
+    
+    /* Ombres */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    
+    /* Élévation */
+    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --elevation-3: 0 6px 16px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3);
+    --elevation-4: 0 12px 24px rgba(0, 0, 0, 0.4), 0 6px 12px rgba(0, 0, 0, 0.3);
+    --elevation-5: 0 24px 48px rgba(0, 0, 0, 0.5), 0 12px 24px rgba(0, 0, 0, 0.4);
+    
+    /* Couleurs Périmap en mode sombre */
+    --pm-green: #4ade80;
+    --pm-green-hover: #22c55e;
+    --pm-green-light: rgba(74, 222, 128, 0.15);
+    --pm-green-glow: rgba(74, 222, 128, 0.4);
+    
+    --pm-cyan: #22d3ee;
+    --pm-cyan-hover: #06b6d4;
+    --pm-cyan-light: rgba(34, 211, 238, 0.15);
+    
+    /* Couleurs sémantiques */
+    --color-success: #4ade80;
+    --color-warning: #facc15;
+    --color-error: #f87171;
+    --color-info: #60a5fa;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BODY
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCROLLBARS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.dark-theme ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SELECTION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme ::selection {
+    background: rgba(74, 222, 128, 0.3);
+    color: #f1f5f9;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FOCUS VISIBLE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme :focus-visible {
+    outline-color: #4ade80;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LIENS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme a:not([class]) {
+    color: #4ade80;
+}
+
+body.dark-theme a:not([class]):hover {
+    color: #22c55e;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CODE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme code {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-theme pre {
+    background: #1e293b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HORIZONTAL RULE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme hr {
+    border-color: #334155;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   IMAGES ADJUSTMENT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme img {
+    filter: brightness(0.95);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LEAFLET MAP OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .leaflet-control-attribution {
+    background: rgba(15, 23, 42, 0.85) !important;
+    color: rgba(148, 163, 184, 0.8);
+}
+
+body.dark-theme .leaflet-control-attribution a {
+    color: #4ade80;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TRANSITION POUR LE CHANGEMENT DE THÈME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.theme-transition,
+body.theme-transition *,
+body.theme-transition *::before,
+body.theme-transition *::after {
+    transition: background-color 0.3s ease, 
+                border-color 0.3s ease,
+                color 0.3s ease,
+                box-shadow 0.3s ease !important;
+}

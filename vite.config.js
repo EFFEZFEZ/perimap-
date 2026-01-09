@@ -10,14 +10,15 @@
 
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { cpSync, existsSync } from 'fs';
+import { cpSync, existsSync, copyFileSync } from 'fs';
 
-// Plugin pour copier les dossiers statiques après le build
+// Plugin pour copier les dossiers et fichiers statiques après le build
 function copyStaticFolders() {
   return {
     name: 'copy-static-folders',
     closeBundle() {
-      const folders = ['views', 'data', 'icons'];
+      // Copier les dossiers
+      const folders = ['views', 'data', 'icons', 'css'];
       folders.forEach(folder => {
         const src = resolve(__dirname, 'public', folder);
         const dest = resolve(__dirname, 'dist', folder);
@@ -26,12 +27,23 @@ function copyStaticFolders() {
           console.log(`✓ Copié: ${folder}/`);
         }
       });
+      
+      // Copier les fichiers individuels à la racine
+      const rootFiles = ['service-worker.js', 'manifest.json', 'robots.txt', 'sitemap.xml'];
+      rootFiles.forEach(file => {
+        const src = resolve(__dirname, 'public', file);
+        const dest = resolve(__dirname, 'dist', file);
+        if (existsSync(src)) {
+          copyFileSync(src, dest);
+          console.log(`✓ Copié: ${file}`);
+        }
+      });
     }
   };
 }
 
 export default defineConfig({
-  // Plugin pour copier views/, data/, icons/ après le build
+  // Plugin pour copier views/, data/, icons/, css/ et fichiers racine après le build
   plugins: [copyStaticFolders()],
   
   // Dossier source = public (pour garder la compatibilité)

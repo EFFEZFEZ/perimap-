@@ -1,0 +1,315 @@
+/**
+ * Cards - Périmap
+ * 
+ * Composants de cartes et conteneurs
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE DE BASE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.card {
+    background: var(--bg-main);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elevation-1);
+    overflow: hidden;
+    transition: box-shadow var(--transition-quick), transform var(--transition-quick);
+}
+
+.card-hover:hover {
+    box-shadow: var(--elevation-3);
+    transform: translateY(-2px);
+}
+
+.card-clickable {
+    cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STRUCTURE DE LA CARTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.card-header {
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-2);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.card-body {
+    padding: var(--spacing-4);
+}
+
+.card-footer {
+    padding: var(--spacing-2) var(--spacing-4) var(--spacing-4);
+    border-top: 1px solid var(--border-light);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.card-text {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VARIANTES DE CARTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Carte bordée */
+.card-bordered {
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+/* Carte plate */
+.card-flat {
+    box-shadow: none;
+    background: var(--bg-secondary);
+}
+
+/* Carte avec accent vert */
+.card-accent {
+    border-left: 4px solid var(--pm-green);
+}
+
+/* Carte gradient */
+.card-gradient {
+    background: var(--pm-gradient);
+    color: white;
+}
+
+.card-gradient .card-title,
+.card-gradient .card-text {
+    color: white;
+}
+
+.card-gradient .card-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE RÉSULTAT ITINÉRAIRE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.result-card {
+    background: var(--bg-main);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-3);
+    box-shadow: var(--elevation-1);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-quick);
+}
+
+.result-card:hover {
+    border-color: var(--pm-green);
+    box-shadow: var(--elevation-2), 0 0 0 1px var(--pm-green-light);
+}
+
+.result-card.selected {
+    border-color: var(--pm-green);
+    background: var(--pm-green-light);
+}
+
+.result-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-3);
+}
+
+.result-card-time {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+}
+
+.result-card-duration {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+}
+
+.result-card-steps {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE D'ARRÊT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stop-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    background: var(--bg-main);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    transition: all var(--transition-quick);
+}
+
+.stop-card:hover {
+    border-color: var(--pm-green);
+    background: var(--pm-green-light);
+}
+
+.stop-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pm-green);
+    color: white;
+    flex-shrink: 0;
+}
+
+.stop-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stop-card-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stop-card-info {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.stop-card-time {
+    font-weight: var(--font-weight-bold);
+    color: var(--pm-green);
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE D'ALERTE TRAFIC
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.alert-card {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    border-left: 4px solid;
+}
+
+.alert-card-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--color-info);
+}
+
+.alert-card-warning {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: var(--color-warning);
+}
+
+.alert-card-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--color-error);
+}
+
+.alert-card-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: var(--color-success);
+}
+
+.alert-card-title {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-1);
+}
+
+.alert-card-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .card {
+    background: #1e293b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .card-bordered {
+    border-color: #334155;
+}
+
+body.dark-theme .card-flat {
+    background: #0f172a;
+}
+
+body.dark-theme .card-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .card-header,
+body.dark-theme .card-footer {
+    border-color: #334155;
+}
+
+body.dark-theme .result-card {
+    background: #1e293b;
+}
+
+body.dark-theme .result-card:hover {
+    background: rgba(74, 222, 128, 0.1);
+}
+
+body.dark-theme .result-card-duration {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-theme .stop-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-theme .stop-card:hover {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: #4ade80;
+}
+
+body.dark-theme .stop-card-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .alert-card-info {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+body.dark-theme .alert-card-warning {
+    background: rgba(234, 179, 8, 0.15);
+}
+
+body.dark-theme .alert-card-error {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+body.dark-theme .alert-card-success {
+    background: rgba(34, 197, 94, 0.15);
+}

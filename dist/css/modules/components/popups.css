@@ -1,0 +1,321 @@
+/**
+ * Popups Bus - Périmap
+ * 
+ * Styles pour les popups de bus sur la carte
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   POPUP CONTAINER LEAFLET
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.leaflet-popup {
+    touch-action: none;
+    zoom: 1 !important;
+}
+
+.leaflet-popup-pane {
+    pointer-events: none;
+}
+
+.leaflet-popup-content-wrapper {
+    pointer-events: auto;
+    padding: 0 !important;
+    border-radius: 16px !important;
+    width: 280px !important;
+    max-width: 280px !important;
+    min-width: 280px !important;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+}
+
+.leaflet-popup-tip-container {
+    margin-top: -1px;
+}
+
+.leaflet-popup-tip {
+    box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUS POPUP DESIGN
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.bus-popup-container .leaflet-popup-content-wrapper {
+    background: #ffffff !important;
+}
+
+.bus-popup-info {
+    padding: 16px;
+    width: 280px;
+    max-width: 280px;
+    min-width: 280px;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+}
+
+/* Header du popup */
+.bus-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.bus-popup-line-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.bus-popup-header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.bus-popup-direction {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.3;
+    margin: 0 0 2px 0;
+}
+
+.bus-popup-trip-id {
+    font-size: 11px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Contenu du popup */
+.bus-popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bus-popup-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.bus-popup-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.bus-popup-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #475569;
+}
+
+.bus-popup-row-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.bus-popup-label {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.bus-popup-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.3;
+}
+
+/* ETA avec couleurs */
+.eta-highlight {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.eta-highlight.realtime {
+    color: #10b981;
+}
+
+.eta-highlight.theoretical {
+    color: #0f172a;
+}
+
+.eta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.eta-badge.realtime {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.eta-badge.theoretical {
+    background: rgba(100, 116, 139, 0.15);
+    color: #475569;
+}
+
+/* Progression vers l'arrêt */
+.bus-popup-progress {
+    margin-top: 4px;
+}
+
+.progress-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--pm-gradient);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .bus-popup-container .leaflet-popup-content-wrapper {
+    background: #1e293b !important;
+}
+
+body.dark-theme .leaflet-popup-tip {
+    background: #1e293b !important;
+}
+
+body.dark-theme .bus-popup-header {
+    border-bottom-color: #334155;
+}
+
+body.dark-theme .bus-popup-direction {
+    color: #f1f5f9;
+}
+
+body.dark-theme .bus-popup-trip-id {
+    color: #94a3b8;
+}
+
+body.dark-theme .bus-popup-icon {
+    background: #0f172a;
+}
+
+body.dark-theme .bus-popup-icon svg {
+    color: #94a3b8;
+}
+
+body.dark-theme .bus-popup-label {
+    color: #94a3b8;
+}
+
+body.dark-theme .bus-popup-value {
+    color: #f1f5f9;
+}
+
+body.dark-theme .eta-highlight.theoretical {
+    color: #f1f5f9;
+}
+
+body.dark-theme .eta-badge.theoretical {
+    background: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+}
+
+body.dark-theme .progress-bar {
+    background: #334155;
+}
+
+body.dark-theme .progress-text {
+    color: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   POPUP ARRÊT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stop-popup {
+    padding: 12px;
+    min-width: 200px;
+}
+
+.stop-popup-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.stop-popup-lines {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.stop-popup-line {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+}
+
+.stop-popup-next {
+    font-size: 13px;
+    color: #475569;
+}
+
+.stop-popup-next strong {
+    color: var(--pm-green);
+}
+
+body.dark-theme .stop-popup-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .stop-popup-next {
+    color: #94a3b8;
+}

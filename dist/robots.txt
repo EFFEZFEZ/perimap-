@@ -1,0 +1,43 @@
+# PériMap - robots.txt
+# https://www.xn--primap-bva.fr/
+
+User-agent: *
+Allow: /
+
+# Pages principales à indexer
+Allow: /
+Allow: /index.html
+Allow: /horaires.html
+Allow: /horaires-ligne-a.html
+Allow: /horaires-ligne-b.html
+Allow: /horaires-ligne-c.html
+Allow: /horaires-ligne-d.html
+Allow: /itineraire.html
+Allow: /trafic.html
+Allow: /carte.html
+Allow: /about.html
+Allow: /mentions-legales.html
+Allow: /data/fichehoraire/
+
+# Ressources à ne pas indexer
+Disallow: /api/
+Disallow: /views/
+Disallow: /js/workers/
+Disallow: /*.json$
+Disallow: /data/gtfs/
+
+# Crawl-delay pour éviter la surcharge (optionnel)
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://www.xn--primap-bva.fr/sitemap.xml
+
+# Google specifique
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specifique  
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

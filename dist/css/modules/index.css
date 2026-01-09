@@ -1,0 +1,47 @@
+/**
+ * CSS Modules - Périmap
+ * 
+ * Organisation des styles en modules thématiques
+ * 
+ * Structure:
+ * ├── base/           → Reset, variables, typographie
+ * ├── components/     → Boutons, cards, modals, etc.
+ * ├── layout/         → Header, footer, grids
+ * ├── pages/          → Styles spécifiques par page
+ * ├── utilities/      → Classes utilitaires
+ * └── themes/         → Dark theme
+ */
+
+/* Base */
+@import './base/variables.css';
+@import './base/reset.css';
+@import './base/typography.css';
+@import './base/animations.css';
+
+/* Layout */
+@import './layout/header.css';
+@import './layout/navigation.css';
+@import './layout/grid.css';
+
+/* Components */
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/forms.css';
+@import './components/modals.css';
+@import './components/popups.css';
+@import './components/badges.css';
+@import './components/loading.css';
+
+/* Pages */
+@import './pages/map.css';
+@import './pages/itinerary.css';
+@import './pages/schedules.css';
+@import './pages/traffic.css';
+
+/* Utilities */
+@import './utilities/spacing.css';
+@import './utilities/display.css';
+@import './utilities/accessibility.css';
+
+/* Themes */
+@import './themes/dark.css';

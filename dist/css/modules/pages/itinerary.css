@@ -1,0 +1,474 @@
+/**
+ * Itinerary page styles - Périmap
+ * 
+ * Styles spécifiques à la recherche d'itinéraires
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORMULAIRE DE RECHERCHE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.itinerary-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--bg-main);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--elevation-1);
+}
+
+.itinerary-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    position: relative;
+}
+
+.itinerary-input-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.itinerary-input-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.itinerary-input-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--pm-green);
+}
+
+.itinerary-input {
+    flex: 1;
+}
+
+/* Bouton d'inversion */
+.itinerary-swap-btn {
+    position: absolute;
+    right: var(--spacing-2);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--pm-green-light);
+    cursor: pointer;
+    transition: all var(--transition-quick);
+}
+
+.itinerary-swap-btn:hover {
+    background: var(--pm-green);
+}
+
+.itinerary-swap-btn svg {
+    width: 18px;
+    height: 18px;
+    color: var(--pm-green);
+    transition: all var(--transition-quick);
+}
+
+.itinerary-swap-btn:hover svg {
+    color: white;
+    transform: rotate(180deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTOCOMPLÉTION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.itinerary-autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--spacing-1);
+    background: var(--bg-main);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--elevation-3);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--transition-base);
+}
+
+.itinerary-autocomplete.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-4);
+    cursor: pointer;
+    transition: background var(--transition-quick);
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.is-selected {
+    background: var(--pm-green-light);
+}
+
+.autocomplete-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.autocomplete-item-icon svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+}
+
+.autocomplete-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item-type {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RÉSULTATS D'ITINÉRAIRES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.itinerary-results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.itinerary-result-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-4);
+    background: var(--bg-main);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--elevation-1);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.itinerary-result-card:hover {
+    box-shadow: var(--elevation-2);
+    transform: translateY(-2px);
+}
+
+.itinerary-result-card.is-selected {
+    border: 2px solid var(--pm-green);
+}
+
+/* En-tête du résultat */
+.itinerary-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-3);
+}
+
+.itinerary-duration {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.itinerary-arrival {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.itinerary-emissions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    padding: var(--spacing-1) var(--spacing-2);
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: var(--border-radius-sm);
+    font-size: 12px;
+    color: var(--pm-green);
+}
+
+/* Timeline du trajet */
+.itinerary-timeline {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.itinerary-timeline::-webkit-scrollbar {
+    display: none;
+}
+
+.timeline-segment {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    flex-shrink: 0;
+}
+
+.timeline-mode {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+}
+
+.timeline-mode svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+}
+
+.timeline-mode.is-bus {
+    background: var(--pm-green);
+}
+
+.timeline-mode.is-bus svg {
+    color: white;
+}
+
+.timeline-line-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 var(--spacing-2);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+
+.timeline-duration {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.timeline-connector {
+    flex-shrink: 0;
+    width: 20px;
+    height: 2px;
+    background: var(--border-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DÉTAILS DE L'ITINÉRAIRE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.itinerary-details {
+    display: none;
+    flex-direction: column;
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-color);
+}
+
+.itinerary-result-card.is-expanded .itinerary-details {
+    display: flex;
+}
+
+.itinerary-step {
+    display: flex;
+    gap: var(--spacing-3);
+    position: relative;
+    padding-bottom: var(--spacing-4);
+}
+
+/* Ligne verticale entre les étapes */
+.itinerary-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.step-indicator svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+}
+
+.step-indicator.is-walk {
+    background: rgba(107, 114, 128, 0.1);
+}
+
+.step-indicator.is-bus {
+    background: var(--pm-green);
+}
+
+.step-indicator.is-bus svg {
+    color: white;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-1);
+}
+
+.step-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.step-stops {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin-top: var(--spacing-2);
+    padding-left: var(--spacing-3);
+    border-left: 2px solid var(--pm-green);
+}
+
+.step-stop {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MESSAGE VIDE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.itinerary-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-8);
+    text-align: center;
+}
+
+.itinerary-empty svg {
+    width: 64px;
+    height: 64px;
+    color: var(--text-tertiary);
+    margin-bottom: var(--spacing-4);
+}
+
+.itinerary-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.itinerary-empty-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 280px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .itinerary-form {
+    background: #1e2330;
+}
+
+body.dark-theme .itinerary-autocomplete {
+    background: #1e2330;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .autocomplete-item:hover,
+body.dark-theme .autocomplete-item.is-selected {
+    background: rgba(74, 222, 128, 0.1);
+}
+
+body.dark-theme .itinerary-result-card {
+    background: #1e2330;
+}
+
+body.dark-theme .timeline-mode {
+    background: #2a3142;
+}
+
+body.dark-theme .timeline-connector {
+    background: #3b4556;
+}
+
+body.dark-theme .step-indicator {
+    background: #2a3142;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .itinerary-form {
+        padding: var(--spacing-3);
+        border-radius: 0;
+    }
+    
+    .itinerary-result-card {
+        border-radius: var(--spacing-3);
+    }
+    
+    .itinerary-duration {
+        font-size: 20px;
+    }
+}
