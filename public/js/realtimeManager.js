@@ -465,6 +465,28 @@ export class RealtimeManager {
     clearCache() {
         this.cache.clear();
     }
+    
+    /**
+     * V303: Vérifie si on a des données temps réel récentes pour un arrêt
+     * @param {string} stopId - ID de l'arrêt GTFS
+     * @param {string} stopCode - Code de l'arrêt (optionnel)
+     * @returns {boolean} true si données temps réel disponibles
+     */
+    hasRealtimeDataForStop(stopId, stopCode = null) {
+        const hawkKey = getHawkKeyForStop(stopId, stopCode);
+        if (!hawkKey) return false;
+        
+        const cacheKey = `hawk_${hawkKey}`;
+        const cached = this.cache.get(cacheKey);
+        
+        // Vérifier si le cache existe et n'est pas expiré
+        if (cached && Date.now() - cached.fetchedAt < this.cacheMaxAge) {
+            // Vérifier qu'il y a bien des données
+            return cached.data && cached.data.count > 0;
+        }
+        
+        return false;
+    }
 }
 
 // Singleton

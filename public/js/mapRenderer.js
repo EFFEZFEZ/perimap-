@@ -744,26 +744,20 @@ export class MapRenderer {
         const lat = parseFloat(masterStop.stop_lat);
         const lon = parseFloat(masterStop.stop_lon);
         
-        // V110: Sur mobile, décaler la vue vers le haut pour que la popup soit visible
+        // V303: PAS de panTo automatique - ça cause des bugs de geste sur mobile
+        // L'utilisateur peut centrer manuellement s'il le souhaite
         const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            const mapHeight = this.map.getSize().y;
-            const offsetY = mapHeight * 0.25;
-            const point = this.map.latLngToContainerPoint([lat, lon]);
-            const newPoint = L.point(point.x, point.y - offsetY);
-            const newCenter = this.map.containerPointToLatLng(newPoint);
-            this.map.panTo(newCenter, { animate: true, duration: 0.3 });
-        }
         
         // V25: Créer d'abord le popup avec les données statiques
         const popupContent = this.createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, null);
         
         const popup = L.popup({ 
             maxHeight: 350, 
+            maxWidth: 280,
+            minWidth: 280,
             className: 'stop-schedule-popup',
-            autoPan: !isMobile,
-            autoPanPaddingTopLeft: isMobile ? [0, 0] : [50, 50],
-            autoPanPaddingBottomRight: isMobile ? [0, 0] : [50, 50]
+            autoPan: false, // Désactivé pour éviter les bugs de geste
+            closeOnClick: true
         })
             .setLatLng([lat, lon])
             .setContent(popupContent)

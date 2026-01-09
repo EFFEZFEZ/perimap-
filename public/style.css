@@ -4670,13 +4670,14 @@ body.dark-theme .install-tip-steps section {
 /* V302 - Popup mobile-first avec taille fixe */
 .leaflet-popup {
     touch-action: none;
-    will-change: transform;
-    /* Taille fixe - ne change PAS avec le zoom */
-    transform-origin: bottom center;
+    /* IMPORTANT: Empêcher le scaling avec le zoom de la carte */
+    zoom: 1 !important;
 }
 
+/* Forcer le popup-pane à ne pas scaler */
 .leaflet-popup-pane {
     pointer-events: none;
+    zoom: 1 !important;
 }
 
 .leaflet-popup-content-wrapper {

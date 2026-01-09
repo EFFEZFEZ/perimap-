@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v302'; // ✅ v302: fixed popup size (280px), no zoom scaling
+const CACHE_VERSION = 'v303'; // ✅ v303: fix popup zoom scaling, remove autoPan, fix isRealtime
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

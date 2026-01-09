@@ -4612,6 +4612,17 @@ function updateData() {
             bus.currentStatus = (lineStatuses[routeId] && lineStatuses[routeId].status) 
                                 ? lineStatuses[routeId].status 
                                 : 'normal';
+            
+            // V303: Définir isRealtime basé sur les données temps réel disponibles
+            // Un bus est "temps réel" si on a des données récentes dans le cache
+            if (bus.segment?.toStopInfo?.stop_id && realtimeManager) {
+                const stopId = bus.segment.toStopInfo.stop_id;
+                const stopCode = bus.segment.toStopInfo.stop_code;
+                // Vérifier si le realtimeManager a préchargé des données pour cet arrêt
+                bus.isRealtime = realtimeManager.hasRealtimeDataForStop?.(stopId, stopCode) ?? false;
+            } else {
+                bus.isRealtime = false;
+            }
         }
     });
     
