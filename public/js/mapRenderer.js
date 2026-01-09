@@ -471,7 +471,17 @@ export class MapRenderer {
             // Contenu dynamique
             if (stateEl) stateEl.textContent = stateText;
             if (nextStopEl) nextStopEl.textContent = nextStopName;
-            if (etaEl) etaEl.textContent = etaText;
+            if (etaEl) {
+                etaEl.textContent = etaText;
+                // Colorer l'ETA selon le mode (vert = temps réel, blanc = théorique)
+                if (bus.isRealtime) {
+                    etaEl.classList.add('realtime');
+                    etaEl.classList.remove('theoretical');
+                } else {
+                    etaEl.classList.add('theoretical');
+                    etaEl.classList.remove('realtime');
+                }
+            }
             
             // Badge temps réel vs estimé
             if (footerBadge) {
@@ -556,15 +566,27 @@ export class MapRenderer {
             popupAnchor: [0, -16]
         });
 
-        const marker = L.marker([lat, lon], { icon });
+        const marker = L.marker([lat, lon], { 
+            icon,
+            interactive: true,
+            bubblingMouseEvents: false
+        });
         
         // *** V24 - NE PAS UTILISER bindPopup ***
         // marker.bindPopup(...);
         
-        // Attacher un simple 'click'
-        marker.on('click', () => {
+        // Attacher un simple 'click' avec log pour debug
+        marker.on('click', (e) => {
+            console.log('[MapRenderer] 🚌 Bus clicked:', busId);
+            L.DomEvent.stopPropagation(e);
+            
             this.selectedBusId = busId;
             const markerData = this.busMarkers[busId];
+            
+            if (!markerData) {
+                console.error('[MapRenderer] markerData not found for', busId);
+                return;
+            }
             
             // Mettre à jour le contenu AVANT de l'ouvrir
             this.updateBusPopupContent(this.busPopupDomElement, markerData.bus, tripScheduler);

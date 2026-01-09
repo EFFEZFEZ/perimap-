@@ -4864,67 +4864,94 @@ body.dark-theme .install-tip-steps section {
 
 /* ===== Bus Popup Modern Design ===== */
 .bus-popup-modern {
-    min-width: 280px;
-    max-width: 320px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-width: 260px;
+    max-width: 300px;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
 }
 
 .bus-popup-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    gap: 14px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.08) 100%);
     border-bottom: 1px solid var(--border);
 }
 
 .bus-popup-line-badge {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 1.1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-weight: 800;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.bus-popup-line-badge:hover {
+    transform: scale(1.05);
+}
+
+.bus-popup-line-badge .line-number {
+    font-weight: 800;
 }
 
 .bus-popup-title {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
+    flex: 1;
 }
 
 .bus-popup-title .route-name {
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 700;
+    font-size: 1.05rem;
     color: var(--text-primary);
 }
 
 .bus-popup-title .route-destination {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .bus-popup-body {
-    padding: 12px 16px;
+    padding: 14px 18px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    background: var(--bg-primary);
 }
 
 .bus-popup-info-row {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+}
+
+.bus-popup-info-row:hover {
+    background: var(--bg-tertiary);
 }
 
 .bus-popup-icon {
-    font-size: 1.2rem;
-    width: 28px;
-    text-align: center;
+    font-size: 1.3rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
@@ -4936,63 +4963,90 @@ body.dark-theme .install-tip-steps section {
 }
 
 .bus-popup-info .info-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+    font-weight: 600;
 }
 
 .bus-popup-info .info-value {
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-primary);
 }
 
+/* ETA highlight - vert pour temps réel, blanc pour théorique */
 .bus-popup-info .eta-highlight {
-    color: var(--primary);
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 1.1rem;
     font-variant-numeric: tabular-nums;
 }
 
+.bus-popup-info .eta-highlight.realtime {
+    color: #10b981; /* Vert - temps réel */
+}
+
+.bus-popup-info .eta-highlight.theoretical {
+    color: var(--text-primary); /* Blanc/texte normal - théorique */
+}
+
 .bus-popup-footer {
-    padding: 10px 16px;
+    padding: 12px 18px;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border);
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .realtime-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    padding: 4px 10px;
+    gap: 8px;
+    font-size: 0.78rem;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
 .realtime-badge.theoretical {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
 }
 
 .realtime-badge.realtime {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
 }
 
 .realtime-badge .badge-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: currentColor;
-    animation: pulse-dot 2s ease-in-out infinite;
+    animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse-dot {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* Fix Leaflet popup container pour le popup bus */
+.leaflet-popup-content-wrapper {
+    padding: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    width: auto !important;
+}
+
+.leaflet-popup-tip {
+    background: var(--bg-primary) !important;
 }
 
 /* Legacy popup styles */
