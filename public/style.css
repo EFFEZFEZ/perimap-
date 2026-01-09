@@ -1481,6 +1481,10 @@ body.itinerary-view-active {
     width: auto;
     object-fit: contain;
     display: block;
+    /* Protection mode clair - fond subtil derrière le logo */
+    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.05) 0%, transparent 70%);
+    border-radius: 8px;
+    padding: 2px;
 }
 .header-title-group {
     display: flex;
@@ -8261,32 +8265,27 @@ body:not(.view-is-locked) {
     overflow: hidden;
 }
 
-/* Puce ronde discrète - cohérence avec menu mobile */
 .nav-dropdown-item::before {
     content: '';
     position: absolute;
-    left: 0.75rem;
+    left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 5px;
-    height: 5px;
-    background: var(--pm-green);
-    opacity: 0.3;
-    border-radius: 50%;
-    transition: all var(--transition-fast);
+    width: 3px;
+    height: 0;
+    background: var(--primary);
+    border-radius: 0 2px 2px 0;
+    transition: height var(--transition-fast);
 }
 
 .nav-dropdown-item:hover {
-    background: var(--pm-green-light, rgba(34, 197, 94, 0.08));
-    color: var(--pm-green);
-    padding-left: 1.5rem;
+    background: var(--bg-secondary);
+    color: var(--primary);
+    padding-left: 1.25rem;
 }
 
 .nav-dropdown-item:hover::before {
-    opacity: 1;
-    background: var(--pm-cyan);
-    transform: translateY(-50%) scale(1.3);
-    box-shadow: 0 0 8px var(--pm-cyan-glow, rgba(0, 200, 255, 0.4));
+    height: 60%;
 }
 
 .nav-dropdown-item svg {
@@ -8438,30 +8437,27 @@ body:not(.view-is-locked) {
     background: transparent;
 }
 
-/* Puce ronde avant chaque élément - Style DA Périmap */
+/* Puce ronde simple */
 .mobile-menu-item::before {
     content: '';
     display: inline-block;
-    width: 6px;
-    height: 6px;
-    min-width: 6px;
-    background: var(--pm-green);
-    opacity: 0.4;
+    width: 5px;
+    height: 5px;
+    min-width: 5px;
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     transition: all 0.2s ease;
 }
 
 .mobile-menu-item:hover {
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     color: #FFFFFF !important;
     padding-left: 1.5rem;
 }
 
 .mobile-menu-item:hover::before {
-    background: var(--pm-cyan);
-    opacity: 1;
-    transform: scale(1.4);
-    box-shadow: 0 0 10px var(--pm-cyan-glow, rgba(0, 200, 255, 0.4));
+    background: #FFFFFF;
+    transform: scale(1.2);
 }
 
 .mobile-menu-item:active {
@@ -8481,9 +8477,9 @@ body:not(.view-is-locked) {
     width: 100%;
     padding: 0.9rem 1rem;
     margin-bottom: 0.35rem;
-    background: rgba(34, 197, 94, 0.04) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
     border: none;
-    border-left: 3px solid var(--pm-green);
+    border-left: 3px solid rgba(255, 255, 255, 0.3);
     outline: none !important;
     box-shadow: none !important;
     font-size: 0.75rem;
@@ -8521,8 +8517,8 @@ button.mobile-menu-category:focus {
 }
 
 .mobile-menu-category:hover {
-    background: rgba(34, 197, 94, 0.08) !important;
-    border-left-color: var(--pm-cyan) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-left-color: rgba(255, 255, 255, 0.5) !important;
     color: #FFFFFF !important;
 }
 
@@ -8533,8 +8529,8 @@ button.mobile-menu-category:focus {
 }
 
 .mobile-menu-category[aria-expanded="true"] {
-    background: rgba(34, 197, 94, 0.12) !important;
-    border-left-color: var(--pm-green) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-left-color: #FFFFFF !important;
 }
 
 .mobile-menu-category:active {
@@ -8559,7 +8555,7 @@ button.mobile-menu-category:focus {
     opacity: 0;
     margin-left: 0.5rem;
     padding-left: 0.5rem;
-    border-left: 1px solid rgba(34, 197, 94, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mobile-menu-items.is-expanded {

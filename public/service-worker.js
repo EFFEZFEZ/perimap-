@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v280'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v280: harmonisation DA menus (vert/cyan Périmap)
+const CACHE_VERSION = 'v281'; // ⚠️ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v281: revert desktop, menu mobile simplifié, fix logo mode clair
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
