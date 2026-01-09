@@ -1,24 +1,24 @@
 /*
- * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ * Copyright (c) 2026-2026 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
- * Service Worker - Stratégie optimisée pour performance
+ * Service Worker - StratÃ©gie optimisÃ©e pour performance
  * 
- * STRATÉGIES:
+ * STRATÃ‰GIES:
  * - Cache-First pour assets statiques (CSS, JS, images)
- * - Stale-While-Revalidate pour données GTFS
+ * - Stale-While-Revalidate pour donnÃ©es GTFS
  * - Network-First pour APIs externes
  * 
- * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
+ * IMPORTANT: IncrÃ©mentez CACHE_VERSION Ã  chaque dÃ©ploiement !
  */
 
-const CACHE_VERSION = 'v286'; // ?? INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v286: supprimer affichage lignes hawk non présentes au GTFS
+const CACHE_VERSION = 'v287'; // âœ… INCRÃ‰MENTEZ Ã€ CHAQUE DÃ‰PLOIEMENT - v287: Fix syntaxe et enable Alt+D
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 
-// Assets critiques à pré-cacher (chargés immédiatement)
+// Assets critiques ï¿½ prï¿½-cacher (chargï¿½s immï¿½diatement)
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
@@ -39,7 +39,7 @@ const CRITICAL_ASSETS = [
   '/sitemap.xml'
 ];
 
-// Assets secondaires (chargés en arrière-plan)
+// Assets secondaires (chargï¿½s en arriï¿½re-plan)
 const SECONDARY_ASSETS = [
   '/js/main.js',
   '/js/dataManager.js',
@@ -57,6 +57,10 @@ const SECONDARY_ASSETS = [
   '/js/config.js',
   '/js/realtimeManager.js',
   '/js/analyticsManager.js',
+  '/js/delayManager.js',
+  '/js/dataExporter.js',
+  '/js/delayStatsUI.js',
+  '/js/config/delayConfig.js',
   '/js/config/icons.js',
   '/js/config/routes.js',
   '/js/config/stopKeyMapping.js',
@@ -83,30 +87,32 @@ const SECONDARY_ASSETS = [
   '/views/tarifs-billettique.html',
   '/views/tarifs-grille.html',
   '/css/brand.css',
-  '/css/line-pages.css'
+  '/css/line-pages.css',
+  '/css/data-exporter.css',
+  '/css/delay-stats.css'
 ];
 
 // Patterns pour Network-Only
 const NETWORK_ONLY = ['/api/', 'google', 'googleapis', 'ibb.co', 'line-status.json'];
 
-// Patterns pour données GTFS (cache long terme)
+// Patterns pour donnÃ©es GTFS (cache long terme)
 const GTFS_PATTERNS = ['/data/gtfs/', '.json', '.txt'];
 
 /**
- * Installation: Pré-cache les assets critiques, puis secondaires
+ * Installation: PrÃ©-cache les assets critiques, puis secondaires
  */
 self.addEventListener('install', (event) => {
   console.log('[SW] Installation version', CACHE_VERSION);
   event.waitUntil(
     (async () => {
-      // Cache critique en priorité
+      // Cache critique en prioritï¿½
       const staticCache = await caches.open(STATIC_CACHE);
       await staticCache.addAll(CRITICAL_ASSETS);
-      console.log('[SW] Assets critiques cachés');
+      console.log('[SW] Assets critiques cachï¿½s');
       
-      // Cache secondaire en arrière-plan (non-bloquant)
+      // Cache secondaire en arriï¿½re-plan (non-bloquant)
       staticCache.addAll(SECONDARY_ASSETS).catch(err => {
-        console.warn('[SW] Certains assets secondaires non cachés:', err);
+        console.warn('[SW] Certains assets secondaires non cachï¿½s:', err);
       });
       
       await self.skipWaiting();
@@ -125,7 +131,7 @@ self.addEventListener('activate', (event) => {
       await Promise.all(
         keys.map(key => {
           if (!key.includes(CACHE_VERSION)) {
-            console.log('[SW] Suppression cache obsolète:', key);
+            console.log('[SW] Suppression cache obsolï¿½te:', key);
             return caches.delete(key);
           }
         })
@@ -136,7 +142,7 @@ self.addEventListener('activate', (event) => {
 });
 
 /**
- * Fetch: Stratégies différenciées selon le type de ressource
+ * Fetch: Stratï¿½gies diffï¿½renciï¿½es selon le type de ressource
  */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -152,25 +158,25 @@ self.addEventListener('fetch', (event) => {
   }
   
   // Stale-While-Revalidate pour assets statiques (JS, CSS, HTML)
-  // Objectif: éviter un site "figé" entre deux versions.
+  // Objectif: ï¿½viter un site "figï¿½" entre deux versions.
   if (url.origin === self.location.origin &&
       (request.url.endsWith('.js') || request.url.endsWith('.css') || request.url.endsWith('.html'))) {
     event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
     return;
   }
   
-  // Stale-While-Revalidate pour données GTFS
+  // Stale-While-Revalidate pour donnï¿½es GTFS
   if (GTFS_PATTERNS.some(p => request.url.includes(p))) {
     event.respondWith(staleWhileRevalidate(request, DATA_CACHE));
     return;
   }
   
-  // Par défaut: Stale-While-Revalidate
+  // Par dï¿½faut: Stale-While-Revalidate
   event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
 });
 
 /**
- * Cache-First: Retourne le cache, sinon réseau
+ * Cache-First: Retourne le cache, sinon rï¿½seau
  */
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
@@ -187,13 +193,13 @@ async function cacheFirst(request, cacheName) {
 }
 
 /**
- * Stale-While-Revalidate: Retourne le cache, met à jour en arrière-plan
+ * Stale-While-Revalidate: Retourne le cache, met ï¿½ jour en arriï¿½re-plan
  */
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   
-  // Revalidation en arrière-plan
+  // Revalidation en arriï¿½re-plan
   const networkPromise = fetch(request)
     .then(response => {
       if (response.ok) cache.put(request, response.clone());
@@ -205,7 +211,7 @@ async function staleWhileRevalidate(request, cacheName) {
 }
 
 /**
- * Message: Permet de forcer une mise à jour depuis l'app
+ * Message: Permet de forcer une mise ï¿½ jour depuis l'app
  */
 self.addEventListener('message', (event) => {
   if (event.data === 'skipWaiting') self.skipWaiting();
