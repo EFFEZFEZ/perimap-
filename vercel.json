@@ -55,8 +55,7 @@
   "functions": {
     "api/realtime.js": {
       "maxDuration": 15,
-      "memory": 256,
-      "regions": ["cdg1"]
+      "memory": 256
     }
   }
 }
