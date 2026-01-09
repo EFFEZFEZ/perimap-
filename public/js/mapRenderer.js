@@ -943,37 +943,6 @@ export class MapRenderer {
                 
                 html += `</div>`;
             });
-            
-            // V25: Ajouter les lignes temps réel non présentes dans GTFS
-            Object.keys(realtimeByLine).forEach(ligne => {
-                if (!sortedLines.map(l => l.toUpperCase()).includes(ligne)) {
-                    const rtData = realtimeByLine[ligne];
-                    if (rtData.length > 0) {
-                        // Couleurs par défaut pour les lignes
-                        const lineColors = { A: 'fdd003', B: '1e91ff', C: 'dd1b75', D: '41ae18' };
-                        const lineTextColors = { A: '000000', B: 'ffffff', C: 'ffffff', D: 'ffffff' };
-                        
-                        html += `<div class="popup-line-block">`;
-                        html += `<div class="popup-line-header">
-                                    <span class="popup-badge" style="background:#${lineColors[ligne] || '666666'};color:#${lineTextColors[ligne] || 'ffffff'};">${ligne}</span>
-                                    <span class="realtime-badge">${REALTIME_ICON} Live</span>
-                                 </div>`;
-                        
-                        rtData.forEach(rt => {
-                            html += `<div class="popup-dest-row">
-                                        <div class="popup-dest-name">
-                                            <span class="dest-label">Direction</span> ${rt.destination}
-                                        </div>
-                                        <div class="popup-times">
-                                            <span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${rt.temps}</span>
-                                        </div>
-                                     </div>`;
-                        });
-                        
-                        html += `</div>`;
-                    }
-                }
-            });
         }
 
         html += `</div>`;
