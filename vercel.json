@@ -88,8 +88,5 @@
       "maxDuration": 15,
       "memory": 256
     }
-  },
-  "analytics": {
-    "enabled": true
   }
 }
