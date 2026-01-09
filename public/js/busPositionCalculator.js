@@ -9,22 +9,37 @@
  * * - Élimine les calculs trigonométriques (Haversine) dans la boucle d'animation.
  * * - Met en cache les segments de route et leurs distances cumulées.
  * * - Réduit drastiquement l'usage CPU/Batterie.
+ * * V305: Intégration temps réel pour ajustement de vitesse
  */
 
 export class BusPositionCalculator {
-    constructor(dataManager) {
+    constructor(dataManager, realtimeManager = null) {
         this.dataManager = dataManager;
+        this.realtimeManager = realtimeManager; // V305: Référence au manager RT
         
         // Cache pour stocker les géométries pré-calculées entre deux arrêts
         // Clé: "routeId_fromStopId_toStopId"
         // Valeur: { path: [[lon,lat]...], distances: [0, d1, d2...], totalDistance: 1500 }
         this.segmentCache = new Map();
+        
+        // V305: Cache des ajustements RT par trip
+        // Clé: tripId, Valeur: { rtMinutes, fetchedAt, adjustedProgress }
+        this.rtAdjustmentCache = new Map();
+        this.rtCacheMaxAge = 30000; // 30 secondes
+    }
+    
+    /**
+     * V305: Configure le realtimeManager (peut être défini après construction)
+     */
+    setRealtimeManager(rtManager) {
+        this.realtimeManager = rtManager;
     }
 
     /**
      * Calcule la position interpolée d'un bus entre deux arrêts
+     * V305: Supporte l'ajustement via données RT
      */
-    calculatePosition(segment, routeId = null) {
+    calculatePosition(segment, routeId = null, tripId = null, routeShortName = null) {
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) {
             return null;
         }
@@ -39,7 +54,23 @@ export class BusPositionCalculator {
             return null;
         }
 
-        const progress = segment.progress; // 0.0 à 1.0
+        // V305: Utiliser progress ajusté par RT si disponible
+        let progress = segment.progress; // 0.0 à 1.0
+        let rtInfo = null;
+        
+        if (tripId && routeShortName && this.realtimeManager) {
+            rtInfo = this.getRealtimeAdjustedProgress(
+                tripId, 
+                routeShortName, 
+                segment.toStopInfo.stop_id,
+                segment.toStopInfo.stop_code,
+                segment.departureTime,
+                segment.arrivalTime
+            );
+            if (rtInfo && rtInfo.adjustedProgress !== null) {
+                progress = rtInfo.adjustedProgress;
+            }
+        }
 
         // Tenter d'utiliser le tracé GeoJSON précis si disponible
         if (routeId) {
@@ -56,6 +87,8 @@ export class BusPositionCalculator {
                     progress
                 );
                 if (position) {
+                    // V305: Ajouter les infos RT à la position
+                    position.rtInfo = rtInfo;
                     return position;
                 }
             }
@@ -70,8 +103,82 @@ export class BusPositionCalculator {
             lat,
             lon,
             progress,
-            bearing: this.calculateLinearBearing(fromLat, fromLon, toLat, toLon)
+            bearing: this.calculateLinearBearing(fromLat, fromLon, toLat, toLon),
+            rtInfo // V305: Infos temps réel
         };
+    }
+    
+    /**
+     * V305: Calcule le progress ajusté basé sur les données temps réel
+     * 
+     * Logique:
+     * - Le temps RT indique dans combien de minutes le bus arrive au prochain arrêt
+     * - On recalcule le progress basé sur ce temps restant
+     * 
+     * @returns {Object|null} { rtMinutes, adjustedProgress, isRealtime }
+     */
+    getRealtimeAdjustedProgress(tripId, routeShortName, toStopId, toStopCode, departureTime, arrivalTime) {
+        if (!this.realtimeManager) return null;
+        
+        // Vérifier le cache d'ajustement RT
+        const cacheKey = `${tripId}_${toStopId}`;
+        const cached = this.rtAdjustmentCache.get(cacheKey);
+        if (cached && Date.now() - cached.fetchedAt < this.rtCacheMaxAge) {
+            return cached;
+        }
+        
+        // Chercher les données RT pour cet arrêt
+        if (!this.realtimeManager.hasRealtimeDataForStop(toStopId, toStopCode)) {
+            return null;
+        }
+        
+        // Récupérer le cache RT directement (synchrone)
+        const hawkKey = this.realtimeManager.cache ? 
+            Array.from(this.realtimeManager.cache.keys()).find(k => k.includes(toStopCode || toStopId)) : null;
+        
+        if (!hawkKey) return null;
+        
+        const cachedRT = this.realtimeManager.cache.get(hawkKey);
+        if (!cachedRT || !cachedRT.data || !cachedRT.data.departures) return null;
+        
+        // Chercher un départ correspondant à cette ligne
+        const normalizedLine = routeShortName?.toUpperCase?.() || '';
+        const matchingDeparture = cachedRT.data.departures.find(d => 
+            d.line?.toUpperCase() === normalizedLine
+        );
+        
+        if (!matchingDeparture) return null;
+        
+        // Parser le temps d'attente RT
+        const rtMinutes = this.realtimeManager.parseTemps(matchingDeparture.time);
+        if (rtMinutes === null || rtMinutes >= 999) return null;
+        
+        // Calculer le progress ajusté
+        // Le temps statique total du segment
+        const totalStaticSeconds = arrivalTime - departureTime;
+        if (totalStaticSeconds <= 0) return null;
+        
+        // Temps restant selon RT (en secondes)
+        const rtRemainingSeconds = rtMinutes * 60;
+        
+        // Progress = 1 - (temps_restant / temps_total)
+        // Si RT dit "5 min" et le segment total est 10 min, progress = 0.5
+        let adjustedProgress = 1 - (rtRemainingSeconds / totalStaticSeconds);
+        
+        // Clamper entre 0 et 1
+        adjustedProgress = Math.max(0, Math.min(1, adjustedProgress));
+        
+        const result = {
+            rtMinutes,
+            adjustedProgress,
+            isRealtime: matchingDeparture.realtime !== false,
+            fetchedAt: Date.now()
+        };
+        
+        // Mettre en cache
+        this.rtAdjustmentCache.set(cacheKey, result);
+        
+        return result;
     }
 
     /**
@@ -227,16 +334,20 @@ export class BusPositionCalculator {
 
     /**
      * Calcule toutes les positions pour les bus actifs
+     * V305: Intègre les données RT pour ajuster les positions
      */
     calculateAllPositions(allBuses) {
         return allBuses.map(bus => {
             const routeId = bus.route?.route_id;
+            const routeShortName = bus.route?.route_short_name;
+            const tripId = bus.tripId;
             let position = null;
             let bearing = 0;
 
             if (bus.segment) {
                 // Cas 1: Bus en mouvement
-                position = this.calculatePosition(bus.segment, routeId);
+                // V305: Passer tripId et routeShortName pour l'ajustement RT
+                position = this.calculatePosition(bus.segment, routeId, tripId, routeShortName);
                 // Si le calcul de position a réussi, on calcule l'angle
                 if (position) {
                     // Petite amélioration : si on a un GeoJSON, l'angle devrait être celui du segment courant
@@ -255,7 +366,9 @@ export class BusPositionCalculator {
             return {
                 ...bus,
                 position,
-                bearing 
+                bearing,
+                // V305: Propager les infos RT
+                rtInfo: position.rtInfo || null
             };
         }).filter(bus => bus !== null);
     }

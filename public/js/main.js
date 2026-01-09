@@ -496,7 +496,8 @@ async function initializeApp() {
         delayManager.init(dataManager, realtimeManager);
         
         tripScheduler = new TripScheduler(dataManager, delayManager);
-        busPositionCalculator = new BusPositionCalculator(dataManager, delayManager);
+        // V305: Passer realtimeManager pour l'ajustement de position basé sur RT
+        busPositionCalculator = new BusPositionCalculator(dataManager, realtimeManager);
         
         // Exposer les managers pour le data exporter
         window.delayManager = delayManager;

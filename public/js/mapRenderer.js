@@ -456,6 +456,7 @@ export class MapRenderer {
 
     /**
      * V24 - Mise à jour du DOM du popup global - Design moderne
+     * V305: Affiche le temps d'arrivée basé sur RT si disponible
      */
     updateBusPopupContent(domElement, bus, tripScheduler) {
         try {
@@ -467,9 +468,28 @@ export class MapRenderer {
             const stopTimes = tripScheduler.dataManager.stopTimesByTrip[bus.tripId];
             const destination = tripScheduler.getTripDestination(stopTimes);
             const nextStopName = bus.segment?.toStopInfo?.stop_name || 'Inconnu';
-            const nextStopETA = tripScheduler.getNextStopETA(bus.segment, bus.currentSeconds);
+            
+            // V305: Utiliser le temps RT si disponible, sinon le temps statique
+            let etaText = '...';
+            let hasRTTime = false;
+            
+            if (bus.rtInfo && bus.rtInfo.rtMinutes !== null && bus.rtInfo.rtMinutes < 999) {
+                // Afficher le temps RT
+                const rtMin = Math.round(bus.rtInfo.rtMinutes);
+                if (rtMin <= 0) {
+                    etaText = 'Imminent';
+                } else if (rtMin === 1) {
+                    etaText = '1 min';
+                } else {
+                    etaText = `${rtMin} min`;
+                }
+                hasRTTime = true;
+            } else {
+                // Fallback sur le temps statique
+                const nextStopETA = tripScheduler.getNextStopETA(bus.segment, bus.currentSeconds);
+                etaText = nextStopETA ? nextStopETA.formatted : '...';
+            }
 
-            const etaText = nextStopETA ? nextStopETA.formatted : '...';
             const isAtTerminus = etaText === 'Terminus' || shouldHideDestinationAtStop(nextStopName, destination);
             const stateText = isAtTerminus ? 'Terminus' : `→ ${destination}`;
 
@@ -495,8 +515,8 @@ export class MapRenderer {
             if (nextStopEl) nextStopEl.textContent = nextStopName;
             if (etaEl) {
                 etaEl.textContent = etaText;
-                // Colorer l'ETA selon le mode (vert = temps réel, blanc = théorique)
-                if (bus.isRealtime) {
+                // V305: Colorer l'ETA selon le mode (vert = temps réel, blanc = théorique)
+                if (hasRTTime || bus.isRealtime) {
                     etaEl.classList.add('realtime');
                     etaEl.classList.remove('theoretical');
                 } else {
@@ -505,12 +525,16 @@ export class MapRenderer {
                 }
             }
             
-            // Badge temps réel vs estimé
+            // V305: Badge temps réel vs estimé - plus précis
             if (footerBadge) {
-                if (bus.isRealtime) {
+                if (hasRTTime) {
                     footerBadge.classList.remove('theoretical');
                     footerBadge.classList.add('realtime');
                     footerBadge.innerHTML = '<span class="badge-dot"></span>Temps réel';
+                } else if (bus.isRealtime) {
+                    footerBadge.classList.remove('theoretical');
+                    footerBadge.classList.add('realtime');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Position ajustée';
                 } else {
                     footerBadge.classList.remove('realtime');
                     footerBadge.classList.add('theoretical');
