@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v291'; // ✅ v291: improved bus popup design + fix PC click
+const CACHE_VERSION = 'v300'; // ✅ v300: MAJOR UPDATE - consolidated styles, fixed popups
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -33,10 +33,10 @@ const CRITICAL_ASSETS = [
   '/about.html',
   '/mentions-legales.html',
   '/style.css',
+  '/css/brand.css',
+  '/css/line-pages.css',
   '/js/app.js',
-  '/manifest.json',
-  '/robots.txt',
-  '/sitemap.xml'
+  '/manifest.json'
 ];
 
 // Assets secondaires (chargés en arrière-plan)
