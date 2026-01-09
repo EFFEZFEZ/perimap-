@@ -1,18 +1,18 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
- * itineraryProcessor.js - Traitement des réponses d'itinéraires
+ * itineraryProcessor.js - Traitement des rÃ©ponses d'itinÃ©raires
  * 
  * @module search/itineraryProcessor
  * @version V221
  * 
- * Ce module gère le traitement des réponses API Google Routes :
- * - Parsing des routes Google en objets itinéraires
- * - Enrichissement avec données GTFS locales
+ * Ce module gÃ¨re le traitement des rÃ©ponses API Google Routes :
+ * - Parsing des routes Google en objets itinÃ©raires
+ * - Enrichissement avec donnÃ©es GTFS locales
  * - Reconstruction des polylines manquantes
- * - Déduplication et signature d'itinéraires
+ * - DÃ©duplication et signature d'itinÃ©raires
  */
 
 import { 
@@ -31,7 +31,7 @@ import { encodePolyline } from '../router.js';
 // === CONSTANTES ===
 
 /**
- * Lignes interdites (TER, régionales)
+ * Lignes interdites (TER, rÃ©gionales)
  * @type {Set<string>}
  */
 const FORBIDDEN_LINES = new Set(['TER', '322']);
@@ -66,13 +66,13 @@ export function parseTimeToSeconds(timeStr) {
     return h * 3600 + m * 60;
 }
 
-// === SIGNATURE ET DÉDUPLICATION ===
+// === SIGNATURE ET DÃ‰DUPLICATION ===
 
 /**
- * Crée une signature unique pour un itinéraire
- * Permet de détecter les doublons même avec des horaires différents
+ * CrÃ©e une signature unique pour un itinÃ©raire
+ * Permet de dÃ©tecter les doublons mÃªme avec des horaires diffÃ©rents
  * 
- * @param {Object} it - L'itinéraire
+ * @param {Object} it - L'itinÃ©raire
  * @returns {string} Signature unique
  */
 export function createItinerarySignature(it) {
@@ -80,12 +80,12 @@ export function createItinerarySignature(it) {
     
     const type = it.type || 'BUS';
     
-    // Pour vélo/piéton, signature simple par type
+    // Pour vÃ©lo/piÃ©ton, signature simple par type
     if (type === 'BIKE' || type === 'WALK') {
         return `${type}_only`;
     }
     
-    // Pour les bus, signature basée sur les lignes et arrêts
+    // Pour les bus, signature basÃ©e sur les lignes et arrÃªts
     const segments = (it.summarySegments || [])
         .map(s => s.name || s.routeShortName || 'X')
         .join('>');
@@ -100,50 +100,50 @@ export function createItinerarySignature(it) {
         })
         .join('|');
     
-    // Inclure l'heure de départ pour distinguer les mêmes trajets à des heures différentes
+    // Inclure l'heure de dÃ©part pour distinguer les mÃªmes trajets Ã  des heures diffÃ©rentes
     const depTime = it.departureTime || '';
     
     return `${type}::${segments}::${steps}::${depTime}`;
 }
 
-// === TRI DES ITINÉRAIRES ===
+// === TRI DES ITINÃ‰RAIRES ===
 
 /**
- * Trie les itinéraires par heure de départ (croissant)
+ * Trie les itinÃ©raires par heure de dÃ©part (croissant)
  * Conserve les groupes par type: BUS d'abord, puis BIKE, puis WALK
  * 
- * @param {Array} list - Liste d'itinéraires
- * @returns {Array} Liste triée
+ * @param {Array} list - Liste d'itinÃ©raires
+ * @returns {Array} Liste triÃ©e
  */
 export function sortItinerariesByDeparture(list) {
-    // Séparer par type
+    // SÃ©parer par type
     const busItins = list.filter(it => it.type !== 'BIKE' && it.type !== 'WALK' && !it._isBike && !it._isWalk);
     const bikeItins = list.filter(it => it.type === 'BIKE' || it._isBike);
     const walkItins = list.filter(it => it.type === 'WALK' || it._isWalk);
     
-    // Trier seulement les bus par heure de départ
+    // Trier seulement les bus par heure de dÃ©part
     busItins.sort((a, b) => parseDepartureMinutes(a?.departureTime) - parseDepartureMinutes(b?.departureTime));
     
-    // Recomposer: BUS triés, puis BIKE, puis WALK
+    // Recomposer: BUS triÃ©s, puis BIKE, puis WALK
     return [...busItins, ...bikeItins, ...walkItins];
 }
 
-// === TRAITEMENT DES RÉPONSES GOOGLE ===
+// === TRAITEMENT DES RÃ‰PONSES GOOGLE ===
 
 /**
- * Traite la réponse de l'API Google Routes pour les trajets en bus
+ * Traite la rÃ©ponse de l'API Google Routes pour les trajets en bus
  * 
- * @param {Object} data - Réponse de l'API Google Routes
+ * @param {Object} data - RÃ©ponse de l'API Google Routes
  * @param {Object} [options] - Options
  * @param {Object} [options.dataManager] - Instance du DataManager pour enrichissement GTFS
- * @param {Object} [options.icons] - Icônes SVG
- * @returns {Array} Liste des itinéraires formatés
+ * @param {Object} [options.icons] - IcÃ´nes SVG
+ * @returns {Array} Liste des itinÃ©raires formatÃ©s
  */
 export function processGoogleRoutesResponse(data, options = {}) {
     const { dataManager = null, icons = ICONS } = options;
     
     if (!data || !data.routes || data.routes.length === 0) {
-        console.warn("Réponse de l'API Routes (BUS) vide ou invalide.");
+        console.warn("RÃ©ponse de l'API Routes (BUS) vide ou invalide.");
         return [];
     }
     
@@ -214,21 +214,21 @@ export function processGoogleRoutesResponse(data, options = {}) {
                 if (line) {
                     const shortName = line.nameShort || 'BUS';
                     
-                    // Vérification des lignes interdites
+                    // VÃ©rification des lignes interdites
                     if (FORBIDDEN_LINES.has(shortName)) {
-                        console.warn(`[Filtre] Trajet rejeté: Ligne interdite ("${shortName}") détectée.`);
+                        console.warn(`[Filtre] Trajet rejetÃ©: Ligne interdite ("${shortName}") dÃ©tectÃ©e.`);
                         isRegionalRoute = true;
                     } else if (dataManager && dataManager.isLoaded && !dataManager.routesByShortName[shortName]) {
-                        console.log(`?? Ligne inconnue du GTFS ("${shortName}") mais conservée.`);
+                        console.log(`âš ï¸ Ligne inconnue du GTFS ("${shortName}") mais conservÃ©e.`);
                     }
                     
                     const color = line.color || '#3388ff';
                     const textColor = line.textColor || '#ffffff';
                     const departureStop = stopDetails.departureStop || {};
                     const arrivalStop = stopDetails.arrivalStop || {};
-                    let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'Arrêt inconnu');
+                    let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'ArrÃªt inconnu');
                     
-                    // Enrichissement GTFS des arrêts intermédiaires
+                    // Enrichissement GTFS des arrÃªts intermÃ©diaires
                     if (intermediateStops.length === 0 && dataManager && dataManager.isLoaded) {
                         const apiDepName = departureStop.name;
                         const apiArrName = arrivalStop.name;
@@ -251,9 +251,9 @@ export function processGoogleRoutesResponse(data, options = {}) {
                         routeColor: color,
                         routeTextColor: textColor,
                         instruction: `Prendre le <b>${shortName}</b> direction <b>${transit.headsign || 'destination'}</b>`,
-                        departureStop: departureStop.name || 'Arrêt de départ',
+                        departureStop: departureStop.name || 'ArrÃªt de dÃ©part',
                         departureTime: depTime,
-                        arrivalStop: arrivalStop.name || 'Arrêt d\'arrivée',
+                        arrivalStop: arrivalStop.name || 'ArrÃªt d\'arrivÃ©e',
                         arrivalTime: arrTime,
                         numStops: transit.stopCount || 0,
                         intermediateStops: intermediateStops,
@@ -281,7 +281,7 @@ export function processGoogleRoutesResponse(data, options = {}) {
             itinerary.steps.push(currentWalkStep);
         }
         
-        // Calculer les heures de départ/arrivée de l'itinéraire
+        // Calculer les heures de dÃ©part/arrivÃ©e de l'itinÃ©raire
         if (itinerary.steps.length > 0) {
             const firstStepWithTime = itinerary.steps.find(s => s.departureTime && s.departureTime !== "--:--");
             itinerary.departureTime = firstStepWithTime ? firstStepWithTime.departureTime : (itinerary.steps[0].departureTime || "--:--");
@@ -290,7 +290,7 @@ export function processGoogleRoutesResponse(data, options = {}) {
             itinerary.arrivalTime = lastStepWithTime ? lastStepWithTime.arrivalTime : (itinerary.steps[itinerary.steps.length - 1].arrivalTime || "--:--");
         }
         
-        // Construire les segments de résumé
+        // Construire les segments de rÃ©sumÃ©
         const allSummarySegments = itinerary.steps.map(step => {
             if (step.type === 'WALK') {
                 return { type: 'WALK', duration: step.duration };
@@ -307,7 +307,7 @@ export function processGoogleRoutesResponse(data, options = {}) {
         
         const hasBusSegment = itinerary.steps.some(step => step.type === 'BUS');
         
-        // Recalculer la durée totale
+        // Recalculer la durÃ©e totale
         const computedDurationSeconds = itinerary.steps.reduce((total, step) => {
             const value = typeof step?.durationRaw === 'number' ? step.durationRaw : 0;
             return total + (Number.isFinite(value) ? value : 0);
@@ -318,10 +318,10 @@ export function processGoogleRoutesResponse(data, options = {}) {
             itinerary.duration = formatGoogleDuration(`${computedDurationSeconds}s`);
         }
 
-        // Propager les temps de départ/arrivée aux steps adjacents
+        // Propager les temps de dÃ©part/arrivÃ©e aux steps adjacents
         _propagateTimesToSteps(itinerary, computedDurationSeconds);
 
-        // Typer l'itinéraire
+        // Typer l'itinÃ©raire
         if (!hasBusSegment) {
             const legDepartureTime = leg.localizedValues?.departureTime?.time?.text || leg.startTime?.text || "--:--";
             const legArrivalTime = leg.localizedValues?.arrivalTime?.time?.text || leg.endTime?.text || "--:--";
@@ -398,14 +398,14 @@ function _propagateTimesToSteps(itinerary, computedDurationSeconds) {
 }
 
 /**
- * Traite une route simple (vélo ou marche)
+ * Traite une route simple (vÃ©lo ou marche)
  * 
- * @param {Object} data - Données de la route
+ * @param {Object} data - DonnÃ©es de la route
  * @param {string} mode - 'bike' ou 'walk'
  * @param {Object} modeInfo - Informations sur le mode (duration, distance)
- * @param {Object} searchTime - Paramètres de recherche temporelle
+ * @param {Object} searchTime - ParamÃ¨tres de recherche temporelle
  * @param {Object} [options] - Options
- * @returns {Object|null} Itinéraire formaté
+ * @returns {Object|null} ItinÃ©raire formatÃ©
  */
 export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {}) {
     const { icons = ICONS } = options;
@@ -418,7 +418,7 @@ export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {
     const distanceKm = modeInfo.distance;
     const durationRawSeconds = durationMinutes * 60;
     const icon = mode === 'bike' ? icons.BICYCLE : icons.WALK;
-    const modeLabel = mode === 'bike' ? 'Vélo' : 'Marche';
+    const modeLabel = mode === 'bike' ? 'VÃ©lo' : 'Marche';
     const type = mode === 'bike' ? 'BIKE' : 'WALK';
     
     let departureTimeStr = "~";
@@ -437,7 +437,7 @@ export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {
             departureTimeStr = `${String(departureDate.getHours()).padStart(2, '0')}:${String(departureDate.getMinutes()).padStart(2, '0')}`;
             arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
         } catch (e) {
-            console.warn("Erreur calcul date pour vélo/marche", e);
+            console.warn("Erreur calcul date pour vÃ©lo/marche", e);
         }
     } else if (searchTime.type === 'arriver') {
         try {
@@ -452,7 +452,7 @@ export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {
             arrivalTimeStr = `${String(arrivalDate.getHours()).padStart(2, '0')}:${String(arrivalDate.getMinutes()).padStart(2, '0')}`;
             departureTimeStr = `${String(departureDate.getHours()).padStart(2, '0')}:${String(departureDate.getMinutes()).padStart(2, '0')}`;
         } catch (e) {
-            console.warn("Erreur calcul date (arriver) pour vélo/marche", e);
+            console.warn("Erreur calcul date (arriver) pour vÃ©lo/marche", e);
         }
     }
 
@@ -473,7 +473,7 @@ export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {
     if (leg?.steps) {
         leg.steps.forEach(step => {
             const distanceText = step.localizedValues?.distance?.text || '';
-            const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer à vélo" : "Marcher");
+            const instruction = step.navigationInstruction?.instructions || step.localizedValues?.instruction || (mode === 'bike' ? "Continuer Ã  vÃ©lo" : "Marcher");
             const duration = formatGoogleDuration(step.staticDuration);
             const maneuver = step.navigationInstruction?.maneuver || 'DEFAULT';
             aggregatedStep.subSteps.push({ instruction, distance: distanceText, duration, maneuver });
@@ -495,7 +495,7 @@ export function processSimpleRoute(data, mode, modeInfo, searchTime, options = {
     };
 }
 
-// === EXPORTS PAR DÉFAUT ===
+// === EXPORTS PAR DÃ‰FAUT ===
 
 export default {
     // Parsing
@@ -512,5 +512,4 @@ export default {
     processGoogleRoutesResponse,
     processSimpleRoute
 };
-
 

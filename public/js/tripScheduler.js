@@ -1,28 +1,26 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
  * tripScheduler.js
- * * * CORRIGÉ (V15 - Logique Stricte)
- * * Basé sur la clarification: le bus ne doit exister
- * * que du DÉPART du premier arrêt à l'ARRIVÉE du dernier arrêt.
+ * * * CORRIGÃ‰ (V15 - Logique Stricte)
+ * * BasÃ© sur la clarification: le bus ne doit exister
+ * * que du DÃ‰PART du premier arrÃªt Ã  l'ARRIVÃ‰E du dernier arrÃªt.
  * *
- * * - SUPPRESSION de l'état "waiting_at_stop".
+ * * - SUPPRESSION de l'Ã©tat "waiting_at_stop".
  * *
- * * Le bus n'apparaît plus avant son heure de départ
- * * et disparaît après son heure d'arrivée.
+ * * Le bus n'apparaÃ®t plus avant son heure de dÃ©part
+ * * et disparaÃ®t aprÃ¨s son heure d'arrivÃ©e.
  */
 
 export class TripScheduler {
-    constructor(dataManager, delayManager = null) {
+    constructor(dataManager) {
         this.dataManager = dataManager;
-        this.delayManager = delayManager; // Optionnel - pour intégrer les retards
     }
 
     /**
-     * Récupère tous les trips "en service" (en mouvement OU en attente au terminus)
-     * V2: Intégration des retards temps réel
+     * RÃ©cupÃ¨re tous les trips "en service" (en mouvement OU en attente au terminus)
      */
     getActiveTrips(currentSeconds, date) {
         if (!this.dataManager.isLoaded) {
@@ -36,25 +34,14 @@ export class TripScheduler {
             const state = this.findCurrentState(stopTimes, currentSeconds); 
             
             if (state) {
-                // V2: Calculer le retard si delayManager disponible
-                let delay = null;
-                if (this.delayManager) {
-                    delay = this.delayManager.calculateTripDelay(trip, stopTimes, currentSeconds);
-                    if (delay) {
-                        // Enregistrer la donnée de retard pour les stats
-                        this.delayManager.recordDelay(delay, route, currentSeconds);
-                    }
-                }
-
                 // state est toujours de type 'moving'
                 activeBuses.push({
                     tripId,
                     trip,
                     route,
                     segment: state, // 'state' est 'moving'
-                    position: null, // 'position' n'est jamais utilisé
-                    currentSeconds,
-                    delay // V2: Ajouter les données de retard
+                    position: null, // 'position' n'est jamais utilisÃ©
+                    currentSeconds
                 });
             }
         });
@@ -64,7 +51,7 @@ export class TripScheduler {
 
 
     /**
-     * CORRIGÉ (Logique V15): "Logique Stricte"
+     * CORRIGÃ‰ (Logique V15): "Logique Stricte"
      */
     findCurrentState(stopTimes, currentSeconds) {
         if (!stopTimes || stopTimes.length < 2) {
@@ -72,23 +59,23 @@ export class TripScheduler {
         }
 
         // *** CORRECTION V15 ***
-        // Le bloc "Cas 1: En attente au premier arrêt" a été supprimé.
+        // Le bloc "Cas 1: En attente au premier arrÃªt" a Ã©tÃ© supprimÃ©.
         // Le bus n'existera pas avant 'firstDepartureTime'.
         
         // Cas 2: En mouvement (Logique V12)
-        // La boucle 'for' gère implicitement le premier segment
-        // (stopTimes[0].departureTime à stopTimes[1].departureTime)
+        // La boucle 'for' gÃ¨re implicitement le premier segment
+        // (stopTimes[0].departureTime Ã  stopTimes[1].departureTime)
         for (let i = 1; i < stopTimes.length; i++) {
             const currentStop = stopTimes[i];
             const prevStop = stopTimes[i - 1];
 
             // *** NOUVELLE LOGIQUE V12 ***
-            // Le segment de mouvement dure du DÉPART de A jusqu'au DÉPART de B.
+            // Le segment de mouvement dure du DÃ‰PART de A jusqu'au DÃ‰PART de B.
             
             const prevDepartureTime = this.dataManager.timeToSeconds(prevStop.departure_time);
             const currentDepartureTime = this.dataManager.timeToSeconds(currentStop.departure_time);
             
-            // Si l'heure est EXACTEMENT l'heure de départ, il passe au segment suivant.
+            // Si l'heure est EXACTEMENT l'heure de dÃ©part, il passe au segment suivant.
             if (currentSeconds >= prevDepartureTime && currentSeconds < currentDepartureTime) {
                 
                 const prevStopInfo = this.dataManager.getStop(prevStop.stop_id);
@@ -99,16 +86,16 @@ export class TripScheduler {
                     type: 'moving',
                     fromStopInfo: prevStopInfo,
                     toStopInfo: currentStopInfo,
-                    departureTime: prevDepartureTime,      // Heure de début (Départ A)
-                    arrivalTime: currentDepartureTime,      // Heure de fin (Départ B)
+                    departureTime: prevDepartureTime,      // Heure de dÃ©but (DÃ©part A)
+                    arrivalTime: currentDepartureTime,      // Heure de fin (DÃ©part B)
                     progress: this.calculateProgress(prevDepartureTime, currentDepartureTime, currentSeconds)
                 };
             }
             
-            // Cas V7 (Priorité 2: Attente) a été supprimé.
+            // Cas V7 (PrioritÃ© 2: Attente) a Ã©tÃ© supprimÃ©.
         }
         
-        // Gérer le dernier segment (Arrivée au terminus final)
+        // GÃ©rer le dernier segment (ArrivÃ©e au terminus final)
         const lastStop = stopTimes[stopTimes.length - 1];
         const prevStop = stopTimes[stopTimes.length - 2];
         const prevDepartureTime = this.dataManager.timeToSeconds(prevStop.departure_time);
@@ -129,36 +116,36 @@ export class TripScheduler {
              };
         }
         
-        // Si currentSeconds est avant le premier départ
-        // ou après la dernière arrivée, on retourne null.
+        // Si currentSeconds est avant le premier dÃ©part
+        // ou aprÃ¨s la derniÃ¨re arrivÃ©e, on retourne null.
         return null; 
     }
 
     /**
-     * Calcule la progression entre deux arrêts (0 à 1)
+     * Calcule la progression entre deux arrÃªts (0 Ã  1)
      */
     calculateProgress(departureTime, arrivalTime, currentTime) {
         const totalDuration = arrivalTime - departureTime;
-        if (totalDuration <= 0) return 0; // Évite la division par zéro
+        if (totalDuration <= 0) return 0; // Ã‰vite la division par zÃ©ro
 
         const elapsed = currentTime - departureTime;
         return Math.max(0, Math.min(1, elapsed / totalDuration));
     }
 
     /**
-     * Estime le temps d'arrivée au prochain arrêt
+     * Estime le temps d'arrivÃ©e au prochain arrÃªt
      */
     getNextStopETA(segment, currentSeconds) {
         if (!segment) return null;
 
-        // "arrivalTime" (dans V12) est l'heure de départ de l'arrêt suivant
+        // "arrivalTime" (dans V12) est l'heure de dÃ©part de l'arrÃªt suivant
         // Ce calcul reste donc correct pour l'ETA
         const remainingSeconds = segment.arrivalTime - currentSeconds;
         const minutes = Math.max(0, Math.floor(remainingSeconds / 60));
         const seconds = Math.max(0, Math.floor(remainingSeconds % 60));
         
         // *** CORRECTION V15 ***
-        // Gère le cas où le bus est arrivé au terminus (progress 1)
+        // GÃ¨re le cas oÃ¹ le bus est arrivÃ© au terminus (progress 1)
         // (Concerne le 'dernier segment' de findCurrentState)
          if (segment.progress === 1) {
             return {
@@ -174,7 +161,7 @@ export class TripScheduler {
     }
 
     /**
-     * Récupère la destination finale d'un trip
+     * RÃ©cupÃ¨re la destination finale d'un trip
      */
     getTripDestination(stopTimes) {
         if (!stopTimes || stopTimes.length === 0) {
@@ -187,5 +174,4 @@ export class TripScheduler {
         return stopInfo ? stopInfo.stop_name : lastStop.stop_id;
     }
 }
-
 

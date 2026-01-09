@@ -1,29 +1,28 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
  * busPositionCalculator.js
- * * Calcule les positions géographiques interpolées des bus entre deux arrêts
- * * OPTIMISÉ V3 (Cache Géométrique):
- * * - Élimine les calculs trigonométriques (Haversine) dans la boucle d'animation.
- * * - Met en cache les segments de route et leurs distances cumulées.
- * * - Réduit drastiquement l'usage CPU/Batterie.
+ * * Calcule les positions gÃ©ographiques interpolÃ©es des bus entre deux arrÃªts
+ * * OPTIMISÃ‰ V3 (Cache GÃ©omÃ©trique):
+ * * - Ã‰limine les calculs trigonomÃ©triques (Haversine) dans la boucle d'animation.
+ * * - Met en cache les segments de route et leurs distances cumulÃ©es.
+ * * - RÃ©duit drastiquement l'usage CPU/Batterie.
  */
 
 export class BusPositionCalculator {
-    constructor(dataManager, delayManager = null) {
+    constructor(dataManager) {
         this.dataManager = dataManager;
-        this.delayManager = delayManager; // Optionnel - pour ajuster positions avec retards
         
-        // Cache pour stocker les géométries pré-calculées entre deux arrêts
-        // Clé: "routeId_fromStopId_toStopId"
+        // Cache pour stocker les gÃ©omÃ©tries prÃ©-calculÃ©es entre deux arrÃªts
+        // ClÃ©: "routeId_fromStopId_toStopId"
         // Valeur: { path: [[lon,lat]...], distances: [0, d1, d2...], totalDistance: 1500 }
         this.segmentCache = new Map();
     }
 
     /**
-     * Calcule la position interpolée d'un bus entre deux arrêts
+     * Calcule la position interpolÃ©e d'un bus entre deux arrÃªts
      */
     calculatePosition(segment, routeId = null) {
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) {
@@ -35,14 +34,14 @@ export class BusPositionCalculator {
         const toLat = parseFloat(segment.toStopInfo.stop_lat);
         const toLon = parseFloat(segment.toStopInfo.stop_lon);
 
-        // Vérification de base des coordonnées
+        // VÃ©rification de base des coordonnÃ©es
         if (isNaN(fromLat) || isNaN(fromLon) || isNaN(toLat) || isNaN(toLon)) {
             return null;
         }
 
-        const progress = segment.progress; // 0.0 à 1.0
+        const progress = segment.progress; // 0.0 Ã  1.0
 
-        // Tenter d'utiliser le tracé GeoJSON précis si disponible
+        // Tenter d'utiliser le tracÃ© GeoJSON prÃ©cis si disponible
         if (routeId) {
             const routeGeometry = this.dataManager.getRouteGeometry(routeId);
             const routeCoordinates = this.extractRouteCoordinates(routeGeometry);
@@ -62,8 +61,8 @@ export class BusPositionCalculator {
             }
         }
 
-        // Fallback: Interpolation linéaire simple (ligne droite) si pas de GeoJSON
-        // ou si le calcul géométrique a échoué
+        // Fallback: Interpolation linÃ©aire simple (ligne droite) si pas de GeoJSON
+        // ou si le calcul gÃ©omÃ©trique a Ã©chouÃ©
         const lat = fromLat + (toLat - fromLat) * progress;
         const lon = fromLon + (toLon - fromLon) * progress;
 
@@ -76,10 +75,10 @@ export class BusPositionCalculator {
     }
 
     /**
-     * Version optimisée avec Mémorisation (Caching)
+     * Version optimisÃ©e avec MÃ©morisation (Caching)
      */
     interpolateAlongRouteCached(routeId, fromStopId, toStopId, routeCoordinates, fromLat, fromLon, toLat, toLon, progress) {
-        // 1. Générer une clé unique pour ce segment spécifique
+        // 1. GÃ©nÃ©rer une clÃ© unique pour ce segment spÃ©cifique
         const cacheKey = `${routeId}_${fromStopId}_${toStopId}`;
 
         let segmentData = this.segmentCache.get(cacheKey);
@@ -91,21 +90,21 @@ export class BusPositionCalculator {
             if (segmentData) {
                 this.segmentCache.set(cacheKey, segmentData);
             } else {
-                // Si échec du calcul (points non trouvés sur la ligne), on marque comme invalide pour ne pas réessayer
+                // Si Ã©chec du calcul (points non trouvÃ©s sur la ligne), on marque comme invalide pour ne pas rÃ©essayer
                 this.segmentCache.set(cacheKey, { invalid: true });
                 return null;
             }
         }
 
-        // 3. Si le segment est marqué invalide, on abandonne
+        // 3. Si le segment est marquÃ© invalide, on abandonne
         if (segmentData.invalid) return null;
 
-        // 4. INTERPOLATION RAPIDE (Zéro trigonométrie ici)
+        // 4. INTERPOLATION RAPIDE (ZÃ©ro trigonomÃ©trie ici)
         const targetDistance = segmentData.totalDistance * progress;
         const distances = segmentData.distances;
         const path = segmentData.path;
 
-        // Trouver le sous-segment correspondant à la distance cible
+        // Trouver le sous-segment correspondant Ã  la distance cible
         // On cherche i tel que distances[i] <= targetDistance <= distances[i+1]
         for (let i = 0; i < distances.length - 1; i++) {
             if (targetDistance >= distances[i] && targetDistance <= distances[i + 1]) {
@@ -120,7 +119,7 @@ export class BusPositionCalculator {
                 const [lon1, lat1] = path[i];
                 const [lon2, lat2] = path[i + 1];
 
-                // Interpolation linéaire simple sur les coordonnées
+                // Interpolation linÃ©aire simple sur les coordonnÃ©es
                 const lat = lat1 + (lat2 - lat1) * localProgress;
                 const lon = lon1 + (lon2 - lon1) * localProgress;
 
@@ -135,10 +134,10 @@ export class BusPositionCalculator {
 
     /**
      * Le calcul lourd : Trouve les points les plus proches, coupe la ligne et mesure les distances.
-     * N'est exécuté qu'une fois par segment.
+     * N'est exÃ©cutÃ© qu'une fois par segment.
      */
     computeSegmentGeometry(routeCoordinates, fromLat, fromLon, toLat, toLon) {
-        // Trouver les indices sur le tracé global
+        // Trouver les indices sur le tracÃ© global
         const fromIndex = this.dataManager.findNearestPointOnRoute(routeCoordinates, fromLat, fromLon);
         const toIndex = this.dataManager.findNearestPointOnRoute(routeCoordinates, toLat, toLon);
 
@@ -146,18 +145,18 @@ export class BusPositionCalculator {
             return null; 
         }
 
-        // Extraire le sous-tracé
+        // Extraire le sous-tracÃ©
         let pathSegment;
         if (fromIndex < toIndex) {
             pathSegment = routeCoordinates.slice(fromIndex, toIndex + 1);
         } else {
-            // Cas aller-retour ou boucle mal gérée par l'indexation simple
+            // Cas aller-retour ou boucle mal gÃ©rÃ©e par l'indexation simple
             pathSegment = routeCoordinates.slice(toIndex, fromIndex + 1).reverse();
         }
 
         if (pathSegment.length < 2) return null;
 
-        // Calculer les distances cumulées (La partie coûteuse en CPU)
+        // Calculer les distances cumulÃ©es (La partie coÃ»teuse en CPU)
         const distances = [0];
         let totalDistance = 0;
 
@@ -165,7 +164,7 @@ export class BusPositionCalculator {
             const [lon1, lat1] = pathSegment[i - 1];
             const [lon2, lat2] = pathSegment[i];
             
-            // Appel à DataManager pour Haversine
+            // Appel Ã  DataManager pour Haversine
             const dist = this.dataManager.calculateDistance(lat1, lon1, lat2, lon2);
             
             totalDistance += dist;
@@ -182,13 +181,13 @@ export class BusPositionCalculator {
     }
 
     /**
-     * Calcule l'angle de déplacement (Bearing)
+     * Calcule l'angle de dÃ©placement (Bearing)
      */
     calculateBearing(segment) {
-        // Nous utilisons ici une approximation simple basée sur le mouvement linéaire
-        // pour éviter de recalculer l'angle complexe à chaque micro-mouvement.
-        // Pour plus de précision, on pourrait stocker les bearings dans le cache,
-        // mais cela suffit généralement pour l'orientation de l'icône.
+        // Nous utilisons ici une approximation simple basÃ©e sur le mouvement linÃ©aire
+        // pour Ã©viter de recalculer l'angle complexe Ã  chaque micro-mouvement.
+        // Pour plus de prÃ©cision, on pourrait stocker les bearings dans le cache,
+        // mais cela suffit gÃ©nÃ©ralement pour l'orientation de l'icÃ´ne.
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) return 0;
         
         const fromLat = parseFloat(segment.fromStopInfo.stop_lat);
@@ -208,7 +207,7 @@ export class BusPositionCalculator {
     }
 
     /**
-     * Helper pour calculer l'angle entre deux points (utilisé en fallback et pour l'orientation globale)
+     * Helper pour calculer l'angle entre deux points (utilisÃ© en fallback et pour l'orientation globale)
      */
     calculateLinearBearing(lat1, lon1, lat2, lon2) {
         const toRad = (deg) => deg * Math.PI / 180;
@@ -228,37 +227,20 @@ export class BusPositionCalculator {
 
     /**
      * Calcule toutes les positions pour les bus actifs
-     * V2: Ajuste les positions en fonction des retards temps réel
      */
     calculateAllPositions(allBuses) {
         return allBuses.map(bus => {
             const routeId = bus.route?.route_id;
             let position = null;
             let bearing = 0;
-            let adjustedProgress = bus.segment?.progress || 0;
 
             if (bus.segment) {
-                // V2: Si données de retard disponibles, ajuster la progression
-                if (this.delayManager && bus.delay) {
-                    adjustedProgress = this.delayManager.adjustProgressForDelay(
-                        bus.segment,
-                        bus.delay,
-                        bus.currentSeconds
-                    );
-                    
-                    // Créer un segment ajusté avec la nouvelle progression
-                    bus.segment = {
-                        ...bus.segment,
-                        progress: adjustedProgress
-                    };
-                }
-
                 // Cas 1: Bus en mouvement
                 position = this.calculatePosition(bus.segment, routeId);
-                // Si le calcul de position a réussi, on calcule l'angle
+                // Si le calcul de position a rÃ©ussi, on calcule l'angle
                 if (position) {
-                    // Petite amélioration : si on a un GeoJSON, l'angle devrait être celui du segment courant
-                    // Mais pour la fluidité visuelle, l'angle global ou l'angle lissé est souvent préférable.
+                    // Petite amÃ©lioration : si on a un GeoJSON, l'angle devrait Ãªtre celui du segment courant
+                    // Mais pour la fluiditÃ© visuelle, l'angle global ou l'angle lissÃ© est souvent prÃ©fÃ©rable.
                     bearing = position.bearing || this.calculateBearing(bus.segment);
                 }
             } else if (bus.position) {
@@ -273,11 +255,9 @@ export class BusPositionCalculator {
             return {
                 ...bus,
                 position,
-                bearing,
-                adjustedProgress
+                bearing 
             };
         }).filter(bus => bus !== null);
     }
 }
-
 

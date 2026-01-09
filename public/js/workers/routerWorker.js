@@ -1,6 +1,6 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 import { DataManager } from '../dataManager.js';
 import { createRouterContext } from '../router.js';
@@ -31,7 +31,7 @@ self.addEventListener('message', async (event) => {
             return;
         }
         try {
-            // V49: Accepter les arrêts forcés des pôles multimodaux
+            // V49: Accepter les arrÃªts forcÃ©s des pÃ´les multimodaux
             const { fromCoords, toCoords, searchTime, labels, forcedStops } = payload || {};
             const itineraries = await routerContext.computeHybridItinerary(fromCoords, toCoords, searchTime, labels, forcedStops || {});
             self.postMessage({ type: 'result', requestId, payload: itineraries });
@@ -59,11 +59,11 @@ async function handleInit(payload = {}) {
     workerDataManager.buildRouteGeometryIndex();
     workerDataManager.isLoaded = true;
     
-    // V192: Debug calendar pour vérifier les jours de service
-    console.log('?? [Worker] Calendar chargé:', workerDataManager.calendar?.length || 0, 'entrées');
+    // V192: Debug calendar pour vÃ©rifier les jours de service
+    console.log('ðŸ“… [Worker] Calendar chargÃ©:', workerDataManager.calendar?.length || 0, 'entrÃ©es');
     if (workerDataManager.calendar?.length > 0) {
         const sample = workerDataManager.calendar[0];
-        console.log('?? [Worker] Exemple calendar:', {
+        console.log('ðŸ“… [Worker] Exemple calendar:', {
             service_id: sample.service_id,
             saturday: sample.saturday,
             sunday: sample.sunday,
@@ -72,11 +72,11 @@ async function handleInit(payload = {}) {
         });
     }
     
-    // DEBUG: Vérifier stopTimesByStop
+    // DEBUG: VÃ©rifier stopTimesByStop
     const stopTimesByStopKeys = Object.keys(workerDataManager.stopTimesByStop || {});
-    console.log('?? [Worker] stopTimesByStop reçu:', stopTimesByStopKeys.length, 'stops');
+    console.log('ðŸ”§ [Worker] stopTimesByStop reÃ§u:', stopTimesByStopKeys.length, 'stops');
     if (stopTimesByStopKeys.length > 0) {
-        console.log('?? [Worker] Sample stopTimesByStop IDs:', stopTimesByStopKeys.slice(0, 5));
+        console.log('ðŸ”§ [Worker] Sample stopTimesByStop IDs:', stopTimesByStopKeys.slice(0, 5));
     }
 
     const apiBridge = createWorkerApiBridge(googleApiKey, { geocodeProxyUrl });
@@ -132,5 +132,4 @@ function createWorkerApiBridge(apiKey, options = {}) {
         }
     };
 }
-
 

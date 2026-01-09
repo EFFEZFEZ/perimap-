@@ -4857,7 +4857,140 @@ body.dark-theme .install-tip-steps section {
     display: block;
 }
 
+/* ===== Bus Popup Modern Design ===== */
+.bus-popup-modern {
+    min-width: 280px;
+    max-width: 320px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
+.bus-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-bottom: 1px solid var(--border);
+}
+
+.bus-popup-line-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+}
+
+.bus-popup-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.bus-popup-title .route-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.bus-popup-title .route-destination {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.bus-popup-body {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bus-popup-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.bus-popup-icon {
+    font-size: 1.2rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.bus-popup-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.bus-popup-info .info-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.bus-popup-info .info-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.bus-popup-info .eta-highlight {
+    color: var(--primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.bus-popup-footer {
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.realtime-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.realtime-badge.theoretical {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+}
+
+.realtime-badge.realtime {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+}
+
+.realtime-badge .badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* Legacy popup styles */
 .info-popup-content {
     width: 100%;
     max-height: 250px;

@@ -1,10 +1,10 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
+Ôªø/*
+ * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
+ * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
  */
 /**
  * timeManager.js
- * * GËre le temps rÈel ou simulÈ pour l'affichage des bus en circulation
+ * * G√®re le temps r√©el ou simul√© pour l'affichage des bus en circulation
  */
 
 export class TimeManager {
@@ -20,13 +20,13 @@ export class TimeManager {
     }
 
     /**
-     * RÈcupËre l'heure rÈelle actuelle (OPTIMIS…E V2 - Avec dÈcimales pour fluiditÈ)
+     * R√©cup√®re l'heure r√©elle actuelle (OPTIMIS√âE V2 - Avec d√©cimales pour fluidit√©)
      * 
-     * Retourne maintenant les dÈcimales pour permettre une interpolation fluide
-     * ‡ chaque frame du navigateur, au lieu d'attendre la prochaine seconde entiËre.
+     * Retourne maintenant les d√©cimales pour permettre une interpolation fluide
+     * √† chaque frame du navigateur, au lieu d'attendre la prochaine seconde enti√®re.
      */
     getRealTime() {
-        /* MODIFICATION: Met ‡ jour la date en mÍme temps */
+        /* MODIFICATION: Met √† jour la date en m√™me temps */
         this.currentDate = new Date();
         const now = this.currentDate;
         
@@ -35,12 +35,12 @@ export class TimeManager {
         const seconds = now.getSeconds();
         const milliseconds = now.getMilliseconds();
         
-        // OPTIMISATION V2: Retourne les dÈcimales de secondes pour l'interpolation fluide
+        // OPTIMISATION V2: Retourne les d√©cimales de secondes pour l'interpolation fluide
         return hours * 3600 + minutes * 60 + seconds + (milliseconds / 1000);
     }
 
     /**
-     * DÈfinit le mode (real ou simulated)
+     * D√©finit le mode (real ou simulated)
      */
     setMode(mode) {
         if (mode !== 'real' && mode !== 'simulated') {
@@ -48,16 +48,16 @@ export class TimeManager {
             return;
         }
         this.mode = mode;
-        console.log(`?? Mode changÈ: ${mode}`);
+        console.log(`üîß Mode chang√©: ${mode}`);
         
-        // S'assure que la date est celle d'aujourd'hui, mÍme en simulation
+        // S'assure que la date est celle d'aujourd'hui, m√™me en simulation
         this.currentDate = new Date(); 
         
         this.notifyListeners();
     }
 
     /**
-     * DÈfinit l'heure simulÈe
+     * D√©finit l'heure simul√©e
      */
     setTime(seconds) {
         this.simulatedSeconds = seconds;
@@ -66,50 +66,50 @@ export class TimeManager {
         // En mode simulation, on utilise TOUJOURS la date d'aujourd'hui
         this.currentDate = new Date(); 
         
-        console.log(`? Heure simulÈe dÈfinie: ${this.formatTime(seconds)}`);
+        console.log(`‚è∞ Heure simul√©e d√©finie: ${this.formatTime(seconds)}`);
         this.notifyListeners();
     }
 
     /**
-     * DÈmarre la simulation ou le temps rÈel
+     * D√©marre la simulation ou le temps r√©el
      */
     play() {
         if (!this.isRunning) {
             this.isRunning = true;
             this.lastTickTime = Date.now();
-            // S'assure que la date est ‡ jour au dÈmarrage
+            // S'assure que la date est √† jour au d√©marrage
             this.currentDate = new Date(); 
             this.tick();
-            console.log(`?? Mode ${this.mode === 'simulated' ? 'simulation' : 'temps rÈel'} dÈmarrÈ`);
+            console.log(`‚ñ∂Ô∏è Mode ${this.mode === 'simulated' ? 'simulation' : 'temps r√©el'} d√©marr√©`);
         }
     }
 
     /**
-     * Met en pause la mise ‡ jour
+     * Met en pause la mise √† jour
      */
     pause() {
         this.isRunning = false;
-        console.log('?? Pause');
+        console.log('‚è∏Ô∏è Pause');
     }
 
     /**
-     * RedÈmarre le temps
+     * Red√©marre le temps
      */
     reset() {
-        console.log('?? Rechargement');
+        console.log('üîÑ Rechargement');
         this.lastTickTime = Date.now();
-        this.currentDate = new Date(); // RÈinitialise la date
+        this.currentDate = new Date(); // R√©initialise la date
         this.notifyListeners();
     }
 
     /**
-     * Boucle principale de mise ‡ jour (OPTIMIS…E V2 - requestAnimationFrame)
+     * Boucle principale de mise √† jour (OPTIMIS√âE V2 - requestAnimationFrame)
      * 
-     * Maintenant utilise requestAnimationFrame pour une fluiditÈ maximale.
-     * Les mises ‡ jour se font ‡ chaque frame du navigateur (~60fps)
-     * au lieu de chaque 1000ms, crÈant des mouvements lisses et continus.
+     * Maintenant utilise requestAnimationFrame pour une fluidit√© maximale.
+     * Les mises √† jour se font √† chaque frame du navigateur (~60fps)
+     * au lieu de chaque 1000ms, cr√©ant des mouvements lisses et continus.
      * 
-     * La prÈcision de temps est maintenant en millisecondes pour une
+     * La pr√©cision de temps est maintenant en millisecondes pour une
      * interpolation vraiment fluide.
      */
     tick() {
@@ -117,18 +117,18 @@ export class TimeManager {
 
         const now = Date.now();
         if (this.mode === 'simulated' && this.simulatedSeconds !== null && this.lastTickTime !== null) {
-            // Calcul du temps ÈcoulÈ en secondes (avec dÈcimales)
+            // Calcul du temps √©coul√© en secondes (avec d√©cimales)
             const elapsed = (now - this.lastTickTime) / 1000;
             this.simulatedSeconds += elapsed;
             
             if (this.simulatedSeconds >= 86400) {
                 this.simulatedSeconds = 0;
             }
-            // En simulation, la date est fixÈe (celle d'aujourd'hui)
-            // On ne met PAS ‡ jour this.currentDate ici
+            // En simulation, la date est fix√©e (celle d'aujourd'hui)
+            // On ne met PAS √† jour this.currentDate ici
             
         } else {
-            // En mode rÈel, on met ‡ jour la date ‡ chaque tick
+            // En mode r√©el, on met √† jour la date √† chaque tick
             this.currentDate = new Date();
         }
         
@@ -154,15 +154,15 @@ export class TimeManager {
     notifyListeners() {
         const currentSeconds = this.getCurrentSeconds();
         
-        // En mode rÈel, la date est mise ‡ jour dans getRealTime() ou tick()
-        // En mode simulÈ, la date est celle d'aujourd'hui (fixÈe dans setMode/setTime/play)
+        // En mode r√©el, la date est mise √† jour dans getRealTime() ou tick()
+        // En mode simul√©, la date est celle d'aujourd'hui (fix√©e dans setMode/setTime/play)
         
         const timeInfo = {
             seconds: currentSeconds,
             timeString: this.formatTime(currentSeconds),
             isRunning: this.isRunning,
             mode: this.mode,
-            date: this.currentDate // Utilise la date stockÈe
+            date: this.currentDate // Utilise la date stock√©e
         };
 
         this.listeners.forEach(callback => {
@@ -171,7 +171,7 @@ export class TimeManager {
     }
 
     /**
-     * Formate les secondes en HH:MM (les secondes ne sont pas affichÈes)
+     * Formate les secondes en HH:MM (les secondes ne sont pas affich√©es)
      */
     formatTime(seconds) {
         const hours = Math.floor(seconds / 3600) % 24;
@@ -181,7 +181,7 @@ export class TimeManager {
     }
 
     /**
-     * RÈcupËre le temps actuel en secondes
+     * R√©cup√®re le temps actuel en secondes
      */
     getCurrentSeconds() {
         if (this.mode === 'simulated' && this.simulatedSeconds !== null) {
@@ -192,37 +192,36 @@ export class TimeManager {
 
     /* NOUVELLE FONCTION */
     /**
-     * RÈcupËre la date actuelle (rÈelle ou de simulation)
+     * R√©cup√®re la date actuelle (r√©elle ou de simulation)
      */
     getCurrentDate() {
-        // Si le timeManager n'est pas en cours, s'assurer que la date est fraÓche
+        // Si le timeManager n'est pas en cours, s'assurer que la date est fra√Æche
         if (!this.isRunning && this.mode === 'real') {
             this.currentDate = new Date();
         }
-        // En mode simulation, la date est dÈj‡ celle d'aujourd'hui
+        // En mode simulation, la date est d√©j√† celle d'aujourd'hui
         return this.currentDate;
     }
 
     /**
-     * RÈcupËre le temps actuel en format HH:MM:SS
+     * R√©cup√®re le temps actuel en format HH:MM:SS
      */
     getCurrentTimeString() {
         return this.formatTime(this.getCurrentSeconds());
     }
 
     /**
-     * VÈrifie si le gestionnaire est en cours d'exÈcution
+     * V√©rifie si le gestionnaire est en cours d'ex√©cution
      */
     getIsRunning() {
         return this.isRunning;
     }
 
     /**
-     * VÈrifie si le mode est simulÈ
+     * V√©rifie si le mode est simul√©
      */
     getIsSimulated() {
         return this.mode === 'simulated';
     }
 }
-
 

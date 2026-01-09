@@ -1,28 +1,28 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
+Ôªø/*
+ * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
+ * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
  */
 /**
- * apiManager.js - VERSION V222 (1 seul appel bus = Èconomie maximale)
- * GËre tous les appels aux API externes (Google Places & Google Routes).
+ * apiManager.js - VERSION V222 (1 seul appel bus = √©conomie maximale)
+ * G√®re tous les appels aux API externes (Google Places & Google Routes).
  *
- * ? V222: 1 SEUL APPEL BUS (comme mode arrivÈe)
+ * ‚úÖ V222: 1 SEUL APPEL BUS (comme mode arriv√©e)
  * - Google retourne 5-6 alternatives avec computeAlternativeRoutes: true
- * - Mode partir ET arriver : 1 appel bus + 1 vÈlo + 1 marche = 3 appels
- * - …CONOMIE : -70% de co˚t API (3 appels au lieu de 10)
+ * - Mode partir ET arriver : 1 appel bus + 1 v√©lo + 1 marche = 3 appels
+ * - √âCONOMIE : -70% de co√ªt API (3 appels au lieu de 10)
  * 
- * ? V181: PROXY COMPLET - Tout passe par les proxies Vercel en production
- * - /api/routes : Google Routes API (itinÈraires bus/vÈlo/marche)
- * - /api/places : Google Places API (autocomplÈtion + geocoding placeId?coords)
- * - /api/geocode : Google Geocoding API (reverse geocode lat/lng?placeId)
+ * ‚úÖ V181: PROXY COMPLET - Tout passe par les proxies Vercel en production
+ * - /api/routes : Google Routes API (itin√©raires bus/v√©lo/marche)
+ * - /api/places : Google Places API (autocompl√©tion + geocoding placeId‚Üícoords)
+ * - /api/geocode : Google Geocoding API (reverse geocode lat/lng‚ÜíplaceId)
  * 
- * Le SDK Google Maps JavaScript n'est PAS chargÈ en mode proxy.
+ * Le SDK Google Maps JavaScript n'est PAS charg√© en mode proxy.
  *
- * *** MODIFICATION V48 (Alias Campus/GrenadiËre) ***
- * 1. Ajout d'un systËme d'alias pour fusionner des lieux Èquivalents.
- * 2. "Campus" et "PÙle Universitaire GrenadiËre" pointent vers le mÍme lieu.
+ * *** MODIFICATION V48 (Alias Campus/Grenadi√®re) ***
+ * 1. Ajout d'un syst√®me d'alias pour fusionner des lieux √©quivalents.
+ * 2. "Campus" et "P√¥le Universitaire Grenadi√®re" pointent vers le m√™me lieu.
  *
- * *** MODIFICATION V57 (GÈolocalisation) ***
+ * *** MODIFICATION V57 (G√©olocalisation) ***
  * 1. Ajout de la fonction `reverseGeocode` pour convertir lat/lng en place_id.
  */
 
@@ -33,14 +33,14 @@ export class ApiManager {
         this.apiKey = apiKey;
         this.sessionToken = null;
         
-        // ? V178: Configuration proxy
+        // ‚úÖ V178: Configuration proxy
         const config = getAppConfig();
         this.useProxy = config.useProxy;
         this.apiEndpoints = config.apiEndpoints || API_ENDPOINTS;
 
-        // Zone du Grand PÈrigueux / Dordogne
+        // Zone du Grand P√©rigueux / Dordogne
         this.perigueuxBounds = {
-            south: 45.10,  // Sud du Grand PÈrigueux
+            south: 45.10,  // Sud du Grand P√©rigueux
             west: 0.60,    // Ouest
             north: 45.30,  // Nord
             east: 0.85     // Est
@@ -48,33 +48,33 @@ export class ApiManager {
         
         this.perigueuxCenter = { lat: 45.184029, lng: 0.7211149 };
 
-        // ? V57: Services Google Maps
+        // ‚úÖ V57: Services Google Maps
         this.geocoder = null;
         this.autocompleteService = null;
         this.apiLoadPromise = null; // <-- CORRECTION: Ajout du verrou
-        this.proxyReady = false; // ? V181: Flag pour mode proxy
+        this.proxyReady = false; // ‚úÖ V181: Flag pour mode proxy
         this.googleAuthFailed = false;
         this.googleAuthFailureMessage = '';
         this.clientOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
         
-        // ? V49: Alias de lieux - Fusion d'arrÍts Èquivalents (pÙles multimodaux)
+        // ‚úÖ V49: Alias de lieux - Fusion d'arr√™ts √©quivalents (p√¥les multimodaux)
         // Quand l'utilisateur cherche un de ces termes, on lui propose le lieu canonique
-        // ET le routeur considËre TOUS les arrÍts du pÙle comme Èquivalents
+        // ET le routeur consid√®re TOUS les arr√™ts du p√¥le comme √©quivalents
         this.placeAliases = {
-            // Campus universitaire de PÈrigueux - P‘LE MULTIMODAL
-            // Regroupe l'arrÍt "Campus" (K1A) et "PÙle Universitaire GrenadiËre" (K1B)
+            // Campus universitaire de P√©rigueux - P√îLE MULTIMODAL
+            // Regroupe l'arr√™t "Campus" (K1A) et "P√¥le Universitaire Grenadi√®re" (K1B)
             'campus': {
-                canonicalName: 'Campus Universitaire, PÈrigueux',
-                aliases: ['campus', 'campus pÈrigueux', 'fac', 'fac pÈrigueux', 'universitÈ', 'universitÈ pÈrigueux', 'iut', 'iut pÈrigueux', 'grenadiËre', 'pole universitaire', 'pÙle universitaire', 'la grenadiËre'],
-                // CoordonnÈes centrales (entre les deux arrÍts)
+                canonicalName: 'Campus Universitaire, P√©rigueux',
+                aliases: ['campus', 'campus p√©rigueux', 'fac', 'fac p√©rigueux', 'universit√©', 'universit√© p√©rigueux', 'iut', 'iut p√©rigueux', 'grenadi√®re', 'pole universitaire', 'p√¥le universitaire', 'la grenadi√®re'],
+                // Coordonn√©es centrales (entre les deux arr√™ts)
                 coordinates: { lat: 45.1958, lng: 0.7192 },
-                description: 'Campus universitaire (arrÍts Campus + PÙle GrenadiËre)',
-                // ? V49: Liste des arrÍts GTFS qui desservent ce pÙle
+                description: 'Campus universitaire (arr√™ts Campus + P√¥le Grenadi√®re)',
+                // ‚úÖ V49: Liste des arr√™ts GTFS qui desservent ce p√¥le
                 gtfsStops: [
                     { stopId: 'MOBIITI:StopPlace:77309', name: 'Campus', lat: 45.197113, lng: 0.718130 },
-                    { stopId: 'MOBIITI:StopPlace:77314', name: 'PÙle Universitaire GrenadiËre', lat: 45.194477, lng: 0.720215 }
+                    { stopId: 'MOBIITI:StopPlace:77314', name: 'P√¥le Universitaire Grenadi√®re', lat: 45.194477, lng: 0.720215 }
                 ],
-                // Rayon de recherche autour du centre (en mËtres)
+                // Rayon de recherche autour du centre (en m√®tres)
                 searchRadius: 400
             }
         };
@@ -82,14 +82,14 @@ export class ApiManager {
 
     /**
      * Initialise le chargeur de l'API Google Maps.
-     * ? V181: En mode proxy, on n'a PAS besoin du SDK Google Maps cÙtÈ client
-     * L'autocomplÈtion et le gÈocodage passent par les proxies Vercel
+     * ‚úÖ V181: En mode proxy, on n'a PAS besoin du SDK Google Maps c√¥t√© client
+     * L'autocompl√©tion et le g√©ocodage passent par les proxies Vercel
      */
     async loadGoogleMapsAPI() {
-        // ? V181: En mode proxy, ne pas charger le SDK Google Maps
+        // ‚úÖ V181: En mode proxy, ne pas charger le SDK Google Maps
         // On utilise les endpoints /api/places et /api/geocode
         if (this.useProxy) {
-            console.log("? Mode proxy activÈ - SDK Google Maps non requis");
+            console.log("‚úÖ Mode proxy activ√© - SDK Google Maps non requis");
             this.proxyReady = true;
             return Promise.resolve();
         }
@@ -98,7 +98,7 @@ export class ApiManager {
             return Promise.reject(new Error(this.buildAuthFailureMessage()));
         }
 
-        // <-- CORRECTION: VÈrifie si un chargement est dÈj‡ en cours
+        // <-- CORRECTION: V√©rifie si un chargement est d√©j√† en cours
         if (this.apiLoadPromise) {
             return this.apiLoadPromise;
         }
@@ -106,7 +106,7 @@ export class ApiManager {
         if (window.google?.maps) {
             await this.ensureGoogleLibraries();
             if (window.google.maps.places && window.google.maps.Geocoder) {
-                console.log("? API Google Maps dÈj‡ chargÈe.");
+                console.log("‚úÖ API Google Maps d√©j√† charg√©e.");
                 this.initServices();
                 return Promise.resolve();
             }
@@ -114,7 +114,7 @@ export class ApiManager {
 
         this.installGoogleAuthHook();
 
-        // <-- CORRECTION: Stocke la promesse pour la rÈutiliser
+        // <-- CORRECTION: Stocke la promesse pour la r√©utiliser
         this.apiLoadPromise = new Promise((resolve, reject) => {
             const authEventName = 'peribus-google-auth-failure';
             const handleAuthFailure = (event) => {
@@ -130,7 +130,7 @@ export class ApiManager {
             const cleanupAuthHandler = () => window.removeEventListener(authEventName, handleAuthFailure);
             const script = document.createElement('script');
             
-            // ? V57: Charge 'places' (pour Autocomplete) et 'geocoding' (pour Reverse Geocode)
+            // ‚úÖ V57: Charge 'places' (pour Autocomplete) et 'geocoding' (pour Reverse Geocode)
             script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKey}&libraries=places,geocoding&v=weekly&loading=async`;
             
             script.async = true;
@@ -139,19 +139,19 @@ export class ApiManager {
             
             script.onload = () => {
                 cleanupAuthHandler();
-                console.log("? API Google Maps chargÈe avec succËs.");
+                console.log("‚úÖ API Google Maps charg√©e avec succ√®s.");
                 setTimeout(async () => {
                     try {
                         await this.ensureGoogleLibraries();
-                        // ? V57: VÈrifie les deux bibliothËques
+                        // ‚úÖ V57: V√©rifie les deux biblioth√®ques
                         if (window.google?.maps?.places && window.google?.maps?.Geocoder) {
                             this.initServices();
                             resolve();
                         } else {
-                            throw new Error("BibliothËques places/geocoding non disponibles");
+                            throw new Error("Biblioth√®ques places/geocoding non disponibles");
                         }
                     } catch (err) {
-                        console.error("? google.maps.places ou google.maps.Geocoder n'est pas disponible");
+                        console.error("‚ùå google.maps.places ou google.maps.Geocoder n'est pas disponible");
                         this.apiLoadPromise = null;
                         reject(err);
                     }
@@ -160,7 +160,7 @@ export class ApiManager {
             
             script.onerror = () => {
                 cleanupAuthHandler();
-                console.error("? Erreur lors du chargement du script Google Maps.");
+                console.error("‚ùå Erreur lors du chargement du script Google Maps.");
                 this.apiLoadPromise = null;
                 reject(new Error("Impossible de charger Google Maps API."));
             };
@@ -172,36 +172,36 @@ export class ApiManager {
     }
 
     /**
-     * Initialise les services une fois l'API chargÈe.
+     * Initialise les services une fois l'API charg√©e.
      */
     initServices() {
-        if (!window.google?.maps?.places || !window.google?.maps?.Geocoder) { // ? V57: VÈrifie les deux
-            console.error("? Les bibliothËques Google Maps 'places' ou 'geocoding' ne sont pas disponibles.");
+        if (!window.google?.maps?.places || !window.google?.maps?.Geocoder) { // ‚úÖ V57: V√©rifie les deux
+            console.error("‚ùå Les biblioth√®ques Google Maps 'places' ou 'geocoding' ne sont pas disponibles.");
             return;
         }
         
         try {
-            // ? V57: Service de Geocoding
+            // ‚úÖ V57: Service de Geocoding
             this.geocoder = new google.maps.Geocoder();
             
             // Service d'Autocomplete
             if (google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions) {
-                console.log("? Nouvelle API AutocompleteSuggestion disponible.");
-                // Pas besoin d'instancier, on utilise la mÈthode statique
+                console.log("‚úÖ Nouvelle API AutocompleteSuggestion disponible.");
+                // Pas besoin d'instancier, on utilise la m√©thode statique
             } else {
-                console.warn("?? AutocompleteSuggestion non disponible, fallback vers ancienne API");
+                console.warn("‚ö†Ô∏è AutocompleteSuggestion non disponible, fallback vers ancienne API");
                 this.autocompleteService = new google.maps.places.AutocompleteService();
             }
             
             this.sessionToken = new google.maps.places.AutocompleteSessionToken();
             
         } catch (error) {
-            console.error("? Erreur lors de l'initialisation des services:", error);
+            console.error("‚ùå Erreur lors de l'initialisation des services:", error);
         }
     }
 
     /**
-     * S'assure que les bibliothËques Google nÈcessaires sont prÍtes
+     * S'assure que les biblioth√®ques Google n√©cessaires sont pr√™tes
      */
     async ensureGoogleLibraries() {
         if (!window.google?.maps) {
@@ -213,7 +213,7 @@ export class ApiManager {
             return;
         }
 
-        // Charger la bibliothËque Places si nÈcessaire
+        // Charger la biblioth√®que Places si n√©cessaire
         if (!window.google.maps.places) {
             try {
                 const placesLib = await importLib('places');
@@ -222,11 +222,11 @@ export class ApiManager {
                     Object.assign(window.google.maps.places, placesLib);
                 }
             } catch (error) {
-                console.warn('?? Impossible de charger la bibliothËque Places via importLibrary:', error);
+                console.warn('‚ö†Ô∏è Impossible de charger la biblioth√®que Places via importLibrary:', error);
             }
         }
 
-        // Charger la bibliothËque Geocoding si nÈcessaire
+        // Charger la biblioth√®que Geocoding si n√©cessaire
         if (!window.google.maps.Geocoder) {
             try {
                 const geocodingLib = await importLib('geocoding');
@@ -234,26 +234,26 @@ export class ApiManager {
                     window.google.maps.Geocoder = geocodingLib.Geocoder;
                 }
             } catch (error) {
-                console.warn('?? Impossible de charger la bibliothËque Geocoding via importLibrary:', error);
+                console.warn('‚ö†Ô∏è Impossible de charger la biblioth√®que Geocoding via importLibrary:', error);
             }
         }
     }
 
     /**
-     * RÈcupËre les suggestions d'autocomplÈtion
-     * ? V181: Utilise le proxy Vercel /api/places en production
-     * ? V48: IntËgre les alias de lieux (Campus = PÙle Universitaire GrenadiËre)
+     * R√©cup√®re les suggestions d'autocompl√©tion
+     * ‚úÖ V181: Utilise le proxy Vercel /api/places en production
+     * ‚úÖ V48: Int√®gre les alias de lieux (Campus = P√¥le Universitaire Grenadi√®re)
      */
     async getPlaceAutocomplete(inputString) {
-        // ? V48: VÈrifier si l'entrÈe correspond ‡ un alias
+        // ‚úÖ V48: V√©rifier si l'entr√©e correspond √† un alias
         const aliasMatch = this._checkPlaceAlias(inputString);
         
         try {
             let results = [];
             
-            // ? V181: Mode proxy - utiliser l'endpoint Vercel
+            // ‚úÖ V181: Mode proxy - utiliser l'endpoint Vercel
             if (this.useProxy) {
-                console.log("?? Recherche autocomplÈtion (proxy):", inputString);
+                console.log("üîç Recherche autocompl√©tion (proxy):", inputString);
                 
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
                 url.searchParams.set('input', inputString);
@@ -271,27 +271,27 @@ export class ApiManager {
                     placeId: p.placeId
                 }));
                 
-                console.log(`? ${results.length} suggestions trouvÈes (proxy)`);
+                console.log(`‚úÖ ${results.length} suggestions trouv√©es (proxy)`);
             } 
-            // Mode SDK Google Maps (dev local avec clÈ API)
+            // Mode SDK Google Maps (dev local avec cl√© API)
             else {
                 if (!this.sessionToken) {
-                    console.warn("?? Service d'autocomplÈtion non initialisÈ. Tentative de chargement...");
+                    console.warn("‚ö†Ô∏è Service d'autocompl√©tion non initialis√©. Tentative de chargement...");
                     try {
                         await this.loadGoogleMapsAPI();
                     } catch (error) {
-                        console.error("? Impossible d'initialiser le service d'autocomplÈtion:", error.message);
+                        console.error("‚ùå Impossible d'initialiser le service d'autocompl√©tion:", error.message);
                         return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
                     }
                     if (!this.sessionToken) {
-                        console.error("? Impossible d'initialiser le service d'autocomplÈtion");
+                        console.error("‚ùå Impossible d'initialiser le service d'autocompl√©tion");
                         return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
                     }
                 }
                 
-                // VÈrifier si la nouvelle API est disponible
+                // V√©rifier si la nouvelle API est disponible
                 if (google.maps.places.AutocompleteSuggestion?.fetchAutocompleteSuggestions) {
-                    // ? NOUVELLE API (recommandÈe depuis mars 2026)
+                    // ‚úÖ NOUVELLE API (recommand√©e depuis mars 2025)
                     const request = {
                         input: inputString,
                         locationRestriction: {
@@ -304,17 +304,17 @@ export class ApiManager {
                         sessionToken: this.sessionToken,
                     };
 
-                    console.log("?? Recherche autocomplÈtion (SDK):", inputString);
+                    console.log("üîç Recherche autocompl√©tion (SDK):", inputString);
                     const { suggestions } = await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
-                    console.log(`? ${suggestions.length} suggestions trouvÈes`);
+                    console.log(`‚úÖ ${suggestions.length} suggestions trouv√©es`);
                     
                     results = suggestions.map(s => ({
                         description: s.placePrediction.text.text,
                         placeId: s.placePrediction.placeId,
                     }));
                 } else {
-                    // ? FALLBACK : Ancienne API (dÈprÈciÈe mais fonctionnelle)
-                    console.warn("?? Utilisation de l'ancienne API AutocompleteService (dÈprÈciÈe)");
+                    // ‚ùå FALLBACK : Ancienne API (d√©pr√©ci√©e mais fonctionnelle)
+                    console.warn("‚ö†Ô∏è Utilisation de l'ancienne API AutocompleteService (d√©pr√©ci√©e)");
                     
                     results = await new Promise((resolve, reject) => {
                         const request = {
@@ -330,10 +330,10 @@ export class ApiManager {
 
                         this.autocompleteService.getPlacePredictions(request, (predictions, status) => {
                             if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
-                                console.warn("?? …chec de l'autocomplÈtion Places:", status);
+                                console.warn("‚ö†Ô∏è √âchec de l'autocompl√©tion Places:", status);
                                 resolve([]);
                             } else {
-                                console.log(`? ${predictions.length} suggestions trouvÈes (ancienne API)`);
+                                console.log(`‚úÖ ${predictions.length} suggestions trouv√©es (ancienne API)`);
                                 resolve(predictions.map(p => ({
                                     description: p.description,
                                     placeId: p.place_id,
@@ -344,25 +344,25 @@ export class ApiManager {
                 }
             }
             
-            // ? V48: Injecter l'alias en premiËre position si trouvÈ
+            // ‚úÖ V48: Injecter l'alias en premi√®re position si trouv√©
             if (aliasMatch) {
-                // VÈrifier si le rÈsultat n'est pas dÈj‡ dans la liste
+                // V√©rifier si le r√©sultat n'est pas d√©j√† dans la liste
                 const alreadyInList = results.some(r => 
-                    r.description.toLowerCase().includes('grenadiËre') || 
+                    r.description.toLowerCase().includes('grenadi√®re') || 
                     r.description.toLowerCase().includes('universitaire')
                 );
                 
                 if (!alreadyInList) {
                     results.unshift(this._createAliasResult(aliasMatch));
-                    console.log(`?? Alias injectÈ: ${aliasMatch.canonicalName}`);
+                    console.log(`üéì Alias inject√©: ${aliasMatch.canonicalName}`);
                 }
             }
             
             return results;
         } catch (error) {
-            console.error("? Erreur lors de l'autocomplÈtion:", error);
+            console.error("‚ùå Erreur lors de l'autocompl√©tion:", error);
             
-            // ? V48: MÍme en cas d'erreur, proposer l'alias si trouvÈ
+            // ‚úÖ V48: M√™me en cas d'erreur, proposer l'alias si trouv√©
             if (aliasMatch) {
                 return [this._createAliasResult(aliasMatch)];
             }
@@ -372,12 +372,12 @@ export class ApiManager {
     }
     
     /**
-     * ? V181: Helper pour crÈer un rÈsultat d'alias
+     * ‚úÖ V181: Helper pour cr√©er un r√©sultat d'alias
      * @private
      */
     _createAliasResult(aliasMatch) {
         return {
-            description: `?? ${aliasMatch.canonicalName}`,
+            description: `üéì ${aliasMatch.canonicalName}`,
             placeId: `ALIAS_CAMPUS`,
             isAlias: true,
             coordinates: aliasMatch.coordinates,
@@ -386,7 +386,7 @@ export class ApiManager {
     }
     
     /**
-     * ? V48: VÈrifie si l'entrÈe correspond ‡ un alias de lieu
+     * ‚úÖ V48: V√©rifie si l'entr√©e correspond √† un alias de lieu
      * @private
      */
     _checkPlaceAlias(inputString) {
@@ -395,14 +395,14 @@ export class ApiManager {
         const normalizedInput = inputString.toLowerCase().trim();
         
         for (const [key, aliasData] of Object.entries(this.placeAliases)) {
-            // VÈrifier si l'entrÈe correspond ‡ un des alias
+            // V√©rifier si l'entr√©e correspond √† un des alias
             const matchesAlias = aliasData.aliases.some(alias => {
-                // Match exact ou partiel (l'alias commence par l'entrÈe)
+                // Match exact ou partiel (l'alias commence par l'entr√©e)
                 return alias.startsWith(normalizedInput) || normalizedInput.startsWith(alias);
             });
             
             if (matchesAlias) {
-                console.log(`?? Alias trouvÈ: "${inputString}" ? "${aliasData.canonicalName}"`);
+                console.log(`üéì Alias trouv√©: "${inputString}" ‚Üí "${aliasData.canonicalName}"`);
                 return aliasData;
             }
         }
@@ -411,17 +411,17 @@ export class ApiManager {
     }
     
     /**
-     * ? V48: RÈsout un placeId d'alias en coordonnÈes
-     * @param {string} placeId - Le placeId (peut Ítre un alias comme ALIAS_CAMPUS)
+     * ‚úÖ V48: R√©sout un placeId d'alias en coordonn√©es
+     * @param {string} placeId - Le placeId (peut √™tre un alias comme ALIAS_CAMPUS)
      * @returns {Promise<{lat:number, lng:number}|null>}
      */
     async resolveAliasOrPlaceId(placeId) {
-        // VÈrifier si c'est un alias
+        // V√©rifier si c'est un alias
         if (placeId && placeId.startsWith('ALIAS_')) {
             const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
             const aliasData = this.placeAliases[aliasKey];
             if (aliasData && aliasData.coordinates) {
-                console.log(`?? RÈsolution alias: ${placeId} ? ${JSON.stringify(aliasData.coordinates)}`);
+                console.log(`üéì R√©solution alias: ${placeId} ‚Üí ${JSON.stringify(aliasData.coordinates)}`);
                 return aliasData.coordinates;
             }
         }
@@ -431,14 +431,14 @@ export class ApiManager {
     }
 
     /**
-     * ? V57: Convertit les coordonnÈes (lat, lng) en le place_id le plus proche.
-     * ? V181: Utilise le proxy Vercel /api/geocode en production
+     * ‚úÖ V57: Convertit les coordonn√©es (lat, lng) en le place_id le plus proche.
+     * ‚úÖ V181: Utilise le proxy Vercel /api/geocode en production
      * @param {number} lat
      * @param {number} lng
      * @returns {Promise<string|null>} Le place_id ou null
      */
     async reverseGeocode(lat, lng) {
-        // ? V181: Mode proxy - utiliser l'endpoint Vercel
+        // ‚úÖ V181: Mode proxy - utiliser l'endpoint Vercel
         if (this.useProxy) {
             try {
                 const url = new URL(this.apiEndpoints.geocode, window.location.origin);
@@ -456,29 +456,29 @@ export class ApiManager {
                 
                 if (data.results && data.results.length > 0) {
                     const placeId = data.results[0].place_id;
-                    console.log(`? GÈocodage inversÈ rÈussi (proxy): ${placeId}`);
+                    console.log(`‚úÖ G√©ocodage invers√© r√©ussi (proxy): ${placeId}`);
                     return placeId;
                 }
                 
-                console.warn("GÈocodage inversÈ: Aucun rÈsultat trouvÈ.");
+                console.warn("G√©ocodage invers√©: Aucun r√©sultat trouv√©.");
                 return null;
             } catch (error) {
-                console.error("? Erreur gÈocodage inversÈ (proxy):", error);
+                console.error("‚ùå Erreur g√©ocodage invers√© (proxy):", error);
                 return null;
             }
         }
         
         // Mode SDK Google Maps (dev local)
         if (!this.geocoder) {
-            console.warn("?? Service Geocoder non initialisÈ. Tentative de chargement...");
+            console.warn("‚ö†Ô∏è Service Geocoder non initialis√©. Tentative de chargement...");
             try {
                 await this.loadGoogleMapsAPI();
             } catch (error) {
-                console.error("? Impossible d'initialiser le service Geocoder:", error.message);
+                console.error("‚ùå Impossible d'initialiser le service Geocoder:", error.message);
                 return null;
             }
             if (!this.geocoder) {
-                console.error("? Impossible d'initialiser le service Geocoder");
+                console.error("‚ùå Impossible d'initialiser le service Geocoder");
                 return null;
             }
         }
@@ -488,15 +488,15 @@ export class ApiManager {
             this.geocoder.geocode({ location: latlng }, (results, status) => {
                 if (status === 'OK') {
                     if (results && results.length > 0) {
-                        // On prend le premier rÈsultat (le plus prÈcis)
-                        console.log(`? GÈocodage inversÈ rÈussi: ${results[0].place_id}`);
+                        // On prend le premier r√©sultat (le plus pr√©cis)
+                        console.log(`‚úÖ G√©ocodage invers√© r√©ussi: ${results[0].place_id}`);
                         resolve(results[0].place_id);
                     } else {
-                        console.warn("GÈocodage inversÈ: Aucun rÈsultat trouvÈ.");
+                        console.warn("G√©ocodage invers√©: Aucun r√©sultat trouv√©.");
                         resolve(null);
                     }
                 } else {
-                    console.warn("…chec du gÈocodage inversÈ:", status);
+                    console.warn("√âchec du g√©ocodage invers√©:", status);
                     reject(new Error(`Geocode failed with status: ${status}`));
                 }
             });
@@ -504,20 +504,20 @@ export class ApiManager {
     }
 
     /**
-     * RÈcupËre les coordonnÈes {lat,lng} pour un place_id en utilisant le Geocoder
-     * ? V49: GËre les alias avec pÙles multimodaux (retourne aussi les arrÍts GTFS)
-     * ? V181: Utilise le proxy Vercel /api/places?placeId=... en production
+     * R√©cup√®re les coordonn√©es {lat,lng} pour un place_id en utilisant le Geocoder
+     * ‚úÖ V49: G√®re les alias avec p√¥les multimodaux (retourne aussi les arr√™ts GTFS)
+     * ‚úÖ V181: Utilise le proxy Vercel /api/places?placeId=... en production
      * @param {string} placeId
      * @returns {Promise<{lat:number, lng:number, gtfsStops?:Array, searchRadius?:number}|null>}
      */
     async getPlaceCoords(placeId) {
-        // ? V49: VÈrifier si c'est un alias avec pÙle multimodal
+        // ‚úÖ V49: V√©rifier si c'est un alias avec p√¥le multimodal
         if (placeId && placeId.startsWith('ALIAS_')) {
             const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
             const aliasData = this.placeAliases[aliasKey];
             if (aliasData && aliasData.coordinates) {
-                console.log(`?? RÈsolution alias coords: ${placeId} ? ${JSON.stringify(aliasData.coordinates)}`);
-                // Retourner les coordonnÈes ET les infos du pÙle multimodal
+                console.log(`üéì R√©solution alias coords: ${placeId} ‚Üí ${JSON.stringify(aliasData.coordinates)}`);
+                // Retourner les coordonn√©es ET les infos du p√¥le multimodal
                 return {
                     lat: aliasData.coordinates.lat,
                     lng: aliasData.coordinates.lng,
@@ -528,7 +528,7 @@ export class ApiManager {
             }
         }
         
-        // ? V181: Mode proxy - utiliser l'endpoint Vercel
+        // ‚úÖ V181: Mode proxy - utiliser l'endpoint Vercel
         if (this.useProxy) {
             try {
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
@@ -545,11 +545,11 @@ export class ApiManager {
                 const data = await response.json();
                 
                 if (data.lat && data.lng) {
-                    console.log(`? CoordonnÈes obtenues (proxy): ${placeId} ? ${data.lat}, ${data.lng}`);
+                    console.log(`‚úÖ Coordonn√©es obtenues (proxy): ${placeId} ‚Üí ${data.lat}, ${data.lng}`);
                     return { lat: data.lat, lng: data.lng };
                 }
                 
-                console.warn('getPlaceCoords (proxy): pas de coordonnÈes pour', placeId);
+                console.warn('getPlaceCoords (proxy): pas de coordonn√©es pour', placeId);
                 return null;
             } catch (error) {
                 console.error('getPlaceCoords (proxy): erreur', error);
@@ -559,15 +559,15 @@ export class ApiManager {
         
         // Mode SDK Google Maps (dev local)
         if (!this.geocoder) {
-            console.warn("?? Service Geocoder non initialisÈ. Tentative de chargement...");
+            console.warn("‚ö†Ô∏è Service Geocoder non initialis√©. Tentative de chargement...");
             try {
                 await this.loadGoogleMapsAPI();
             } catch (error) {
-                console.error("? Impossible d'initialiser le service Geocoder:", error.message);
+                console.error("‚ùå Impossible d'initialiser le service Geocoder:", error.message);
                 return null;
             }
             if (!this.geocoder) {
-                console.error("? Impossible d'initialiser le service Geocoder");
+                console.error("‚ùå Impossible d'initialiser le service Geocoder");
                 return null;
             }
         }
@@ -585,7 +585,7 @@ export class ApiManager {
                         return;
                     }
                 }
-                console.warn('getPlaceCoords: pas de rÈsultat pour', placeId, status);
+                console.warn('getPlaceCoords: pas de r√©sultat pour', placeId, status);
                 resolve(null);
             });
         });
@@ -593,19 +593,19 @@ export class ApiManager {
 
 
     /**
-     * V188: M…THODE SNCF CONNECT
-     * - 2 appels API (maintenant + 20min) pour avoir ~5 horaires consÈcutifs
-     * - Cache les rÈsultats pour "Voir plus"
-     * - DÈdoublonne et trie par heure de dÈpart
+     * V188: M√âTHODE SNCF CONNECT
+     * - 2 appels API (maintenant + 20min) pour avoir ~5 horaires cons√©cutifs
+     * - Cache les r√©sultats pour "Voir plus"
+     * - D√©doublonne et trie par heure de d√©part
      */
     async fetchItinerary(fromPlaceId, toPlaceId, searchTime = null) {
         const startTime = performance.now();
-        console.log(`?? V188 RECHERCHE ITIN…RAIRE: ${fromPlaceId} ? ${toPlaceId}`);
+        console.log(`üß† V188 RECHERCHE ITIN√âRAIRE: ${fromPlaceId} ‚Üí ${toPlaceId}`);
         if (searchTime) {
-            console.log(`? Mode: ${searchTime.type || 'partir'}, Heure: ${searchTime.hour}:${searchTime.minute}`);
+            console.log(`‚è∞ Mode: ${searchTime.type || 'partir'}, Heure: ${searchTime.hour}:${searchTime.minute}`);
         }
         
-        // Convertir les alias en coordonnÈes
+        // Convertir les alias en coordonn√©es
         const fromIsAlias = fromPlaceId && fromPlaceId.startsWith('ALIAS_');
         const toIsAlias = toPlaceId && toPlaceId.startsWith('ALIAS_');
         
@@ -625,33 +625,33 @@ export class ApiManager {
         };
 
         // ========================================
-        // V222: STRAT…GIE MINIMALE - 1 SEUL APPEL BUS
+        // V222: STRAT√âGIE MINIMALE - 1 SEUL APPEL BUS
         // Google Routes avec computeAlternativeRoutes retourne 5-6 alternatives
         // 
         // - Mode "partir" : 1 appel = 5-6 trajets
         // - Mode "arriver" : 1 appel = 5-6 trajets
         // 
-        // …CONOMIE : 10 appels ? 3 appels = -70% de co˚t API
+        // √âCONOMIE : 10 appels ‚Üí 3 appels = -70% de co√ªt API
         // ========================================
         
         // V222: UN SEUL appel bus, que ce soit mode "partir" ou "arriver"
-        // Google renvoie dÈj‡ 5-6 alternatives avec computeAlternativeRoutes: true
+        // Google renvoie d√©j√† 5-6 alternatives avec computeAlternativeRoutes: true
         const searchTimes = [searchTime];
         
         if (searchTime && searchTime.type === 'arriver') {
-            console.log(`? V222 Mode ARRIVER: 1 appel avec arrivalTime=${searchTime.hour}:${searchTime.minute}`);
+            console.log(`‚è∞ V222 Mode ARRIVER: 1 appel avec arrivalTime=${searchTime.hour}:${searchTime.minute}`);
         } else {
-            console.log(`? V222 Mode PARTIR: 1 appel avec departureTime=${searchTime?.hour || 'now'}:${searchTime?.minute || ''}`);
+            console.log(`‚è∞ V222 Mode PARTIR: 1 appel avec departureTime=${searchTime?.hour || 'now'}:${searchTime?.minute || ''}`);
         }
         
         const [busResults, bikeResult, walkResult] = await Promise.allSettled([
-            // V220: 3 appels bus en parallËle (au lieu de 8)
+            // V220: 3 appels bus en parall√®le (au lieu de 8)
             Promise.allSettled(searchTimes.map(st => this._fetchBusRoute(fromPlaceId, toPlaceId, st, fromCoords, toCoords))),
             this.fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords, toCoords),
             this.fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords, toCoords)
         ]);
 
-        // V217: Helper pour extraire l'heure de dÈpart d'une route Google
+        // V217: Helper pour extraire l'heure de d√©part d'une route Google
         const extractDepartureTime = (route) => {
             // Essayer d'abord le chemin direct
             let depTime = route.legs?.[0]?.localizedValues?.departureTime?.time?.text;
@@ -677,7 +677,7 @@ export class ApiManager {
             return '';
         };
 
-        // 1?? Traitement BUS - Fusionner et dÈdupliquer
+        // 1Ô∏è‚É£ Traitement BUS - Fusionner et d√©dupliquer
         if (busResults.status === 'fulfilled') {
             const allBusRoutes = [];
             const seenDepartures = new Set();
@@ -691,7 +691,7 @@ export class ApiManager {
                         const lineName = transitStep?.transitDetails?.transitLine?.nameShort || 
                                         transitStep?.transitDetails?.transitLine?.name || '';
                         
-                        // V217: ClÈ unique = heure dÈpart + ligne + arrÍt dÈpart (pour plus de prÈcision)
+                        // V217: Cl√© unique = heure d√©part + ligne + arr√™t d√©part (pour plus de pr√©cision)
                         const depStopName = transitStep?.transitDetails?.stopDetails?.departureStop?.name || '';
                         const uniqueKey = `${depTime}-${lineName}-${depStopName}`;
                         
@@ -704,14 +704,14 @@ export class ApiManager {
             }
             
             if (allBusRoutes.length > 0) {
-                // V217: Trier par heure de dÈpart en utilisant le helper
+                // V217: Trier par heure de d√©part en utilisant le helper
                 allBusRoutes.sort((a, b) => {
                     const depA = extractDepartureTime(a) || '99:99';
                     const depB = extractDepartureTime(b) || '99:99';
                     return depA.localeCompare(depB);
                 });
                 
-                // V218: Limiter ‡ 8 trajets bus maximum
+                // V218: Limiter √† 8 trajets bus maximum
                 const limitedBusRoutes = allBusRoutes.slice(0, 8);
                 const busData = { routes: limitedBusRoutes, hasMore: allBusRoutes.length > 8 };
                 
@@ -723,34 +723,34 @@ export class ApiManager {
                 const transferCount = Math.max(0, transitSteps.length - 1);
                 
                 results.bus = { data: busData, duration: durationMinutes, transfers: transferCount };
-                console.log(`?? V218: ${limitedBusRoutes.length}/${allBusRoutes.length} trajets affichÈs (max 8)`);
+                console.log(`üöç V218: ${limitedBusRoutes.length}/${allBusRoutes.length} trajets affich√©s (max 8)`);
                 
-                // V217: Log des heures pour vÈrification (avec le helper)
+                // V217: Log des heures pour v√©rification (avec le helper)
                 const heures = limitedBusRoutes.map(r => extractDepartureTime(r)).filter(Boolean).join(', ');
-                console.log(`?? Horaires: ${heures}`);
+                console.log(`üìã Horaires: ${heures}`);
                 
-                // Score simplifiÈ
+                // Score simplifi√©
                 results.recommendations.push({
                     mode: 'bus', score: 100, // Bus toujours prioritaire
                     reason: `${durationMinutes}min${transferCount ? ` (${transferCount} corresp.)` : ''}`
                 });
             } else {
-                console.warn("?? Pas de bus disponible");
+                console.warn("‚ö†Ô∏è Pas de bus disponible");
                 results.recommendations.push({ mode: 'bus', score: 0, reason: 'Aucun bus disponible' });
             }
         } else {
-            console.warn("?? Erreur appels bus");
+            console.warn("‚ö†Ô∏è Erreur appels bus");
             results.recommendations.push({ mode: 'bus', score: 0, reason: 'Erreur recherche bus' });
         }
 
-        // 2?? Traitement V…LO
+        // 2Ô∏è‚É£ Traitement V√âLO
         if (bikeResult.status === 'fulfilled' && bikeResult.value?.routes?.length > 0) {
             const route = bikeResult.value.routes[0];
             const durationMinutes = Math.round((parseInt(route.duration?.replace('s', '')) || 0) / 60);
             const distanceKm = (route.distanceMeters / 1000).toFixed(1);
             
             results.bike = { data: bikeResult.value, duration: durationMinutes, distance: distanceKm };
-            console.log(`?? VÈlo: ${durationMinutes}min, ${distanceKm}km`);
+            console.log(`üö¥ V√©lo: ${durationMinutes}min, ${distanceKm}km`);
             
             let score = durationMinutes < 15 ? 100 : durationMinutes < 30 ? 90 : durationMinutes < 45 ? 70 : 40;
             results.recommendations.push({
@@ -759,14 +759,14 @@ export class ApiManager {
             });
         }
 
-        // 3?? Traitement MARCHE
+        // 3Ô∏è‚É£ Traitement MARCHE
         if (walkResult.status === 'fulfilled' && walkResult.value?.routes?.length > 0) {
             const route = walkResult.value.routes[0];
             const durationMinutes = Math.round((parseInt(route.duration?.replace('s', '')) || 0) / 60);
             const distanceKm = (route.distanceMeters / 1000).toFixed(1);
             
             results.walk = { data: walkResult.value, duration: durationMinutes, distance: distanceKm };
-            console.log(`?? Marche: ${durationMinutes}min, ${distanceKm}km`);
+            console.log(`üö∂ Marche: ${durationMinutes}min, ${distanceKm}km`);
             
             let score = durationMinutes < 10 ? 95 : durationMinutes < 20 ? 85 : durationMinutes < 30 ? 65 : durationMinutes < 45 ? 40 : 20;
             results.recommendations.push({
@@ -775,15 +775,15 @@ export class ApiManager {
             });
         }
 
-        // 4?? TRIER PAR SCORE ET RETOURNER
+        // 4Ô∏è‚É£ TRIER PAR SCORE ET RETOURNER
         results.recommendations.sort((a, b) => b.score - a.score);
         
         const elapsed = Math.round(performance.now() - startTime);
         const apiCallCount = searchTimes.length + 2; // 1 bus + 1 bike + 1 walk = 3
-        console.log(`? V222 Calcul terminÈ en ${elapsed}ms (${apiCallCount} appels API au lieu de 10)`);
-        console.log(`?? …conomie API: ${Math.round((1 - apiCallCount/10) * 100)}%`);
+        console.log(`‚ö° V222 Calcul termin√© en ${elapsed}ms (${apiCallCount} appels API au lieu de 10)`);
+        console.log(`üí∞ √âconomie API: ${Math.round((1 - apiCallCount/10) * 100)}%`);
 
-        // RÈgÈnÈrer le token de session
+        // R√©g√©n√©rer le token de session
         if (window.google?.maps?.places) {
             this.sessionToken = new google.maps.places.AutocompleteSessionToken();
         }
@@ -792,7 +792,7 @@ export class ApiManager {
     }
 
     /**
-     * V187: DÈcale un searchTime de X minutes
+     * V187: D√©cale un searchTime de X minutes
      * @private
      */
     _offsetSearchTime(baseSearchTime, offsetMinutes) {
@@ -806,8 +806,8 @@ export class ApiManager {
             };
         }
         
-        // V203: Gestion complËte de la date et du passage de minuit
-        // On convertit tout en objet Date pour gÈrer correctement les changements de jour
+        // V203: Gestion compl√®te de la date et du passage de minuit
+        // On convertit tout en objet Date pour g√©rer correctement les changements de jour
         let dateObj;
         if (!baseSearchTime.date || baseSearchTime.date === 'today' || baseSearchTime.date === "Aujourd'hui") {
             dateObj = new Date();
@@ -815,12 +815,12 @@ export class ApiManager {
             dateObj = new Date(baseSearchTime.date);
         }
         
-        // DÈfinir l'heure de base
+        // D√©finir l'heure de base
         dateObj.setHours(parseInt(baseSearchTime.hour) || 0);
         dateObj.setMinutes(parseInt(baseSearchTime.minute) || 0);
         dateObj.setSeconds(0);
         
-        // Ajouter le dÈcalage
+        // Ajouter le d√©calage
         dateObj.setMinutes(dateObj.getMinutes() + offsetMinutes);
         
         // Reconstruire le searchTime avec la NOUVELLE date et heure
@@ -831,25 +831,25 @@ export class ApiManager {
         
         return {
             ...baseSearchTime,
-            date: newDateStr, // Date mise ‡ jour (peut avoir changÈ de jour)
+            date: newDateStr, // Date mise √† jour (peut avoir chang√© de jour)
             hour: dateObj.getHours().toString().padStart(2, '0'),
             minute: dateObj.getMinutes().toString().padStart(2, '0')
         };
     }
 
     /**
-     * MÈthode privÈe pour calculer uniquement le bus
-     * ? V178: Utilise le proxy Vercel pour masquer la clÈ API
-     * ? V48: GËre les alias via coordonnÈes
+     * M√©thode priv√©e pour calculer uniquement le bus
+     * ‚úÖ V178: Utilise le proxy Vercel pour masquer la cl√© API
+     * ‚úÖ V48: G√®re les alias via coordonn√©es
      * @private
      */
     async _fetchBusRoute(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
-        // ? V178: Utiliser le proxy Vercel
+        // ‚úÖ V178: Utiliser le proxy Vercel
         const API_URL = this.useProxy 
             ? `${this.apiEndpoints.routes}?action=directions`
             : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
-        // ? V48: Utiliser les coordonnÈes pour les alias, sinon placeId
+        // ‚úÖ V48: Utiliser les coordonn√©es pour les alias, sinon placeId
         const origin = fromCoords 
             ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
             : { placeId: fromPlaceId };
@@ -863,26 +863,26 @@ export class ApiManager {
             travelMode: "TRANSIT",
             computeAlternativeRoutes: true,  // Demander plusieurs alternatives
             transitPreferences: {
-                allowedTravelModes: ["BUS"],  // Uniquement bus (pas train, mÈtro, tram)
+                allowedTravelModes: ["BUS"],  // Uniquement bus (pas train, m√©tro, tram)
                 routingPreference: "FEWER_TRANSFERS"  // V63: Prioriser moins de correspondances
             },
             languageCode: "fr",
             units: "METRIC"
-            // Note: requestedReferenceRoutes n'est PAS supportÈ pour TRANSIT
+            // Note: requestedReferenceRoutes n'est PAS support√© pour TRANSIT
         };
 
-        // Ajout du temps de dÈpart/arrivÈe
+        // Ajout du temps de d√©part/arriv√©e
         if (searchTime) {
             const dateTime = this._buildDateTime(searchTime);
             if (searchTime.type === 'arriver') {
                 body.arrivalTime = dateTime;
-                console.log(`?? V222 API arrivalTime: ${dateTime}`);
+                console.log(`üéØ V222 API arrivalTime: ${dateTime}`);
             } else {
                 body.departureTime = dateTime;
             }
         }
 
-        // ? V178: Headers diffÈrents selon mode proxy ou direct
+        // ‚úÖ V178: Headers diff√©rents selon mode proxy ou direct
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -900,7 +900,7 @@ export class ApiManager {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("? Erreur API Routes (bus):", errorText);
+            console.error("‚ùå Erreur API Routes (bus):", errorText);
             
             if (response.status === 404 || errorText.includes("NOT_FOUND")) {
                 throw new Error("Aucun bus disponible");
@@ -911,10 +911,10 @@ export class ApiManager {
         const data = await response.json();
         
         if (!data.routes || data.routes.length === 0) {
-            throw new Error("Aucun itinÈraire en bus trouvÈ");
+            throw new Error("Aucun itin√©raire en bus trouv√©");
         }
 
-        console.log(`? ${data.routes.length} itinÈraire(s) bus trouvÈ(s)`);
+        console.log(`‚úÖ ${data.routes.length} itin√©raire(s) bus trouv√©(s)`);
         return data;
     }
 
@@ -930,7 +930,7 @@ export class ApiManager {
             if (!value || value === 'today' || value === "Aujourd'hui") {
                 return new Date();
             }
-            // Parse en local pour Èviter le dÈcalage d'un jour liÈ au fuseau
+            // Parse en local pour √©viter le d√©calage d'un jour li√© au fuseau
             const parts = String(value).split(/[-/]/).map(Number);
             if (parts.length >= 3 && parts.every(n => Number.isFinite(n))) {
                 const [y, m, d] = parts;
@@ -941,7 +941,7 @@ export class ApiManager {
 
         let dateObj = toLocalDate(date);
         if (isNaN(dateObj.getTime())) {
-            console.warn("?? Date invalide, utilisation de la date actuelle");
+            console.warn("‚ö†Ô∏è Date invalide, utilisation de la date actuelle");
             dateObj = new Date();
         }
         
@@ -950,7 +950,7 @@ export class ApiManager {
         dateObj.setHours(hourInt, minuteInt, 0, 0);
         
         // V142: Construire ISO string avec offset timezone local au lieu de UTC
-        // Cela Èvite que 13:20 local devienne 12:20 UTC
+        // Cela √©vite que 13:20 local devienne 12:20 UTC
         const tzOffset = -dateObj.getTimezoneOffset();
         const sign = tzOffset >= 0 ? '+' : '-';
         const offsetHours = String(Math.floor(Math.abs(tzOffset) / 60)).padStart(2, '0');
@@ -965,24 +965,24 @@ export class ApiManager {
         
         const isoWithTz = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetHours}:${offsetMinutes}`;
         
-        console.log("?? DateTime construit (local):", isoWithTz);
+        console.log("üïí DateTime construit (local):", isoWithTz);
         return isoWithTz;
     }
 
     /**
-     * Calcule un itinÈraire ‡ vÈlo
-     * ? V178: Utilise le proxy Vercel pour masquer la clÈ API
-     * ? V48: GËre les alias via coordonnÈes
+     * Calcule un itin√©raire √† v√©lo
+     * ‚úÖ V178: Utilise le proxy Vercel pour masquer la cl√© API
+     * ‚úÖ V48: G√®re les alias via coordonn√©es
      */
     async fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
-        console.log(`?? API Google Routes (V…LO): ${fromPlaceId} ? ${toPlaceId}`);
+        console.log(`üö¥ API Google Routes (V√âLO): ${fromPlaceId} ‚Üí ${toPlaceId}`);
 
-        // ? V178: Utiliser le proxy Vercel
+        // ‚úÖ V178: Utiliser le proxy Vercel
         const API_URL = this.useProxy 
             ? `${this.apiEndpoints.routes}?action=bicycle`
             : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
-        // ? V48: Utiliser les coordonnÈes pour les alias, sinon placeId
+        // ‚úÖ V48: Utiliser les coordonn√©es pour les alias, sinon placeId
         const origin = fromCoords 
             ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
             : { placeId: fromPlaceId };
@@ -998,7 +998,7 @@ export class ApiManager {
             units: "METRIC"
         };
 
-        // ? V178: Headers diffÈrents selon mode proxy ou direct
+        // ‚úÖ V178: Headers diff√©rents selon mode proxy ou direct
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -1016,29 +1016,29 @@ export class ApiManager {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("? Erreur API Routes (vÈlo):", errorText);
-            throw new Error(`Erreur vÈlo: ${response.status}`);
+            console.error("‚ùå Erreur API Routes (v√©lo):", errorText);
+            throw new Error(`Erreur v√©lo: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("? ItinÈraire vÈlo calculÈ");
+        console.log("‚úÖ Itin√©raire v√©lo calcul√©");
         return data;
     }
     
     /**
-     * Calcule un itinÈraire ‡ pied
-     * ? V178: Utilise le proxy Vercel pour masquer la clÈ API
-     * ? V48: GËre les alias via coordonnÈes
+     * Calcule un itin√©raire √† pied
+     * ‚úÖ V178: Utilise le proxy Vercel pour masquer la cl√© API
+     * ‚úÖ V48: G√®re les alias via coordonn√©es
      */
     async fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
-        console.log(`?? API Google Routes (MARCHE): ${fromPlaceId} ? ${toPlaceId}`);
+        console.log(`üö∂ API Google Routes (MARCHE): ${fromPlaceId} ‚Üí ${toPlaceId}`);
 
-        // ? V178: Utiliser le proxy Vercel
+        // ‚úÖ V178: Utiliser le proxy Vercel
         const API_URL = this.useProxy 
             ? `${this.apiEndpoints.routes}?action=walking`
             : 'https://routes.googleapis.com/directions/v2:computeRoutes';
 
-        // ? V48: Utiliser les coordonnÈes pour les alias, sinon placeId
+        // ‚úÖ V48: Utiliser les coordonn√©es pour les alias, sinon placeId
         const origin = fromCoords 
             ? { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } }
             : { placeId: fromPlaceId };
@@ -1054,7 +1054,7 @@ export class ApiManager {
             units: "METRIC"
         };
 
-        // ? V178: Headers diffÈrents selon mode proxy ou direct
+        // ‚úÖ V178: Headers diff√©rents selon mode proxy ou direct
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -1072,16 +1072,16 @@ export class ApiManager {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error("? Erreur API Routes (marche):", errorText);
+            console.error("‚ùå Erreur API Routes (marche):", errorText);
             throw new Error(`Erreur marche: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("? ItinÈraire marche calculÈ");
+        console.log("‚úÖ Itin√©raire marche calcul√©");
         return data;
     }
 
-    // CompatibilitÈ ascendante (ancienne signature)
+    // Compatibilit√© ascendante (ancienne signature)
     async fetchWalkRoute(fromPlaceId, toPlaceId) {
         return this.fetchWalkingRoute(fromPlaceId, toPlaceId);
     }
@@ -1115,8 +1115,7 @@ export class ApiManager {
 
     buildAuthFailureMessage(origin = this.clientOrigin) {
         const target = origin || this.clientOrigin || 'ce domaine';
-        return `Google Maps API a refusÈ le referer ${target}. Ajoutez cette URL dans les restrictions HTTP de votre clÈ Google Cloud.`;
+        return `Google Maps API a refus√© le referer ${target}. Ajoutez cette URL dans les restrictions HTTP de votre cl√© Google Cloud.`;
     }
 }
-
 

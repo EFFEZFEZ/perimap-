@@ -1,6 +1,6 @@
-/*
- * Copyright (c) 2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
+Ôªø/*
+ * Copyright (c) 2025 P√©rimap. Tous droits r√©serv√©s.
+ * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
  */
 export class UIManager {
     constructor({ icons, geolocationManager }) {
@@ -16,12 +16,12 @@ export class UIManager {
         const toggleButtons = Array.from(document.querySelectorAll('[data-theme-toggle]'));
         toggleButtons.forEach(btn => {
             btn.setAttribute('aria-pressed', useDark ? 'true' : 'false');
-            btn.title = useDark ? 'ThËme clair' : 'ThËme sombre';
+            btn.title = useDark ? 'Th√®me clair' : 'Th√®me sombre';
         });
 
         const icons = Array.from(document.querySelectorAll('.theme-toggle-icon'));
         icons.forEach(icon => {
-            icon.textContent = useDark ? '??' : '??';
+            icon.textContent = useDark ? '‚òÄÔ∏è' : 'üåô';
         });
 
         try {
@@ -180,7 +180,7 @@ export class UIManager {
                     popover.querySelectorAll('.popover-tab').forEach(t => t.classList.remove('active'));
                     e.currentTarget.classList.add('active');
                     const tabType = e.currentTarget.dataset.tab;
-                    popoverSubmitBtn.textContent = (tabType === 'arriver') ? "Valider l'arrivÈe" : 'Partir maintenant';
+                    popoverSubmitBtn.textContent = (tabType === 'arriver') ? "Valider l'arriv√©e" : 'Partir maintenant';
                 });
             });
             popoverSubmitBtn.addEventListener('click', () => {
@@ -205,8 +205,8 @@ export class UIManager {
                     } catch (e) {}
                 }
 
-                // V92: Auto-ajustement de la date si l'heure est passÈe
-                // Si la date sÈlectionnÈe est "Aujourd'hui" et l'heure est dÈj‡ passÈe,
+                // V92: Auto-ajustement de la date si l'heure est pass√©e
+                // Si la date s√©lectionn√©e est "Aujourd'hui" et l'heure est d√©j√† pass√©e,
                 // on bascule automatiquement sur "Demain"
                 const selectedDateValue = dateSelect.value;
                 const todayIso = new Date().toISOString().split('T')[0];
@@ -216,11 +216,11 @@ export class UIManager {
                     const selectedHour = parseInt(hourSelect.value) || 0;
                     const selectedMinute = parseInt(minuteSelect.value) || 0;
                     
-                    // CrÈer un objet Date pour l'heure sÈlectionnÈe aujourd'hui
+                    // Cr√©er un objet Date pour l'heure s√©lectionn√©e aujourd'hui
                     const selectedTime = new Date();
                     selectedTime.setHours(selectedHour, selectedMinute, 0, 0);
                     
-                    // Si l'heure sÈlectionnÈe est passÈe, basculer sur demain
+                    // Si l'heure s√©lectionn√©e est pass√©e, basculer sur demain
                     if (selectedTime < now) {
                         const tomorrow = new Date();
                         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -231,7 +231,7 @@ export class UIManager {
                             if (dateSelect.options[i].value === tomorrowIso) {
                                 dateSelect.value = tomorrowIso;
                                 dateText = dateSelect.options[i].text;
-                                console.log(`? Heure passÈe (${selectedHour}h${String(selectedMinute).padStart(2,'0')}) ? Basculement automatique sur Demain`);
+                                console.log(`‚è∞ Heure pass√©e (${selectedHour}h${String(selectedMinute).padStart(2,'0')}) ‚Üí Basculement automatique sur Demain`);
                                 break;
                             }
                         }
@@ -241,11 +241,11 @@ export class UIManager {
                 const hourText = String(hourSelect.value).padStart(2, '0');
                 const minuteText = String(minuteSelect.value).padStart(2, '0');
                 const mainBtnSpan = whenBtn.querySelector('span');
-                let prefix = (tab === 'arriver') ? 'ArrivÈe' : 'DÈpart';
+                let prefix = (tab === 'arriver') ? 'Arriv√©e' : 'D√©part';
                 if (dateText === "Aujourd'hui") {
-                    mainBtnSpan.textContent = `${prefix} ‡ ${hourText}h${minuteText}`;
+                    mainBtnSpan.textContent = `${prefix} √† ${hourText}h${minuteText}`;
                 } else {
-                    mainBtnSpan.textContent = `${prefix} ${dateText.toLowerCase()} ‡ ${hourText}h${minuteText}`;
+                    mainBtnSpan.textContent = `${prefix} ${dateText.toLowerCase()} √† ${hourText}h${minuteText}`;
                 }
                 popover.classList.add('hidden');
                 whenBtn.classList.remove('popover-active');
@@ -270,7 +270,7 @@ export class UIManager {
             geolocateBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!this.geolocationManager) {
-                    console.warn('Geolocation manager non initialisÈ');
+                    console.warn('Geolocation manager non initialis√©');
                     return;
                 }
                 this.geolocationManager.useCurrentLocationAsDeparture({
@@ -415,5 +415,4 @@ export class UIManager {
         this.updateTimeDropdownDisplay(selectEl);
     }
 }
-
 

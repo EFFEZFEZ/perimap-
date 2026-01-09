@@ -1,19 +1,19 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
- * routes.js - Configuration des lignes et catégories de routes
+ * routes.js - Configuration des lignes et catÃ©gories de routes
  * 
  * Ce module contient les mappages des noms de lignes,
- * les catégories de lignes et les chemins vers les fiches horaires.
+ * les catÃ©gories de lignes et les chemins vers les fiches horaires.
  */
 
-// === Catégories de lignes ===
+// === CatÃ©gories de lignes ===
 
 /**
- * Catégories de lignes du réseau Péribus
- * Chaque catégorie contient un nom, une liste de lignes et une couleur
+ * CatÃ©gories de lignes du rÃ©seau PÃ©ribus
+ * Chaque catÃ©gorie contient un nom, une liste de lignes et une couleur
  */
 export const LINE_CATEGORIES = {
     'majeures': { 
@@ -49,27 +49,27 @@ export const LINE_CATEGORIES = {
  * Mappage des noms courts de ligne vers les noms de fichiers PDF des fiches horaires
  */
 export const PDF_FILENAME_MAP = {
-    'A': 'grandperigueux_fiche_horaires_ligne_A_sept_2026.pdf',
-    'B': 'grandperigueux_fiche_horaires_ligne_B_sept_2026.pdf',
-    'C': 'grandperigueux_fiche_horaires_ligne_C_sept_2026.pdf',
-    'D': 'grandperigueux_fiche_horaires_ligne_D_sept_2026.pdf',
-    'e1': 'grandperigueux_fiche_horaires_ligne_e1_sept_2026.pdf',
-    'e2': 'grandperigueux_fiche_horaires_ligne_e2_sept_2026.pdf',
-    'e4': 'grandperigueux_fiche_horaires_ligne_e4_sept_2026.pdf',
-    'e5': 'grandperigueux_fiche_horaires_ligne_e5_sept_2026.pdf',
-    'e6': 'grandperigueux_fiche_horaires_ligne_e6_sept_2026.pdf',
+    'A': 'grandperigueux_fiche_horaires_ligne_A_sept_2025.pdf',
+    'B': 'grandperigueux_fiche_horaires_ligne_B_sept_2025.pdf',
+    'C': 'grandperigueux_fiche_horaires_ligne_C_sept_2025.pdf',
+    'D': 'grandperigueux_fiche_horaires_ligne_D_sept_2025.pdf',
+    'e1': 'grandperigueux_fiche_horaires_ligne_e1_sept_2025.pdf',
+    'e2': 'grandperigueux_fiche_horaires_ligne_e2_sept_2025.pdf',
+    'e4': 'grandperigueux_fiche_horaires_ligne_e4_sept_2025.pdf',
+    'e5': 'grandperigueux_fiche_horaires_ligne_e5_sept_2025.pdf',
+    'e6': 'grandperigueux_fiche_horaires_ligne_e6_sept_2025.pdf',
     'e7': 'grandperigueux_fiche_horaires_ligne_e7_12_janvier.pdf',
     'K1A': 'grandperigueux_K1A_12_janv_26.pdf',
     'K1B': 'grandperigueux_fiche_horaires_ligne_k1B_12_janvier.pdf',
     'K2': 'grandperigueux_fiche_horaires_ligne_k2_12_janvier.pdf',
-    'K3A': 'grandperigueux_fiche_horaires_ligne_K3A_sept_2026.pdf',
-    'K3B': 'grandperigueux_fiche_horaires_ligne_K3B_sept_2026.pdf',
-    'K4A': 'grandperigueux_fiche_horaires_ligne_K4A_sept_2026.pdf',
-    'K4B': 'grandperigueux_fiche_horaires_ligne_K4B_sept_2026.pdf',
-    'K5': 'grandperigueux_fiche_horaires_ligne_K5_sept_2026.pdf',
-    'K6': 'grandperigueux_fiche_horaires_ligne_K6_sept_2026.pdf',
-    'N': 'grandperigueux_fiche_horaires_ligne_N_sept_2026.pdf',
-    'N1': 'grandperigueux_fiche_horaires_ligne_N1_sept_2026.pdf',
+    'K3A': 'grandperigueux_fiche_horaires_ligne_K3A_sept_2025.pdf',
+    'K3B': 'grandperigueux_fiche_horaires_ligne_K3B_sept_2025.pdf',
+    'K4A': 'grandperigueux_fiche_horaires_ligne_K4A_sept_2025.pdf',
+    'K4B': 'grandperigueux_fiche_horaires_ligne_K4B_sept_2025.pdf',
+    'K5': 'grandperigueux_fiche_horaires_ligne_K5_sept_2025.pdf',
+    'K6': 'grandperigueux_fiche_horaires_ligne_K6_sept_2025.pdf',
+    'N': 'grandperigueux_fiche_horaires_ligne_N_sept_2025.pdf',
+    'N1': 'grandperigueux_fiche_horaires_ligne_N1_sept_2025.pdf',
 };
 
 // === Mappage des noms longs de lignes ===
@@ -83,17 +83,17 @@ export const ROUTE_LONG_NAME_MAP = {
     'C': 'ZAE Marsac <> P+R Aquacap',
     'D': 'P+R Charrieras <> Tourny',
     'e1': 'ZAE Marsac <> P+R Aquacap',
-    'e2': 'Talleyrand Périgord <> Fromarsac',
+    'e2': 'Talleyrand PÃ©rigord <> Fromarsac',
     'e4': 'Charrieras <> La Feuilleraie <> Tourny',
     'e5': 'Les Tournesols <> PEM',
-    'e6': 'Créavallée <> Trésorerie municipale',
-    'e7': 'Notre-Dame de Sanilhac poste <> Les Lilas hôpital',
+    'e6': 'CrÃ©avallÃ©e <> TrÃ©sorerie municipale',
+    'e7': 'Notre-Dame de Sanilhac poste <> Les Lilas hÃ´pital',
     'K1A': 'Maison Rouge <> Tourny / La Rudeille <> Tourny',
-    'K1B': 'Le Lac <> Pôle universitaire Grenadière <> Taillefer',
+    'K1B': 'Le Lac <> PÃ´le universitaire GrenadiÃ¨re <> Taillefer',
     'K2': 'Champcevinel bourg <> Tourny',
     'K3A': 'La Feuilleraie <> Place du 8 mai',
-    'K3B': 'Pépinière <> Place du 8 mai',
-    'K4A': 'Sarrazi <> Dojo départemental <> Tourny',
+    'K3B': 'PÃ©piniÃ¨re <> Place du 8 mai',
+    'K4A': 'Sarrazi <> Dojo dÃ©partemental <> Tourny',
     'K4B': 'Coulounieix bourg <> Tourny',
     'K5': 'Halte ferroviaire Boulazac <> La Feuilleraie',
     'K6': 'Halte ferroviaire Marsac sur l\'Isle',
@@ -104,9 +104,9 @@ export const ROUTE_LONG_NAME_MAP = {
 // === Fonctions utilitaires ===
 
 /**
- * Récupère la catégorie d'une ligne à partir de son nom court
+ * RÃ©cupÃ¨re la catÃ©gorie d'une ligne Ã  partir de son nom court
  * @param {string} routeShortName - Nom court de la ligne (ex: 'A', 'e1', 'K2')
- * @returns {string} - Identifiant de la catégorie ou 'autres'
+ * @returns {string} - Identifiant de la catÃ©gorie ou 'autres'
  */
 export function getCategoryForRoute(routeShortName) {
     for (const [categoryId, category] of Object.entries(LINE_CATEGORIES)) {
@@ -118,18 +118,18 @@ export function getCategoryForRoute(routeShortName) {
 }
 
 /**
- * Récupère les informations d'une catégorie
- * @param {string} categoryId - Identifiant de la catégorie
- * @returns {Object|null} - Informations de la catégorie ou null
+ * RÃ©cupÃ¨re les informations d'une catÃ©gorie
+ * @param {string} categoryId - Identifiant de la catÃ©gorie
+ * @returns {Object|null} - Informations de la catÃ©gorie ou null
  */
 export function getCategoryInfo(categoryId) {
     return LINE_CATEGORIES[categoryId] || null;
 }
 
 /**
- * Récupère le chemin vers le PDF d'une fiche horaire
+ * RÃ©cupÃ¨re le chemin vers le PDF d'une fiche horaire
  * @param {string} routeShortName - Nom court de la ligne
- * @returns {string} - Chemin vers le PDF ou '#' si non trouvé
+ * @returns {string} - Chemin vers le PDF ou '#' si non trouvÃ©
  */
 export function getPdfPath(routeShortName) {
     const filename = PDF_FILENAME_MAP[routeShortName];
@@ -137,9 +137,9 @@ export function getPdfPath(routeShortName) {
 }
 
 /**
- * Récupère le nom long d'une ligne
+ * RÃ©cupÃ¨re le nom long d'une ligne
  * @param {string} routeShortName - Nom court de la ligne
- * @param {string} fallback - Valeur par défaut si non trouvé
+ * @param {string} fallback - Valeur par dÃ©faut si non trouvÃ©
  * @returns {string} - Nom long de la ligne
  */
 export function getRouteLongName(routeShortName, fallback = '') {
@@ -147,9 +147,9 @@ export function getRouteLongName(routeShortName, fallback = '') {
 }
 
 /**
- * Vérifie si une ligne appartient à une catégorie affichée dans le trafic
+ * VÃ©rifie si une ligne appartient Ã  une catÃ©gorie affichÃ©e dans le trafic
  * @param {string} routeShortName - Nom court de la ligne
- * @returns {boolean} - true si la ligne doit être affichée
+ * @returns {boolean} - true si la ligne doit Ãªtre affichÃ©e
  */
 export function isDisplayableInTraffic(routeShortName) {
     const allowedCategories = ['majeures', 'express', 'quartier', 'navettes'];
@@ -167,5 +167,4 @@ export default {
     getRouteLongName,
     isDisplayableInTraffic
 };
-
 

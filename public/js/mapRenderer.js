@@ -1,37 +1,37 @@
-/*
- * Copyright (c) 2026-2026 PÈrimap. Tous droits rÈservÈs.
- * Ce code ne peut Ítre ni copiÈ, ni distribuÈ, ni modifiÈ sans l'autorisation Ècrite de l'auteur.
+Ôªø/*
+ * Copyright (c) 2025-2026 P√©rimap. Tous droits r√©serv√©s.
+ * Ce code ne peut √™tre ni copi√©, ni distribu√©, ni modifi√© sans l'autorisation √©crite de l'auteur.
  */
 /**
- * mapRenderer.js - VERSION V25 (IntÈgration Temps RÈel)
+ * mapRenderer.js - VERSION V25 (Int√©gration Temps R√©el)
  *
- * *** V25 - TEMPS R…EL HAWK ***
- * - IntÈgration du scraper hawk.perimouv.fr pour les horaires en direct
- * - Affichage des temps rÈels avec icÙne WiFi et couleur verte
- * - Fallback sur les horaires GTFS statiques si temps rÈel indisponible
+ * *** V25 - TEMPS R√âEL HAWK ***
+ * - Int√©gration du scraper hawk.perimouv.fr pour les horaires en direct
+ * - Affichage des temps r√©els avec ic√¥ne WiFi et couleur verte
+ * - Fallback sur les horaires GTFS statiques si temps r√©el indisponible
  *
- * *** SOLUTION D…FINITIVE V24 ***
+ * *** SOLUTION D√âFINITIVE V24 ***
  * - Le bug est que marker.bindPopup() est incompatible
- * avec setLatLng() appelÈ ‡ chaque tick.
+ * avec setLatLng() appel√© √† chaque tick.
  *
  * - SOLUTION :
  * 1. Ne PLUS utiliser marker.bindPopup().
- * 2. CrÈer UN SEUL popup global (this.busPopup).
+ * 2. Cr√©er UN SEUL popup global (this.busPopup).
  * 3. Utiliser marker.on('click') pour ouvrir ce popup global.
- * 4. Mettre ‡ jour la position du marqueur ET du popup
- * sÈparÈment dans updateBusMarkers().
+ * 4. Mettre √† jour la position du marqueur ET du popup
+ * s√©par√©ment dans updateBusMarkers().
  *
- * - R…SULTAT :
+ * - R√âSULTAT :
  * Le bus bouge (setLatLng sur le marqueur).
  * Le popup suit (setLatLng sur le popup).
- * L'ETA se met ‡ jour (setContent sur le popup).
- * Z…RO CLIGNOTEMENT.
+ * L'ETA se met √† jour (setContent sur le popup).
+ * Z√âRO CLIGNOTEMENT.
  *
- * *** MODIFICATION V57 (GÈolocalisation) ***
+ * *** MODIFICATION V57 (G√©olocalisation) ***
  * 1. Ajout de `userLocationMarker` et `locateControl` au constructeur.
  * 2. Ajout de `addLocateControl()` pour initialiser L.Control.Locate.
- * 3. Ajout de `updateUserLocation()` pour afficher/dÈplacer le point bleu.
- * 4. Ajout de `onLocateError()` pour gÈrer les erreurs.
+ * 3. Ajout de `updateUserLocation()` pour afficher/d√©placer le point bleu.
+ * 4. Ajout de `onLocateError()` pour g√©rer les erreurs.
  * 5. Ajout de `panToUserLocation()` pour centrer la carte.
  */
 
@@ -42,7 +42,7 @@ import { analyticsManager } from './analyticsManager.js';
 const LIGHT_TILE_CONFIG = Object.freeze({
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     options: {
-        attribution: '© OpenStreetMap contributors',
+        attribution: '¬© OpenStreetMap contributors',
         maxZoom: 19
     }
 });
@@ -50,13 +50,13 @@ const LIGHT_TILE_CONFIG = Object.freeze({
 const DARK_TILE_CONFIG = Object.freeze({
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     options: {
-        attribution: '© OpenStreetMap contributors, © CARTO',
+        attribution: '¬© OpenStreetMap contributors, ¬© CARTO',
         maxZoom: 19,
         subdomains: 'abcd'
     }
 });
 
-// V161 - IcÙne localisation
+// V161 - Ic√¥ne localisation
 const LOCATE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="3"/>
     <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
@@ -64,35 +64,35 @@ const LOCATE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 
 export class MapRenderer {
     /**
-     * @param {string} mapElementId - L'ID de l'ÈlÈment HTML de la carte
+     * @param {string} mapElementId - L'ID de l'√©l√©ment HTML de la carte
      * @param {DataManager} dataManager - L'instance de DataManager
      * @param {TimeManager} timeManager - L'instance de TimeManager
      */
     constructor(mapElementId, dataManager, timeManager) {
         this.mapElementId = mapElementId;
         this.map = null;
-        this.busMarkers = {}; // Garde la trace de nos marqueurs (clÈ: tripId)
+        this.busMarkers = {}; // Garde la trace de nos marqueurs (cl√©: tripId)
         this.routeLayer = null;
         this.routeLayersById = {};
         this.selectedRoute = null;
-        this.centerCoordinates = [45.1833, 0.7167]; // PÈrigueux
+        this.centerCoordinates = [45.1833, 0.7167]; // P√©rigueux
         this.zoomLevel = 16;
         this.tempStopMarker = null;
 
         this.stopLayer = null;
 
-        /* Garder une rÈfÈrence aux managers */
+        /* Garder une r√©f√©rence aux managers */
         this.dataManager = dataManager;
         this.timeManager = timeManager;
 
-        /* V24 - Initialisation du Popup IndÈpendant */
+        /* V24 - Initialisation du Popup Ind√©pendant */
         this.busPopup = null;
         this.busPopupDomElement = null; // Le DOM stable (V18)
-        this.selectedBusId = null; // Savoir quel bus est cliquÈ
+        this.selectedBusId = null; // Savoir quel bus est cliqu√©
 
-        /* ? V57 - GÈolocalisation */
+        /* ‚úÖ V57 - G√©olocalisation */
         this.userLocationMarker = null; // Le "point bleu"
-        this.locateControl = null; // Le contrÙle Leaflet.Locate
+        this.locateControl = null; // Le contr√¥le Leaflet.Locate
         this.locateButtonElement = null;
 
         this.activeTileLayer = null;
@@ -113,13 +113,13 @@ export class MapRenderer {
      */
     initializeMap(useClusters = true) {
         this.map = L.map(this.mapElementId, {
-            zoomControl: false // ? V57: On dÈsactive le zoom par dÈfaut pour le repositionner
+            zoomControl: false // ‚úÖ V57: On d√©sactive le zoom par d√©faut pour le repositionner
         }).setView(this.centerCoordinates, this.zoomLevel);
 
         const prefersDark = typeof document !== 'undefined' && document.body?.classList?.contains('dark-theme');
         this.applyTheme(prefersDark);
         
-        // ? V57: Ajout du contrÙle de zoom en haut ‡ droite
+        // ‚úÖ V57: Ajout du contr√¥le de zoom en haut √† droite
         L.control.zoom({ position: 'topright' }).addTo(this.map);
 
         /* Initialisation des couches */
@@ -129,7 +129,7 @@ export class MapRenderer {
             this.map.addLayer(this.clusterGroup);
         }
         
-        console.log(`??? Carte ${this.mapElementId} initialisÈe`);
+        console.log(`üó∫Ô∏è Carte ${this.mapElementId} initialis√©e`);
         this.map.on('click', () => {
             if (this.tempStopMarker) {
                 this.map.removeLayer(this.tempStopMarker);
@@ -137,8 +137,8 @@ export class MapRenderer {
             }
         });
 
-        /* V24 - CrÈer le popup global et son DOM */
-        this.busPopupDomElement = this.createBusPopupDomElement(); // CrÈe la structure
+        /* V24 - Cr√©er le popup global et son DOM */
+        this.busPopupDomElement = this.createBusPopupDomElement(); // Cr√©e la structure
         this.busPopup = L.popup({
             autoClose: true,
             closeOnClick: true,
@@ -146,7 +146,7 @@ export class MapRenderer {
             autoPan: true
         });
 
-        // Quand le popup est fermÈ, on dÈsÈlectionne le bus
+        // Quand le popup est ferm√©, on d√©s√©lectionne le bus
         this.busPopup.on('remove', () => {
             this.selectedBusId = null;
         });
@@ -264,7 +264,7 @@ export class MapRenderer {
     
     displayMultiColorRoutes(geoJsonData, dataManager, visibleRoutes) {
         if (!geoJsonData) {
-            console.warn('Aucune donnÈe GeoJSON ‡ afficher');
+            console.warn('Aucune donn√©e GeoJSON √† afficher');
             return;
         }
         if (this.routeLayer) {
@@ -342,7 +342,7 @@ export class MapRenderer {
     }
     
     addRoutePopup(layer, features, dataManager) {
-        let content = '<b>Ligne(s) sur ce tracÈ:</b><br>';
+        let content = '<b>Ligne(s) sur ce trac√©:</b><br>';
         const routeNames = new Set();
         features.forEach(feature => {
             const routeId = feature.properties?.route_id;
@@ -356,19 +356,19 @@ export class MapRenderer {
     }
 
     /**
-     * V24 - Logique de Popup IndÈpendant
+     * V24 - Logique de Popup Ind√©pendant
      */
     updateBusMarkers(busesWithPositions, tripScheduler, currentSeconds) {
         const markersToAdd = [];
         const markersToRemove = [];
         const activeBusIds = new Set();
         
-        // 1. Trouver les marqueurs ‡ supprimer
+        // 1. Trouver les marqueurs √† supprimer
         busesWithPositions.forEach(bus => activeBusIds.add(bus.tripId));
 
         Object.keys(this.busMarkers).forEach(busId => {
             if (!activeBusIds.has(busId)) {
-                // Si le bus sÈlectionnÈ disparaÓt, fermer le popup
+                // Si le bus s√©lectionn√© dispara√Æt, fermer le popup
                 if (busId === this.selectedBusId) {
                     this.busPopup.close();
                     this.selectedBusId = null;
@@ -379,7 +379,7 @@ export class MapRenderer {
             }
         });
 
-        // 2. Mettre ‡ jour les marqueurs existants et ajouter les nouveaux
+        // 2. Mettre √† jour les marqueurs existants et ajouter les nouveaux
         busesWithPositions.forEach(bus => {
             const busId = bus.tripId;
             if (!busId) return;
@@ -391,7 +391,7 @@ export class MapRenderer {
                 const markerData = this.busMarkers[busId];
                 markerData.bus = bus;
                 
-                // On met TOUJOURS ‡ jour la position du marqueur
+                // On met TOUJOURS √† jour la position du marqueur
                 markerData.marker.setLatLng([lat, lon]);
 
             } else {
@@ -406,14 +406,14 @@ export class MapRenderer {
             }
         });
         
-        // 3. (V24) Mettre ‡ jour le popup s'il est ouvert
+        // 3. (V24) Mettre √† jour le popup s'il est ouvert
         if (this.selectedBusId && this.busMarkers[this.selectedBusId]) {
             const selectedMarkerData = this.busMarkers[this.selectedBusId];
             
-            // Mettre ‡ jour le contenu
+            // Mettre √† jour le contenu
             this.updateBusPopupContent(this.busPopupDomElement, selectedMarkerData.bus, tripScheduler);
             
-            // Mettre ‡ jour la position du popup
+            // Mettre √† jour la position du popup
             this.busPopup.setLatLng(selectedMarkerData.marker.getLatLng());
         }
 
@@ -433,7 +433,7 @@ export class MapRenderer {
     }
 
     /**
-     * V24 - Mise ‡ jour du DOM du popup global
+     * V24 - Mise √† jour du DOM du popup global - Design moderne
      */
     updateBusPopupContent(domElement, bus, tripScheduler) {
         try {
@@ -449,84 +449,94 @@ export class MapRenderer {
 
             const etaText = nextStopETA ? nextStopETA.formatted : '...';
             const isAtTerminus = etaText === 'Terminus' || shouldHideDestinationAtStop(nextStopName, destination);
-            const stateText = isAtTerminus ? 'Terminus' : `En Ligne (vers ${destination})`;
-            const nextStopText = nextStopName;
+            const stateText = isAtTerminus ? 'Terminus' : `‚Üí ${destination}`;
 
-            // SÈlectionne les ÈlÈments ‡ mettre ‡ jour
-            const headerEl = domElement.querySelector('.info-popup-header');
+            // Mettre √† jour les √©l√©ments du nouveau design
+            const badgeEl = domElement.querySelector('.bus-popup-line-badge');
+            const lineNumberEl = domElement.querySelector('.line-number');
+            const routeNameEl = domElement.querySelector('.route-name');
             const stateEl = domElement.querySelector('[data-update="state"]');
             const nextStopEl = domElement.querySelector('[data-update="next-stop-value"]');
             const etaEl = domElement.querySelector('[data-update="eta-value"]');
+            const footerBadge = domElement.querySelector('.realtime-badge');
 
-            // Mettre ‡ jour le Header (couleur + texte)
-            if (headerEl) {
-                headerEl.style.background = routeColor;
-                headerEl.style.color = textColor;
-                headerEl.textContent = `Ligne ${routeShortName}`;
+            // Badge de ligne avec couleur
+            if (badgeEl) {
+                badgeEl.style.background = routeColor;
+                badgeEl.style.color = textColor;
             }
-
-            // Mettre ‡ jour le contenu
-            if (stateEl && stateEl.textContent !== stateText) stateEl.textContent = stateText;
-            if (nextStopEl && nextStopEl.textContent !== nextStopText) nextStopEl.textContent = nextStopText;
-            if (etaEl && etaEl.textContent !== etaText) etaEl.textContent = etaText;
+            if (lineNumberEl) lineNumberEl.textContent = routeShortName;
+            if (routeNameEl) routeNameEl.textContent = `Ligne ${routeShortName}`;
+            
+            // Contenu dynamique
+            if (stateEl) stateEl.textContent = stateText;
+            if (nextStopEl) nextStopEl.textContent = nextStopName;
+            if (etaEl) etaEl.textContent = etaText;
+            
+            // Badge temps r√©el vs estim√©
+            if (footerBadge) {
+                if (bus.isRealtime) {
+                    footerBadge.classList.remove('theoretical');
+                    footerBadge.classList.add('realtime');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Temps r√©el';
+                } else {
+                    footerBadge.classList.remove('realtime');
+                    footerBadge.classList.add('theoretical');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Position estim√©e';
+                }
+            }
             
         } catch (e) {
-            console.error("Erreur mise ‡ jour popup:", e);
+            console.error("Erreur mise √† jour popup:", e);
         }
     }
 
     /**
-     * V24 - CrÈe la STRUCTURE DOM (vide) du popup global
+     * V24 - Cr√©e la STRUCTURE DOM du popup global - Design moderne
      */
     createBusPopupDomElement() {
         const container = document.createElement('div');
-        container.className = 'info-popup-content';
+        container.className = 'bus-popup-modern';
 
-        // Header
-        const header = document.createElement('div');
-        header.className = 'info-popup-header';
-        container.appendChild(header);
-
-        // Body
-        const body = document.createElement('div');
-        body.className = 'info-popup-body bus-details';
-
-        // Statut
-        const statusP = document.createElement('p');
-        statusP.innerHTML = '<strong>Statut: </strong><span data-update="state">Chargement...</span>';
-        body.appendChild(statusP);
-
-        // Prochain arrÍt
-        const nextStopP = document.createElement('p');
-        nextStopP.innerHTML = '<strong data-update="next-stop-label">Prochain arrÍt : </strong><span data-update="next-stop-value">...</span>';
-        body.appendChild(nextStopP);
-
-        // ArrivÈe
-        const etaP = document.createElement('p');
-        const etaValue = document.createElement('span');
-        etaValue.setAttribute('data-update', 'eta-value');
-        etaValue.textContent = '...';
-        etaValue.style.fontVariantNumeric = 'tabular-nums'; 
-        etaValue.style.display = 'inline-block';
-        etaValue.style.minWidth = '80px';
-        
-        etaP.innerHTML = '<strong data-update="eta-label">ArrivÈe : </strong>';
-        etaP.appendChild(etaValue);
-        body.appendChild(etaP);
-        
-        // Notice temps rÈel
-        const noticeP = document.createElement('p');
-        noticeP.className = 'realtime-notice theoretical';
-        noticeP.innerHTML = '<strong>?? DonnÈes simulÈes :</strong> Position estimÈe ‡ partir des horaires thÈoriques.';
-        body.appendChild(noticeP);
-
-        container.appendChild(body);
+        container.innerHTML = `
+            <div class="bus-popup-header">
+                <div class="bus-popup-line-badge">
+                    <span class="line-number">?</span>
+                </div>
+                <div class="bus-popup-title">
+                    <span class="route-name">Ligne</span>
+                    <span class="route-destination" data-update="state">Chargement...</span>
+                </div>
+            </div>
+            <div class="bus-popup-body">
+                <div class="bus-popup-info-row">
+                    <div class="bus-popup-icon">üìç</div>
+                    <div class="bus-popup-info">
+                        <span class="info-label">Prochain arr√™t</span>
+                        <span class="info-value" data-update="next-stop-value">...</span>
+                    </div>
+                </div>
+                <div class="bus-popup-info-row">
+                    <div class="bus-popup-icon">‚è±Ô∏è</div>
+                    <div class="bus-popup-info">
+                        <span class="info-label">Arriv√©e estim√©e</span>
+                        <span class="info-value eta-highlight" data-update="eta-value">...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bus-popup-footer">
+                <span class="realtime-badge theoretical">
+                    <span class="badge-dot"></span>
+                    Position estim√©e
+                </span>
+            </div>
+        `;
 
         return container;
     }
 
     /**
-     * V24 - CrÈe un marqueur et lui attache un 'click' event
+     * V24 - Cr√©e un marqueur et lui attache un 'click' event
      */
     createBusMarker(bus, tripScheduler, busId) {
         const { lat, lon } = bus.position;
@@ -541,7 +551,7 @@ export class MapRenderer {
         const icon = L.divIcon({
             className: `${iconClassName} ${statusClass}`,
             html: `<div style="background-color: ${routeColor}; color: ${textColor};">${routeShortName}</div>`,
-            iconSize: [32, 32],    // Dimensions carrÈes pour cercle parfait
+            iconSize: [32, 32],    // Dimensions carr√©es pour cercle parfait
             iconAnchor: [16, 16],  // Centre du cercle
             popupAnchor: [0, -16]
         });
@@ -556,7 +566,7 @@ export class MapRenderer {
             this.selectedBusId = busId;
             const markerData = this.busMarkers[busId];
             
-            // Mettre ‡ jour le contenu AVANT de l'ouvrir
+            // Mettre √† jour le contenu AVANT de l'ouvrir
             this.updateBusPopupContent(this.busPopupDomElement, markerData.bus, tripScheduler);
             
             // Ouvrir le popup global
@@ -566,7 +576,7 @@ export class MapRenderer {
                 .openOn(this.map);
         });
         
-        // CrÈer l'objet markerData (sans popupDomElement, car il est global)
+        // Cr√©er l'objet markerData (sans popupDomElement, car il est global)
         const markerData = {
             marker: marker,
             bus: bus
@@ -576,7 +586,7 @@ export class MapRenderer {
     }
 
     /**
-     * Surligne un tracÈ sur la carte
+     * Surligne un trac√© sur la carte
      */
     highlightRoute(routeId, state) {
         if (!this.routeLayersById || !this.routeLayersById[routeId]) return;
@@ -596,11 +606,11 @@ export class MapRenderer {
     }
 
     /**
-     * Zoome sur un tracÈ de ligne
+     * Zoome sur un trac√© de ligne
      */
     zoomToRoute(routeId) {
         if (!this.routeLayersById || !this.routeLayersById[routeId] || this.routeLayersById[routeId].length === 0) {
-            console.warn(`Aucune couche trouvÈe pour zoomer sur la route ${routeId}`);
+            console.warn(`Aucune couche trouv√©e pour zoomer sur la route ${routeId}`);
             return;
         }
         const routeGroup = L.featureGroup(this.routeLayersById[routeId]);
@@ -611,7 +621,7 @@ export class MapRenderer {
     }
 
     /**
-     * Zoome sur un arrÍt
+     * Zoome sur un arr√™t
      */
     zoomToStop(stop) {
         const lat = parseFloat(stop.stop_lat);
@@ -642,7 +652,7 @@ export class MapRenderer {
         }
 
         const stopIcon = L.divIcon({
-            className: 'stop-marker-icon', // Style dÈfini dans style.css
+            className: 'stop-marker-icon', // Style d√©fini dans style.css
             iconSize: [10, 10],
             iconAnchor: [5, 5]
         });
@@ -656,7 +666,7 @@ export class MapRenderer {
             // zIndexOffset -100 pour que les bus passent TOUJOURS au-dessus
             const marker = L.marker([lat, lon], { icon: stopIcon, zIndexOffset: -100 });
             
-            /* Attache un ÈvÈnement au lieu d'un popup statique */
+            /* Attache un √©v√©nement au lieu d'un popup statique */
             marker.on('click', () => this.onStopClick(stop));
             
             stopsToDisplay.push(marker);
@@ -666,31 +676,31 @@ export class MapRenderer {
     }
 
     /**
-     * AppelÈ lorsqu'un marqueur d'arrÍt est cliquÈ
-     * V99: Affiche les premiers dÈparts si rien dans l'heure
-     * V110: Sur mobile, dÈcale la carte vers le haut pour mieux voir la popup
-     * V25: IntÈgration temps rÈel hawk.perimouv.fr
+     * Appel√© lorsqu'un marqueur d'arr√™t est cliqu√©
+     * V99: Affiche les premiers d√©parts si rien dans l'heure
+     * V110: Sur mobile, d√©cale la carte vers le haut pour mieux voir la popup
+     * V25: Int√©gration temps r√©el hawk.perimouv.fr
      */
     async onStopClick(masterStop) {
         const currentSeconds = this.timeManager.getCurrentSeconds();
         const currentDate = this.timeManager.getCurrentDate();
 
-        // ?? ANALYTICS: Tracker le clic sur l'arrÍt
+        // üìä ANALYTICS: Tracker le clic sur l'arr√™t
         analyticsManager.trackStopClick(masterStop.stop_id, masterStop.stop_name);
 
-        console.log(`?? Clic sur arrÍt: ${masterStop.stop_name}`);
+        console.log(`üöè Clic sur arr√™t: ${masterStop.stop_name}`);
         
         const associatedStopIds = this.dataManager.groupedStopMap[masterStop.stop_id] || [masterStop.stop_id];
 
         // V99: Utiliser la nouvelle fonction qui retourne aussi isNextDayDepartures
         const result = this.dataManager.getDeparturesForOneHour(associatedStopIds, currentSeconds, currentDate);
         const { departuresByLine, isNextDayDepartures, firstDepartureTime } = result;
-        console.log(`?? DÈparts trouvÈs:`, Object.keys(departuresByLine).length, 'lignes', isNextDayDepartures ? `(premiers dÈparts ‡ ${firstDepartureTime})` : '');
+        console.log(`üïê D√©parts trouv√©s:`, Object.keys(departuresByLine).length, 'lignes', isNextDayDepartures ? `(premiers d√©parts √† ${firstDepartureTime})` : '');
 
         const lat = parseFloat(masterStop.stop_lat);
         const lon = parseFloat(masterStop.stop_lon);
         
-        // V110: Sur mobile, dÈcaler la vue vers le haut pour que la popup soit visible
+        // V110: Sur mobile, d√©caler la vue vers le haut pour que la popup soit visible
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
             const mapHeight = this.map.getSize().y;
@@ -701,7 +711,7 @@ export class MapRenderer {
             this.map.panTo(newCenter, { animate: true, duration: 0.3 });
         }
         
-        // V25: CrÈer d'abord le popup avec les donnÈes statiques
+        // V25: Cr√©er d'abord le popup avec les donn√©es statiques
         const popupContent = this.createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, null);
         
         const popup = L.popup({ 
@@ -727,21 +737,21 @@ export class MapRenderer {
             });
         }, 50);
 
-        // V25: Tenter de rÈcupÈrer les donnÈes temps rÈel en arriËre-plan
+        // V25: Tenter de r√©cup√©rer les donn√©es temps r√©el en arri√®re-plan
         this.fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon);
     }
 
     /**
-     * V25: RÈcupËre les donnÈes temps rÈel et met ‡ jour le popup si ouvert
+     * V25: R√©cup√®re les donn√©es temps r√©el et met √† jour le popup si ouvert
      */
     async fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon) {
         try {
-            // Utiliser getRealtimeForStopPlace pour les arrÍts maÓtres (StopPlace)
-            // Cela rÈcupÈrera les donnÈes pour tous les quais de cet arrÍt
+            // Utiliser getRealtimeForStopPlace pour les arr√™ts ma√Ætres (StopPlace)
+            // Cela r√©cup√©rera les donn√©es pour tous les quais de cet arr√™t
             const realtimeData = await realtimeManager.getRealtimeForStopPlace(masterStop.stop_id);
             
             if (realtimeData && realtimeData.departures && realtimeData.departures.length > 0) {
-                console.log(`?? DonnÈes temps rÈel reÁues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
+                console.log(`üì° Donn√©es temps r√©el re√ßues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
                 
                 // Convertir au format attendu par createStopPopupContent
                 const realtimeForPopup = {
@@ -754,7 +764,7 @@ export class MapRenderer {
                     }))
                 };
                 
-                // VÈrifier que le popup est toujours ouvert et au bon endroit
+                // V√©rifier que le popup est toujours ouvert et au bon endroit
                 if (popup.isOpen()) {
                     const newContent = this.createStopPopupContent(
                         masterStop, 
@@ -766,7 +776,7 @@ export class MapRenderer {
                     );
                     popup.setContent(newContent);
                     
-                    // RÈ-attacher les listeners
+                    // R√©-attacher les listeners
                     setTimeout(() => {
                         const destElements = document.querySelectorAll('.popup-dest-clickable');
                         destElements.forEach(el => {
@@ -779,22 +789,22 @@ export class MapRenderer {
                     }, 50);
                 }
             } else {
-                console.log(`?? Pas de donnÈes temps rÈel pour ${masterStop.stop_name}`);
+                console.log(`üì° Pas de donn√©es temps r√©el pour ${masterStop.stop_name}`);
             }
         } catch (error) {
-            console.warn(`?? Erreur temps rÈel pour ${masterStop.stop_name}:`, error.message);
+            console.warn(`‚ö†Ô∏è Erreur temps r√©el pour ${masterStop.stop_name}:`, error.message);
         }
     }
 
     /**
-     * Formate le contenu HTML pour le popup d'un arrÍt
-     * V106: Destinations cliquables pour afficher le tracÈ
-     * V25: Support temps rÈel avec icÙne WiFi et couleur verte
+     * Formate le contenu HTML pour le popup d'un arr√™t
+     * V106: Destinations cliquables pour afficher le trac√©
+     * V25: Support temps r√©el avec ic√¥ne WiFi et couleur verte
      */
     createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures = false, firstDepartureTime = null, realtimeData = null) {
         const lineKeys = Object.keys(departuresByLine);
         
-        // V25: IcÙne SVG temps rÈel - Signal live (barres style WiFi/signal mobile)
+        // V25: Ic√¥ne SVG temps r√©el - Signal live (barres style WiFi/signal mobile)
         const REALTIME_ICON = `<span class="realtime-icon"><svg viewBox="0 0 16 12" fill="currentColor">
             <rect x="0" y="8" width="3" height="4" rx="0.5" opacity="1"/>
             <rect x="4.5" y="5" width="3" height="7" rx="0.5" opacity="0.85"/>
@@ -802,7 +812,7 @@ export class MapRenderer {
             <rect x="13.5" y="0" width="2.5" height="12" rx="0.5" opacity="0.55"/>
         </svg></span>`;
         
-        // V25: Indexer les donnÈes temps rÈel par ligne
+        // V25: Indexer les donn√©es temps r√©el par ligne
         const realtimeByLine = {};
         if (realtimeData && realtimeData.schedules) {
             realtimeData.schedules.forEach(rt => {
@@ -830,11 +840,11 @@ export class MapRenderer {
                 };
             }
             
-            // ? V229+: Filtrer les destinations qui correspondent au nom de l'arrÍt (terminus)
+            // ‚úÖ V229+: Filtrer les destinations qui correspondent au nom de l'arr√™t (terminus)
             const stopNameNormalized = normalizeStopNameForComparison(masterStop.stop_name);
             const destNameNormalized = normalizeStopNameForComparison(line.destination);
 
-            // Ne pas ajouter si c'est une arrivÈe au terminus (destination = arrÍt actuel)
+            // Ne pas ajouter si c'est une arriv√©e au terminus (destination = arr√™t actuel)
             if (destNameNormalized && stopNameNormalized && destNameNormalized !== stopNameNormalized) {
                 lineGroups[routeName].destinations.push({
                     destination: line.destination,
@@ -852,7 +862,7 @@ export class MapRenderer {
 
         let html = `<div class="stop-popup-v105">`;
 
-        // En-tÍte: nom de l'arrÍt + badge temps rÈel si disponible
+        // En-t√™te: nom de l'arr√™t + badge temps r√©el si disponible
         html += `<div class="popup-line-header">
                     <span class="popup-stop-name">${masterStop.stop_name}</span>`;
         if (hasRealtime) {
@@ -860,32 +870,32 @@ export class MapRenderer {
         }
         html += `</div>`;
         
-        // Notice si premiers dÈparts
+        // Notice si premiers d√©parts
         if (isNextDayDepartures) {
-            html += `<div class="popup-notice">Ces horaires sont prÈvisionnels et peuvent changer en cas de perturbation.</div>`;
+            html += `<div class="popup-notice">Ces horaires sont pr√©visionnels et peuvent changer en cas de perturbation.</div>`;
         }
 
         if (sortedLines.length === 0 && !hasRealtime) {
             html += `<div class="popup-empty">
-                        <span class="popup-empty-icon">??</span>
-                        <span>Aucun passage prÈvu</span>
+                        <span class="popup-empty-icon">üåô</span>
+                        <span>Aucun passage pr√©vu</span>
                      </div>`;
         } else {
             // Chaque ligne
             sortedLines.forEach(routeName => {
                 const lineGroup = lineGroups[routeName];
                 
-                // ? V229: VÈrifier qu'il reste des destinations aprËs filtrage
+                // ‚úÖ V229: V√©rifier qu'il reste des destinations apr√®s filtrage
                 if (lineGroup.destinations.length === 0) {
-                    return; // Passer ‡ la ligne suivante
+                    return; // Passer √† la ligne suivante
                 }
                 
-                // V25: RÈcupÈrer les temps rÈels pour cette ligne
+                // V25: R√©cup√©rer les temps r√©els pour cette ligne
                 const lineRealtime = realtimeByLine[routeName.toUpperCase()] || [];
                 
                 html += `<div class="popup-line-block">`;
                 
-                // ? V229: Header de la ligne : badge uniquement (sans nom arrÍt redondant)
+                // ‚úÖ V229: Header de la ligne : badge uniquement (sans nom arr√™t redondant)
                 html += `<div class="popup-line-header">
                             <span class="popup-badge" style="background:#${lineGroup.routeColor};color:#${lineGroup.routeTextColor};">${lineGroup.routeShortName}</span>
                          </div>`;
@@ -902,11 +912,11 @@ export class MapRenderer {
                                      data-stop-name="${masterStop.stop_name}"
                                      data-trip-id="${dest.tripId || ''}">
                                     <span class="dest-label">Direction</span> ${dest.destination}
-                                    <span class="dest-arrow">?</span>
+                                    <span class="dest-arrow">‚Üí</span>
                                 </div>
                                 <div class="popup-times">`;
                     
-                    // V25: Trouver les temps rÈel matchant cette destination
+                    // V25: Trouver les temps r√©el matchant cette destination
                     const matchingRealtime = lineRealtime.filter(rt => {
                         if (!rt.destination) return false;
                         // Match partiel sur la destination
@@ -918,24 +928,24 @@ export class MapRenderer {
                     
                     let realtimeUsed = 0;
                     
-                    // Afficher les horaires (temps rÈel en prioritÈ, puis statiques)
+                    // Afficher les horaires (temps r√©el en priorit√©, puis statiques)
                     dest.departures.forEach((dep, idx) => {
-                        // V25: VÈrifier s'il y a un temps rÈel correspondant
+                        // V25: V√©rifier s'il y a un temps r√©el correspondant
                         if (matchingRealtime.length > realtimeUsed) {
                             const rt = matchingRealtime[realtimeUsed];
                             realtimeUsed++;
-                            // Afficher le temps rÈel en vert avec icÙne
-                            html += `<span class="popup-time realtime" title="Temps rÈel">${REALTIME_ICON}${rt.temps}</span>`;
+                            // Afficher le temps r√©el en vert avec ic√¥ne
+                            html += `<span class="popup-time realtime" title="Temps r√©el">${REALTIME_ICON}${rt.temps}</span>`;
                         } else {
                             // Horaire statique GTFS
                             html += `<span class="popup-time">${dep.time.substring(0, 5)}</span>`;
                         }
                     });
                     
-                    // V25: Afficher les temps rÈels restants (bus supplÈmentaires)
+                    // V25: Afficher les temps r√©els restants (bus suppl√©mentaires)
                     for (let i = realtimeUsed; i < matchingRealtime.length && i < 3; i++) {
                         const rt = matchingRealtime[i];
-                        html += `<span class="popup-time realtime" title="Temps rÈel">${REALTIME_ICON}${rt.temps}</span>`;
+                        html += `<span class="popup-time realtime" title="Temps r√©el">${REALTIME_ICON}${rt.temps}</span>`;
                     }
                     
                     html += `</div></div>`;
@@ -950,39 +960,39 @@ export class MapRenderer {
     }
 
     /**
-     * V108: Centre la carte sur l'arrÍt terminus quand on clique sur une destination
+     * V108: Centre la carte sur l'arr√™t terminus quand on clique sur une destination
      */
     goToDestinationStop(destinationName) {
-        console.log(`?? Recherche arrÍt: ${destinationName}`);
+        console.log(`üéØ Recherche arr√™t: ${destinationName}`);
         
         // Fermer le popup actuel
         this.map.closePopup();
         
-        // Chercher l'arrÍt par son nom
+        // Chercher l'arr√™t par son nom
         const stop = this.findStopByName(destinationName);
         
         if (stop) {
             const lat = parseFloat(stop.stop_lat);
             const lon = parseFloat(stop.stop_lon);
             
-            console.log(`? ArrÍt trouvÈ: ${stop.stop_name} ‡ [${lat}, ${lon}]`);
+            console.log(`‚úÖ Arr√™t trouv√©: ${stop.stop_name} √† [${lat}, ${lon}]`);
             
-            // Centrer la carte sur l'arrÍt avec animation
+            // Centrer la carte sur l'arr√™t avec animation
             this.map.flyTo([lat, lon], 16, {
                 duration: 1
             });
             
-            // Ouvrir le popup de l'arrÍt aprËs l'animation
+            // Ouvrir le popup de l'arr√™t apr√®s l'animation
             setTimeout(() => {
                 this.onStopClick(stop);
             }, 1100);
         } else {
-            console.warn(`? ArrÍt non trouvÈ: ${destinationName}`);
+            console.warn(`‚ùå Arr√™t non trouv√©: ${destinationName}`);
         }
     }
     
     /**
-     * V108: Trouve un arrÍt par son nom (recherche flexible)
+     * V108: Trouve un arr√™t par son nom (recherche flexible)
      */
     findStopByName(name) {
         if (!this.dataManager || !this.dataManager.masterStops) return null;
@@ -1007,24 +1017,24 @@ export class MapRenderer {
 
 
     /* =========================================
-     * ? NOUVELLES FONCTIONS V57 (G…OLOCALISATION)
+     * ‚úÖ NOUVELLES FONCTIONS V57 (G√âOLOCALISATION)
      * ========================================= */
 
     /**
-     * Ajoute le contrÙle de gÈolocalisation ‡ la carte
-     * @param {function} onSuccess - Callback de succËs (appelÈ par main.js)
-     * @param {function} onError - Callback d'erreur (appelÈ par main.js)
+     * Ajoute le contr√¥le de g√©olocalisation √† la carte
+     * @param {function} onSuccess - Callback de succ√®s (appel√© par main.js)
+     * @param {function} onError - Callback d'erreur (appel√© par main.js)
      */
     addLocateControl(onSuccess, onError) {
         if (!this.map) {
-            console.warn('Carte non initialisÈe, impossible d\'ajouter le contrÙle de localisation.');
+            console.warn('Carte non initialis√©e, impossible d\'ajouter le contr√¥le de localisation.');
             return;
         }
         if (this.locateControl) {
             return;
         }
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            console.warn('API de gÈolocalisation indisponible dans ce navigateur.');
+            console.warn('API de g√©olocalisation indisponible dans ce navigateur.');
             return;
         }
 
@@ -1056,7 +1066,7 @@ export class MapRenderer {
             setTimeout(() => renderer.setLocateButtonState('idle'), 1800);
         };
 
-        // ? V158 - Bouton localisation seul (sans zoom)
+        // ‚úÖ V158 - Bouton localisation seul (sans zoom)
         const MapControlsBar = L.Control.extend({
             options: { position: 'bottomright' },
             onAdd(map) {
@@ -1071,11 +1081,11 @@ export class MapRenderer {
                 renderer.locateButtonElement = btnLocate;
                 renderer.setLocateButtonState('idle');
                 
-                // EmpÍcher propagation des clics
+                // Emp√™cher propagation des clics
                 L.DomEvent.disableClickPropagation(container);
                 L.DomEvent.disableScrollPropagation(container);
                 
-                // …vÈnement localisation
+                // √âv√©nement localisation
                 L.DomEvent.on(btnLocate, 'click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1105,7 +1115,7 @@ export class MapRenderer {
     }
 
     /**
-     * Met ‡ jour la position du "point bleu" de l'utilisateur sur la carte
+     * Met √† jour la position du "point bleu" de l'utilisateur sur la carte
      * @param {object} coords - { lat, lng }
      */
     updateUserLocation(coords) {
@@ -1114,7 +1124,7 @@ export class MapRenderer {
         const latLng = [coords.lat, coords.lng];
 
         if (!this.userLocationMarker) {
-            // CrÈer le marqueur "point bleu"
+            // Cr√©er le marqueur "point bleu"
             const userIcon = L.divIcon({
                 className: 'user-location-marker',
                 iconSize: [16, 16],
@@ -1125,13 +1135,13 @@ export class MapRenderer {
                 zIndexOffset: 1000 // Toujours au-dessus
             }).addTo(this.map);
         } else {
-            // Simplement mettre ‡ jour sa position
+            // Simplement mettre √† jour sa position
             this.userLocationMarker.setLatLng(latLng);
         }
     }
 
     /**
-     * GËre les erreurs de localisation (ex: permission refusÈe)
+     * G√®re les erreurs de localisation (ex: permission refus√©e)
      */
     onLocateError() {
         this.setLocateButtonState('error');
@@ -1144,7 +1154,7 @@ export class MapRenderer {
     panToUserLocation() {
         if (this.userLocationMarker) {
             const latLng = this.userLocationMarker.getLatLng();
-            this.map.flyTo(latLng, Math.max(this.map.getZoom(), 17)); // Zoome si nÈcessaire
+            this.map.flyTo(latLng, Math.max(this.map.getZoom(), 17)); // Zoome si n√©cessaire
         } else if (this.map) {
             this.setLocateButtonState('loading');
             this.map.locate({ enableHighAccuracy: true, watch: false, setView: true });
@@ -1152,7 +1162,7 @@ export class MapRenderer {
     }
 
     /**
-     * Ajoute ou met ‡ jour un marqueur de bus en retard sur la carte
+     * Ajoute ou met √† jour un marqueur de bus en retard sur la carte
      * @param {object} delayInfo - Informations sur le retard
      */
     addDelayedBusMarker(delayInfo) {
@@ -1171,7 +1181,7 @@ export class MapRenderer {
             this.delayedBusMarkers = {};
         }
 
-        // CrÈer l'icÙne personnalisÈe avec point d'exclamation
+        // Cr√©er l'ic√¥ne personnalis√©e avec point d'exclamation
         const markerHtml = `
             <div class="delayed-bus-marker ${isMajorDelay ? 'major-delay' : ''}">
                 <div class="bus-icon" style="--line-color: ${routeColor || '#1976D2'}">
@@ -1179,7 +1189,7 @@ export class MapRenderer {
                 </div>
                 <div class="delay-indicator">!</div>
                 <div class="delay-tooltip">
-                    ?? ${routeName}: ~${delayMinutes} min de retard
+                    ‚ö†Ô∏è ${routeName}: ~${delayMinutes} min de retard
                 </div>
             </div>
         `;
@@ -1205,15 +1215,15 @@ export class MapRenderer {
                 <div class="delay-popup">
                     <div class="delay-popup-header" style="background: ${routeColor || '#1976D2'}">
                         <span class="route-name">${routeName}</span>
-                        <span class="delay-badge">?? ~${delayMinutes} min</span>
+                        <span class="delay-badge">‚ö†Ô∏è ~${delayMinutes} min</span>
                     </div>
                     <div class="delay-popup-body">
                         <p><strong>Direction:</strong> ${delayInfo.headsign || 'N/A'}</p>
-                        <p><strong>Prochain arrÍt:</strong> ${delayInfo.nextStopName || 'N/A'}</p>
-                        <p><strong>PrÈvu:</strong> <span class="original-time">${delayInfo.scheduledTime}</span></p>
-                        <p><strong>EstimÈ:</strong> <span class="delayed-time">${delayInfo.estimatedTime}</span></p>
+                        <p><strong>Prochain arr√™t:</strong> ${delayInfo.nextStopName || 'N/A'}</p>
+                        <p><strong>Pr√©vu:</strong> <span class="original-time">${delayInfo.scheduledTime}</span></p>
+                        <p><strong>Estim√©:</strong> <span class="delayed-time">${delayInfo.estimatedTime}</span></p>
                         <p class="delay-note">
-                            ${delayInfo.isPeakHour ? '?? Heure de pointe - trafic dense' : ''}
+                            ${delayInfo.isPeakHour ? 'üöó Heure de pointe - trafic dense' : ''}
                         </p>
                     </div>
                 </div>
@@ -1224,7 +1234,7 @@ export class MapRenderer {
                 .openOn(this.map);
         });
 
-        console.log(`?? Marqueur retard ajoutÈ: ${routeName} ‡ [${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}]`);
+        console.log(`üöå Marqueur retard ajout√©: ${routeName} √† [${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}]`);
     }
 
     /**
@@ -1251,5 +1261,4 @@ export class MapRenderer {
         this.delayedBusMarkers = {};
     }
 }
-
 

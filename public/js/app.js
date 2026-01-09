@@ -1,6 +1,6 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 import { loadBaseLayout } from './viewLoader.js';
 import { bootstrapApp } from './main.js';
@@ -56,7 +56,7 @@ function getHashRouteAndParams() {
 }
 
 function configureDynamicSeo() {
-    const BRAND = 'PériMap';
+    const BRAND = 'PÃ©riMap';
 
     const updateFromHash = () => {
         const { route, params } = getHashRouteAndParams();
@@ -68,8 +68,8 @@ function configureDynamicSeo() {
         // Default (home)
         if (!normalized) {
             applySeo({
-                title: `Péribus - Horaires & Itinéraires Bus Périgueux | ${BRAND}`,
-                description: `Horaires Péribus en temps réel, itinéraires (trajets), carte du réseau et infos voyageurs à Périgueux. ${BRAND} : application gratuite.`
+                title: `PÃ©ribus - Horaires & ItinÃ©raires Bus PÃ©rigueux | ${BRAND}`,
+                description: `Horaires PÃ©ribus en temps rÃ©el, itinÃ©raires (trajets), carte du rÃ©seau et infos voyageurs Ã  PÃ©rigueux. ${BRAND} : application gratuite.`
             });
             return;
         }
@@ -77,43 +77,43 @@ function configureDynamicSeo() {
         if (normalized === 'horaires') {
             applySeo({
                 title: lineLabel
-                    ? `${BRAND} — Horaires ligne ${lineLabel} Péribus`
-                    : `${BRAND} — Liste des lignes Péribus`,
+                    ? `${BRAND} â€” Horaires ligne ${lineLabel} PÃ©ribus`
+                    : `${BRAND} â€” Liste des lignes PÃ©ribus`,
                 description: lineLabel
-                    ? `Consultez les horaires de la ligne ${lineLabel} Péribus (Grand Périgueux) avec ${BRAND}. Prochains passages, arrêts et détails de la ligne.`
-                    : `Retrouvez la liste des lignes Péribus et accédez aux horaires par ligne avec ${BRAND} (Grand Périgueux).`
+                    ? `Consultez les horaires de la ligne ${lineLabel} PÃ©ribus (Grand PÃ©rigueux) avec ${BRAND}. Prochains passages, arrÃªts et dÃ©tails de la ligne.`
+                    : `Retrouvez la liste des lignes PÃ©ribus et accÃ©dez aux horaires par ligne avec ${BRAND} (Grand PÃ©rigueux).`
             });
             return;
         }
 
         if (normalized === 'itineraire') {
             applySeo({
-                title: `${BRAND} — Itinéraires Péribus (trajets)` ,
-                description: `Calculez votre trajet Péribus à Périgueux : itinéraires, correspondances, marche et temps estimés. ${BRAND} simplifie vos déplacements.`
+                title: `${BRAND} â€” ItinÃ©raires PÃ©ribus (trajets)` ,
+                description: `Calculez votre trajet PÃ©ribus Ã  PÃ©rigueux : itinÃ©raires, correspondances, marche et temps estimÃ©s. ${BRAND} simplifie vos dÃ©placements.`
             });
             return;
         }
 
         if (normalized === 'trafic' || normalized === 'info-trafic') {
             applySeo({
-                title: `${BRAND} — Informations voyageurs Péribus`,
-                description: `Suivez les informations voyageurs Péribus : perturbations, état des lignes et messages trafic. Mis à jour régulièrement sur ${BRAND}.`
+                title: `${BRAND} â€” Informations voyageurs PÃ©ribus`,
+                description: `Suivez les informations voyageurs PÃ©ribus : perturbations, Ã©tat des lignes et messages trafic. Mis Ã  jour rÃ©guliÃ¨rement sur ${BRAND}.`
             });
             return;
         }
 
         if (normalized === 'carte') {
             applySeo({
-                title: `${BRAND} — Carte du réseau Péribus`,
-                description: `Explorez la carte du réseau Péribus : lignes, arrêts et déplacements autour de Périgueux. ${BRAND} sur mobile et desktop.`
+                title: `${BRAND} â€” Carte du rÃ©seau PÃ©ribus`,
+                description: `Explorez la carte du rÃ©seau PÃ©ribus : lignes, arrÃªts et dÃ©placements autour de PÃ©rigueux. ${BRAND} sur mobile et desktop.`
             });
             return;
         }
 
         if (normalized === 'tarifs' || normalized === 'tarifs-grille' || normalized === 'tarifs-achat' || normalized === 'tarifs-billettique' || normalized === 'tarifs-amendes') {
             applySeo({
-                title: `${BRAND} — Tarifs Péribus`,
-                description: `Tarifs et billetterie Péribus : grille, achat, billettique et amendes. Retrouvez les infos utiles sur ${BRAND}.`
+                title: `${BRAND} â€” Tarifs PÃ©ribus`,
+                description: `Tarifs et billetterie PÃ©ribus : grille, achat, billettique et amendes. Retrouvez les infos utiles sur ${BRAND}.`
             });
             return;
         }
@@ -127,30 +127,30 @@ function configureDynamicSeo() {
 }
 
 /**
- * Enregistre le Service Worker avec détection automatique des mises à jour
+ * Enregistre le Service Worker avec dÃ©tection automatique des mises Ã  jour
  */
 async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) {
-        console.log('[App] Service Worker non supporté');
+        console.log('[App] Service Worker non supportÃ©');
         return;
     }
 
     try {
         const registration = await navigator.serviceWorker.register('/service-worker.js');
-        console.log('[App] Service Worker enregistré');
+        console.log('[App] Service Worker enregistrÃ©');
 
-        // Vérifie les mises à jour au démarrage
+        // VÃ©rifie les mises Ã  jour au dÃ©marrage
         registration.update();
 
-        // Écoute les mises à jour du SW
+        // Ã‰coute les mises Ã  jour du SW
         registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-            console.log('[App] Nouvelle version du Service Worker détectée');
+            console.log('[App] Nouvelle version du Service Worker dÃ©tectÃ©e');
 
             newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Nouvelle version prête: activer immédiatement (update fluide)
-                    // + garde un fallback visuel si l'activation est bloquée.
+                    // Nouvelle version prÃªte: activer immÃ©diatement (update fluide)
+                    // + garde un fallback visuel si l'activation est bloquÃ©e.
                     try {
                         newWorker.postMessage('skipWaiting');
                     } catch (e) {
@@ -161,7 +161,7 @@ async function registerServiceWorker() {
             });
         });
 
-        // Si le SW est déjà installé et qu'il y a une mise à jour en attente
+        // Si le SW est dÃ©jÃ  installÃ© et qu'il y a une mise Ã  jour en attente
         if (registration.waiting) {
             // On tente d'activer tout de suite.
             try {
@@ -172,7 +172,7 @@ async function registerServiceWorker() {
             showUpdateNotification(registration);
         }
 
-        // Recharge automatiquement quand le nouveau SW prend le contrôle
+        // Recharge automatiquement quand le nouveau SW prend le contrÃ´le
         let refreshing = false;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
@@ -193,19 +193,19 @@ async function registerServiceWorker() {
 }
 
 /**
- * Affiche une notification discrète pour informer de la mise à jour
+ * Affiche une notification discrÃ¨te pour informer de la mise Ã  jour
  */
 function showUpdateNotification(registration) {
-    // Évite les doublons
+    // Ã‰vite les doublons
     if (document.getElementById('update-banner')) return;
 
     const banner = document.createElement('div');
     banner.id = 'update-banner';
     banner.innerHTML = `
         <div class="update-banner-content">
-            <span>?? Une nouvelle version est disponible</span>
-            <button id="update-btn" class="btn btn-primary btn-sm">Mettre à jour</button>
-            <button id="update-dismiss" class="btn-icon-round" aria-label="Fermer">×</button>
+            <span>ðŸ”„ Une nouvelle version est disponible</span>
+            <button id="update-btn" class="btn btn-primary btn-sm">Mettre Ã  jour</button>
+            <button id="update-dismiss" class="btn-icon-round" aria-label="Fermer">Ã—</button>
         </div>
     `;
     banner.style.cssText = `
@@ -224,7 +224,7 @@ function showUpdateNotification(registration) {
 
     document.body.appendChild(banner);
 
-    // Bouton "Mettre à jour" - force le rechargement
+    // Bouton "Mettre Ã  jour" - force le rechargement
     document.getElementById('update-btn').addEventListener('click', async () => {
         try {
             const reg = registration || await navigator.serviceWorker.getRegistration();
@@ -258,7 +258,7 @@ async function startApplication() {
         registerServiceWorker();
 
         // SEO dynamique (titres/snippets) pour les URLs avec hash (/#horaires, /#itineraire, etc.)
-        // Important: main.js nettoie le hash après navigation, donc on doit le lire très tôt.
+        // Important: main.js nettoie le hash aprÃ¨s navigation, donc on doit le lire trÃ¨s tÃ´t.
         configureDynamicSeo();
         
         await loadBaseLayout();
@@ -269,5 +269,4 @@ async function startApplication() {
 }
 
 startApplication();
-
 

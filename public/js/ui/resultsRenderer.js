@@ -1,10 +1,10 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
  * resultsRenderer.js
- * V214: Rendu simplifié - chaque itinéraire affiché séparément, pas de groupement
+ * V214: Rendu simplifiÃ© - chaque itinÃ©raire affichÃ© sÃ©parÃ©ment, pas de groupement
  */
 import { ICONS } from '../config/icons.js';
 
@@ -31,7 +31,7 @@ export function createResultsRenderer(deps) {
   }
 
   /**
-   * V60: Vérifie si l'itinéraire a de la marche significative
+   * V60: VÃ©rifie si l'itinÃ©raire a de la marche significative
    */
   function hasSignificantWalk(itinerary) {
     if (!itinerary?.steps) return false;
@@ -67,11 +67,11 @@ export function createResultsRenderer(deps) {
     }
 
     if (!list.length) {
-      resultsListContainer.innerHTML = `<p class="results-message">Aucun itinéraire n'a été trouvé.</p>`;
+      resultsListContainer.innerHTML = `<p class="results-message">Aucun itinÃ©raire n'a Ã©tÃ© trouvÃ©.</p>`;
       return;
     }
 
-    // V214: Ordre BUS ? BIKE ? WALK, chaque itinéraire affiché individuellement
+    // V214: Ordre BUS â†’ BIKE â†’ WALK, chaque itinÃ©raire affichÃ© individuellement
     const busItins = list.filter(i => getItineraryType(i) === 'BUS');
     const bikeItins = list.filter(i => getItineraryType(i) === 'BIKE');
     const walkItins = list.filter(i => getItineraryType(i) === 'WALK');
@@ -86,7 +86,7 @@ export function createResultsRenderer(deps) {
     let hasBusTitle = false, hasBikeTitle = false, hasWalkTitle = false;
     let globalIndex = 0;
 
-    // V214: Fonction pour rendre UN itinéraire (plus de groupes)
+    // V214: Fonction pour rendre UN itinÃ©raire (plus de groupes)
     const renderItinerary = (itinerary, forceTitle = '') => {
       const type = getItineraryType(itinerary);
       
@@ -96,15 +96,15 @@ export function createResultsRenderer(deps) {
       let title = forceTitle;
       if (mode === 'ALL' && !isArrival) {
         if (globalIndex === 0 && !forceTitle) {
-          title = 'Suggéré';
+          title = 'SuggÃ©rÃ©';
           if (type === 'BUS') hasBusTitle = true;
           if (type === 'BIKE') hasBikeTitle = true;
           if (type === 'WALK') hasWalkTitle = true;
         }
         if (!forceTitle) {
-          if (type === 'BUS' && !hasBusTitle) { title = 'Itinéraires Bus'; hasBusTitle = true; }
-          else if (type === 'BIKE' && !hasBikeTitle) { title = 'Itinéraires Vélo'; hasBikeTitle = true; }
-          else if (type === 'WALK' && !hasWalkTitle) { title = 'Itinéraires Piéton'; hasWalkTitle = true; }
+          if (type === 'BUS' && !hasBusTitle) { title = 'ItinÃ©raires Bus'; hasBusTitle = true; }
+          else if (type === 'BIKE' && !hasBikeTitle) { title = 'ItinÃ©raires VÃ©lo'; hasBikeTitle = true; }
+          else if (type === 'WALK' && !hasWalkTitle) { title = 'ItinÃ©raires PiÃ©ton'; hasWalkTitle = true; }
         }
       }
       if (title) wrapper.innerHTML += `<p class='route-option-title'>${title}</p>`;
@@ -114,11 +114,11 @@ export function createResultsRenderer(deps) {
 
       let summaryHtml = '';
       if (type === 'BIKE') {
-        summaryHtml = `<div class='route-summary-bus-icon route-summary-bike-icon'>${ICONS.BICYCLE}</div><span class='route-type-label'>Trajet à vélo</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon route-summary-bike-icon'>${ICONS.BICYCLE}</div><span class='route-type-label'>Trajet Ã  vÃ©lo</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
       } else if (type === 'WALK') {
-        summaryHtml = `<div class='route-summary-bus-icon route-summary-walk-only-icon'>${ICONS.WALK}</div><span class='route-type-label'>Trajet à pied</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
+        summaryHtml = `<div class='route-summary-bus-icon route-summary-walk-only-icon'>${ICONS.WALK}</div><span class='route-type-label'>Trajet Ã  pied</span><span class='route-type-distance'>${itinerary.steps[0]?.distance || ''}</span>`;
       } else {
-        // Style IDFM - Points entre les étapes
+        // Style IDFM - Points entre les Ã©tapes
         const segments = itinerary.summarySegments || [];
         const hasWalkAtEnd = hasSignificantWalk(itinerary);
         
@@ -126,12 +126,12 @@ export function createResultsRenderer(deps) {
           const label = seg.name || 'Route';
           summaryHtml += `<div class='route-line-badge' style='background-color:${seg.color};color:${seg.textColor};'>${label}</div>`;
           if (i < segments.length - 1) {
-            summaryHtml += `<span class='route-summary-dot'>•</span>`;
+            summaryHtml += `<span class='route-summary-dot'>â€¢</span>`;
           }
         });
         
         if (hasWalkAtEnd) {
-          summaryHtml += `<span class='route-summary-dot'>•</span>`;
+          summaryHtml += `<span class='route-summary-dot'>â€¢</span>`;
           summaryHtml += `<div class='route-summary-walk-icon'>${ICONS.WALK}</div>`;
         }
       }
@@ -144,7 +144,7 @@ export function createResultsRenderer(deps) {
         ? `<span class='route-time' style='color:var(--text-secondary);font-weight:500;'>(Trajet)</span>`
         : `<span class='route-time'>${itinerary.departureTime} &gt; ${itinerary.arrivalTime}</span>`;
 
-      // V214: Plus de "AUSSI À" - chaque trajet est affiché séparément
+      // V214: Plus de "AUSSI Ã€" - chaque trajet est affichÃ© sÃ©parÃ©ment
       card.innerHTML = `
         <div class='route-summary-line'>${summaryHtml}</div>
         <div class='route-footer'>${timeHtml}<span class='route-duration'>${ecoHtml}</span></div>
@@ -161,17 +161,17 @@ export function createResultsRenderer(deps) {
       globalIndex++;
     };
 
-    // V214: Afficher chaque itinéraire individuellement
+    // V214: Afficher chaque itinÃ©raire individuellement
     busItins.forEach(it => renderItinerary(it));
     bikeItins.forEach(it => renderItinerary(it));
     walkItins.forEach(it => renderItinerary(it));
     
-    // V149: Bouton "Générer + de trajets" pour charger plus de bus
+    // V149: Bouton "GÃ©nÃ©rer + de trajets" pour charger plus de bus
     const loadMoreBtn = document.createElement('button');
     loadMoreBtn.className = 'btn btn-secondary btn-load-more';
     loadMoreBtn.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-      Générer + de trajets
+      GÃ©nÃ©rer + de trajets
     `;
     loadMoreBtn.addEventListener('click', () => {
       loadMoreBtn.disabled = true;
@@ -182,7 +182,7 @@ export function createResultsRenderer(deps) {
           loadMoreBtn.disabled = false;
           loadMoreBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-            Générer + de trajets
+            GÃ©nÃ©rer + de trajets
           `;
         });
       } else if (typeof deps.onLoadMoreDepartures === 'function') {
@@ -190,7 +190,7 @@ export function createResultsRenderer(deps) {
           loadMoreBtn.disabled = false;
           loadMoreBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-            Générer + de trajets
+            GÃ©nÃ©rer + de trajets
           `;
         });
       }
@@ -200,5 +200,4 @@ export function createResultsRenderer(deps) {
 
   return { render };
 }
-
 

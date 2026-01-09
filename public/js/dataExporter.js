@@ -42,19 +42,14 @@ export class DataExporterUI {
         // Ajouter un bouton au menu admin s'il existe
         this.addToAdminMenu();
 
-        // Keyboard shortcut: Alt+D (toujours actif pour dev)
-        document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.key.toLowerCase() === 'd') {
-                e.preventDefault();
-                this.toggle();
-            }
-        });
-        
-        // Log d'initialisation
+        // Keyboard shortcut: Alt+D pour admin
         if (this.isAdminMode) {
+            document.addEventListener('keydown', (e) => {
+                if (e.altKey && e.key.toLowerCase() === 'd') {
+                    this.toggle();
+                }
+            });
             console.log('[DataExporter] ✅ Console admin initialisée (Alt+D)');
-        } else {
-            console.log('[DataExporter] 📊 Console initialisée (Alt+D pour développeurs)');
         }
     }
 

@@ -1,6 +1,6 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
     const R = 6371e3;
@@ -77,10 +77,10 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
             const placeId = await apiManager.reverseGeocode(lat, lng);
             state.userPlaceId = placeId || null;
             if (placeId) {
-                console.log('Géolocalisation inversée réussie, place_id:', placeId);
+                console.log('GÃ©olocalisation inversÃ©e rÃ©ussie, place_id:', placeId);
             }
         } catch (error) {
-            console.error('Erreur lors de la géolocalisation inversée:', error);
+            console.error('Erreur lors de la gÃ©olocalisation inversÃ©e:', error);
             state.userPlaceId = null;
         } finally {
             state.isGeocoding = false;
@@ -133,7 +133,7 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
     };
 
     const handleGeolocationError = (error) => {
-        console.warn(`Erreur de géolocalisation (code ${error.code}): ${error.message}`);
+        console.warn(`Erreur de gÃ©olocalisation (code ${error.code}): ${error.message}`);
         disableButtons();
         if (typeof onUserLocationError === 'function') {
             onUserLocationError(error);
@@ -152,7 +152,7 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
         }
 
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            console.warn("La géolocalisation n'est pas supportée par ce navigateur.");
+            console.warn("La gÃ©olocalisation n'est pas supportÃ©e par ce navigateur.");
             disableButtons();
             return;
         }
@@ -170,7 +170,7 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
 
     const useCurrentLocationAsDeparture = async ({ fromInput, toInput, geolocateBtn, onPlaceResolved } = {}) => {
         if (!state.userLocation) {
-            alert('Impossible de récupérer votre position. Avez-vous autorisé la géolocalisation ?');
+            alert('Impossible de rÃ©cupÃ©rer votre position. Avez-vous autorisÃ© la gÃ©olocalisation ?');
             return;
         }
 
@@ -183,7 +183,7 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
         }
 
         if (!state.userPlaceId) {
-            alert("Impossible de convertir votre position en adresse pour le planificateur. Veuillez réessayer.");
+            alert("Impossible de convertir votre position en adresse pour le planificateur. Veuillez rÃ©essayer.");
             setButtonIdle(targetBtn);
             return;
         }
@@ -214,5 +214,4 @@ export function createGeolocationManager({ apiManager, icons = {}, onUserLocatio
         getUserPlaceId
     };
 }
-
 

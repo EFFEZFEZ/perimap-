@@ -1,6 +1,6 @@
-/*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ï»¿/*
+ * Copyright (c) 2025 PÃ©rimap. Tous droits rÃ©servÃ©s.
+ * Ce code ne peut Ãªtre ni copiÃ©, ni distribuÃ©, ni modifiÃ© sans l'autorisation Ã©crite de l'auteur.
  */
 /**
  * routeDrawing.js - Utilitaires de dessin de routes sur la carte
@@ -8,10 +8,10 @@
  * @module map/routeDrawing
  * @version V221
  * 
- * Ce module gère le dessin des itinéraires sur la carte Leaflet :
- * - Styles de polylines (couleur, épaisseur, hachures)
- * - Extraction et décodage des polylines
- * - Ajout des marqueurs d'arrêts
+ * Ce module gÃ¨re le dessin des itinÃ©raires sur la carte Leaflet :
+ * - Styles de polylines (couleur, Ã©paisseur, hachures)
+ * - Extraction et dÃ©codage des polylines
+ * - Ajout des marqueurs d'arrÃªts
  */
 
 import { decodePolyline } from '../router.js';
@@ -21,7 +21,7 @@ import { resolveStopCoordinates } from '../utils/geo.js';
 // === CONSTANTES ===
 
 /**
- * Priorité des rôles d'arrêts pour l'affichage des marqueurs
+ * PrioritÃ© des rÃ´les d'arrÃªts pour l'affichage des marqueurs
  * @type {Object<string, number>}
  */
 export const STOP_ROLE_PRIORITY = {
@@ -31,11 +31,11 @@ export const STOP_ROLE_PRIORITY = {
     intermediate: 1
 };
 
-// === DÉTECTION DE STEPS ===
+// === DÃ‰TECTION DE STEPS ===
 
 /**
- * Vérifie si une étape est un step d'attente/correspondance
- * @param {Object} step - L'étape à vérifier
+ * VÃ©rifie si une Ã©tape est un step d'attente/correspondance
+ * @param {Object} step - L'Ã©tape Ã  vÃ©rifier
  * @returns {boolean}
  */
 export function isWaitStep(step) {
@@ -55,8 +55,8 @@ export function isWaitStep(step) {
 // === POLYLINES ===
 
 /**
- * Extrait la valeur encodée d'une polyline
- * @param {Object|string} polyline - Polyline ou chaîne encodée
+ * Extrait la valeur encodÃ©e d'une polyline
+ * @param {Object|string} polyline - Polyline ou chaÃ®ne encodÃ©e
  * @returns {string|null}
  */
 export function getEncodedPolylineValue(polyline) {
@@ -66,7 +66,7 @@ export function getEncodedPolylineValue(polyline) {
 }
 
 /**
- * Extrait les coordonnées latLng d'une polyline
+ * Extrait les coordonnÃ©es latLng d'une polyline
  * Supporte plusieurs formats (array, encodedPolyline, coordinates)
  * 
  * @param {Object|Array|string} polyline - La polyline
@@ -101,7 +101,7 @@ export function getPolylineLatLngs(polyline) {
         if (direct) return direct;
     }
 
-    // Cas 3: Objet avec points (peut être encodé ou array)
+    // Cas 3: Objet avec points (peut Ãªtre encodÃ© ou array)
     if (Array.isArray(polyline.points)) {
         const maybeRaw = normalizePairs(polyline.points);
         if (maybeRaw) return maybeRaw;
@@ -113,7 +113,7 @@ export function getPolylineLatLngs(polyline) {
         if (converted) return converted;
     }
 
-    // Cas 5: Chaîne encodée
+    // Cas 5: ChaÃ®ne encodÃ©e
     const encoded = getEncodedPolylineValue(polyline);
     if (encoded) {
         try {
@@ -128,7 +128,7 @@ export function getPolylineLatLngs(polyline) {
 
 /**
  * Extrait toutes les polylines d'un step
- * @param {Object} step - L'étape
+ * @param {Object} step - L'Ã©tape
  * @returns {Array} Array de polylines
  */
 export function extractStepPolylines(step) {
@@ -153,12 +153,12 @@ export function extractStepPolylines(step) {
 // === STYLES LEAFLET ===
 
 /**
- * Détermine le style Leaflet pour une étape d'itinéraire
- * @param {Object} step - L'étape
+ * DÃ©termine le style Leaflet pour une Ã©tape d'itinÃ©raire
+ * @param {Object} step - L'Ã©tape
  * @returns {Object} Style Leaflet (color, weight, opacity, dashArray)
  */
 export function getLeafletStyleForStep(step) {
-    // Vérifie le type simple (vélo/marche)
+    // VÃ©rifie le type simple (vÃ©lo/marche)
     if (step.type === 'BIKE') {
         return {
             color: 'var(--secondary)',
@@ -171,10 +171,10 @@ export function getLeafletStyleForStep(step) {
             color: 'var(--primary)',
             weight: 5,
             opacity: 0.8,
-            dashArray: '10, 10' // Hachuré
+            dashArray: '10, 10' // HachurÃ©
         };
     }
-    // Vérifie le type Bus
+    // VÃ©rifie le type Bus
     if (step.type === 'BUS') {
         const busColor = step.routeColor || 'var(--primary)';
         return {
@@ -184,12 +184,12 @@ export function getLeafletStyleForStep(step) {
         };
     }
     
-    // Fallback pour les types Google (au cas où)
+    // Fallback pour les types Google (au cas oÃ¹)
     if (step.travelMode === 'BICYCLE') return getLeafletStyleForStep({ type: 'BIKE' });
     if (step.travelMode === 'WALK') return getLeafletStyleForStep({ type: 'WALK' });
     if (step.travelMode === 'TRANSIT') return getLeafletStyleForStep({ type: 'BUS', routeColor: step.routeColor });
 
-    // Style par défaut
+    // Style par dÃ©faut
     return {
         color: 'var(--primary)',
         weight: 5,
@@ -200,8 +200,8 @@ export function getLeafletStyleForStep(step) {
 // === MARQUEURS ===
 
 /**
- * Crée un divIcon Leaflet pour un arrêt
- * @param {string} role - Rôle de l'arrêt (boarding, alighting, transfer, intermediate)
+ * CrÃ©e un divIcon Leaflet pour un arrÃªt
+ * @param {string} role - RÃ´le de l'arrÃªt (boarding, alighting, transfer, intermediate)
  * @returns {L.DivIcon|null}
  */
 export function createStopDivIcon(role) {
@@ -224,9 +224,9 @@ export function createStopDivIcon(role) {
 }
 
 /**
- * Ajoute les marqueurs d'arrêts pour un itinéraire
+ * Ajoute les marqueurs d'arrÃªts pour un itinÃ©raire
  * 
- * @param {Object} itinerary - L'itinéraire
+ * @param {Object} itinerary - L'itinÃ©raire
  * @param {L.Map} map - La carte Leaflet
  * @param {L.LayerGroup} markerLayer - Le layer pour les marqueurs
  * @param {Object} [options] - Options
@@ -252,12 +252,12 @@ export function addItineraryMarkers(itinerary, map, markerLayer, options = {}) {
         const isLastBus = index === busSteps.length - 1;
         const stepStops = [];
 
-        // Arrêt de départ
+        // ArrÃªt de dÃ©part
         if (step.departureStop) {
             stepStops.push({ name: step.departureStop, role: isFirstBus ? 'boarding' : 'transfer' });
         }
 
-        // Arrêts intermédiaires
+        // ArrÃªts intermÃ©diaires
         let intermediateStopsData = [];
         
         if (Array.isArray(step.intermediateStops) && step.intermediateStops.length > 0) {
@@ -290,12 +290,12 @@ export function addItineraryMarkers(itinerary, map, markerLayer, options = {}) {
             }
         });
 
-        // Arrêt d'arrivée
+        // ArrÃªt d'arrivÃ©e
         if (step.arrivalStop) {
             stepStops.push({ name: step.arrivalStop, role: isLastBus ? 'alighting' : 'transfer' });
         }
 
-        // Résoudre les coordonnées
+        // RÃ©soudre les coordonnÃ©es
         stepStops.forEach(stop => {
             let coords = null;
             
@@ -306,7 +306,7 @@ export function addItineraryMarkers(itinerary, map, markerLayer, options = {}) {
             }
             
             if (!coords) {
-                console.log(`?? Coordonnées non trouvées pour: ${stop.name}`);
+                console.log(`âš ï¸ CoordonnÃ©es non trouvÃ©es pour: ${stop.name}`);
                 return;
             }
 
@@ -338,7 +338,7 @@ export function addItineraryMarkers(itinerary, map, markerLayer, options = {}) {
         return;
     }
 
-    // Créer les marqueurs avec z-index approprié
+    // CrÃ©er les marqueurs avec z-index appropriÃ©
     stopPoints.forEach(point => {
         const icon = createStopDivIcon(point.role);
         if (!icon) return;
@@ -357,12 +357,12 @@ export function addItineraryMarkers(itinerary, map, markerLayer, options = {}) {
         markerLayer.addLayer(marker);
     });
     
-    console.log(`?? ${stopPoints.length} marqueurs ajoutés (${stopPoints.filter(p => p.role === 'intermediate').length} arrêts intermédiaires)`);
+    console.log(`ðŸ“ ${stopPoints.length} marqueurs ajoutÃ©s (${stopPoints.filter(p => p.role === 'intermediate').length} arrÃªts intermÃ©diaires)`);
 }
 
 /**
  * Ajoute des marqueurs de fallback depuis les polylines
- * @param {Object} itinerary - L'itinéraire
+ * @param {Object} itinerary - L'itinÃ©raire
  * @param {L.LayerGroup} markerLayer - Le layer pour les marqueurs
  */
 export function addFallbackItineraryMarkers(itinerary, markerLayer) {
@@ -379,7 +379,7 @@ export function addFallbackItineraryMarkers(itinerary, markerLayer) {
         fallbackPoints.push({ lat, lng, role: 'boarding' });
     }
 
-    // Points intermédiaires (correspondances)
+    // Points intermÃ©diaires (correspondances)
     itinerary.steps.forEach((step, index) => {
         if (index === itinerary.steps.length - 1) return;
         const polyline = (step.type === 'BUS')
@@ -403,7 +403,7 @@ export function addFallbackItineraryMarkers(itinerary, markerLayer) {
         fallbackPoints.push({ lat, lng, role: 'alighting' });
     }
 
-    // Créer les marqueurs
+    // CrÃ©er les marqueurs
     fallbackPoints.forEach(point => {
         const icon = createStopDivIcon(point.role);
         if (!icon) return;
@@ -415,15 +415,15 @@ export function addFallbackItineraryMarkers(itinerary, markerLayer) {
 }
 
 /**
- * Dessine un itinéraire sur une carte
+ * Dessine un itinÃ©raire sur une carte
  * 
- * @param {Object} itinerary - L'itinéraire à dessiner
+ * @param {Object} itinerary - L'itinÃ©raire Ã  dessiner
  * @param {L.Map} map - La carte Leaflet
- * @param {L.Layer|null} existingRouteLayer - Layer existant à remplacer
+ * @param {L.Layer|null} existingRouteLayer - Layer existant Ã  remplacer
  * @param {L.LayerGroup} markerLayer - Layer pour les marqueurs
  * @param {Object} [options] - Options
  * @param {Object} [options.dataManager] - Instance du DataManager
- * @returns {L.FeatureGroup|null} Le nouveau layer créé
+ * @returns {L.FeatureGroup|null} Le nouveau layer crÃ©Ã©
  */
 export function drawRouteOnMap(itinerary, map, existingRouteLayer, markerLayer, options = {}) {
     // Accepter un tableau ou un objet unique
@@ -462,7 +462,7 @@ export function drawRouteOnMap(itinerary, map, existingRouteLayer, markerLayer, 
 
     if (stepLayers.length === 0) return null;
 
-    // Créer un groupe avec toutes les couches
+    // CrÃ©er un groupe avec toutes les couches
     const routeLayer = L.featureGroup(stepLayers).addTo(map);
     
     // Ajouter les marqueurs
@@ -479,13 +479,13 @@ export function drawRouteOnMap(itinerary, map, existingRouteLayer, markerLayer, 
     return routeLayer;
 }
 
-// === EXPORTS PAR DÉFAUT ===
+// === EXPORTS PAR DÃ‰FAUT ===
 
 export default {
     // Constantes
     STOP_ROLE_PRIORITY,
     
-    // Détection
+    // DÃ©tection
     isWaitStep,
     
     // Polylines
@@ -504,5 +504,4 @@ export default {
     // Dessin
     drawRouteOnMap
 };
-
 

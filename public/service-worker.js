@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2026-2026 Périmap. Tous droits réservés.
+﻿/*
+ * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
@@ -13,12 +13,12 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v287'; // ✅ INCRÉMENTEZ À CHAQUE DÉPLOIEMENT - v287: Fix syntaxe et enable Alt+D
+const CACHE_VERSION = 'v288'; // ✅ v288: fix encoding + modern bus popup + delay analytics
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 
-// Assets critiques � pr�-cacher (charg�s imm�diatement)
+// Assets critiques à pré-cacher (chargés immédiatement)
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
@@ -39,7 +39,7 @@ const CRITICAL_ASSETS = [
   '/sitemap.xml'
 ];
 
-// Assets secondaires (charg�s en arri�re-plan)
+// Assets secondaires (chargés en arrière-plan)
 const SECONDARY_ASSETS = [
   '/js/main.js',
   '/js/dataManager.js',
@@ -60,10 +60,10 @@ const SECONDARY_ASSETS = [
   '/js/delayManager.js',
   '/js/dataExporter.js',
   '/js/delayStatsUI.js',
-  '/js/config/delayConfig.js',
   '/js/config/icons.js',
   '/js/config/routes.js',
   '/js/config/stopKeyMapping.js',
+  '/js/config/delayConfig.js',
   '/js/utils/formatters.js',
   '/js/utils/geo.js',
   '/js/utils/stopName.mjs',
@@ -88,8 +88,8 @@ const SECONDARY_ASSETS = [
   '/views/tarifs-grille.html',
   '/css/brand.css',
   '/css/line-pages.css',
-  '/css/data-exporter.css',
-  '/css/delay-stats.css'
+  '/css/delay-stats.css',
+  '/css/data-exporter.css'
 ];
 
 // Patterns pour Network-Only
@@ -105,14 +105,14 @@ self.addEventListener('install', (event) => {
   console.log('[SW] Installation version', CACHE_VERSION);
   event.waitUntil(
     (async () => {
-      // Cache critique en priorit�
+      // Cache critique en priorité
       const staticCache = await caches.open(STATIC_CACHE);
       await staticCache.addAll(CRITICAL_ASSETS);
-      console.log('[SW] Assets critiques cach�s');
+      console.log('[SW] Assets critiques cachés');
       
-      // Cache secondaire en arri�re-plan (non-bloquant)
+      // Cache secondaire en arrière-plan (non-bloquant)
       staticCache.addAll(SECONDARY_ASSETS).catch(err => {
-        console.warn('[SW] Certains assets secondaires non cach�s:', err);
+        console.warn('[SW] Certains assets secondaires non cachés:', err);
       });
       
       await self.skipWaiting();
@@ -131,7 +131,7 @@ self.addEventListener('activate', (event) => {
       await Promise.all(
         keys.map(key => {
           if (!key.includes(CACHE_VERSION)) {
-            console.log('[SW] Suppression cache obsol�te:', key);
+            console.log('[SW] Suppression cache obsolète:', key);
             return caches.delete(key);
           }
         })
@@ -142,7 +142,7 @@ self.addEventListener('activate', (event) => {
 });
 
 /**
- * Fetch: Strat�gies diff�renci�es selon le type de ressource
+ * Fetch: Stratégies différenciées selon le type de ressource
  */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -158,25 +158,25 @@ self.addEventListener('fetch', (event) => {
   }
   
   // Stale-While-Revalidate pour assets statiques (JS, CSS, HTML)
-  // Objectif: �viter un site "fig�" entre deux versions.
+  // Objectif: éviter un site "figé" entre deux versions.
   if (url.origin === self.location.origin &&
       (request.url.endsWith('.js') || request.url.endsWith('.css') || request.url.endsWith('.html'))) {
     event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
     return;
   }
   
-  // Stale-While-Revalidate pour donn�es GTFS
+  // Stale-While-Revalidate pour données GTFS
   if (GTFS_PATTERNS.some(p => request.url.includes(p))) {
     event.respondWith(staleWhileRevalidate(request, DATA_CACHE));
     return;
   }
   
-  // Par d�faut: Stale-While-Revalidate
+  // Par défaut: Stale-While-Revalidate
   event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
 });
 
 /**
- * Cache-First: Retourne le cache, sinon r�seau
+ * Cache-First: Retourne le cache, sinon réseau
  */
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
@@ -193,13 +193,13 @@ async function cacheFirst(request, cacheName) {
 }
 
 /**
- * Stale-While-Revalidate: Retourne le cache, met � jour en arri�re-plan
+ * Stale-While-Revalidate: Retourne le cache, met à jour en arrière-plan
  */
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   
-  // Revalidation en arri�re-plan
+  // Revalidation en arrière-plan
   const networkPromise = fetch(request)
     .then(response => {
       if (response.ok) cache.put(request, response.clone());
@@ -211,7 +211,7 @@ async function staleWhileRevalidate(request, cacheName) {
 }
 
 /**
- * Message: Permet de forcer une mise � jour depuis l'app
+ * Message: Permet de forcer une mise à jour depuis l'app
  */
 self.addEventListener('message', (event) => {
   if (event.data === 'skipWaiting') self.skipWaiting();
@@ -219,5 +219,4 @@ self.addEventListener('message', (event) => {
     caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
   }
 });
-
 
