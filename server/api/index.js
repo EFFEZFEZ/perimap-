@@ -5,15 +5,16 @@
  */
 
 import { Router } from 'express';
-import routesApi from './routes.js';
-import placesApi from './places.js';
+import otpProxyApi from './otp-proxy.js';
 import realtimeApi from './realtime.js';
+import gtfsStaticApi from './gtfs-static.js';
 
 const router = Router();
 
-router.use('/routes', routesApi);
-router.use('/places', placesApi);
+router.use('/routes', otpProxyApi);
+router.use('/places', otpProxyApi);
 router.use('/realtime', realtimeApi);
+router.use('/gtfs', gtfsStaticApi);
 
 router.get('/', (req, res) => {
   res.json({

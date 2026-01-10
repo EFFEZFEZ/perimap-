@@ -6,8 +6,8 @@ import { cleanDataset, buildGtfsIndexes } from '../utils/gtfsProcessor.js';
 
 const BUNDLE_VERSION = '20260108b'; // Version du bundle GTFS - change à chaque mise à jour
 const OPTIMIZED_BUNDLE_CANDIDATES = [
-    { url: `/data/gtfs/gtfs.bundle.json.gz?v=${BUNDLE_VERSION}`, type: 'gzip' },
-    { url: `/data/gtfs/gtfs.bundle.json?v=${BUNDLE_VERSION}`, type: 'json' }
+    { url: `/api/gtfs/gtfs.bundle.json.gz?v=${BUNDLE_VERSION}`, type: 'gzip' },
+    { url: `/api/gtfs/gtfs.bundle.json?v=${BUNDLE_VERSION}`, type: 'json' }
 ];
 const GTFS_FILES = [
     { file: 'routes.txt', key: 'routes' },
@@ -101,7 +101,7 @@ async function loadFromCsv() {
 }
 
 async function fetchAndParseCsv(filename) {
-    const response = await fetch(`/data/gtfs/${filename}`, { cache: 'no-store' });
+    const response = await fetch(`/api/gtfs/${filename}`, { cache: 'no-store' });
     if (!response.ok) {
         throw new Error(`Impossible de charger ${filename}: ${response.statusText}`);
     }
