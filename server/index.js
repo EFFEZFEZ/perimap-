@@ -51,7 +51,15 @@ async function startServer() {
     const app = express();
 
     app.use(helmet({ contentSecurityPolicy: false }));
-    app.use(compression());
+    app.use(compression({
+      filter: (req, res) => {
+        // Don't compress GTFS files - they'll be served statically by Vercel
+        if (req.path.startsWith('/data/gtfs/')) {
+          return false;
+        }
+        return compression.filter(req, res);
+      }
+    }));
     app.use(express.json({ limit: '1mb' }));
     app.use(express.urlencoded({ extended: true }));
 
