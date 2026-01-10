@@ -135,6 +135,8 @@ export class RaptorAlgorithm {
   computeJourneys(originStopId, destStopId, departureTime, dateStr) {
     const { maxRounds, minTransferTime } = this.options;
 
+    console.log(`🚀 RAPTOR.computeJourneys: ${originStopId} → ${destStopId}, départ=${departureTime}s (${Math.floor(departureTime/3600)}h${Math.floor((departureTime%3600)/60)}), date=${dateStr}`);
+
     // Tableaux RAPTOR
     // τ[k][p] = meilleure heure d'arrivée à l'arrêt p avec exactement k correspondances
     const tau = [];
@@ -177,6 +179,8 @@ export class RaptorAlgorithm {
         const routes = this.routesAtStop.get(stopId) || [];
         routes.forEach(r => routesToScan.add(r));
       });
+      
+      console.log(`  Round ${k}: ${routesToScan.size} routes à scanner, ${marked.size} arrêts marqués`);
       marked.clear();
 
       // Pour chaque route
@@ -187,8 +191,11 @@ export class RaptorAlgorithm {
       // Transferts à pied (si implémentés)
       // this.processFootpaths(k, tau, tauStar, marked);
 
+      console.log(`  Round ${k} terminé: ${marked.size} nouveaux arrêts améliorés`);
+
       // Si aucun arrêt n'a été amélioré, on peut arrêter
       if (marked.size === 0) {
+        console.log(`  → Arrêt à round ${k} (aucune amélioration)`);
         break;
       }
     }

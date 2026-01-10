@@ -132,9 +132,12 @@ export class PathfindingEngine {
     }
 
     // 2. Pour chaque combinaison origine/destination, calculer l'itinéraire RAPTOR
+    console.log(`🔍 Tentative de calcul RAPTOR pour ${originStops.length} x ${destStops.length} combinaisons`);
     for (const originStop of originStops.slice(0, 3)) {
       for (const destStop of destStops.slice(0, 3)) {
         const adjustedDepartureTime = timeSeconds + originStop.walkTime;
+        
+        console.log(`  → Essai: ${originStop.stop.stop_name} → ${destStop.stop.stop_name} à ${Math.floor(adjustedDepartureTime/3600)}h${Math.floor((adjustedDepartureTime%3600)/60)}`);
         
         const journeys = this.raptor.computeJourneys(
           originStop.stop.stop_id,
@@ -142,6 +145,8 @@ export class PathfindingEngine {
           adjustedDepartureTime,
           dateStr
         );
+
+        console.log(`  ← Résultat: ${journeys.length} itinéraires trouvés`);
 
         for (const journey of journeys) {
           const itinerary = this.buildItinerary(
