@@ -288,7 +288,7 @@ export async function initializeRouter() {
  * @returns {Object} Résultat compatible avec le format OTP
  */
 export async function planItineraryNative(params) {
-  const { origin, destination, time, mode = 'TRANSIT', maxWalkDistance = 1000, maxTransfers = 3 } = params;
+  const { origin, destination, time, mode = 'TRANSIT', maxWalkDistance = 3000, maxTransfers = 3 } = params;
 
   // S'assurer que le routeur est initialisé
   const engine = await initializeRouter();

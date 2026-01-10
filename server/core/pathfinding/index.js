@@ -94,6 +94,15 @@ export class PathfindingEngine {
     const originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     const destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
 
+    console.log(`🔍 Arrêts proches origine (${origin.lat.toFixed(4)}, ${origin.lon.toFixed(4)}): ${originStops.length} trouvés`);
+    if (originStops.length > 0) {
+      console.log(`   → ${originStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
+    }
+    console.log(`🔍 Arrêts proches destination (${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}): ${destStops.length} trouvés`);
+    if (destStops.length > 0) {
+      console.log(`   → ${destStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
+    }
+
     if (originStops.length === 0 || destStops.length === 0) {
       // Pas d'arrêts à proximité, retourner uniquement le trajet à pied
       const walkPath = this.astar.computeDirectPath(
