@@ -138,7 +138,7 @@ async function registerServiceWorker() {
 
     try {
         const registration = await navigator.serviceWorker.register('/service-worker.js');
-        console.log('[App] Service Worker enregistré');
+        console.log('[App] 📦 Service Worker enregistré');
 
         // Vérifie les mises à jour au démarrage
         registration.update();
@@ -146,16 +146,16 @@ async function registerServiceWorker() {
         // Écoute les mises à jour du SW
         registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
-            console.log('[App] Nouvelle version du Service Worker détectée');
+            console.log('[App] 🚀 Nouvelle version du Service Worker détectée');
 
             newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     // Nouvelle version prête: activer immédiatement (update fluide)
-                    // + garde un fallback visuel si l'activation est bloquée.
+                    console.log('[App] ✅ Nouvelle version prête, activation...');
                     try {
                         newWorker.postMessage('skipWaiting');
                     } catch (e) {
-                        // ignore
+                        console.error('[App] Erreur skipWaiting:', e);
                     }
                     showUpdateNotification(registration);
                 }
@@ -164,11 +164,11 @@ async function registerServiceWorker() {
 
         // Si le SW est déjà installé et qu'il y a une mise à jour en attente
         if (registration.waiting) {
-            // On tente d'activer tout de suite.
+            console.log('[App] ⏳ Mise à jour en attente, activation...');
             try {
                 registration.waiting.postMessage('skipWaiting');
             } catch (e) {
-                // ignore
+                console.error('[App] Erreur skipWaiting:', e);
             }
             showUpdateNotification(registration);
         }
@@ -178,18 +178,30 @@ async function registerServiceWorker() {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (!refreshing) {
                 refreshing = true;
-                console.log('[App] Nouveau Service Worker actif, rechargement...');
-                window.location.reload();
+                console.log('[App] 🔄 Nouveau Service Worker actif, rechargement...');
+                // Délai court pour laisser le temps au SW de nettoyer les caches
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             }
         });
 
-        // Re-check updates when user comes back to the tab (keeps updates snappy)
+        // Écoute les messages du Service Worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data.type === 'CACHE_UPDATED') {
+                console.log('[App] 📱 Message du SW:', event.data.message);
+                // Déjà en train de recharger via controllerchange
+            }
+        });
+
+        // Re-check updates when user comes back to the tab
         window.addEventListener('focus', () => {
-            try { registration.update(); } catch (e) { /* ignore */ }
+            console.log('[App] 👁️ Focus - vérification des mises à jour');
+            try { registration.update(); } catch (e) { console.warn('[App] Erreur update:', e); }
         });
 
     } catch (error) {
-        console.warn('[App] Erreur enregistrement Service Worker:', error);
+        console.error('[App] ❌ Erreur enregistrement Service Worker:', error);
     }
 }
 

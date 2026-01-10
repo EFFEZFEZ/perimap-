@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v310'; // ✅ v310: Réduction cache mémoire serveur pour VPS 1Go
+const CACHE_VERSION = 'v311'; // ✅ v311: Optimisation UI + RAPTOR + nettoyage cache agressif
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -107,41 +107,77 @@ const GTFS_PATTERNS = ['/data/gtfs/', '.json', '.txt'];
  * Installation: Pré-cache les assets critiques, puis secondaires
  */
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installation version', CACHE_VERSION);
+  console.log('[SW] 📦 Installation version', CACHE_VERSION);
   event.waitUntil(
     (async () => {
-      // Cache critique en priorité
-      const staticCache = await caches.open(STATIC_CACHE);
-      await staticCache.addAll(CRITICAL_ASSETS);
-      console.log('[SW] Assets critiques cachés');
-      
-      // Cache secondaire en arrière-plan (non-bloquant)
-      staticCache.addAll(SECONDARY_ASSETS).catch(err => {
-        console.warn('[SW] Certains assets secondaires non cachés:', err);
-      });
-      
-      await self.skipWaiting();
+      try {
+        // Cache critique en priorité
+        const staticCache = await caches.open(STATIC_CACHE);
+        await staticCache.addAll(CRITICAL_ASSETS);
+        console.log('[SW] ✅ Assets critiques cachés');
+        
+        // Cache secondaire en arrière-plan (non-bloquant)
+        staticCache.addAll(SECONDARY_ASSETS).catch(err => {
+          console.warn('[SW] ⚠️ Certains assets secondaires non cachés:', err);
+        });
+        
+        // Force la nouvelle version
+        await self.skipWaiting();
+        console.log('[SW] ✅ Service Worker activé immédiatement');
+      } catch (err) {
+        console.error('[SW] Erreur installation:', err);
+      }
     })()
   );
 });
 
 /**
- * Activation: Nettoie les anciens caches
+ * Activation: Nettoie TOUS les anciens caches + anciens stores
  */
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activation version', CACHE_VERSION);
+  console.log('[SW] 🚀 Activation version', CACHE_VERSION, '- Nettoyage agressif');
   event.waitUntil(
     (async () => {
-      const keys = await caches.keys();
-      await Promise.all(
-        keys.map(key => {
+      try {
+        // 1. Supprimer TOUS les anciens caches
+        const keys = await caches.keys();
+        const deletePromises = keys.map(key => {
           if (!key.includes(CACHE_VERSION)) {
-            console.log('[SW] Suppression cache obsolète:', key);
+            console.log('[SW] ❌ Suppression cache obsolète:', key);
             return caches.delete(key);
           }
-        })
-      );
-      await self.clients.claim();
+        });
+        await Promise.all(deletePromises);
+        console.log('[SW] ✅ Caches nettoyés');
+
+        // 2. Nettoyer les IndexedDB et LocalStorage obsolètes
+        try {
+          const dbs = await indexedDB.databases();
+          dbs.forEach(db => {
+            console.log('[SW] 🗑️ Vidage IndexedDB:', db.name);
+            indexedDB.deleteDatabase(db.name);
+          });
+        } catch (err) {
+          console.warn('[SW] Erreur nettoyage IndexedDB:', err);
+        }
+
+        // 3. Réclamer tous les clients
+        await self.clients.claim();
+        console.log('[SW] ✅ Tous les clients réclamés');
+        
+        // 4. Notifier tous les clients
+        const allClients = await self.clients.matchAll();
+        allClients.forEach(client => {
+          client.postMessage({
+            type: 'CACHE_UPDATED',
+            version: CACHE_VERSION,
+            message: 'Nouvelle version Périmap disponible - Page rechargée'
+          });
+        });
+
+      } catch (err) {
+        console.error('[SW] Erreur activation:', err);
+      }
     })()
   );
 });
@@ -219,9 +255,25 @@ async function staleWhileRevalidate(request, cacheName) {
  * Message: Permet de forcer une mise à jour depuis l'app
  */
 self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') self.skipWaiting();
+  console.log('[SW] Message reçu:', event.data);
+  
+  if (event.data === 'skipWaiting') {
+    console.log('[SW] 🔄 Activation immédiate demandée');
+    self.skipWaiting();
+  }
+  
   if (event.data === 'clearCache') {
-    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    console.log('[SW] 🗑️ Suppression de tous les caches');
+    caches.keys().then(keys => {
+      keys.forEach(k => {
+        console.log('[SW] Suppression:', k);
+        caches.delete(k);
+      });
+    });
+  }
+
+  if (event.data === 'getVersion') {
+    event.ports[0].postMessage({ version: CACHE_VERSION });
   }
 });
 
