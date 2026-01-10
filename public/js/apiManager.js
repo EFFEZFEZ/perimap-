@@ -1138,8 +1138,13 @@ export class ApiManager {
         // Construire les steps à partir des legs OTP
         const steps = legs.map(leg => {
             const otpMode = (leg.mode || '').toUpperCase();
-            const hasTransitLeg = Boolean(leg.transitLeg);
-            const isTransit = hasTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
+            const isTransitLeg = leg.transitLeg === true;
+            const isTransit = isTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
+
+            const routeShortName = leg.routeShortName || '';
+            const routeLongName = leg.routeLongName || leg.route || '';
+            const routeColor = '#' + (leg.routeColor || '3388ff');
+            const routeTextColor = '#' + (leg.routeTextColor || 'FFFFFF');
             
             return {
                 travelMode: isTransit ? 'TRANSIT' : 'WALK',
@@ -1148,7 +1153,17 @@ export class ApiManager {
                 polyline: leg.legGeometry?.points ? { encodedPolyline: leg.legGeometry.points } : null,
                 startLocation: { latLng: { latitude: leg.from.lat, longitude: leg.from.lon } },
                 endLocation: { latLng: { latitude: leg.to.lat, longitude: leg.to.lon } },
-                ...(isTransit && leg.transitLeg && {
+                ...(isTransit && {
+                    // Used by the UI to render the line badge/logo
+                    routeShortName,
+                    routeLongName,
+                    routeColor,
+                    routeTextColor,
+                    headsign: leg.headsign || '',
+                    routeId: leg.routeId || '',
+                    tripId: leg.tripId || '',
+                }),
+                ...(isTransit && isTransitLeg && {
                     transitDetails: {
                         stopDetails: {
                             departureStop: { name: leg.from.name },
@@ -1161,13 +1176,13 @@ export class ApiManager {
                             arrivalTime: { time: { text: this._formatTimeFromMs(leg.endTime) } }
                         },
                         transitLine: {
-                            nameShort: leg.transitLeg?.routeShortName || '',
-                            name: leg.transitLeg?.routeLongName || '',
-                            color: '#' + (leg.transitLeg?.routeColor || '3388ff'),
-                            textColor: '#' + (leg.transitLeg?.routeTextColor || 'FFFFFF'),
+                            nameShort: routeShortName || 'BUS',
+                            name: routeLongName || 'BUS',
+                            color: routeColor,
+                            textColor: routeTextColor,
                             vehicle: { type: 'BUS' }
                         },
-                        headsign: leg.transitLeg?.headsign || ''
+                        headsign: leg.headsign || ''
                     }
                 })
             };
