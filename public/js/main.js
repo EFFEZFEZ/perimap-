@@ -4157,7 +4157,7 @@ function buildFicheHoraireList() {
             routes.sort((a, b) => a.route_short_name.localeCompare(b.route_short_name, undefined, {numeric: true}));
             routes.forEach(route => {
                 let pdfName = PDF_FILENAME_MAP[route.route_short_name];
-                let pdfPath = pdfName ? `/api/fichehoraire/${pdfName}` : '#';
+                let pdfPath = pdfName ? `/data/fichehoraire/${pdfName}` : '#';
                 if (!pdfName) console.warn(`PDF non mappé pour ${route.route_short_name}.`);
                 const longName = ROUTE_LONG_NAME_MAP[route.route_short_name] || (route.route_long_name ? route.route_long_name.replace(/<->/g, '<=>') : '');
                 const displayName = `Ligne ${route.route_short_name} ${longName}`.trim();

@@ -540,7 +540,7 @@ export class DataManager {
     }
 
     async loadGTFSFile(filename, urlOverride = null) {
-        const url = urlOverride || `/api/gtfs/${filename}`;
+        const url = urlOverride || `/data/gtfs/${filename}`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Impossible de charger ${filename}: ${response.statusText}`);
