@@ -84,6 +84,10 @@
     }
   ],
   "functions": {
+    "api/google-routes.js": {
+      "maxDuration": 15,
+      "memory": 256
+    },
     "api/realtime.js": {
       "maxDuration": 15,
       "memory": 256

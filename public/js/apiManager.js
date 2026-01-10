@@ -82,6 +82,13 @@ export class ApiManager {
         this.googleAuthFailed = false;
         this.googleAuthFailureMessage = '';
         this.clientOrigin = (typeof window !== 'undefined' && window.location) ? window.location.origin : '';
+
+        // ✅ Itinerary cache (in-memory)
+        // Avoids repeated recalculation for identical queries (useful during peak hours).
+        // Note: this caches only SAME query (same from/to + date/time + mode). It does NOT reuse across different times.
+        this._itineraryCache = new Map();
+        this._itineraryCacheTtlMs = 2 * 60 * 1000; // 2 minutes
+        this._itineraryCacheMaxEntries = 50;
         
         // ✅ V49: Alias de lieux - Fusion d'arrêts équivalents (pôles multimodaux)
         // Quand l'utilisateur cherche un de ces termes, on lui propose le lieu canonique
@@ -739,6 +746,40 @@ export class ApiManager {
             recommendations: []
         };
 
+        // ----------------------------------------
+        // In-memory cache lookup (only for SAME query)
+        // ----------------------------------------
+        try {
+            const norm = (v) => {
+                const n = Number(v);
+                return Number.isFinite(n) ? n.toFixed(5) : '';
+            };
+            const fromKey = fromCoords ? `${norm(fromCoords.lat)},${norm(fromCoords.lng ?? fromCoords.lon)}` : String(fromPlaceId || '');
+            const toKey = toCoords ? `${norm(toCoords.lat)},${norm(toCoords.lng ?? toCoords.lon)}` : String(toPlaceId || '');
+            const dateKey = searchTime?.date || 'today';
+            const timeKey = (searchTime && searchTime.hour !== undefined)
+                ? `${String(searchTime.hour).padStart(2, '0')}:${String(searchTime.minute || 0).padStart(2, '0')}`
+                : 'now';
+            const typeKey = searchTime?.type || 'partir';
+            const backendKey = this.backendMode || 'unknown';
+            const cacheKey = `${backendKey}|${typeKey}|${dateKey}|${timeKey}|${fromKey}|${toKey}`;
+
+            const cached = this._itineraryCache.get(cacheKey);
+            if (cached && (Date.now() - cached.fetchedAt) < this._itineraryCacheTtlMs) {
+                console.log('⚡ Itinerary cache HIT:', { cacheKey });
+                const cloned = (typeof structuredClone === 'function')
+                    ? structuredClone(cached.data)
+                    : JSON.parse(JSON.stringify(cached.data));
+                return cloned;
+            }
+
+            // Store cacheKey for writeback later
+            results._cacheKey = cacheKey;
+        } catch (e) {
+            // Cache is best-effort; never break routing
+            console.debug('Itinerary cache: skipped (key build failed)', e);
+        }
+
         // ========================================
         // V222: STRATÉGIE MINIMALE - 1 SEUL APPEL BUS
         // Google Routes avec computeAlternativeRoutes retourne 5-6 alternatives
@@ -903,6 +944,25 @@ export class ApiManager {
             this.sessionToken = new google.maps.places.AutocompleteSessionToken();
         }
 
+        // Writeback cache (best-effort)
+        try {
+            const cacheKey = results._cacheKey;
+            if (cacheKey) {
+                // Prevent unbounded growth
+                if (this._itineraryCache.size >= this._itineraryCacheMaxEntries) {
+                    const oldestKey = this._itineraryCache.keys().next().value;
+                    if (oldestKey) this._itineraryCache.delete(oldestKey);
+                }
+                const stored = { ...results };
+                delete stored._cacheKey;
+                this._itineraryCache.set(cacheKey, { fetchedAt: Date.now(), data: stored });
+                console.log('💾 Itinerary cache SET');
+            }
+        } catch (e) {
+            console.debug('Itinerary cache: writeback failed', e);
+        }
+
+        delete results._cacheKey;
         return results;
     }
 
@@ -1062,63 +1122,15 @@ export class ApiManager {
             throw new Error("Coordonnées requises pour le mode OTP");
         }
         
-        // Construire le body au format attendu par l'API OTP
-        const body = {
-            fromPlace: `${originCoords.lat},${originCoords.lng || originCoords.lon}`,
-            toPlace: `${destCoords.lat},${destCoords.lng || destCoords.lon}`,
-            mode: 'TRANSIT',
+        return this._fetchOtpRouteAsGoogleFormat({
+            originCoords,
+            destCoords,
+            searchTime,
+            otpMode: 'TRANSIT,WALK',
             maxWalkDistance: 1000,
-            numItineraries: 3
-        };
-        
-        // Ajouter la date et l'heure
-        if (searchTime) {
-            const dateTimeObj = this._buildDateTime(searchTime);
-            // dateTimeObj should be ISO string like "2026-01-10T11:40:00+01:00"
-            const isoStr = dateTimeObj;
-            const dateMatch = isoStr.match(/(\d{4})-(\d{2})-(\d{2})/);
-            const timeMatch = isoStr.match(/(\d{2}):(\d{2})/);
-            
-            if (dateMatch) {
-                body.date = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
-            }
-            if (timeMatch) {
-                body.time = `${timeMatch[1]}:${timeMatch[2]}`;
-            }
-            body.arriveBy = searchTime.type === 'arriver';
-        }
-        
-        console.log("🕒 DateTime construit (local):", body.date, body.time);
-        
-        const response = await fetch(this.apiEndpoints.routes, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            numItineraries: 3,
+            errorLabel: 'bus',
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error("❌ Erreur API OTP:", errorData);
-            
-            if (errorData.code === 'NO_ROUTE' || errorData.code === 'OTP_UNAVAILABLE' || response.status === 404 || response.status === 503) {
-                throw new Error("Aucun bus disponible");
-            }
-            throw new Error(errorData.error || errorData.details || `Erreur OTP: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        // Handle both direct OTP response and transformed response
-        if (data.plan && data.plan.itineraries && data.plan.itineraries.length > 0) {
-            // Direct OTP response
-            const itineraries = data.plan.itineraries.slice(0, 3);
-            const routes = itineraries.map(itin => this._convertOtpItineraryToGoogleFormat(itin));
-            console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s)`);
-            return { routes };
-        }
-        
-        // If no itineraries found
-        throw new Error("Aucun itinéraire en bus trouvé");
     }
     
     /**
@@ -1140,6 +1152,7 @@ export class ApiManager {
             const otpMode = (leg.mode || '').toUpperCase();
             const isTransitLeg = leg.transitLeg === true;
             const isTransit = isTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
+            const isBicycle = otpMode === 'BICYCLE' || otpMode === 'BIKE';
 
             const routeShortName = leg.routeShortName || '';
             const routeLongName = leg.routeLongName || leg.route || '';
@@ -1147,7 +1160,7 @@ export class ApiManager {
             const routeTextColor = '#' + (leg.routeTextColor || 'FFFFFF');
             
             return {
-                travelMode: isTransit ? 'TRANSIT' : 'WALK',
+                travelMode: isTransit ? 'TRANSIT' : (isBicycle ? 'BICYCLE' : 'WALK'),
                 distance: { meters: leg.distance || 0 },
                 duration: { seconds: Math.round((leg.endTime - leg.startTime) / 1000) },
                 polyline: leg.legGeometry?.points ? { encodedPolyline: leg.legGeometry.points } : null,
@@ -1202,6 +1215,143 @@ export class ApiManager {
             startAddress: legs[0]?.from.name || '',
             endAddress: legs[legs.length - 1]?.to.name || ''
         };
+    }
+
+    /**
+     * ✅ V320: Itinéraire OTP générique (TRANSIT/WALK/BICYCLE) renvoyé au format Google Routes
+     * - Utilise le backend Oracle (/api/routes) en mode OTP
+     * - Permet de faire marche + vélo via OTP (min=1 / max=1)
+     * - Fallback Google possible (endpoint /api/google-routes) si OTP échoue
+     */
+    async _fetchOtpRouteAsGoogleFormat({
+        originCoords,
+        destCoords,
+        searchTime,
+        otpMode,
+        maxWalkDistance = 1000,
+        numItineraries = 1,
+        errorLabel = 'route',
+    }) {
+        if (!originCoords || !destCoords) {
+            throw new Error('Coordonnées requises pour le mode OTP');
+        }
+
+        const body = {
+            fromPlace: `${originCoords.lat},${originCoords.lng || originCoords.lon}`,
+            toPlace: `${destCoords.lat},${destCoords.lng || destCoords.lon}`,
+            mode: otpMode,
+            maxWalkDistance,
+            numItineraries,
+        };
+
+        if (searchTime) {
+            const isoStr = this._buildDateTime(searchTime);
+            const dateMatch = isoStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+            const timeMatch = isoStr.match(/T(\d{2}):(\d{2})/);
+            if (dateMatch) body.date = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+            if (timeMatch) body.time = `${timeMatch[1]}:${timeMatch[2]}`;
+            body.arriveBy = searchTime.type === 'arriver';
+        } else {
+            // OTP legacy /plan nécessite toujours date + time.
+            // Par défaut, on utilise l'heure locale courante (arriveBy=false).
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            body.date = `${yyyy}-${mm}-${dd}`;
+            body.time = `${hh}:${min}`;
+            body.arriveBy = false;
+        }
+
+        console.log('🕒 OTP payload:', { mode: body.mode, date: body.date, time: body.time, arriveBy: body.arriveBy });
+
+        let response;
+        let data;
+        try {
+            response = await fetch(this.apiEndpoints.routes, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error(`❌ Erreur API OTP (${errorLabel}):`, errorData);
+                throw new Error(errorData.error || errorData.details || `Erreur OTP: ${response.status}`);
+            }
+
+            data = await response.json();
+        } catch (otpErr) {
+            // ✅ Fallback: si OTP/Oracle est KO, tenter Google (proxy serveur) en dernier recours
+            console.warn(`⚠️ OTP indisponible (${errorLabel}), tentative fallback Google...`, otpErr?.message || otpErr);
+            const fallback = await this._tryEmergencyGoogleFallback({
+                originCoords,
+                destCoords,
+                otpMode,
+            });
+            if (fallback) return fallback;
+            throw otpErr;
+        }
+
+        if (data?.plan?.itineraries?.length > 0) {
+            const itineraries = data.plan.itineraries.slice(0, Math.max(1, numItineraries));
+            const routes = itineraries.map((itin) => this._convertOtpItineraryToGoogleFormat(itin));
+            console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s) (${errorLabel})`);
+            return { routes };
+        }
+
+        throw new Error(`Aucun itinéraire trouvé (${errorLabel})`);
+    }
+
+    async _tryEmergencyGoogleFallback({ originCoords, destCoords, otpMode }) {
+        // On ne fallback que si on a un proxy serveur disponible.
+        const googleEndpoint = this.apiEndpoints?.googleRoutes || '/api/google-routes';
+        if (!this.useProxy) return null;
+
+        const travelMode = String(otpMode || '').toUpperCase().includes('BICYCLE')
+            ? 'BICYCLE'
+            : (String(otpMode || '').toUpperCase().includes('WALK') && !String(otpMode || '').toUpperCase().includes('TRANSIT'))
+                ? 'WALK'
+                : 'TRANSIT';
+
+        const body = {
+            origin: { location: { latLng: { latitude: originCoords.lat, longitude: originCoords.lng || originCoords.lon } } },
+            destination: { location: { latLng: { latitude: destCoords.lat, longitude: destCoords.lng || destCoords.lon } } },
+            travelMode,
+            computeAlternativeRoutes: travelMode === 'TRANSIT',
+            ...(travelMode === 'TRANSIT'
+                ? {
+                    transitPreferences: {
+                        allowedTravelModes: ['BUS'],
+                        routingPreference: 'FEWER_TRANSFERS',
+                    },
+                  }
+                : {}),
+            languageCode: 'fr',
+            units: 'METRIC',
+        };
+
+        try {
+            const resp = await fetch(googleEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!resp.ok) {
+                const err = await resp.text().catch(() => '');
+                console.warn('Fallback Google échoué:', resp.status, err);
+                return null;
+            }
+            const data = await resp.json();
+            if (!data?.routes?.length) return null;
+            console.log('✅ Fallback Google OK:', travelMode, '- routes:', data.routes.length);
+            return data;
+        } catch (e) {
+            console.warn('Fallback Google exception:', e?.message || e);
+            return null;
+        }
     }
     
     /**
@@ -1272,6 +1422,22 @@ export class ApiManager {
      * ✅ V48: Gère les alias via coordonnées
      */
     async fetchBicycleRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
+        // ✅ V320: en mode OTP, vélo = OTP (min=1/max=1)
+        if (this.useOtp) {
+            console.log(`🚴 OTP (VÉLO): ${fromPlaceId} → ${toPlaceId}`);
+            const originCoords = fromCoords || fromPlaceId?.coordinates || fromPlaceId;
+            const destCoords = toCoords || toPlaceId?.coordinates || toPlaceId;
+            return this._fetchOtpRouteAsGoogleFormat({
+                originCoords,
+                destCoords,
+                searchTime: null,
+                otpMode: 'BICYCLE',
+                maxWalkDistance: 1000,
+                numItineraries: 1,
+                errorLabel: 'vélo',
+            });
+        }
+
         console.log(`🚴 API Google Routes (VÉLO): ${fromPlaceId} → ${toPlaceId}`);
 
         // ✅ V178: Utiliser le proxy Vercel
@@ -1328,6 +1494,22 @@ export class ApiManager {
      * ✅ V48: Gère les alias via coordonnées
      */
     async fetchWalkingRoute(fromPlaceId, toPlaceId, fromCoords = null, toCoords = null) {
+        // ✅ V320: en mode OTP, marche = OTP (min=1/max=1)
+        if (this.useOtp) {
+            console.log(`🚶 OTP (MARCHE): ${fromPlaceId} → ${toPlaceId}`);
+            const originCoords = fromCoords || fromPlaceId?.coordinates || fromPlaceId;
+            const destCoords = toCoords || toPlaceId?.coordinates || toPlaceId;
+            return this._fetchOtpRouteAsGoogleFormat({
+                originCoords,
+                destCoords,
+                searchTime: null,
+                otpMode: 'WALK',
+                maxWalkDistance: 1000,
+                numItineraries: 1,
+                errorLabel: 'marche',
+            });
+        }
+
         console.log(`🚶 API Google Routes (MARCHE): ${fromPlaceId} → ${toPlaceId}`);
 
         // ✅ V178: Utiliser le proxy Vercel
