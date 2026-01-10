@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v311'; // ✅ v311: Optimisation UI + RAPTOR + nettoyage cache agressif
+const CACHE_VERSION = 'v312'; // ✅ v312: Polylines OTP + blocage Google sans clé
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

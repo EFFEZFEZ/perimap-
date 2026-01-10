@@ -1060,7 +1060,13 @@ function initBottomSheetControls() {
 }
 
 function setupStaticEventListeners() {
-    try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
+    // Ne chargez Google Maps que si une clé est présente et que le backend n'est pas forcé sur Oracle
+    const shouldLoadGoogle = Boolean(APP_CONFIG.googleApiKey) && apiManager?.backendMode !== 'oracle';
+    if (shouldLoadGoogle) {
+        try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
+    } else {
+        console.log('Google Maps non chargé (pas de clé ou mode oracle actif)');
+    }
     populateTimeSelects();
 
     // Gérer les liens hash (#horaires, #trafic, etc.)
@@ -2559,8 +2565,8 @@ function processIntelligentResults(intelligentResults, searchTime) {
         }
     });
     
-    // Debug: afficher tous les itinéraires extraits de Google AVANT filtrage
-    console.log("📋 Itinéraires Google bruts (avant filtrage):", itineraries.map(it => ({
+    // Debug: afficher tous les itinéraires bruts AVANT filtrage (OTP/Oracle format Google-like)
+    console.log("📋 Itinéraires bruts (avant filtrage):", itineraries.map(it => ({
         type: it.type,
         dep: it.departureTime,
         arr: it.arrivalTime,
@@ -3169,15 +3175,21 @@ async function ensureItineraryPolylines(itineraries) {
                     continue;
                 }
 
-                // Try to find departure/arrival stops via stop names (fast path)
+                // Try to find departure/arrival stops via ids or names (fast path)
                 let depStopObj = null, arrStopObj = null;
                 let resolvedDepCoords = null, resolvedArrCoords = null;
                 try {
-                    if (step.departureStop) {
+                    const depStopId = step.departureStopId || step?.transitDetails?.stopDetails?.departureStop?.id || step?.transitDetails?.stopDetails?.departureStop?.stopId || null;
+                    const arrStopId = step.arrivalStopId || step?.transitDetails?.stopDetails?.arrivalStop?.id || step?.transitDetails?.stopDetails?.arrivalStop?.stopId || null;
+
+                    if (depStopId && dataManager.getStop) depStopObj = dataManager.getStop(depStopId) || depStopObj;
+                    if (arrStopId && dataManager.getStop) arrStopObj = dataManager.getStop(arrStopId) || arrStopObj;
+
+                    if (step.departureStop && !depStopObj) {
                         const candidates = (dataManager.findStopsByName && dataManager.findStopsByName(step.departureStop, 3)) || [];
                         if (candidates.length) depStopObj = candidates[0];
                     }
-                    if (step.arrivalStop) {
+                    if (step.arrivalStop && !arrStopObj) {
                         const candidates = (dataManager.findStopsByName && dataManager.findStopsByName(step.arrivalStop, 3)) || [];
                         if (candidates.length) arrStopObj = candidates[0];
                     }
@@ -3213,7 +3225,7 @@ async function ensureItineraryPolylines(itineraries) {
                     console.warn('ensureItineraryPolylines: erreur résolution arrêts', err);
                 }
 
-                    if (!depStopObj && step.departureStop) {
+                if (!depStopObj && step.departureStop) {
                     resolvedDepCoords = resolveStopCoordinates(step.departureStop, dataManager);
                 }
                 if (!arrStopObj && step.arrivalStop) {
@@ -3253,48 +3265,68 @@ async function ensureItineraryPolylines(itineraries) {
 
                 const latlngs = geometryToLatLngs(geometry);
 
-                if (latlngs && latlngs.length >= 2 && depStopObj && arrStopObj) {
-                    // find nearest indices
-                    const findNearestIdx = (points, targetLat, targetLon) => {
-                        let best = 0; let bestD = Infinity;
-                        for (let i = 0; i < points.length; i++) {
-                            const d = dataManager.calculateDistance(targetLat, targetLon, points[i][0], points[i][1]);
-                            if (d < bestD) { bestD = d; best = i; }
+                const stopToCoord = (stopObj) => {
+                    if (!stopObj) return null;
+                    const lat = parseFloat(stopObj.stop_lat);
+                    const lon = parseFloat(stopObj.stop_lon);
+                    if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+                    return { lat, lon };
+                };
+                const depCoordCandidate = stopToCoord(depStopObj)
+                    || (resolvedDepCoords ? { lat: resolvedDepCoords.lat, lon: resolvedDepCoords.lng ?? resolvedDepCoords.lon } : null)
+                    || (step.departureLocation ? { lat: step.departureLocation.lat, lon: step.departureLocation.lng ?? step.departureLocation.lon } : null);
+                const arrCoordCandidate = stopToCoord(arrStopObj)
+                    || (resolvedArrCoords ? { lat: resolvedArrCoords.lat, lon: resolvedArrCoords.lng ?? resolvedArrCoords.lon } : null)
+                    || (step.arrivalLocation ? { lat: step.arrivalLocation.lat, lon: step.arrivalLocation.lng ?? step.arrivalLocation.lon } : null);
+
+                if (latlngs && latlngs.length >= 2) {
+                    if (depCoordCandidate && arrCoordCandidate) {
+                        // find nearest indices
+                        const findNearestIdx = (points, targetLat, targetLon) => {
+                            let best = 0; let bestD = Infinity;
+                            for (let i = 0; i < points.length; i++) {
+                                const d = dataManager.calculateDistance(targetLat, targetLon, points[i][0], points[i][1]);
+                                if (d < bestD) { bestD = d; best = i; }
+                            }
+                            return best;
+                        };
+                        const startIdx = findNearestIdx(latlngs, depCoordCandidate.lat, depCoordCandidate.lon);
+                        const endIdx = findNearestIdx(latlngs, arrCoordCandidate.lat, arrCoordCandidate.lon);
+                        let slice = null;
+                        if (startIdx != null && endIdx != null && startIdx !== endIdx) {
+                            if (startIdx < endIdx) slice = latlngs.slice(startIdx, endIdx + 1);
+                            else slice = [...latlngs].slice(endIdx, startIdx + 1).reverse();
                         }
-                        return best;
-                    };
-                    const startIdx = findNearestIdx(latlngs, parseFloat(depStopObj.stop_lat), parseFloat(depStopObj.stop_lon));
-                    const endIdx = findNearestIdx(latlngs, parseFloat(arrStopObj.stop_lat), parseFloat(arrStopObj.stop_lon));
-                    let slice = null;
-                    if (startIdx != null && endIdx != null && startIdx !== endIdx) {
-                        if (startIdx < endIdx) slice = latlngs.slice(startIdx, endIdx + 1);
-                        else slice = [...latlngs].slice(endIdx, startIdx + 1).reverse();
+                        if (!slice || slice.length < 2) {
+                            slice = [
+                                [depCoordCandidate.lat, depCoordCandidate.lon],
+                                [arrCoordCandidate.lat, arrCoordCandidate.lon]
+                            ];
+                        }
+                        latLngPoints = slice
+                            .map(pair => [Number(pair[0]), Number(pair[1])])
+                            .filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
+                        encoded = latLngPoints.length >= 2 ? encodePolyline(latLngPoints) : null;
+                        console.log('ensureItineraryPolylines: polyline reconstruite depuis la géométrie', {
+                            itinId: itin.tripId || itin.trip?.trip_id || null,
+                            stepRoute: routeId,
+                            pointCount: latLngPoints?.length || 0
+                        });
+                    } else {
+                        // Pas de coordonnées précises, on utilise la géométrie complète du tracé
+                        latLngPoints = latlngs.map(pair => [Number(pair[0]), Number(pair[1])]).filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
+                        encoded = latLngPoints.length >= 2 ? encodePolyline(latLngPoints) : null;
                     }
-                    if (!slice || slice.length < 2) {
-                        slice = [
-                            [parseFloat(depStopObj.stop_lat), parseFloat(depStopObj.stop_lon)],
-                            [parseFloat(arrStopObj.stop_lat), parseFloat(arrStopObj.stop_lon)]
-                        ];
-                    }
-                    latLngPoints = slice
-                        .map(pair => [Number(pair[0]), Number(pair[1])])
-                        .filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
-                    encoded = latLngPoints.length >= 2 ? encodePolyline(latLngPoints) : null;
-                    console.log('ensureItineraryPolylines: polyline reconstruite depuis la géométrie', {
-                        itinId: itin.tripId || itin.trip?.trip_id || null,
-                        stepRoute: routeId,
-                        pointCount: latLngPoints?.length || 0
-                    });
                 }
 
                 // Final fallback: direct straight line using available coordinates
                 if (!encoded) {
-                    const dep = depStopObj
-                        ? { lat: parseFloat(depStopObj.stop_lat), lon: parseFloat(depStopObj.stop_lon) }
-                        : (resolvedDepCoords ? { lat: resolvedDepCoords.lat, lon: resolvedDepCoords.lng } : null);
-                    const arr = arrStopObj
-                        ? { lat: parseFloat(arrStopObj.stop_lat), lon: parseFloat(arrStopObj.stop_lon) }
-                        : (resolvedArrCoords ? { lat: resolvedArrCoords.lat, lon: resolvedArrCoords.lng } : null);
+                    const dep = depCoordCandidate
+                        ? depCoordCandidate
+                        : null;
+                    const arr = arrCoordCandidate
+                        ? arrCoordCandidate
+                        : null;
                     
                     // V267: Fallback ultime - utiliser les coords de l'itinéraire global si dispo
                     let finalDep = dep;

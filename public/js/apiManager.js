@@ -1170,6 +1170,13 @@ export class ApiManager {
             const isTransit = isTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
             const isBicycle = otpMode === 'BICYCLE' || otpMode === 'BIKE';
 
+            const depStopId = leg?.from?.stopId?.id || leg?.from?.stopId || leg?.from?.stop?.id || leg?.from?.stop || null;
+            const arrStopId = leg?.to?.stopId?.id || leg?.to?.stopId || leg?.to?.stop?.id || leg?.to?.stop || null;
+            const depStopCode = leg?.from?.stopCode || leg?.from?.code || leg?.from?.stopCode || null;
+            const arrStopCode = leg?.to?.stopCode || leg?.to?.code || leg?.to?.stopCode || null;
+            const departureLocation = { lat: leg.from?.lat, lon: leg.from?.lon };
+            const arrivalLocation = { lat: leg.to?.lat, lon: leg.to?.lon };
+
             const legDurationSeconds = (() => {
                 if (leg?.startTime && leg?.endTime) {
                     return Math.max(0, Math.round((leg.endTime - leg.startTime) / 1000));
@@ -1208,6 +1215,12 @@ export class ApiManager {
                 polyline: leg.legGeometry?.points ? { encodedPolyline: leg.legGeometry.points } : null,
                 startLocation: { latLng: { latitude: leg.from.lat, longitude: leg.from.lon } },
                 endLocation: { latLng: { latitude: leg.to.lat, longitude: leg.to.lon } },
+                departureStopId: depStopId,
+                arrivalStopId: arrStopId,
+                departureStopCode: depStopCode,
+                arrivalStopCode: arrStopCode,
+                departureLocation,
+                arrivalLocation,
                 ...(isTransit && {
                     // Used by the UI to render the line badge/logo
                     routeShortName,
@@ -1221,8 +1234,8 @@ export class ApiManager {
                 ...(isTransit && isTransitLeg && {
                     transitDetails: {
                         stopDetails: {
-                            departureStop: { name: leg.from.name },
-                            arrivalStop: { name: leg.to.name },
+                            departureStop: { name: leg.from.name, id: depStopId, code: depStopCode },
+                            arrivalStop: { name: leg.to.name, id: arrStopId, code: arrStopCode },
                             departureTime: new Date(leg.startTime).toISOString(),
                             arrivalTime: new Date(leg.endTime).toISOString(),
                             intermediateStops: Array.isArray(leg?.intermediateStops)
