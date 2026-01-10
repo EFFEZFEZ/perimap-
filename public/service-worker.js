@@ -103,6 +103,18 @@ const NETWORK_ONLY = ['/api/', 'google', 'googleapis', 'ibb.co', 'line-status.js
 // Patterns pour données GTFS (cache long terme)
 const GTFS_PATTERNS = ['/data/gtfs/', '.json', '.txt'];
 
+// Ajout robuste en cache: ignore les ressources manquantes pour ne pas casser l'installation
+async function cacheUrlsSafely(cacheName, urls, label) {
+  const cache = await caches.open(cacheName);
+  for (const url of urls) {
+    try {
+      await cache.add(url);
+    } catch (err) {
+      console.warn(`[SW] ⚠️ ${label} non mis en cache (ignoré):`, url, err?.message || err);
+    }
+  }
+}
+
 /**
  * Installation: Pré-cache les assets critiques, puis secondaires
  */
@@ -111,14 +123,13 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       try {
-        // Cache critique en priorité
-        const staticCache = await caches.open(STATIC_CACHE);
-        await staticCache.addAll(CRITICAL_ASSETS);
-        console.log('[SW] ✅ Assets critiques cachés');
+        // Cache critique en priorité (tolérant aux 404)
+        await cacheUrlsSafely(STATIC_CACHE, CRITICAL_ASSETS, 'Asset critique');
+        console.log('[SW] ✅ Assets critiques cachés (best effort)');
         
-        // Cache secondaire en arrière-plan (non-bloquant)
-        staticCache.addAll(SECONDARY_ASSETS).catch(err => {
-          console.warn('[SW] ⚠️ Certains assets secondaires non cachés:', err);
+        // Cache secondaire en arrière-plan (non-bloquant, tolérant aux 404)
+        cacheUrlsSafely(STATIC_CACHE, SECONDARY_ASSETS, 'Asset secondaire').catch(err => {
+          console.warn('[SW] ⚠️ Cache secondaire partiel:', err);
         });
         
         // Force la nouvelle version
