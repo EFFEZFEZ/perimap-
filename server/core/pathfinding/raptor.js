@@ -62,6 +62,7 @@ export class RaptorAlgorithm {
     this.stopsIndex = new Map(); // stop_id -> index
     this.routesAtStop = new Map(); // stop_id -> [route_ids]
     this.stopTimesIndex = new Map(); // route_id -> {trip_id -> [stop_times]}
+    this.tripServices = new Map(); // trip_id -> service_id
   }
 
   /**
@@ -73,6 +74,11 @@ export class RaptorAlgorithm {
     // Index des arrêts
     stops.forEach((stop, index) => {
       this.stopsIndex.set(stop.stop_id, index);
+    });
+
+    // Index trip_id -> service_id
+    trips.forEach(trip => {
+      this.tripServices.set(trip.trip_id, trip.service_id);
     });
 
     // Routes par arrêt
@@ -225,9 +231,16 @@ export class RaptorAlgorithm {
     if (!firstTripStopTimes || firstTripStopTimes.length === 0) return;
 
     // Pour chaque trip de la route
+    let activeTrips = 0;
+    let inactiveTrips = 0;
     routeTrips.forEach((tripStopTimes, tripId) => {
       // Vérifier si le trip est actif à cette date
-      // (simplifié - en vrai il faut vérifier calendar/calendar_dates)
+      const serviceId = this.tripServices.get(tripId);
+      if (!serviceId || !this.graph.isServiceActive(serviceId, dateStr)) {
+        inactiveTrips++;
+        return; // Trip inactif ce jour-là
+      }
+      activeTrips++;
       
       let boardingStop = null;
       let boardingTime = null;
@@ -273,6 +286,10 @@ export class RaptorAlgorithm {
         }
       }
     });
+    
+    if (activeTrips === 0) {
+      console.log(`    ⚠️ Route ${routeId}: 0 trips actifs (${inactiveTrips} inactifs) pour ${dateStr}`);
+    }
   }
 
   /**
