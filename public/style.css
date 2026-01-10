@@ -5720,10 +5720,10 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.875rem; /* COMPACT: Réduction du padding */
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* COMPACT: Réduction de la taille */
     font-family: inherit;
     background: var(--bg-main);
     cursor: pointer;
@@ -6191,19 +6191,19 @@ body.dark-theme .real-select option {
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    padding: 1rem 1.5rem;
+    padding: 0.5rem 1rem; /* COMPACT: Réduction du padding */
 }
 
 /* V66: En-tête itinéraire - visible sur desktop uniquement */
 .itinerary-edit-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0 0 0.75rem 0;
+    gap: 0.5rem;
+    padding: 0 0 0.25rem 0; /* COMPACT: Réduction du padding */
 }
 
 .itinerary-edit-header h2 {
-    font-size: 1.125rem;
+    font-size: 1rem; /* COMPACT: Réduction de la taille */
     font-weight: 700;
     margin: 0;
     color: var(--text-primary);
@@ -6216,11 +6216,11 @@ body.dark-theme .real-select option {
 }
 
 .itinerary-edit-form .form-group {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.4rem; /* COMPACT: Réduction des marges */
 }
 
 .itinerary-edit-form .form-group:last-of-type {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem; /* COMPACT: Réduction des marges */
 }
 
 /* V66: Inputs harmonisés avec le style planner-block du hall */
@@ -6229,13 +6229,13 @@ body.dark-theme .real-select option {
 #results-planner-to {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 0.875rem 1rem;
-    font-size: 0.95rem;
+    border-radius: 10px; /* COMPACT: Réduction du radius */
+    padding: 0.6rem 0.875rem; /* COMPACT: Réduction du padding */
+    font-size: 0.9rem; /* COMPACT: Réduction de la taille */
     color: var(--text-primary);
     width: 100%;
     transition: all 0.2s ease;
-    min-height: 48px;
+    min-height: 40px; /* COMPACT: Réduction de la hauteur */
     box-sizing: border-box;
 }
 
@@ -6292,8 +6292,8 @@ body.dark-theme #results-planner-to:focus {
 .btn-full-width {
     width: 100%;
     justify-content: center;
-    padding: 0.75rem;
-    font-size: 1rem;
+    padding: 0.5rem; /* COMPACT: Réduction du padding */
+    font-size: 0.9rem; /* COMPACT: Réduction de la taille */
     font-weight: 600;
     border-radius: var(--radius-md);
 }
