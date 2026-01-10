@@ -6495,9 +6495,9 @@ body.dark-theme #results-planner-to:focus {
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     font-size: 0.9rem;
-    border-radius: 999px;
-    width: 46px;
-    min-width: 46px;
+    border-radius: 9999px;
+    width: 32px;
+    min-width: 32px;
     height: 32px;
     padding: 0;
     text-align: center;
@@ -6664,8 +6664,12 @@ body.dark-theme .next-departures-label {
     color: inherit;
 }
 .route-details .step-icon .route-line-badge {
-    font-size: 1.1rem;
-    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 9999px;
 }
 
 .route-details .step-info {
@@ -10948,10 +10952,11 @@ body.dark-theme .route-summary-dot {
     justify-content: center;
     font-weight: 700;
     font-size: 0.8rem;
-    border-radius: 6px;
-    min-width: 36px;
-    height: 26px;
-    padding: 0 0.5rem;
+    border-radius: 9999px;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
     box-shadow: none;
     letter-spacing: 0.02em;
 }
@@ -11448,10 +11453,11 @@ body.dark-theme .route-summary-dot {
     justify-content: center;
     font-weight: 700;
     font-size: 0.75rem;
-    border-radius: 8px;
-    min-width: 40px;
-    height: 28px;
-    padding: 0 0.625rem;
+    border-radius: 9999px;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
+    padding: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -11813,10 +11819,12 @@ body.dark-theme #results-planner-to:focus {
     }
     
     .route-line-badge {
-        min-width: 36px;
+        width: 26px;
+        min-width: 26px;
         height: 26px;
+        padding: 0;
         font-size: 0.7rem;
-        border-radius: 7px;
+        border-radius: 9999px;
     }
     
     .route-time {

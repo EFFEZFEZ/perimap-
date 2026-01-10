@@ -3779,33 +3779,45 @@ function renderItineraryDetailHTML(itinerary) {
                 return true;
             });
 
+            const effectiveSubSteps = filteredSubSteps
+                .map(s => ({
+                    instruction: (s?.instruction || '').trim() || 'Marcher',
+                    distance: (s?.distance || '').trim(),
+                    duration: (s?.duration || '').trim(),
+                    maneuver: s?.maneuver || 'DEFAULT'
+                }))
+                .filter(s => s.instruction || s.distance || s.duration);
+            const showDetails = hasSubSteps && effectiveSubSteps.length > 0;
+            const inlineDurationHtml = step.duration ? `<span class="step-duration-inline">${step.duration}</span>` : '';
+            const fallbackMeta = [step.distance, step.duration].filter(Boolean).join(' • ');
+
             return `
                 <div class="step-detail ${stepClass}" style="--line-color: var(--text-secondary);">
                     <div class="step-icon">
                         ${icon}
                     </div>
                     <div class="step-info">
-                        <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
+                        <span class="step-instruction">${step.instruction} ${inlineDurationHtml}</span>
                         
-                        ${hasSubSteps ? `
+                        ${showDetails ? `
                         <details class="intermediate-stops">
                             <summary>
                                 <span>Voir les étapes</span>
                                 <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                             </summary>
                             <ul class="intermediate-stops-list walk-steps">
-                                ${filteredSubSteps.map(subStep => `
+                                ${effectiveSubSteps.map(subStep => `
                                     <li>
                                         ${getManeuverIcon(subStep.maneuver)}
                                         <div class="walk-step-info">
                                             <span>${subStep.instruction}</span>
-                                            <span class="walk-step-meta">${subStep.distance} (${subStep.duration})</span>
+                                            <span class="walk-step-meta">${[subStep.distance, subStep.duration].filter(Boolean).join(' • ')}</span>
                                         </div>
                                     </li>
                                 `).join('')}
                             </ul>
                         </details>
-                        ` : `<span class="step-sub-instruction">${step.instruction}</span>`}
+                        ` : `<span class="step-sub-instruction">${fallbackMeta || step.instruction}</span>`}
                     </div>
                 </div>
             `;
@@ -3843,7 +3855,7 @@ function renderItineraryDetailHTML(itinerary) {
                         <div class="route-line-badge" style="background-color: ${badgeBg}; color: ${badgeText};">${badgeLabel}</div>
                     </div>
                     <div class="step-info">
-                        <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
+                        <span class="step-instruction">${step.instruction} ${step.duration ? `<span class="step-duration-inline">${step.duration}</span>` : ''}</span>
                         
                         <div class="step-stop-point stop-context">
                             <span class="stop-label">Montée</span>
@@ -3918,33 +3930,45 @@ function renderItineraryDetail(itinerary) {
                 return true;
             });
 
+            const effectiveSubSteps = filteredSubSteps
+                .map(s => ({
+                    instruction: (s?.instruction || '').trim() || 'Marcher',
+                    distance: (s?.distance || '').trim(),
+                    duration: (s?.duration || '').trim(),
+                    maneuver: s?.maneuver || 'DEFAULT'
+                }))
+                .filter(s => s.instruction || s.distance || s.duration);
+            const showDetails = hasSubSteps && effectiveSubSteps.length > 0;
+            const inlineDurationHtml = step.duration ? `<span class="step-duration-inline">${step.duration}</span>` : '';
+            const fallbackMeta = [step.distance, step.duration].filter(Boolean).join(' • ');
+
             return `
                 <div class="step-detail ${stepClass}" style="--line-color: ${lineColor};">
                     <div class="step-icon">
                         ${icon}
                     </div>
                     <div class="step-info">
-                        <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
+                        <span class="step-instruction">${step.instruction} ${inlineDurationHtml}</span>
                         
-                        ${hasSubSteps ? `
+                        ${showDetails ? `
                         <details class="intermediate-stops">
                             <summary>
                                 <span>Voir les étapes</span>
                                 <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                             </summary>
                             <ul class="intermediate-stops-list walk-steps">
-                                ${filteredSubSteps.map(subStep => `
+                                ${effectiveSubSteps.map(subStep => `
                                     <li>
                                         ${getManeuverIcon(subStep.maneuver)}
                                         <div class="walk-step-info">
                                             <span>${subStep.instruction}</span>
-                                            <span class="walk-step-meta">${subStep.distance} ${subStep.duration ? `(${subStep.duration})` : ''}</span>
+                                            <span class="walk-step-meta">${[subStep.distance, subStep.duration].filter(Boolean).join(' • ')}</span>
                                         </div>
                                     </li>
                                 `).join('')}
                             </ul>
                         </details>
-                        ` : `<span class="step-sub-instruction">${step.instruction}</span>`}
+                        ` : `<span class="step-sub-instruction">${fallbackMeta || step.instruction}</span>`}
                     </div>
                 </div>
             `;
@@ -3981,7 +4005,7 @@ function renderItineraryDetail(itinerary) {
                         <div class="route-line-badge" style="background-color: ${badgeBg}; color: ${badgeText};">${badgeLabel}</div>
                     </div>
                     <div class="step-info">
-                        <span class="step-instruction">${step.instruction} <span class="step-duration-inline">(${step.duration})</span></span>
+                        <span class="step-instruction">${step.instruction} ${step.duration ? `<span class="step-duration-inline">${step.duration}</span>` : ''}</span>
                         
                         <div class="step-stop-point stop-context">
                             <span class="stop-label">Montée</span>
