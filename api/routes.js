@@ -62,20 +62,54 @@ export default async function handler(request) {
             // Transform Perimap format to OTP v2 format
             let { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
             
-            // OTP v2 expects YYYY-MM-DD format (keep as is)
-            console.log('[routes edge V314] Calling OTP with date:', date, 'time:', time, 'fromPlace:', fromPlace, 'toPlace:', toPlace);
+            // Validate and format parameters
+            if (!date || !time) {
+                console.error('[routes edge V314] Missing date or time:', { date, time });
+                return new Response(
+                    JSON.stringify({ error: 'Date et heure requis' }),
+                    { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                );
+            }
+            
+            // Extract just HH:MM if time includes seconds or is ISO format
+            let timeFormatted = time;
+            if (time.includes('T')) {
+                // ISO format like "2026-01-10T11:50:00+01:00" - extract time part
+                const timeMatch = time.match(/T(\d{2}):(\d{2})/);
+                if (timeMatch) {
+                    timeFormatted = `${timeMatch[1]}:${timeMatch[2]}`;
+                }
+            } else if (time.includes(' ')) {
+                // Format like "2026-01-10 11:50" - extract time part
+                const parts = time.split(' ');
+                if (parts.length === 2) {
+                    date = parts[0];  // Update date from combined string
+                    timeFormatted = parts[1];
+                }
+            }
+            
+            // Ensure date is YYYY-MM-DD
+            if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                console.error('[routes edge V314] Invalid date format:', date);
+                return new Response(
+                    JSON.stringify({ error: 'Format de date invalide (attendu YYYY-MM-DD)' }),
+                    { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                );
+            }
+            
+            console.log('[routes edge V314] Calling OTP with:', { fromPlace, toPlace, date, time: timeFormatted, mode: 'TRANSIT,WALK' });
             
             const otpUrl = new URL('http://79.72.24.141:8080/otp/routers/default/plan');
             otpUrl.searchParams.append('fromPlace', fromPlace);
             otpUrl.searchParams.append('toPlace', toPlace);
-            otpUrl.searchParams.append('date', date);  // Keep YYYY-MM-DD format
-            otpUrl.searchParams.append('time', time);
+            otpUrl.searchParams.append('date', date);
+            otpUrl.searchParams.append('time', timeFormatted);
             otpUrl.searchParams.append('mode', 'TRANSIT,WALK');
             otpUrl.searchParams.append('maxWalkDistance', maxWalkDistance || 1000);
             otpUrl.searchParams.append('numItineraries', numItineraries || 3);
             otpUrl.searchParams.append('arriveBy', arriveBy ? 'true' : 'false');
             
-            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 180));
+            console.log('[routes edge V314] Full OTP URL:', otpUrl.toString());
             
             try {
                 const response = await fetch(otpUrl.toString(), {
