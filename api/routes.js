@@ -41,10 +41,12 @@ export default async function handler(request) {
     try {
         const body = await request.json();
         console.log('[routes edge V314] Mode:', body.mode || 'non spécifié');
+        console.log('[routes edge V314] Body keys:', Object.keys(body).join(', '));
 
-        if (!body || !body.origin || !body.destination) {
+        // Support both fromPlace/toPlace and origin/destination formats
+        if (!body || (!body.fromPlace && !body.origin) || (!body.toPlace && !body.destination)) {
             return new Response(
-                JSON.stringify({ error: 'Corps de requête invalide: origin et destination requis.' }),
+                JSON.stringify({ error: 'Corps de requête invalide: fromPlace/toPlace ou origin/destination requis.' }),
                 { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
         }
