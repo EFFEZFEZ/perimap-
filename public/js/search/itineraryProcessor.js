@@ -222,8 +222,17 @@ export function processGoogleRoutesResponse(data, options = {}) {
                         console.log(`⚠️ Ligne inconnue du GTFS ("${shortName}") mais conservée.`);
                     }
                     
-                    const color = line.color || '#3388ff';
-                    const textColor = line.textColor || '#ffffff';
+                    const normalizeHexColor = (value, fallback) => {
+                        if (!value) return fallback;
+                        const raw = String(value).trim();
+                        if (!raw) return fallback;
+                        const hex = raw.startsWith('#') ? raw.slice(1) : raw;
+                        if (/^[0-9a-fA-F]{6}$/.test(hex)) return `#${hex.toUpperCase()}`;
+                        return fallback;
+                    };
+
+                    const color = normalizeHexColor(line.color, '#3388FF');
+                    const textColor = normalizeHexColor(line.textColor, '#FFFFFF');
                     const departureStop = stopDetails.departureStop || {};
                     const arrivalStop = stopDetails.arrivalStop || {};
                     let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'Arrêt inconnu');
@@ -259,6 +268,11 @@ export function processGoogleRoutesResponse(data, options = {}) {
                         intermediateStops: intermediateStops,
                         duration: formatGoogleDuration(step.staticDuration),
                         polyline: step.polyline,
+                        // Hints pour reconstruction tracé + debug
+                        routeId: step.routeId || '',
+                        tripId: step.tripId || '',
+                        departureLocation: step.startLocation?.latLng ? { latLng: step.startLocation.latLng } : null,
+                        arrivalLocation: step.endLocation?.latLng ? { latLng: step.endLocation.latLng } : null,
                         durationRaw: rawDuration
                     });
                 }

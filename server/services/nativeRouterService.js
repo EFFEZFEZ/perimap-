@@ -251,11 +251,11 @@ export async function initializeRouter() {
 
       // Créer et initialiser le moteur
       routerEngine = new PathfindingEngine(gtfsData, {
-        maxWalkDistance: 1000,    // 1km max de marche
+        maxWalkDistance: 3000,    // 3km max de marche (permet de rejoindre un arrêt plus pertinent)
         walkSpeed: 1.25,          // ~4.5 km/h
-        maxTransfers: 3,          // 3 correspondances max
-        minTransferTime: 120,     // 2 min minimum
-        transferPenalty: 300,     // Pénalité de 5 min
+        maxTransfers: 2,          // 2 correspondances max (moins d'itinéraires incohérents)
+        minTransferTime: 180,     // 3 min minimum
+        transferPenalty: 900,     // Pénalité de 15 min par correspondance
         maxResults: 5,            // 5 itinéraires max
         nearbyStopRadius: 500     // 500m pour trouver arrêts proches
       });

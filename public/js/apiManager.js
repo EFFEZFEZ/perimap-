@@ -1127,7 +1127,7 @@ export class ApiManager {
             destCoords,
             searchTime,
             otpMode: 'TRANSIT,WALK',
-            maxWalkDistance: 1000,
+            maxWalkDistance: 3000,
             numItineraries: 3,
             errorLabel: 'bus',
         });
@@ -1139,6 +1139,15 @@ export class ApiManager {
      */
     _convertOtpItineraryToGoogleFormat(itinerary) {
         const legs = itinerary.legs || [];
+
+        const normalizeHexColor = (value, fallback) => {
+            if (!value) return fallback;
+            const raw = String(value).trim();
+            if (!raw) return fallback;
+            const hex = raw.startsWith('#') ? raw.slice(1) : raw;
+            if (/^[0-9a-fA-F]{6}$/.test(hex)) return `#${hex.toUpperCase()}`;
+            return fallback;
+        };
 
         const totalDistanceMeters = legs.reduce((sum, leg) => sum + (leg.distance || 0), 0);
         const startTimeMs = itinerary.startTime || legs[0]?.startTime;
@@ -1172,8 +1181,8 @@ export class ApiManager {
 
             const routeShortName = leg.routeShortName || '';
             const routeLongName = leg.routeLongName || leg.route || '';
-            const routeColor = '#' + (leg.routeColor || '3388ff');
-            const routeTextColor = '#' + (leg.routeTextColor || 'FFFFFF');
+            const routeColor = normalizeHexColor(leg.routeColor, '#3388FF');
+            const routeTextColor = normalizeHexColor(leg.routeTextColor, '#FFFFFF');
 
             const distanceMeters = Number(leg?.distance) || 0;
             const distanceText = formatDistanceText(distanceMeters);

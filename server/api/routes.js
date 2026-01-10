@@ -48,6 +48,7 @@ router.post('/', async (req, res) => {
         maxWalkDistance = 1000,
         numItineraries = 3,
         arriveBy: arriveByRaw = false,
+        maxTransfers: maxTransfersRaw = 2,
       } = req.body;
 
       // Parser les coordonnées
@@ -75,7 +76,7 @@ router.post('/', async (req, res) => {
         time: departureTime,
         mode: effectiveMode,
         maxWalkDistance,
-        maxTransfers: 3
+        maxTransfers: Number.isFinite(Number(maxTransfersRaw)) ? Math.max(0, Math.min(4, Number(maxTransfersRaw))) : 2
       });
 
       // Convertir au format OTP attendu par le frontend

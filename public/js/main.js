@@ -3128,9 +3128,21 @@ async function ensureItineraryPolylines(itineraries) {
                 const hasLatLngs = Array.isArray(step?.polyline?.latLngs) && step.polyline.latLngs.length >= 2;
                 if (hasLatLngs) continue;
 
-                const routeId = (itin.route && (itin.route.route_id || itin.routeId)) || null;
-                const shapeId = (itin.trip && itin.trip.shape_id) || (itin.shapeId) || null;
-                const hasLocalGeometryHints = Boolean(routeId || shapeId || itin.tripId || itin.trip);
+                const stepTripId = step.tripId || itin.tripId || (itin.trip && itin.trip.trip_id) || null;
+                const stepRouteId = step.routeId || (itin.route && (itin.route.route_id || itin.routeId)) || null;
+
+                let tripObj = null;
+                try {
+                    if (stepTripId && dataManager?.tripsByTripId) {
+                        tripObj = dataManager.tripsByTripId[stepTripId] || null;
+                    }
+                } catch {
+                    tripObj = null;
+                }
+
+                const routeId = (tripObj && tripObj.route_id) || stepRouteId || null;
+                const shapeId = (tripObj && tripObj.shape_id) || (itin.trip && itin.trip.shape_id) || (itin.shapeId) || null;
+                const hasLocalGeometryHints = Boolean(routeId || shapeId || stepTripId || itin.tripId || itin.trip);
 
                 const hasExistingEncoded = step.polyline && (step.polyline.encodedPolyline || step.polyline.points);
                 if (!hasLocalGeometryHints && hasExistingEncoded) {
@@ -3152,8 +3164,8 @@ async function ensureItineraryPolylines(itineraries) {
                     }
 
                     // If still missing, try to use itinerary-level info (trip/route) and match by times or stop_id
-                    if ((!depStopObj || !arrStopObj) && itin.tripId) {
-                        const stopTimes = dataManager.getStopTimes(itin.tripId) || [];
+                    if ((!depStopObj || !arrStopObj) && stepTripId) {
+                        const stopTimes = dataManager.getStopTimes(stepTripId) || [];
                         if (stopTimes.length >= 1) {
                             // Attempt to match by departureTime/arrivalTime strings if available
                             if (!depStopObj && step.departureTime && step.departureTime !== '~') {
@@ -3182,7 +3194,7 @@ async function ensureItineraryPolylines(itineraries) {
                     console.warn('ensureItineraryPolylines: erreur résolution arrêts', err);
                 }
 
-                if (!depStopObj && step.departureStop) {
+                    if (!depStopObj && step.departureStop) {
                     resolvedDepCoords = resolveStopCoordinates(step.departureStop, dataManager);
                 }
                 if (!arrStopObj && step.arrivalStop) {
