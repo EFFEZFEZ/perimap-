@@ -60,27 +60,20 @@ export default async function handler(request) {
             // Transform Perimap format to OTP v2 format
             let { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
             
-            // Convert date format from YYYY-MM-DD to MM-DD-YYYY (OTP expects this)
-            if (date && typeof date === 'string') {
-                const dateParts = date.split('-');
-                if (dateParts.length === 3) {
-                    date = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
-                }
-            }
-            
-            console.log('[routes edge V314] Calling OTP with:', { fromPlace, toPlace, date, time });
+            // OTP v2 expects YYYY-MM-DD format (keep as is)
+            console.log('[routes edge V314] Calling OTP with date:', date, 'time:', time, 'fromPlace:', fromPlace, 'toPlace:', toPlace);
             
             const otpUrl = new URL('http://79.72.24.141:8080/otp/routers/default/plan');
             otpUrl.searchParams.append('fromPlace', fromPlace);
             otpUrl.searchParams.append('toPlace', toPlace);
-            otpUrl.searchParams.append('date', date);
+            otpUrl.searchParams.append('date', date);  // Keep YYYY-MM-DD format
             otpUrl.searchParams.append('time', time);
             otpUrl.searchParams.append('mode', 'TRANSIT,WALK');
             otpUrl.searchParams.append('maxWalkDistance', maxWalkDistance || 1000);
             otpUrl.searchParams.append('numItineraries', numItineraries || 3);
             otpUrl.searchParams.append('arriveBy', arriveBy ? 'true' : 'false');
             
-            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 150));
+            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 180));
             
             try {
                 const response = await fetch(otpUrl.toString(), {
@@ -90,18 +83,39 @@ export default async function handler(request) {
                     }
                 });
 
-                const data = await response.json();
-                console.log('[routes edge V314] OTP réponse:', response.status, '- itineraires:', data.plan?.itineraries?.length || 0);
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.error('[routes edge V314] Failed to parse JSON:', e.message);
+                    data = { error: 'Invalid JSON response from OTP' };
+                }
+                
+                console.log('[routes edge V314] OTP réponse:', response.status, '- error:', data.error || 'none', '- itineraires:', data.plan?.itineraries?.length || 0);
 
-                // If OTP returns an error or no itineraries, log it
-                if (!response.ok || !data.plan || !data.plan.itineraries) {
-                    console.warn('[routes edge V314] OTP response invalid or empty:', data.error);
+                // If OTP returns an error, log the full response and error message
+                if (!response.ok) {
+                    console.error('[routes edge V314] OTP error response:', JSON.stringify(data));
+                    return new Response(
+                        JSON.stringify({ 
+                            success: false, 
+                            error: 'OTP ne peut pas traiter cette requête',
+                            code: 'OTP_REQUEST_ERROR',
+                            details: data.error?.message || data.error || JSON.stringify(data)
+                        }),
+                        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Backend': 'oracle-otp' } }
+                    );
+                }
+
+                // If OTP returns 200 but no itineraries
+                if (!data.plan || !data.plan.itineraries || data.plan.itineraries.length === 0) {
+                    console.warn('[routes edge V314] OTP returned no itineraries');
                     return new Response(
                         JSON.stringify({ 
                             success: false, 
                             error: 'Pas d\'itinéraire disponible',
                             code: 'NO_ITINERARIES',
-                            details: data.error?.message || 'OTP ne trouve aucun itinéraire'
+                            details: 'OTP ne trouve aucun itinéraire pour cette recherche'
                         }),
                         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Backend': 'oracle-otp' } }
                     );
