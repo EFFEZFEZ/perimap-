@@ -1,42 +1,56 @@
-# GTFS Data Files (Données brutes et générées)
-# ⚠️ NE PAS ignorer les fichiers GTFS - ils sont essentiels pour le frontend statique
-# Les fichiers .txt et .bundle DOIVENT être versionés pour Vercel
+# ═══════════════════════════════════════════════════════════════════════
+# PÉRIMAP - GITIGNORE
+# ═══════════════════════════════════════════════════════════════════════
 
-# OTP Build Files (trop gros pour GitHub)
-otp-build/*.jar
-otp-build/*.pbf
-otp-build/*.obj
-otp-build/*.zip
-gtfs-peribus.zip
-public/data/map.geojson
-
-# Keep directory structure (Garder la structure des dossiers)
-!public/data/gtfs/.gitkeep
-!public/data/.gitkeep
-!otp-build/.gitkeep
-# ✅ Force à inclure les fichiers GTFS statiques
-!public/data/gtfs/
-!public/data/gtfs/**
-
-# Node.js
+# ─────────────────────────────────────────────────────────────────────────
+# DÉPENDANCES
+# ─────────────────────────────────────────────────────────────────────────
 node_modules/
-package-lock.json
 .vercel/
 
-# OS files
-.DS_Store
-Thumbs.db
+# ─────────────────────────────────────────────────────────────────────────
+# BUILD / ARTIFACTS
+# ─────────────────────────────────────────────────────────────────────────
+dist/
+otp-build/
+*.jar
+*.pbf
+*.obj
+gtfs-peribus.zip
 
-# IDE files
+# ─────────────────────────────────────────────────────────────────────────
+# ENVIRONNEMENTS LOCAUX
+# ─────────────────────────────────────────────────────────────────────────
+.venv/
+.vs/
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Logs
+# ─────────────────────────────────────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────────────────────────────
+# LOGS / TEMP
+# ─────────────────────────────────────────────────────────────────────────
 *.log
 npm-debug.log*
-
-# Temporary files
 *.tmp
 *.temp
+
+# ─────────────────────────────────────────────────────────────────────────
+# DONNÉES SENSIBLES
+# ─────────────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─────────────────────────────────────────────────────────────────────────
+# CONSERVER (GTFS statiques pour Vercel)
+# ─────────────────────────────────────────────────────────────────────────
+!public/data/gtfs/
+!public/data/gtfs/**
