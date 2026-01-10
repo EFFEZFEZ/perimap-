@@ -151,7 +151,10 @@ export class PathfindingEngine {
     // On essaie progressivement plus de combinaisons pour éviter de rater une paire viable
     // (les 3 plus proches peuvent être des StopPlace/non-desservis ou juste non connectés à l'heure demandée).
     const tryLimits = [3, 8, 15, 25];
-    const maxToReturn = this.options.maxResults;
+    // IMPORTANT: ne pas s'arrêter dès qu'on trouve un trajet.
+    // Un arrêt un peu plus loin (ex: Tourny) + marche finale peut produire
+    // un itinéraire bien plus court que le meilleur parmi les 3 arrêts les plus proches.
+    const maxToCollect = Math.max(this.options.maxResults, 20);
 
     for (const limit of tryLimits) {
       const oLimit = Math.min(limit, originCandidates.length);
@@ -187,16 +190,16 @@ export class PathfindingEngine {
             results.push(itinerary);
           }
 
-          if (results.length >= maxToReturn) {
+          if (results.length >= maxToCollect) {
             break;
           }
         }
-        if (results.length >= maxToReturn) {
+        if (results.length >= maxToCollect) {
           break;
         }
       }
 
-      if (results.length > 0) {
+      if (results.length >= maxToCollect) {
         break;
       }
     }
