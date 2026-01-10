@@ -58,7 +58,17 @@ export default async function handler(request) {
             console.log('[routes edge V314] Mode TRANSIT → Oracle OTP');
             
             // Transform Perimap format to OTP v2 format
-            const { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
+            let { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
+            
+            // Convert date format from YYYY-MM-DD to MM-DD-YYYY (OTP expects this)
+            if (date && typeof date === 'string') {
+                const dateParts = date.split('-');
+                if (dateParts.length === 3) {
+                    date = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
+                }
+            }
+            
+            console.log('[routes edge V314] Calling OTP with:', { fromPlace, toPlace, date, time });
             
             const otpUrl = new URL('http://79.72.24.141:8080/otp/routers/default/plan');
             otpUrl.searchParams.append('fromPlace', fromPlace);
@@ -70,7 +80,7 @@ export default async function handler(request) {
             otpUrl.searchParams.append('numItineraries', numItineraries || 3);
             otpUrl.searchParams.append('arriveBy', arriveBy ? 'true' : 'false');
             
-            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 100));
+            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 150));
             
             try {
                 const response = await fetch(otpUrl.toString(), {
@@ -85,7 +95,7 @@ export default async function handler(request) {
 
                 // If OTP returns an error or no itineraries, log it
                 if (!response.ok || !data.plan || !data.plan.itineraries) {
-                    console.warn('[routes edge V314] OTP response invalid or empty');
+                    console.warn('[routes edge V314] OTP response invalid or empty:', data.error);
                     return new Response(
                         JSON.stringify({ 
                             success: false, 
