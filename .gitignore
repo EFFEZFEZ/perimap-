@@ -1,13 +1,22 @@
 # GTFS Data Files (Données brutes et générées)
-public/data/gtfs/*.txt
+# ⚠️ NE PAS ignorer les fichiers GTFS - ils sont essentiels pour le frontend statique
+# Les fichiers .txt et .bundle DOIVENT être versionés pour Vercel
+
+# OTP Build Files (trop gros pour GitHub)
+otp-build/*.jar
+otp-build/*.pbf
+otp-build/*.obj
+otp-build/*.zip
+gtfs-peribus.zip
 public/data/map.geojson
-public/data/gtfs/gtfs.bundle.json
-*.bundle
-*.bundle.json
 
 # Keep directory structure (Garder la structure des dossiers)
 !public/data/gtfs/.gitkeep
 !public/data/.gitkeep
+!otp-build/.gitkeep
+# ✅ Force à inclure les fichiers GTFS statiques
+!public/data/gtfs/
+!public/data/gtfs/**
 
 # Node.js
 node_modules/
