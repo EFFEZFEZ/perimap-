@@ -282,11 +282,11 @@ export class PathfindingEngine {
           stopId: leg.toStop,
         },
         departureTime: this.secondsToDate(baseTime, leg.departureTime).toISOString(),
-        arrivalTime: this.secondsToDate(baseTime, leg.alightTime).toISOString(),
-        duration: leg.alightTime - leg.departureTime,
+        arrivalTime: this.secondsToDate(baseTime, (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime)).toISOString(),
+        duration: (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime) - leg.departureTime,
       });
 
-      currentTime = this.secondsToDate(baseTime, leg.alightTime);
+      currentTime = this.secondsToDate(baseTime, (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime));
     }
 
     // Segment de marche vers la destination

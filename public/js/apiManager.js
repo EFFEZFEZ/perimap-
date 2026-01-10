@@ -296,7 +296,7 @@ export class ApiManager {
             
             // ✅ V230: Mode OTP - utiliser l'endpoint Photon du serveur Express
             if (this.useOtp) {
-                console.log("[ApiManager] 🌐 Mode OTP activé - Appel backend Oracle Cloud");
+                console.log("[ApiManager] 🌐 Mode Oracle activé - Appel backend Oracle Cloud (RAPTOR)");
                 
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
                 url.searchParams.set('q', inputString);
@@ -1105,7 +1105,7 @@ export class ApiManager {
      * @private
      */
     async _fetchBusRouteOtp(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
-        console.log("🚍 Recherche itinéraire OTP...");
+        console.log("🚍 Recherche itinéraire Oracle (RAPTOR)...");
         
         // Résoudre les coordonnées si nécessaire
         let originCoords = fromCoords;
@@ -1304,7 +1304,7 @@ export class ApiManager {
             body.arriveBy = false;
         }
 
-        console.log('🕒 OTP payload:', { mode: body.mode, date: body.date, time: body.time, arriveBy: body.arriveBy });
+        console.log('🕒 Oracle payload:', { mode: body.mode, date: body.date, time: body.time, arriveBy: body.arriveBy });
 
         let response;
         let data;

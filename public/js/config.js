@@ -17,20 +17,20 @@
 
 /**
  * Détermine le mode backend à utiliser
- * ✅ V310: FORCÉ SUR OTP (Oracle Cloud) - Google désactivé
- * @returns {'vercel' | 'otp' | 'google'} Le mode backend
+ * ✅ V310: FORCÉ SUR ORACLE (RAPTOR) - Google désactivé
+ * @returns {'vercel' | 'otp' | 'oracle' | 'google'} Le mode backend
  */
 export function getBackendMode() {
-  // ✅ V310: FORCER LE MODE OTP (Oracle Cloud backend)
+  // ✅ V310: FORCER LE MODE ORACLE (Oracle Cloud backend)
   console.log('[Config] 🔧 getBackendMode() appelé');
   console.log('[Config] 📍 URL actuelle:', window.location.href);
   console.log('[Config] 📍 Origin:', window.location.origin);
   console.log('[Config] 📍 Hostname:', window.location.hostname);
   console.log('[Config] 📍 Port:', window.location.port);
   
-  // FORCER OTP pour tous les environnements
-  console.log('[Config] ✅ MODE FORCÉ: otp (Oracle Cloud backend)');
-  return 'otp';
+  // Forcer Oracle (backend Oracle Cloud). Le moteur côté serveur est RAPTOR natif.
+  console.log('[Config] ✅ MODE FORCÉ: oracle (Oracle Cloud / RAPTOR)');
+  return 'oracle';
   
   /* DÉSACTIVÉ - Code original commenté
   // 1. Configuration explicite via window.__APP_CONFIG
@@ -60,7 +60,7 @@ export function getBackendMode() {
  */
 export function useServerProxy() {
   const mode = getBackendMode();
-  return mode === 'vercel' || mode === 'otp';
+  return mode === 'vercel' || mode === 'otp' || mode === 'oracle';
 }
 
 /**
@@ -68,7 +68,8 @@ export function useServerProxy() {
  * @returns {boolean} true si on utilise le serveur Express avec OTP
  */
 export function useOtpBackend() {
-  return getBackendMode() === 'otp';
+  const mode = getBackendMode();
+  return mode === 'otp' || mode === 'oracle';
 }
 
 /**
