@@ -251,13 +251,13 @@ export async function initializeRouter() {
 
       // Créer et initialiser le moteur
       routerEngine = new PathfindingEngine(gtfsData, {
-        maxWalkDistance: 3000,    // 3km max de marche (permet de rejoindre un arrêt plus pertinent)
+        maxWalkDistance: 2000,    // 2km max de marche
         walkSpeed: 1.25,          // ~4.5 km/h
-        maxTransfers: 2,          // 2 correspondances max (moins d'itinéraires incohérents)
+        maxTransfers: 2,          // 2 correspondances max
         minTransferTime: 180,     // 3 min minimum
-        transferPenalty: 900,     // Pénalité de 15 min par correspondance
+        transferPenalty: 1200,    // Pénalité de 20 min par correspondance (priorise trajets directs)
         maxResults: 5,            // 5 itinéraires max
-        nearbyStopRadius: 500     // 500m pour trouver arrêts proches
+        nearbyStopRadius: 800     // 800m pour trouver arrêts proches
       });
 
       await routerEngine.buildGraph();

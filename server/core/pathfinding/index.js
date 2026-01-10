@@ -269,6 +269,13 @@ export class PathfindingEngine {
 
       // Filtrer les legs transit "vides" (ex: Tourny → Tourny) qui gonflent artificiellement les correspondances
       if (leg.fromStop !== leg.toStop && transitDurationSec > 0) {
+        // Récupérer la polyline du shape GTFS si disponible
+        const shapeId = trip?.shape_id;
+        let polyline = null;
+        if (shapeId && this.gtfsData.shapes) {
+          polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
+        }
+
         legs.push({
           type: 'transit',
           mode: this.getRouteMode(route),
@@ -292,6 +299,7 @@ export class PathfindingEngine {
           departureTime: this.secondsToDate(baseTime, leg.departureTime).toISOString(),
           arrivalTime: this.secondsToDate(baseTime, alightTimeSec).toISOString(),
           duration: transitDurationSec,
+          polyline,
         });
       }
 
@@ -337,14 +345,138 @@ export class PathfindingEngine {
 
   /**
    * Classe les itinéraires par qualité
+   * Priorise fortement les trajets avec moins de correspondances
    */
   rankItineraries(itineraries) {
-    return itineraries.sort((a, b) => {
-      // Score = durée + pénalité par correspondance
-      const scoreA = a.totalDuration + a.transfers * this.options.transferPenalty;
-      const scoreB = b.totalDuration + b.transfers * this.options.transferPenalty;
+    // D'abord dédupliquer les itinéraires similaires
+    const seen = new Set();
+    const unique = itineraries.filter(it => {
+      // Clé unique basée sur les arrêts de transit (pas les détails horaires)
+      const transitLegs = it.legs.filter(l => l.type === 'transit');
+      const key = transitLegs.map(l => `${l.routeName}:${l.from?.stopId}->${l.to?.stopId}`).join('|');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return unique.sort((a, b) => {
+      // 1. Prioriser FORTEMENT moins de correspondances (pénalité de 20 min par correspondance)
+      const transferPenalty = 1200; // 20 minutes
+      const scoreA = a.totalDuration + a.transfers * transferPenalty;
+      const scoreB = b.totalDuration + b.transfers * transferPenalty;
+
+      // 2. À score égal, prioriser moins de correspondances
+      if (Math.abs(scoreA - scoreB) < 300) { // ~5 min de différence acceptable
+        if (a.transfers !== b.transfers) {
+          return a.transfers - b.transfers;
+        }
+      }
+
       return scoreA - scoreB;
     });
+  }
+
+  /**
+   * Extrait la polyline GTFS encodée pour un segment entre deux arrêts
+   */
+  extractShapePolyline(shapeId, fromStop, toStop) {
+    if (!shapeId || !this.gtfsData.shapes) return null;
+
+    // Récupérer tous les points du shape
+    const shapePoints = this.gtfsData.shapes
+      .filter(s => s.shape_id === shapeId)
+      .sort((a, b) => parseInt(a.shape_pt_sequence) - parseInt(b.shape_pt_sequence));
+
+    if (shapePoints.length < 2) return null;
+
+    const fromLat = parseFloat(fromStop?.stop_lat);
+    const fromLon = parseFloat(fromStop?.stop_lon);
+    const toLat = parseFloat(toStop?.stop_lat);
+    const toLon = parseFloat(toStop?.stop_lon);
+
+    if (isNaN(fromLat) || isNaN(toLat)) return null;
+
+    // Trouver les indices les plus proches des arrêts de départ et d'arrivée
+    let startIdx = 0, endIdx = shapePoints.length - 1;
+    let minStartDist = Infinity, minEndDist = Infinity;
+
+    for (let i = 0; i < shapePoints.length; i++) {
+      const lat = parseFloat(shapePoints[i].shape_pt_lat);
+      const lon = parseFloat(shapePoints[i].shape_pt_lon);
+      const distFrom = this.quickDistance(fromLat, fromLon, lat, lon);
+      const distTo = this.quickDistance(toLat, toLon, lat, lon);
+
+      if (distFrom < minStartDist) {
+        minStartDist = distFrom;
+        startIdx = i;
+      }
+      if (distTo < minEndDist) {
+        minEndDist = distTo;
+        endIdx = i;
+      }
+    }
+
+    // Extraire le segment (dans le bon ordre)
+    let segment;
+    if (startIdx <= endIdx) {
+      segment = shapePoints.slice(startIdx, endIdx + 1);
+    } else {
+      segment = shapePoints.slice(endIdx, startIdx + 1).reverse();
+    }
+
+    if (segment.length < 2) {
+      // Fallback: ligne directe
+      segment = [
+        { shape_pt_lat: fromLat, shape_pt_lon: fromLon },
+        { shape_pt_lat: toLat, shape_pt_lon: toLon }
+      ];
+    }
+
+    // Encoder en polyline Google
+    return this.encodePolyline(segment.map(p => [parseFloat(p.shape_pt_lat), parseFloat(p.shape_pt_lon)]));
+  }
+
+  /**
+   * Distance rapide (approximation)
+   */
+  quickDistance(lat1, lon1, lat2, lon2) {
+    const dLat = lat2 - lat1;
+    const dLon = lon2 - lon1;
+    return dLat * dLat + dLon * dLon * 0.7; // Approximation
+  }
+
+  /**
+   * Encode une liste de [lat, lon] en polyline Google
+   */
+  encodePolyline(coords) {
+    if (!coords || coords.length === 0) return null;
+
+    let encoded = '';
+    let prevLat = 0, prevLon = 0;
+
+    for (const [lat, lon] of coords) {
+      const latE5 = Math.round(lat * 1e5);
+      const lonE5 = Math.round(lon * 1e5);
+
+      encoded += this.encodeSignedNumber(latE5 - prevLat);
+      encoded += this.encodeSignedNumber(lonE5 - prevLon);
+
+      prevLat = latE5;
+      prevLon = lonE5;
+    }
+
+    return encoded;
+  }
+
+  encodeSignedNumber(num) {
+    let sgn = num < 0 ? ~(num << 1) : (num << 1);
+    let encoded = '';
+    while (sgn >= 0x20) {
+      encoded += String.fromCharCode((0x20 | (sgn & 0x1f)) + 63);
+      sgn >>= 5;
+    }
+    encoded += String.fromCharCode(sgn + 63);
+    return encoded;
   }
 
   /**

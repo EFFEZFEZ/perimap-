@@ -13,15 +13,23 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v312'; // ✅ v312: Polylines OTP + blocage Google sans clé
+const CACHE_VERSION = 'v313'; // ✅ v313: Polylines GTFS + meilleur ranking correspondances
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 
 // Assets critiques à pré-cacher (chargés immédiatement)
+// NOTE: En production avec Vite, les fichiers sont bundlés dans /assets/ avec hash
+// Ces chemins sont pour le développement local uniquement
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
+  '/manifest.json'
+];
+
+// Assets secondaires: pages HTML statiques et views
+// Les JS/CSS sont gérés dynamiquement par Stale-While-Revalidate
+const SECONDARY_ASSETS = [
   '/horaires.html',
   '/horaires-ligne-a.html',
   '/horaires-ligne-b.html',
@@ -32,56 +40,6 @@ const CRITICAL_ASSETS = [
   '/carte.html',
   '/about.html',
   '/mentions-legales.html',
-  '/style.css',
-  '/css/brand.css',
-  '/css/line-pages.css',
-  '/js/app.js',
-  '/manifest.json'
-];
-
-// Assets secondaires (chargés en arrière-plan)
-const SECONDARY_ASSETS = [
-  '/js/main.js',
-  '/js/dataManager.js',
-  '/js/mapRenderer.js',
-  '/js/router.js',
-  '/js/routerWorkerClient.js',
-  '/js/geolocationManager.js',
-  '/js/busPositionCalculator.js',
-  '/js/tripScheduler.js',
-  '/js/timeManager.js',
-  '/js/apiManager.js',
-  '/js/stopTimesStore.js',
-  '/js/uiManager.js',
-  '/js/viewLoader.js',
-  '/js/config.js',
-  '/js/realtimeManager.js',
-  '/js/analyticsManager.js',
-  '/js/delayManager.js',
-  '/js/dataExporter.js',
-  '/js/delayStatsUI.js',
-  '/js/offlineManager.js',
-  '/js/config/icons.js',
-  '/js/config/routes.js',
-  '/js/config/stopKeyMapping.js',
-  '/js/config/delayConfig.js',
-  '/js/utils/formatters.js',
-  '/js/utils/geo.js',
-  '/js/utils/stopName.mjs',
-  '/js/utils/tripStopTimes.mjs',
-  '/js/utils/polyline.js',
-  '/js/utils/gtfsProcessor.js',
-  '/js/itinerary/ranking.js',
-  '/js/ui/resultsRenderer.js',
-  '/js/ui/trafficInfo.js',
-  '/js/ui/bottomSheetManager.js',
-  '/js/ui/navigationManager.js',
-  '/js/ui/installManager.js',
-  '/js/map/routeDrawing.js',
-  '/js/search/itineraryProcessor.js',
-  '/js/search/searchManager.js',
-  '/js/workers/gtfsWorker.js',
-  '/js/workers/routerWorker.js',
   '/views/hall.html',
   '/views/horaires.html',
   '/views/carte.html',
@@ -90,11 +48,7 @@ const SECONDARY_ASSETS = [
   '/views/tarifs-achat.html',
   '/views/tarifs-amendes.html',
   '/views/tarifs-billettique.html',
-  '/views/tarifs-grille.html',
-  '/css/brand.css',
-  '/css/line-pages.css',
-  '/css/delay-stats.css',
-  '/css/data-exporter.css'
+  '/views/tarifs-grille.html'
 ];
 
 // Patterns pour Network-Only
