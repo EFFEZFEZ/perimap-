@@ -1147,6 +1147,13 @@ export class ApiManager {
             ? Math.max(0, Math.round((endTimeMs - startTimeMs) / 1000))
             : Math.round((legs.reduce((sum, leg) => sum + (leg.duration || 0), 0)) || 0);
         
+        const formatDistanceText = (meters) => {
+            const m = Number(meters) || 0;
+            if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
+            if (m > 0) return `${Math.round(m)} m`;
+            return '';
+        };
+
         // Construire les steps à partir des legs OTP
         const steps = legs.map(leg => {
             const otpMode = (leg.mode || '').toUpperCase();
@@ -1154,15 +1161,41 @@ export class ApiManager {
             const isTransit = isTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
             const isBicycle = otpMode === 'BICYCLE' || otpMode === 'BIKE';
 
+            const legDurationSeconds = (() => {
+                if (leg?.startTime && leg?.endTime) {
+                    return Math.max(0, Math.round((leg.endTime - leg.startTime) / 1000));
+                }
+                // OTP renvoie souvent leg.duration en secondes
+                const v = Number(leg?.duration);
+                return Number.isFinite(v) ? Math.max(0, Math.round(v)) : 0;
+            })();
+
             const routeShortName = leg.routeShortName || '';
             const routeLongName = leg.routeLongName || leg.route || '';
             const routeColor = '#' + (leg.routeColor || '3388ff');
             const routeTextColor = '#' + (leg.routeTextColor || 'FFFFFF');
+
+            const distanceMeters = Number(leg?.distance) || 0;
+            const distanceText = formatDistanceText(distanceMeters);
+            const instructionText = isTransit
+                ? ''
+                : (isBicycle ? 'Vélo' : 'Marcher');
             
             return {
                 travelMode: isTransit ? 'TRANSIT' : (isBicycle ? 'BICYCLE' : 'WALK'),
                 distance: { meters: leg.distance || 0 },
-                duration: { seconds: Math.round((leg.endTime - leg.startTime) / 1000) },
+                duration: { seconds: legDurationSeconds },
+                // Champs attendus par nos parsers "Google-like"
+                staticDuration: `${legDurationSeconds}s`,
+                distanceMeters,
+                localizedValues: {
+                    distance: { text: distanceText },
+                    instruction: instructionText,
+                },
+                navigationInstruction: isTransit ? undefined : {
+                    instructions: instructionText,
+                    maneuver: 'DEFAULT',
+                },
                 polyline: leg.legGeometry?.points ? { encodedPolyline: leg.legGeometry.points } : null,
                 startLocation: { latLng: { latitude: leg.from.lat, longitude: leg.from.lon } },
                 endLocation: { latLng: { latitude: leg.to.lat, longitude: leg.to.lon } },
@@ -1182,7 +1215,10 @@ export class ApiManager {
                             departureStop: { name: leg.from.name },
                             arrivalStop: { name: leg.to.name },
                             departureTime: new Date(leg.startTime).toISOString(),
-                            arrivalTime: new Date(leg.endTime).toISOString()
+                            arrivalTime: new Date(leg.endTime).toISOString(),
+                            intermediateStops: Array.isArray(leg?.intermediateStops)
+                                ? leg.intermediateStops.map(s => ({ name: s?.name || 'Arrêt' }))
+                                : [],
                         },
                         localizedValues: {
                             departureTime: { time: { text: this._formatTimeFromMs(leg.startTime) } },
@@ -1195,7 +1231,10 @@ export class ApiManager {
                             textColor: routeTextColor,
                             vehicle: { type: 'BUS' }
                         },
-                        headsign: leg.headsign || ''
+                        headsign: leg.headsign || '',
+                        stopCount: Array.isArray(leg?.intermediateStops)
+                            ? Math.max(0, leg.intermediateStops.length)
+                            : (Number.isFinite(leg?.stopCount) ? leg.stopCount : 0),
                     }
                 })
             };
