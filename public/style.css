@@ -6494,12 +6494,11 @@ body.dark-theme #results-planner-to:focus {
     justify-content: center;
     font-weight: 700;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    font-size: 0.9rem;
-    border-radius: 9999px;
-    width: 32px;
+    font-size: 0.85rem;
+    border-radius: 8px;
     min-width: 32px;
-    height: 32px;
-    padding: 0;
+    height: 26px;
+    padding: 0 8px;
     text-align: center;
 }
 
@@ -6639,20 +6638,21 @@ body.dark-theme .next-departures-label {
     position: absolute;
     left: 0;
     top: 0;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--bg-main);
+    background: transparent;
     /* *** CORRECTION V36: Ajout du Z-index *** */
     position: relative; /* z-index a besoin de position */
     z-index: 2;
+    margin-right: 0.5rem;
 }
 .route-details .step-detail.walk .step-icon,
 .route-details .step-detail.bicycle .step-icon { /* Ajout vélo */
-    background: var(--bg-secondary);
+    background: transparent;
     color: var(--text-secondary);
 }
 .route-details .step-icon svg {
@@ -6664,12 +6664,13 @@ body.dark-theme .next-departures-label {
     color: inherit;
 }
 .route-details .step-icon .route-line-badge {
-    font-size: 1rem;
+    font-size: 0.9rem;
     width: 32px;
     min-width: 32px;
     height: 32px;
     padding: 0;
     border-radius: 9999px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .route-details .step-info {
@@ -10952,11 +10953,10 @@ body.dark-theme .route-summary-dot {
     justify-content: center;
     font-weight: 700;
     font-size: 0.8rem;
-    border-radius: 9999px;
-    width: 28px;
-    min-width: 28px;
-    height: 28px;
-    padding: 0;
+    border-radius: 8px;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 6px;
     box-shadow: none;
     letter-spacing: 0.02em;
 }
@@ -11453,11 +11453,10 @@ body.dark-theme .route-summary-dot {
     justify-content: center;
     font-weight: 700;
     font-size: 0.75rem;
-    border-radius: 9999px;
-    width: 30px;
-    min-width: 30px;
-    height: 30px;
-    padding: 0;
+    border-radius: 8px;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     letter-spacing: 0.02em;
     text-transform: uppercase;
