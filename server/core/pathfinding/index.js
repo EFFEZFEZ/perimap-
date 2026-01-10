@@ -2,7 +2,7 @@
  * core/pathfinding/index.js
  * Export principal du module de pathfinding
  * 
- * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ✅ STATUT: ACTIF - Moteur RAPTOR natif pour le calcul d'itinéraires
  */
 
 import { RaptorAlgorithm } from './raptor.js';

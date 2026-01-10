@@ -25,7 +25,7 @@ import { config, validateConfig } from './config.js';
 import { createLogger } from './utils/logger.js';
 import apiRouter from './api/index.js';
 import { loadRouteAttributes } from './utils/gtfsLoader.js';
-import { checkOtpHealth } from './services/otpService.js';
+import { initializeRouter, checkNativeRouterHealth } from './services/nativeRouterService.js';
 
 const logger = createLogger('server');
 
@@ -34,19 +34,25 @@ async function startServer() {
     validateConfig();
     logger.info('✅ Configuration validée');
 
-    // ✅ NOUVEAU: Charger les couleurs GTFS au démarrage
+    // Charger les couleurs GTFS au démarrage
     logger.info(`📂 Chargement des données GTFS...`);
     const routeColors = await loadRouteAttributes();
     logger.info(`✅ ${routeColors.size} routes chargées avec leurs couleurs`);
     
-    // Vérifier la connectivité OTP (non bloquant)
-    checkOtpHealth().then(health => {
+    // ✅ NOUVEAU: Initialiser le moteur RAPTOR natif au démarrage
+    logger.info('🚀 Initialisation du moteur RAPTOR...');
+    try {
+      await initializeRouter();
+      const health = await checkNativeRouterHealth();
       if (health.ok) {
-        logger.info(`✅ OTP connecté (version: ${health.version})`);
+        logger.info(`✅ RAPTOR prêt - ${health.stats?.stopsCount || '?'} arrêts, ${health.stats?.routesCount || '?'} lignes`);
       } else {
-        logger.warn(`⚠️ OTP non accessible: ${health.error}`);
+        logger.warn(`⚠️ RAPTOR initialisé mais en erreur: ${health.error}`);
       }
-    });
+    } catch (raptorError) {
+      logger.error('❌ Erreur initialisation RAPTOR:', raptorError);
+      // On continue quand même - le routeur tentera de s'initialiser à la première requête
+    }
 
     const app = express();
 

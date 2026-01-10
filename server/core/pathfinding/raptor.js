@@ -2,7 +2,7 @@
  * raptor.js
  * Implémentation de l'algorithme RAPTOR (Round-Based Public Transit Routing)
  * 
- * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ✅ STATUT: ACTIF - Moteur de routage principal
  * 
  * RAPTOR est l'algorithme de référence pour le calcul d'itinéraires
  * en transport en commun. Il est utilisé par de nombreux systèmes

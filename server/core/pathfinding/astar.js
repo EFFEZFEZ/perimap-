@@ -2,7 +2,7 @@
  * astar.js
  * Implémentation de l'algorithme A* pour le calcul de chemins piétons
  * 
- * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ✅ STATUT: ACTIF - Utilisé par RAPTOR
  * 
  * A* est utilisé pour calculer les trajets à pied:
  * - De l'origine jusqu'à l'arrêt de bus le plus proche

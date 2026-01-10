@@ -2,7 +2,7 @@
  * graph.js
  * Gestion du graphe de transport pour le pathfinding
  * 
- * 🔴 STATUT: DÉSACTIVÉ - Code préparé pour le futur
+ * ✅ STATUT: ACTIF - Utilisé par RAPTOR
  * 
  * Ce module gère:
  * - La construction du graphe à partir des données GTFS
