@@ -1639,7 +1639,7 @@ async function executeItinerarySearch(source, sourceElements) {
     allFetchedItineraries = [];
     
     prefillOtherPlanner(source, sourceElements);
-    console.log(`Recherche Google API (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
+    console.log(`Recherche itinéraire (backend ${apiManager.backendMode || 'unknown'}) (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     if (source === 'hall') {
         showResultsView(); 
     }
@@ -1678,8 +1678,7 @@ async function executeItinerarySearch(source, sourceElements) {
         const fromLabel = sourceElements.fromInput?.value || '';
         const toLabel = sourceElements.toInput?.value || '';
 
-        // 🚀 V60: Routage optimisé - API Google uniquement
-        // ⚠️ Router GTFS local désactivé (ENABLE_GTFS_ROUTER=false)
+        // 🚀 Routage optimisé - backend Oracle (RAPTOR). Router GTFS local reste désactivé (ENABLE_GTFS_ROUTER=false)
         const routingStart = performance.now();
         
         let hybridItins = [];
@@ -1698,16 +1697,16 @@ async function executeItinerarySearch(source, sourceElements) {
             }
         }
 
-        // API Google (source principale)
+        // Backend principal (Oracle/RAPTOR via /api/routes)
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
-            .catch(e => { console.error('API Google error:', e); return null; });
+            .catch(e => { console.error('Erreur routage principal:', e); return null; });
         
         console.log(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
 
-        // Traiter les résultats Google
+        // Traiter les résultats backend principal
         if (intelligentResults) {
             allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
-            console.log('✅ API Google:', allFetchedItineraries?.length || 0, 'itinéraires');
+            console.log('✅ Backend principal:', allFetchedItineraries?.length || 0, 'itinéraires');
             
             // Fusionner avec GTFS si disponible
             if (hybridItins?.length) {
@@ -3136,6 +3135,16 @@ async function ensureItineraryPolylines(itineraries) {
             if (!step || step.type !== 'BUS' || isWaitStep(step)) continue;
 
                 const hasLatLngs = Array.isArray(step?.polyline?.latLngs) && step.polyline.latLngs.length >= 2;
+                // Si on a déjà une polyline encodée, la décoder et sortir pour éviter les lignes droites
+                if (!hasLatLngs && step?.polyline?.encodedPolyline) {
+                    const decoded = decodePolyline(step.polyline.encodedPolyline) || [];
+                    if (decoded.length >= 2) {
+                        step.polyline.latLngs = decoded.map(([lat, lon]) => [Number(lat), Number(lon)]).filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
+                        if (step.polyline.latLngs.length >= 2) {
+                            continue;
+                        }
+                    }
+                }
                 if (hasLatLngs) continue;
 
                 const stepTripId = step.tripId || itin.tripId || (itin.trip && itin.trip.trip_id) || null;

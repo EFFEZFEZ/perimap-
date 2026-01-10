@@ -1354,6 +1354,9 @@ export class ApiManager {
     }
 
     async _tryEmergencyGoogleFallback({ originCoords, destCoords, otpMode }) {
+        // En mode oracle/RAPTOR, on ne mélange pas avec Google → pas de fallback
+        if (this.backendMode === 'oracle') return null;
+
         // On ne fallback que si on a un proxy serveur disponible.
         const googleEndpoint = this.apiEndpoints?.googleRoutes || '/api/google-routes';
         if (!this.useProxy) return null;

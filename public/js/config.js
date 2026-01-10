@@ -60,7 +60,8 @@ export function getBackendMode() {
  */
 export function useServerProxy() {
   const mode = getBackendMode();
-  return mode === 'vercel' || mode === 'otp' || mode === 'oracle';
+  // En mode oracle (backend local/Oracle Cloud), on appelle directement l'API locale → pas de proxy
+  return mode === 'vercel' || mode === 'otp';
 }
 
 /**
@@ -123,7 +124,6 @@ export const API_ENDPOINTS = {
  */
 export const OTP_API_ENDPOINTS = {
   routes: '/api/routes',
-  googleRoutes: '/api/google-routes',
   places: '/api/places',
   reverse: '/api/places/reverse',
   realtime: '/api/realtime'
