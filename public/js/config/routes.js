@@ -133,7 +133,7 @@ export function getCategoryInfo(categoryId) {
  */
 export function getPdfPath(routeShortName) {
     const filename = PDF_FILENAME_MAP[routeShortName];
-    return filename ? `/data/fichehoraire/${filename}` : '#';
+    return filename ? `/api/fichehoraire/${filename}` : '#';
 }
 
 /**

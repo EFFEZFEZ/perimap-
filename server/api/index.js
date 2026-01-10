@@ -8,6 +8,7 @@ import { Router } from 'express';
 import otpProxyApi from './otp-proxy.js';
 import realtimeApi from './realtime.js';
 import gtfsStaticApi from './gtfs-static.js';
+import fichehoraireApi from './fichehoraire-static.js';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use('/routes', otpProxyApi);
 router.use('/places', otpProxyApi);
 router.use('/realtime', realtimeApi);
 router.use('/gtfs', gtfsStaticApi);
+router.use('/fichehoraire', fichehoraireApi);
 
 router.get('/', (req, res) => {
   res.json({
