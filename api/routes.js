@@ -74,8 +74,12 @@ export default async function handler(request) {
             // Extract just HH:MM if time includes seconds or is ISO format
             let timeFormatted = time;
             if (time.includes('T')) {
-                // ISO format like "2026-01-10T11:50:00+01:00" - extract time part
+                // ISO format like "2026-01-10T11:50:00+01:00" - extract both date and time
+                const dateMatchISO = time.match(/^(\d{4})-(\d{2})-(\d{2})/);
                 const timeMatch = time.match(/T(\d{2}):(\d{2})/);
+                if (dateMatchISO) {
+                    date = `${dateMatchISO[1]}-${dateMatchISO[2]}-${dateMatchISO[3]}`;
+                }
                 if (timeMatch) {
                     timeFormatted = `${timeMatch[1]}:${timeMatch[2]}`;
                 }
@@ -85,6 +89,14 @@ export default async function handler(request) {
                 if (parts.length === 2) {
                     date = parts[0];  // Update date from combined string
                     timeFormatted = parts[1];
+                }
+            }
+            
+            // Also extract date from date field if it's in ISO format
+            if (date && date.includes('T')) {
+                const dateMatchISO = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (dateMatchISO) {
+                    date = `${dateMatchISO[1]}-${dateMatchISO[2]}-${dateMatchISO[3]}`;
                 }
             }
             
