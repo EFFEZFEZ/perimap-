@@ -94,16 +94,32 @@ export class PathfindingEngine {
     const originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     const destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
 
-    console.log(`🔍 Arrêts proches origine (${origin.lat.toFixed(4)}, ${origin.lon.toFixed(4)}): ${originStops.length} trouvés`);
+    // Filtrer: privilégier les quais (StopPlace/parent stations ne sont souvent pas dans stop_times)
+    // et exclure les arrêts qui n'ont aucune route (impossible d'embarquer/débarquer en TC)
+    const isQuayLike = stop => {
+      const id = stop?.stop_id || '';
+      if (id.includes(':StopPlace:')) return false;
+      if (stop?.location_type !== undefined && String(stop.location_type) === '1') return false;
+      return true;
+    };
+    const hasRoutes = stopId => {
+      const routes = this.raptor.routesAtStop.get(stopId);
+      return Array.isArray(routes) ? routes.length > 0 : false;
+    };
+
+    const originCandidates = originStops.filter(s => isQuayLike(s.stop) && hasRoutes(s.stop.stop_id));
+    const destCandidates = destStops.filter(s => isQuayLike(s.stop) && hasRoutes(s.stop.stop_id));
+
+    console.log(`🔍 Arrêts proches origine (${origin.lat.toFixed(4)}, ${origin.lon.toFixed(4)}): ${originStops.length} trouvés (${originCandidates.length} utilisables)`);
     if (originStops.length > 0) {
       console.log(`   → ${originStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
     }
-    console.log(`🔍 Arrêts proches destination (${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}): ${destStops.length} trouvés`);
+    console.log(`🔍 Arrêts proches destination (${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}): ${destStops.length} trouvés (${destCandidates.length} utilisables)`);
     if (destStops.length > 0) {
       console.log(`   → ${destStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
     }
 
-    if (originStops.length === 0 || destStops.length === 0) {
+    if (originCandidates.length === 0 || destCandidates.length === 0) {
       // Pas d'arrêts à proximité, retourner uniquement le trajet à pied
       const walkPath = this.astar.computeDirectPath(
         origin.lat, origin.lon,
@@ -132,33 +148,56 @@ export class PathfindingEngine {
     }
 
     // 2. Pour chaque combinaison origine/destination, calculer l'itinéraire RAPTOR
-    console.log(`🔍 Tentative de calcul RAPTOR pour ${originStops.length} x ${destStops.length} combinaisons`);
-    for (const originStop of originStops.slice(0, 3)) {
-      for (const destStop of destStops.slice(0, 3)) {
-        const adjustedDepartureTime = timeSeconds + originStop.walkTime;
-        
-        console.log(`  → Essai: ${originStop.stop.stop_name} → ${destStop.stop.stop_name} à ${Math.floor(adjustedDepartureTime/3600)}h${Math.floor((adjustedDepartureTime%3600)/60)}`);
-        
-        const journeys = this.raptor.computeJourneys(
-          originStop.stop.stop_id,
-          destStop.stop.stop_id,
-          adjustedDepartureTime,
-          dateStr
-        );
+    // On essaie progressivement plus de combinaisons pour éviter de rater une paire viable
+    // (les 3 plus proches peuvent être des StopPlace/non-desservis ou juste non connectés à l'heure demandée).
+    const tryLimits = [3, 8, 15, 25];
+    const maxToReturn = this.options.maxResults;
 
-        console.log(`  ← Résultat: ${journeys.length} itinéraires trouvés`);
+    for (const limit of tryLimits) {
+      const oLimit = Math.min(limit, originCandidates.length);
+      const dLimit = Math.min(limit, destCandidates.length);
+      console.log(`🔍 Tentative RAPTOR: ${oLimit} x ${dLimit} combinaisons (top ${limit})`);
 
-        for (const journey of journeys) {
-          const itinerary = this.buildItinerary(
-            origin,
-            destination,
-            originStop,
-            destStop,
-            journey,
-            departureTime
+      for (const originStop of originCandidates.slice(0, oLimit)) {
+        for (const destStop of destCandidates.slice(0, dLimit)) {
+          const adjustedDepartureTime = timeSeconds + originStop.walkTime;
+
+          console.log(
+            `  → Essai: ${originStop.stop.stop_name} → ${destStop.stop.stop_name} à ${Math.floor(adjustedDepartureTime / 3600)}h${Math.floor((adjustedDepartureTime % 3600) / 60)}`
           );
-          results.push(itinerary);
+
+          const journeys = this.raptor.computeJourneys(
+            originStop.stop.stop_id,
+            destStop.stop.stop_id,
+            adjustedDepartureTime,
+            dateStr
+          );
+
+          console.log(`  ← Résultat: ${journeys.length} itinéraires trouvés`);
+
+          for (const journey of journeys) {
+            const itinerary = this.buildItinerary(
+              origin,
+              destination,
+              originStop,
+              destStop,
+              journey,
+              departureTime
+            );
+            results.push(itinerary);
+          }
+
+          if (results.length >= maxToReturn) {
+            break;
+          }
         }
+        if (results.length >= maxToReturn) {
+          break;
+        }
+      }
+
+      if (results.length > 0) {
+        break;
       }
     }
 
