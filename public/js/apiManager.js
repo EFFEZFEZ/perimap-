@@ -1127,10 +1127,19 @@ export class ApiManager {
      */
     _convertOtpItineraryToGoogleFormat(itinerary) {
         const legs = itinerary.legs || [];
+
+        const totalDistanceMeters = legs.reduce((sum, leg) => sum + (leg.distance || 0), 0);
+        const startTimeMs = itinerary.startTime || legs[0]?.startTime;
+        const endTimeMs = itinerary.endTime || legs[legs.length - 1]?.endTime;
+        const totalDurationSeconds = (startTimeMs && endTimeMs)
+            ? Math.max(0, Math.round((endTimeMs - startTimeMs) / 1000))
+            : Math.round((legs.reduce((sum, leg) => sum + (leg.duration || 0), 0)) || 0);
         
         // Construire les steps à partir des legs OTP
         const steps = legs.map(leg => {
-            const isTransit = leg.mode === 'TRANSIT' || ['BUS', 'TRAM', 'SUBWAY', 'RAIL'].includes(leg.transitLeg?.routeType);
+            const otpMode = (leg.mode || '').toUpperCase();
+            const hasTransitLeg = Boolean(leg.transitLeg);
+            const isTransit = hasTransitLeg || ['BUS', 'TRAM', 'SUBWAY', 'RAIL', 'FERRY'].includes(otpMode);
             
             return {
                 travelMode: isTransit ? 'TRANSIT' : 'WALK',
@@ -1156,7 +1165,7 @@ export class ApiManager {
                             name: leg.transitLeg?.routeLongName || '',
                             color: '#' + (leg.transitLeg?.routeColor || '3388ff'),
                             textColor: '#' + (leg.transitLeg?.routeTextColor || 'FFFFFF'),
-                            vehicle: { type: leg.transitLeg?.routeType || 'BUS' }
+                            vehicle: { type: 'BUS' }
                         },
                         headsign: leg.transitLeg?.headsign || ''
                     }
@@ -1165,12 +1174,15 @@ export class ApiManager {
         });
 
         return {
+            // Align with Google Routes API shapes used elsewhere in the app
+            duration: `${totalDurationSeconds}s`,
+            distanceMeters: totalDistanceMeters,
             legs: [{
                 steps,
                 startLocation: { latLng: { latitude: legs[0]?.from.lat, longitude: legs[0]?.from.lon } },
                 endLocation: { latLng: { latitude: legs[legs.length - 1]?.to.lat, longitude: legs[legs.length - 1]?.to.lon } },
-                distance: { meters: legs.reduce((sum, leg) => sum + (leg.distance || 0), 0) },
-                duration: { seconds: Math.round((legs[legs.length - 1]?.endTime - legs[0]?.startTime) / 1000) }
+                distance: { meters: totalDistanceMeters },
+                duration: { seconds: totalDurationSeconds }
             }],
             startAddress: legs[0]?.from.name || '',
             endAddress: legs[legs.length - 1]?.to.name || ''
