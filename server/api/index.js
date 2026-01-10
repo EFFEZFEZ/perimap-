@@ -5,13 +5,14 @@
  */
 
 import { Router } from 'express';
-import otpProxyApi from './otp-proxy.js';
+import routesApi from './routes.js';
+import placesApi from './places.js';
 import realtimeApi from './realtime.js';
 
 const router = Router();
 
-router.use('/routes', otpProxyApi);
-router.use('/places', otpProxyApi);
+router.use('/routes', routesApi);
+router.use('/places', placesApi);
 router.use('/realtime', realtimeApi);
 
 router.get('/', (req, res) => {

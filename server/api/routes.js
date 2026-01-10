@@ -23,6 +23,55 @@ const SUPPORTED_MODES = ['TRANSIT', 'WALK', 'BICYCLE'];
  */
 router.post('/', async (req, res) => {
   try {
+    // --- Compat frontend OTP (V230) ---
+    // Payload attendu par public/js/apiManager.js::_fetchBusRouteOtp:
+    // { fromPlace:"lat,lon", toPlace:"lat,lon", date:"YYYY-MM-DD", time:"HH:mm", mode?, maxWalkDistance?, numItineraries?, arriveBy? }
+    if (req.body?.fromPlace && req.body?.toPlace && req.body?.date && req.body?.time) {
+      const {
+        fromPlace,
+        toPlace,
+        date,
+        time,
+        mode = 'TRANSIT,WALK',
+        maxWalkDistance = 1000,
+        numItineraries = 3,
+        arriveBy: arriveByRaw = false,
+      } = req.body;
+
+      const arriveBy = parseBoolean(arriveByRaw, false);
+
+      const routerId = process.env.OTP_ROUTER || 'default';
+      const rawBase = (process.env.OTP_URL || process.env.OTP_BASE_URL || 'http://127.0.0.1:8080').replace(/\/+$/, '');
+
+      const base = rawBase.includes('/otp/routers/')
+        ? rawBase
+        : `${rawBase}/otp/routers/${routerId}`;
+
+      const url = new URL(`${base}/plan`);
+      url.searchParams.set('fromPlace', String(fromPlace));
+      url.searchParams.set('toPlace', String(toPlace));
+      url.searchParams.set('date', String(date));
+      url.searchParams.set('time', String(time));
+      url.searchParams.set('mode', String(mode));
+      url.searchParams.set('maxWalkDistance', String(maxWalkDistance));
+      url.searchParams.set('numItineraries', String(numItineraries));
+      url.searchParams.set('arriveBy', arriveBy ? 'true' : 'false');
+
+      const otpResponse = await fetch(url.toString(), { method: 'GET' });
+      if (!otpResponse.ok) {
+        const text = await otpResponse.text().catch(() => '');
+        return res.status(otpResponse.status).json({
+          error: 'OTP non disponible',
+          code: 'OTP_ERROR',
+          details: text ? text.slice(0, 200) : undefined,
+        });
+      }
+
+      const otpData = await otpResponse.json();
+      res.setHeader('Cache-Control', 'no-store');
+      return res.json(otpData);
+    }
+
     const {
       origin,
       destination,
@@ -140,6 +189,17 @@ function buildOtpMode(mode) {
   if (mode === 'BICYCLE') return 'BICYCLE';
   // Transit par défaut: ajouter WALK pour accès/egress
   return 'TRANSIT,WALK';
+}
+
+function parseBoolean(value, defaultValue = false) {
+  if (value === true || value === false) return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', 'off', ''].includes(normalized)) return false;
+  }
+  return defaultValue;
 }
 
 function mapItineraryToClient(itinerary) {

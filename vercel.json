@@ -55,12 +55,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/routes",
-      "destination": "/api/routes"
-    },
-    {
-      "source": "/api/places",
-      "destination": "/api/places"
+      "source": "/api/(.*)",
+      "destination": "http://79.72.24.141.nip.io/api/$1"
     },
     {
       "source": "/carte",

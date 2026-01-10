@@ -11,6 +11,17 @@ export const config = {
     runtime: 'edge',
 };
 
+function parseBoolean(value) {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value !== 0;
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase();
+        if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) return true;
+        if (['false', '0', 'no', 'n', 'off', ''].includes(normalized)) return false;
+    }
+    return false;
+}
+
 // URL du backend Oracle Cloud (via nip.io pour contourner restriction Vercel)
 const ORACLE_BACKEND = 'http://79.72.24.141.nip.io';
 
@@ -109,26 +120,30 @@ export default async function handler(request) {
                 );
             }
             
-            console.log('[routes edge V314] Calling OTP with:', { fromPlace, toPlace, date, time: timeFormatted, mode: 'TRANSIT,WALK' });
-            
-            const otpUrl = new URL('http://79.72.24.141:8080/otp/routers/default/plan');
-            otpUrl.searchParams.append('fromPlace', fromPlace);
-            otpUrl.searchParams.append('toPlace', toPlace);
-            otpUrl.searchParams.append('date', date);
-            otpUrl.searchParams.append('time', timeFormatted);
-            otpUrl.searchParams.append('mode', 'TRANSIT,WALK');
-            otpUrl.searchParams.append('maxWalkDistance', maxWalkDistance || 1000);
-            otpUrl.searchParams.append('numItineraries', numItineraries || 3);
-            otpUrl.searchParams.append('arriveBy', arriveBy ? 'true' : 'false');
-            
-            console.log('[routes edge V314] Full OTP URL:', otpUrl.toString());
-            
+            const oracleRoutesUrl = `${ORACLE_BACKEND}/api/routes`;
+            const oraclePayload = {
+                fromPlace,
+                toPlace,
+                date,
+                time: timeFormatted,
+                mode: 'TRANSIT,WALK',
+                maxWalkDistance: maxWalkDistance || 1000,
+                numItineraries: numItineraries || 3,
+                arriveBy: parseBoolean(arriveBy),
+            };
+
+            console.log('[routes edge V314] Proxy TRANSIT vers Oracle:', oracleRoutesUrl);
+            console.log('[routes edge V314] Payload OTP-compat:', oraclePayload);
+
             try {
-                const response = await fetch(otpUrl.toString(), {
-                    method: 'GET',
+                const response = await fetch(oracleRoutesUrl, {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'User-Agent': 'Perimap-Vercel-Edge/1.0'
-                    }
+                    },
+                    body: JSON.stringify(oraclePayload),
                 });
 
                 let data;
@@ -138,17 +153,17 @@ export default async function handler(request) {
                     console.error('[routes edge V314] Failed to parse JSON:', e.message);
                     data = { error: 'Invalid JSON response from OTP' };
                 }
-                
-                console.log('[routes edge V314] OTP réponse:', response.status, '- error:', data.error || 'none', '- itineraires:', data.plan?.itineraries?.length || 0);
+
+                console.log('[routes edge V314] Oracle réponse:', response.status, '- error:', data.error || 'none', '- itineraires:', data.plan?.itineraries?.length || 0);
 
                 // If OTP returns an error, log the full response and error message
                 if (!response.ok) {
-                    console.error('[routes edge V314] OTP error response:', JSON.stringify(data));
+                    console.error('[routes edge V314] Oracle error response:', JSON.stringify(data));
                     return new Response(
                         JSON.stringify({ 
                             success: false, 
-                            error: 'OTP ne peut pas traiter cette requête',
-                            code: 'OTP_REQUEST_ERROR',
+                            error: 'Backend Oracle ne peut pas traiter cette requête',
+                            code: 'ORACLE_REQUEST_ERROR',
                             details: data.error?.message || data.error || JSON.stringify(data)
                         }),
                         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Backend': 'oracle-otp' } }
@@ -157,7 +172,7 @@ export default async function handler(request) {
 
                 // If OTP returns 200 but no itineraries
                 if (!data.plan || !data.plan.itineraries || data.plan.itineraries.length === 0) {
-                    console.warn('[routes edge V314] OTP returned no itineraries');
+                    console.warn('[routes edge V314] Oracle returned no itineraries');
                     return new Response(
                         JSON.stringify({ 
                             success: false, 
@@ -177,13 +192,12 @@ export default async function handler(request) {
                     }
                 );
             } catch (otpError) {
-                console.error('[routes edge V314] Oracle OTP indisponible:', otpError.message);
-                // OTP non disponible - retourner erreur explicite
+                console.error('[routes edge V314] Backend Oracle indisponible:', otpError.message);
                 return new Response(
                     JSON.stringify({ 
                         success: false, 
-                        error: 'Service OTP non disponible',
-                        code: 'OTP_UNAVAILABLE',
+                        error: 'Backend Oracle non disponible',
+                        code: 'ORACLE_UNAVAILABLE',
                         details: 'Le planificateur de transports est temporairement indisponible: ' + otpError.message
                     }),
                     { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

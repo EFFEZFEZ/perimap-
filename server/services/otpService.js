@@ -21,7 +21,7 @@ import { getRouteAttributes } from '../utils/gtfsLoader.js';
 const logger = createLogger('otp-service');
 
 // Configuration OTP
-const OTP_BASE_URL = process.env.OTP_BASE_URL || 'http://localhost:8888/otp/routers/default';
+const OTP_BASE_URL = process.env.OTP_BASE_URL || 'http://127.0.0.1:8080/otp/routers/default';
 const OTP_TIMEOUT_MS = parseInt(process.env.OTP_TIMEOUT_MS || '15000', 10);
 const OTP_MAX_ITINERARIES = parseInt(process.env.OTP_MAX_ITINERARIES || '5', 10);
 // Valeur maximale absolue que le client peut demander (sécurité contre les requêtes trop larges)
