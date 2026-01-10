@@ -2288,6 +2288,16 @@ function processGoogleRoutesResponse(data) {
         console.warn("Réponse de l'API Routes (BUS) vide ou invalide.");
         return [];
     }
+
+    const normalizeHexColor = (value, fallback) => {
+        if (!value) return fallback;
+        const raw = String(value).trim();
+        if (!raw) return fallback;
+        const hex = raw.startsWith('#') ? raw.slice(1) : raw;
+        if (/^[0-9a-fA-F]{6}$/.test(hex)) return `#${hex.toUpperCase()}`;
+        return fallback;
+    };
+
     return data.routes.map(route => {
         const leg = route.legs[0];
         let isRegionalRoute = false; 
@@ -2355,8 +2365,8 @@ function processGoogleRoutesResponse(data) {
                         console.log(`⚠️ V199: Ligne inconnue du GTFS ("${shortName}") mais conservée.`);
                     }
                     
-                    const color = line.color || '#3388ff';
-                    const textColor = line.textColor || '#ffffff';
+                    const color = normalizeHexColor(line.color, '#3388FF');
+                    const textColor = normalizeHexColor(line.textColor, '#FFFFFF');
                     const departureStop = stopDetails.departureStop || {};
                     const arrivalStop = stopDetails.arrivalStop || {};
                     let intermediateStops = (stopDetails.intermediateStops || []).map(stop => stop.name || 'Arrêt inconnu');

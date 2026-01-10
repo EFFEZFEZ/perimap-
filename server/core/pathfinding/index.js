@@ -242,6 +242,9 @@ export class PathfindingEngine {
       const route = this.graph.routesById.get(leg.routeId);
       const trip = this.graph.tripsById.get(leg.tripId);
 
+      const alightTimeSec = (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime);
+      const transitDurationSec = alightTimeSec - leg.departureTime;
+
       // Attente éventuelle
       const legDepartureTime = this.secondsToDate(baseTime, leg.departureTime);
       if (legDepartureTime > currentTime) {
@@ -264,32 +267,35 @@ export class PathfindingEngine {
         currentTime = legDepartureTime;
       }
 
-      legs.push({
-        type: 'transit',
-        mode: this.getRouteMode(route),
-        routeId: leg.routeId,
-        routeName: route?.route_short_name || route?.route_long_name,
-        routeColor: route?.route_color ? `#${route.route_color}` : '#1976D2',
-        tripId: leg.tripId,
-        tripHeadsign: trip?.trip_headsign,
-        from: {
-          lat: fromStop?.stop_lat,
-          lon: fromStop?.stop_lon,
-          name: fromStop?.stop_name,
-          stopId: leg.fromStop,
-        },
-        to: {
-          lat: toStop?.stop_lat,
-          lon: toStop?.stop_lon,
-          name: toStop?.stop_name,
-          stopId: leg.toStop,
-        },
-        departureTime: this.secondsToDate(baseTime, leg.departureTime).toISOString(),
-        arrivalTime: this.secondsToDate(baseTime, (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime)).toISOString(),
-        duration: (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime) - leg.departureTime,
-      });
+      // Filtrer les legs transit "vides" (ex: Tourny → Tourny) qui gonflent artificiellement les correspondances
+      if (leg.fromStop !== leg.toStop && transitDurationSec > 0) {
+        legs.push({
+          type: 'transit',
+          mode: this.getRouteMode(route),
+          routeId: leg.routeId,
+          routeName: route?.route_short_name || route?.route_long_name,
+          routeColor: route?.route_color ? `#${route.route_color}` : '#1976D2',
+          tripId: leg.tripId,
+          tripHeadsign: trip?.trip_headsign,
+          from: {
+            lat: fromStop?.stop_lat,
+            lon: fromStop?.stop_lon,
+            name: fromStop?.stop_name,
+            stopId: leg.fromStop,
+          },
+          to: {
+            lat: toStop?.stop_lat,
+            lon: toStop?.stop_lon,
+            name: toStop?.stop_name,
+            stopId: leg.toStop,
+          },
+          departureTime: this.secondsToDate(baseTime, leg.departureTime).toISOString(),
+          arrivalTime: this.secondsToDate(baseTime, alightTimeSec).toISOString(),
+          duration: transitDurationSec,
+        });
+      }
 
-      currentTime = this.secondsToDate(baseTime, (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime));
+      currentTime = this.secondsToDate(baseTime, alightTimeSec);
     }
 
     // Segment de marche vers la destination
