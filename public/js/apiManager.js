@@ -1112,7 +1112,7 @@ export class ApiManager {
         if (data.plan && data.plan.itineraries && data.plan.itineraries.length > 0) {
             // Direct OTP response
             const itineraries = data.plan.itineraries.slice(0, 3);
-            const routes = itineraries.map(itin => this._convertOtpItin eraryToGoogleFormat(itin));
+            const routes = itineraries.map(itin => this._convertOtpItineraryToGoogleFormat(itin));
             console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s)`);
             return { routes };
         }
@@ -1174,29 +1174,6 @@ export class ApiManager {
             }],
             startAddress: legs[0]?.from.name || '',
             endAddress: legs[legs.length - 1]?.to.name || ''
-        };
-    }
-                    }
-                })
-            };
-        });
-        
-        // Calculer les totaux
-        const totalDuration = otpRoute.duration || legs.reduce((acc, l) => acc + (l.duration || 0), 0);
-        const totalDistance = otpRoute.distanceMeters || legs.reduce((acc, l) => acc + (l.distanceMeters || 0), 0);
-        
-        return {
-            duration: `${totalDuration}s`,
-            distanceMeters: totalDistance,
-            polyline: otpRoute.polyline || legs[0]?.polyline || null,
-            legs: [{
-                steps,
-                polyline: otpRoute.polyline || legs.map(l => l.polyline).filter(Boolean)[0],
-                localizedValues: {
-                    departureTime: { time: { text: this._formatTimeFromMs(otpRoute.startTime) } },
-                    arrivalTime: { time: { text: this._formatTimeFromMs(otpRoute.endTime) } }
-                }
-            }]
         };
     }
     
