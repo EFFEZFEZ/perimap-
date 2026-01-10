@@ -8,7 +8,10 @@ import { Router } from 'express';
 import fetch from 'node-fetch';
 
 const router = Router();
-const OTP_BASE_URL = 'http://localhost:8080';
+
+// OTP can be accessed at localhost when running on Oracle Cloud, 
+// but via IP when accessed from Vercel
+const OTP_BASE_URL = process.env.OTP_URL || 'http://79.72.24.141:8080';
 const OTP_ROUTER = 'default';
 
 router.post('/', async (req, res) => {

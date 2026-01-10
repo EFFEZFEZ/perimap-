@@ -57,25 +57,50 @@ export default async function handler(request) {
         if (mode === 'TRANSIT' && !isGoogleFormat) {
             console.log('[routes edge V314] Mode TRANSIT → Oracle OTP');
             
-            const oracleUrl = `${ORACLE_BACKEND}/api/routes`;
+            // Transform Perimap format to OTP v2 format
+            const { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
+            
+            const otpUrl = new URL('http://79.72.24.141:8080/otp/routers/default/plan');
+            otpUrl.searchParams.append('fromPlace', fromPlace);
+            otpUrl.searchParams.append('toPlace', toPlace);
+            otpUrl.searchParams.append('date', date);
+            otpUrl.searchParams.append('time', time);
+            otpUrl.searchParams.append('mode', 'TRANSIT,WALK');
+            otpUrl.searchParams.append('maxWalkDistance', maxWalkDistance || 1000);
+            otpUrl.searchParams.append('numItineraries', numItineraries || 3);
+            otpUrl.searchParams.append('arriveBy', arriveBy ? 'true' : 'false');
+            
+            console.log('[routes edge V314] OTP URL:', otpUrl.toString().substring(0, 100));
             
             try {
-                const response = await fetch(oracleUrl, {
-                    method: 'POST',
+                const response = await fetch(otpUrl.toString(), {
+                    method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
                         'User-Agent': 'Perimap-Vercel-Edge/1.0'
-                    },
-                    body: JSON.stringify(body)
+                    }
                 });
 
                 const data = await response.json();
-                console.log('[routes edge V314] Oracle réponse:', response.status);
+                console.log('[routes edge V314] OTP réponse:', response.status, '- itineraires:', data.plan?.itineraries?.length || 0);
+
+                // If OTP returns an error or no itineraries, log it
+                if (!response.ok || !data.plan || !data.plan.itineraries) {
+                    console.warn('[routes edge V314] OTP response invalid or empty');
+                    return new Response(
+                        JSON.stringify({ 
+                            success: false, 
+                            error: 'Pas d\'itinéraire disponible',
+                            code: 'NO_ITINERARIES',
+                            details: data.error?.message || 'OTP ne trouve aucun itinéraire'
+                        }),
+                        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Backend': 'oracle-otp' } }
+                    );
+                }
 
                 return new Response(
                     JSON.stringify(data),
                     { 
-                        status: response.status, 
+                        status: 200, 
                         headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Backend': 'oracle-otp' } 
                     }
                 );
@@ -87,7 +112,7 @@ export default async function handler(request) {
                         success: false, 
                         error: 'Service OTP non disponible',
                         code: 'OTP_UNAVAILABLE',
-                        details: 'Le planificateur de transports est temporairement indisponible'
+                        details: 'Le planificateur de transports est temporairement indisponible: ' + otpError.message
                     }),
                     { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 );

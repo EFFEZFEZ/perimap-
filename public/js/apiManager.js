@@ -1062,24 +1062,33 @@ export class ApiManager {
             throw new Error("Coordonnées requises pour le mode OTP");
         }
         
-        // Construire le body pour l'API OTP
+        // Construire le body au format attendu par l'API OTP
         const body = {
-            origin: { lat: originCoords.lat, lon: originCoords.lng || originCoords.lon },
-            destination: { lat: destCoords.lat, lon: destCoords.lng || destCoords.lon },
+            fromPlace: `${originCoords.lat},${originCoords.lng || originCoords.lon}`,
+            toPlace: `${destCoords.lat},${destCoords.lng || destCoords.lon}`,
             mode: 'TRANSIT',
             maxWalkDistance: 1000,
-            maxTransfers: 3,
-            options: {
-                numItineraries: 8  // Demander plusieurs alternatives
-            }
+            numItineraries: 3
         };
         
-        // Ajouter l'heure de départ/arrivée
+        // Ajouter la date et l'heure
         if (searchTime) {
-            const dateTime = this._buildDateTime(searchTime);
-            body.time = dateTime;
-            body.timeType = searchTime.type === 'arriver' ? 'arrival' : 'departure';
+            const dateTimeObj = this._buildDateTime(searchTime);
+            // dateTimeObj should be ISO string like "2026-01-10T11:40:00+01:00"
+            const isoStr = dateTimeObj;
+            const dateMatch = isoStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+            const timeMatch = isoStr.match(/(\d{2}):(\d{2})/);
+            
+            if (dateMatch) {
+                body.date = `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}`;
+            }
+            if (timeMatch) {
+                body.time = `${timeMatch[1]}:${timeMatch[2]}`;
+            }
+            body.arriveBy = searchTime.type === 'arriver';
         }
+        
+        console.log("🕒 DateTime construit (local):", body.date, body.time);
         
         const response = await fetch(this.apiEndpoints.routes, {
             method: 'POST',
@@ -1091,63 +1100,82 @@ export class ApiManager {
             const errorData = await response.json().catch(() => ({}));
             console.error("❌ Erreur API OTP:", errorData);
             
-            if (errorData.code === 'NO_ROUTE' || response.status === 404) {
+            if (errorData.code === 'NO_ROUTE' || errorData.code === 'OTP_UNAVAILABLE' || response.status === 404 || response.status === 503) {
                 throw new Error("Aucun bus disponible");
             }
-            throw new Error(errorData.error || `Erreur OTP: ${response.status}`);
+            throw new Error(errorData.error || errorData.details || `Erreur OTP: ${response.status}`);
         }
         
         const data = await response.json();
         
-        if (!data.success || !data.routes || data.routes.length === 0) {
-            throw new Error("Aucun itinéraire en bus trouvé");
+        // Handle both direct OTP response and transformed response
+        if (data.plan && data.plan.itineraries && data.plan.itineraries.length > 0) {
+            // Direct OTP response
+            const itineraries = data.plan.itineraries.slice(0, 3);
+            const routes = itineraries.map(itin => this._convertOtpItin eraryToGoogleFormat(itin));
+            console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s)`);
+            return { routes };
         }
         
-        // ✅ Convertir le format OTP au format attendu par le client (proche de Google)
-        const routes = data.routes.map(route => this._convertOtpRouteToGoogleFormat(route));
-        
-        console.log(`✅ ${routes.length} itinéraire(s) OTP trouvé(s)`);
-        return { routes };
+        // If no itineraries found
+        throw new Error("Aucun itinéraire en bus trouvé");
     }
     
     /**
-     * ✅ V230: Convertit un itinéraire OTP au format Google Routes pour compatibilité
+     * ✅ V230: Convertit un itinéraire OTP (JSON direct) au format Google Routes
      * @private
      */
-    _convertOtpRouteToGoogleFormat(otpRoute) {
-        const legs = otpRoute.legs || [];
+    _convertOtpItineraryToGoogleFormat(itinerary) {
+        const legs = itinerary.legs || [];
         
         // Construire les steps à partir des legs OTP
         const steps = legs.map(leg => {
-            const isTransit = ['BUS', 'TRAM', 'SUBWAY', 'RAIL'].includes(leg.mode);
+            const isTransit = leg.mode === 'TRANSIT' || ['BUS', 'TRAM', 'SUBWAY', 'RAIL'].includes(leg.transitLeg?.routeType);
             
             return {
                 travelMode: isTransit ? 'TRANSIT' : 'WALK',
-                distanceMeters: leg.distanceMeters || 0,
-                staticDuration: `${leg.duration}s`,
-                polyline: leg.polyline ? { encodedPolyline: leg.polyline } : null,
-                startLocation: { latLng: { latitude: leg.from?.lat, longitude: leg.from?.lon } },
-                endLocation: { latLng: { latitude: leg.to?.lat, longitude: leg.to?.lon } },
-                ...(isTransit && {
+                distance: { meters: leg.distance || 0 },
+                duration: { seconds: Math.round((leg.endTime - leg.startTime) / 1000) },
+                polyline: leg.legGeometry?.points ? { encodedPolyline: leg.legGeometry.points } : null,
+                startLocation: { latLng: { latitude: leg.from.lat, longitude: leg.from.lon } },
+                endLocation: { latLng: { latitude: leg.to.lat, longitude: leg.to.lon } },
+                ...(isTransit && leg.transitLeg && {
                     transitDetails: {
                         stopDetails: {
-                            departureStop: { name: leg.from?.name },
-                            arrivalStop: { name: leg.to?.name },
-                            departureTime: leg.startTime ? new Date(leg.startTime).toISOString() : null,
-                            arrivalTime: leg.endTime ? new Date(leg.endTime).toISOString() : null
+                            departureStop: { name: leg.from.name },
+                            arrivalStop: { name: leg.to.name },
+                            departureTime: new Date(leg.startTime).toISOString(),
+                            arrivalTime: new Date(leg.endTime).toISOString()
                         },
                         localizedValues: {
                             departureTime: { time: { text: this._formatTimeFromMs(leg.startTime) } },
                             arrivalTime: { time: { text: this._formatTimeFromMs(leg.endTime) } }
                         },
                         transitLine: {
-                            nameShort: leg.routeShortName || leg.routeColor?.shortName || '',
-                            name: leg.routeLongName || '',
-                            color: leg.routeColor || '#3388ff',
-                            textColor: leg.routeTextColor || '#FFFFFF',
-                            vehicle: { type: leg.mode }
+                            nameShort: leg.transitLeg?.routeShortName || '',
+                            name: leg.transitLeg?.routeLongName || '',
+                            color: '#' + (leg.transitLeg?.routeColor || '3388ff'),
+                            textColor: '#' + (leg.transitLeg?.routeTextColor || 'FFFFFF'),
+                            vehicle: { type: leg.transitLeg?.routeType || 'BUS' }
                         },
-                        headsign: leg.headsign || ''
+                        headsign: leg.transitLeg?.headsign || ''
+                    }
+                })
+            };
+        });
+
+        return {
+            legs: [{
+                steps,
+                startLocation: { latLng: { latitude: legs[0]?.from.lat, longitude: legs[0]?.from.lon } },
+                endLocation: { latLng: { latitude: legs[legs.length - 1]?.to.lat, longitude: legs[legs.length - 1]?.to.lon } },
+                distance: { meters: legs.reduce((sum, leg) => sum + (leg.distance || 0), 0) },
+                duration: { seconds: Math.round((legs[legs.length - 1]?.endTime - legs[0]?.startTime) / 1000) }
+            }],
+            startAddress: legs[0]?.from.name || '',
+            endAddress: legs[legs.length - 1]?.to.name || ''
+        };
+    }
                     }
                 })
             };
