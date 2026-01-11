@@ -352,15 +352,21 @@ export async function planItineraryNative(params) {
     }
 
     // Convertir au format attendu par le client
-    const routes = itineraries.map((itin, index) => ({
-      index,
-      duration: itin.totalDuration,
-      walkDistance: itin.totalWalkDistance,
-      transfers: itin.transfers,
-      departureTime: itin.departureTime,
-      arrivalTime: itin.arrivalTime,
-      legs: itin.legs.map(leg => formatLeg(leg))
-    }));
+    const routes = itineraries.map((itin, index) => {
+      // Debug: vérifier si les legs ont des polylines
+      const legsWithPolylines = itin.legs.filter(l => l.polyline).length;
+      console.log(`📐 Itinerary ${index}: ${itin.legs.length} legs, ${legsWithPolylines} avec polylines`);
+      
+      return {
+        index,
+        duration: itin.totalDuration,
+        walkDistance: itin.totalWalkDistance,
+        transfers: itin.transfers,
+        departureTime: itin.departureTime,
+        arrivalTime: itin.arrivalTime,
+        legs: itin.legs.map(leg => formatLeg(leg))
+      };
+    });
 
     const result = {
       routes,
