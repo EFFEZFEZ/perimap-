@@ -306,6 +306,7 @@ export class PathfindingEngine {
    * Construit un itinéraire complet avec les segments de marche
    */
   buildItinerary(origin, destination, originStop, destStop, journey, baseTime) {
+    console.log(`🏗️ buildItinerary appelé: journey.legs=${JSON.stringify(journey.legs?.map(l => ({type: l.type, from: l.fromStop, to: l.toStop})))}`);
     const legs = [];
     let currentTime = new Date(baseTime);
 
