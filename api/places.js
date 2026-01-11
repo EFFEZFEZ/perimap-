@@ -41,33 +41,48 @@ export default async function handler(request) {
     const placeId = url.searchParams.get('placeId');
 
     try {
-        // Mode 1: Autocomplétion
+        // Mode 1: Autocomplétion via New Places API (Text Search)
         if (input) {
-            const googleUrl = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
-            googleUrl.searchParams.set('input', input);
-            googleUrl.searchParams.set('key', apiKey);
-            googleUrl.searchParams.set('language', 'fr');
-            googleUrl.searchParams.set('components', 'country:fr');
-            // Zone Grand Périgueux
-            googleUrl.searchParams.set('location', '45.184029,0.7211149');
-            googleUrl.searchParams.set('radius', '30000');
-            googleUrl.searchParams.set('strictbounds', 'false');
+            const googleUrl = 'https://places.googleapis.com/v1/places:searchText';
+            
+            const requestBody = {
+                textQuery: input,
+                languageCode: 'fr',
+                regionCode: 'FR',
+                locationBias: {
+                    circle: {
+                        center: { latitude: 45.184029, longitude: 0.7211149 },
+                        radius: 30000.0
+                    }
+                },
+                maxResultCount: 10
+            };
 
-            const response = await fetch(googleUrl.toString());
+            const response = await fetch(googleUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Goog-Api-Key': apiKey,
+                    'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
             const data = await response.json();
 
-            if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+            if (!response.ok) {
                 return new Response(
-                    JSON.stringify({ error: `Google Places error: ${data.status}`, details: data.error_message }),
-                    { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                    JSON.stringify({ error: `Google Places error`, details: data.error?.message }),
+                    { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 );
             }
 
             // Formater la réponse
-            const predictions = (data.predictions || []).map(p => ({
-                description: p.description,
-                placeId: p.place_id,
-                types: p.types
+            const predictions = (data.places || []).map(p => ({
+                description: p.formattedAddress || p.displayName?.text,
+                placeId: p.id,
+                name: p.displayName?.text,
+                location: p.location ? { lat: p.location.latitude, lng: p.location.longitude } : null
             }));
 
             return new Response(
@@ -83,34 +98,36 @@ export default async function handler(request) {
             );
         }
 
-        // Mode 2: Récupérer les coordonnées d'un placeId
+        // Mode 2: Récupérer les coordonnées d'un placeId via Place Details (New API)
         if (placeId) {
-            const googleUrl = new URL('https://maps.googleapis.com/maps/api/place/details/json');
-            googleUrl.searchParams.set('place_id', placeId);
-            googleUrl.searchParams.set('key', apiKey);
-            googleUrl.searchParams.set('fields', 'geometry,formatted_address,name');
-            googleUrl.searchParams.set('language', 'fr');
+            const googleUrl = `https://places.googleapis.com/v1/places/${placeId}`;
 
-            const response = await fetch(googleUrl.toString());
+            const response = await fetch(googleUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Goog-Api-Key': apiKey,
+                    'X-Goog-FieldMask': 'id,displayName,formattedAddress,location'
+                }
+            });
+
             const data = await response.json();
 
-            if (data.status !== 'OK') {
+            if (!response.ok) {
                 return new Response(
-                    JSON.stringify({ error: `Google Places error: ${data.status}`, details: data.error_message }),
-                    { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                    JSON.stringify({ error: `Google Places error`, details: data.error?.message }),
+                    { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 );
             }
 
-            const result = data.result;
             return new Response(
                 JSON.stringify({
-                    placeId: placeId,
-                    name: result.name,
-                    address: result.formatted_address,
-                    location: {
-                        lat: result.geometry?.location?.lat,
-                        lng: result.geometry?.location?.lng
-                    }
+                    placeId: data.id,
+                    name: data.displayName?.text,
+                    address: data.formattedAddress,
+                    location: data.location ? {
+                        lat: data.location.latitude,
+                        lng: data.location.longitude
+                    } : null
                 }),
                 { 
                     status: 200, 
