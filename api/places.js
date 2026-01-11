@@ -1,330 +1,476 @@
-/*
+/**
  * Copyright (c) 2026 Périmap. Tous droits réservés.
- * API Places - Autocomplétion optimisée Grand Périgueux
+ * API Places - Autocomplétion avec hiérarchie intelligente
  * 
- * Priorités:
- * 1. Arrêts de bus GTFS locaux (noms de communes = arrêt central)
- * 2. Lieux Google dans le Grand Périgueux uniquement
+ * Priorité : POI > Communes > Arrêts bus > Adresses Google
  */
 
 export const config = {
-    runtime: 'edge',
-    regions: ['cdg1'],
+  runtime: 'edge',
+  regions: ['cdg1'],
 };
 
-// Arrêts GTFS importants du Grand Périgueux avec coordonnées précises
-// Ces arrêts sont prioritaires et évitent les confusions de Google
+// ===========================================
+// 1. POI LOCAUX - Points d'intérêt populaires
+// ===========================================
+const LOCAL_POIS = {
+  // Grande distribution
+  'auchan': { name: 'Auchan Périgueux Boulazac', category: 'Hypermarché', lat: 45.1847, lng: 0.7567 },
+  'leclerc': { name: 'E.Leclerc Trélissac', category: 'Hypermarché', lat: 45.1923, lng: 0.7612 },
+  'leclerc trelissac': { name: 'E.Leclerc Trélissac', category: 'Hypermarché', lat: 45.1923, lng: 0.7612 },
+  'leclerc boulazac': { name: 'E.Leclerc Boulazac', category: 'Hypermarché', lat: 45.1789, lng: 0.7634 },
+  'carrefour': { name: 'Carrefour Market Périgueux', category: 'Supermarché', lat: 45.1842, lng: 0.7189 },
+  'lidl': { name: 'Lidl Périgueux', category: 'Supermarché', lat: 45.1756, lng: 0.7298 },
+  'lidl trelissac': { name: 'Lidl Trélissac', category: 'Supermarché', lat: 45.1912, lng: 0.7589 },
+  'intermarche': { name: 'Intermarché Coulounieix', category: 'Supermarché', lat: 45.1678, lng: 0.6934 },
+  'intermarché': { name: 'Intermarché Coulounieix', category: 'Supermarché', lat: 45.1678, lng: 0.6934 },
+  'super u': { name: 'Super U Chancelade', category: 'Supermarché', lat: 45.1923, lng: 0.6812 },
+  'biocoop': { name: 'Biocoop Périgueux', category: 'Magasin bio', lat: 45.1834, lng: 0.7201 },
+  'netto': { name: 'Netto Coulounieix', category: 'Discount', lat: 45.1689, lng: 0.6923 },
+  
+  // Zones commerciales
+  'zone commerciale boulazac': { name: 'Zone Commerciale Boulazac', category: 'Zone commerciale', lat: 45.1834, lng: 0.7589 },
+  'zone commerciale trelissac': { name: 'Zone Commerciale Trélissac', category: 'Zone commerciale', lat: 45.1912, lng: 0.7601 },
+  'zone commerciale marsac': { name: 'Zone Commerciale Marsac', category: 'Zone commerciale', lat: 45.2012, lng: 0.6823 },
+  
+  // Santé
+  'hopital': { name: 'Centre Hospitalier de Périgueux', category: 'Hôpital', lat: 45.1789, lng: 0.7312 },
+  'hôpital': { name: 'Centre Hospitalier de Périgueux', category: 'Hôpital', lat: 45.1789, lng: 0.7312 },
+  'centre hospitalier': { name: 'Centre Hospitalier de Périgueux', category: 'Hôpital', lat: 45.1789, lng: 0.7312 },
+  'clinique': { name: 'Clinique Francheville', category: 'Clinique', lat: 45.1923, lng: 0.7145 },
+  'francheville': { name: 'Clinique Francheville', category: 'Clinique', lat: 45.1923, lng: 0.7145 },
+  'polyclinique': { name: 'Polyclinique Francheville', category: 'Clinique', lat: 45.1923, lng: 0.7145 },
+  
+  // Éducation - Lycées
+  'bertran de born': { name: 'Lycée Bertran de Born', category: 'Lycée', lat: 45.1867, lng: 0.7234 },
+  'jay de beaufort': { name: 'Lycée Jay de Beaufort', category: 'Lycée', lat: 45.1912, lng: 0.7189 },
+  'laure gatet': { name: 'Lycée Laure Gatet', category: 'Lycée', lat: 45.1845, lng: 0.7156 },
+  'albert claveille': { name: 'Lycée Albert Claveille', category: 'Lycée', lat: 45.1778, lng: 0.7267 },
+  'claveille': { name: 'Lycée Albert Claveille', category: 'Lycée', lat: 45.1778, lng: 0.7267 },
+  'saint joseph': { name: 'Lycée Saint-Joseph', category: 'Lycée privé', lat: 45.1856, lng: 0.7198 },
+  'lycee': { name: 'Lycée Bertran de Born', category: 'Lycée', lat: 45.1867, lng: 0.7234 },
+  'lycée': { name: 'Lycée Bertran de Born', category: 'Lycée', lat: 45.1867, lng: 0.7234 },
+  
+  // Éducation - Collèges
+  'college montaigne': { name: 'Collège Michel de Montaigne', category: 'Collège', lat: 45.1834, lng: 0.7178 },
+  'collège montaigne': { name: 'Collège Michel de Montaigne', category: 'Collège', lat: 45.1834, lng: 0.7178 },
+  
+  // Éducation - Supérieur
+  'universite': { name: 'Campus Universitaire Périgueux', category: 'Université', lat: 45.1789, lng: 0.7234 },
+  'université': { name: 'Campus Universitaire Périgueux', category: 'Université', lat: 45.1789, lng: 0.7234 },
+  'iut': { name: 'IUT Périgueux-Bordeaux', category: 'IUT', lat: 45.1756, lng: 0.7289 },
+  'campus': { name: 'Campus Périgord', category: 'Université', lat: 45.1789, lng: 0.7234 },
+  'fac': { name: 'Campus Universitaire Périgueux', category: 'Université', lat: 45.1789, lng: 0.7234 },
+  
+  // Transport
+  'gare': { name: 'Gare SNCF de Périgueux', category: 'Gare', lat: 45.1867, lng: 0.7145 },
+  'gare sncf': { name: 'Gare SNCF de Périgueux', category: 'Gare', lat: 45.1867, lng: 0.7145 },
+  'gare routiere': { name: 'Gare Routière de Périgueux', category: 'Gare routière', lat: 45.1856, lng: 0.7156 },
+  'gare routière': { name: 'Gare Routière de Périgueux', category: 'Gare routière', lat: 45.1856, lng: 0.7156 },
+  
+  // Culture & Loisirs
+  'vesone': { name: 'Musée Vesunna', category: 'Musée', lat: 45.1801, lng: 0.7089 },
+  'vésone': { name: 'Musée Vesunna', category: 'Musée', lat: 45.1801, lng: 0.7089 },
+  'vesunna': { name: 'Musée Vesunna', category: 'Musée', lat: 45.1801, lng: 0.7089 },
+  'musee': { name: "Musée d'Art et d'Archéologie", category: 'Musée', lat: 45.1845, lng: 0.7189 },
+  'musée': { name: "Musée d'Art et d'Archéologie", category: 'Musée', lat: 45.1845, lng: 0.7189 },
+  'cathedrale': { name: 'Cathédrale Saint-Front', category: 'Monument', lat: 45.1845, lng: 0.7223 },
+  'cathédrale': { name: 'Cathédrale Saint-Front', category: 'Monument', lat: 45.1845, lng: 0.7223 },
+  'saint front': { name: 'Cathédrale Saint-Front', category: 'Monument', lat: 45.1845, lng: 0.7223 },
+  'cinema': { name: 'CGR Périgueux', category: 'Cinéma', lat: 45.1823, lng: 0.7212 },
+  'cinéma': { name: 'CGR Périgueux', category: 'Cinéma', lat: 45.1823, lng: 0.7212 },
+  'cgr': { name: 'CGR Périgueux', category: 'Cinéma', lat: 45.1823, lng: 0.7212 },
+  'mediatheque': { name: 'Médiathèque Pierre Fanlac', category: 'Médiathèque', lat: 45.1834, lng: 0.7198 },
+  'médiathèque': { name: 'Médiathèque Pierre Fanlac', category: 'Médiathèque', lat: 45.1834, lng: 0.7198 },
+  'bibliotheque': { name: 'Médiathèque Pierre Fanlac', category: 'Médiathèque', lat: 45.1834, lng: 0.7198 },
+  'piscine': { name: 'Piscine Bertran de Born', category: 'Piscine', lat: 45.1878, lng: 0.7234 },
+  'odyssee': { name: "L'Odyssée - Piscine", category: 'Piscine', lat: 45.1878, lng: 0.7234 },
+  
+  // Sport
+  'stade': { name: 'Stade Francis Rongiéras', category: 'Stade', lat: 45.1756, lng: 0.7312 },
+  'patinoire': { name: 'Patinoire de Boulazac', category: 'Patinoire', lat: 45.1801, lng: 0.7545 },
+  'gymnase': { name: 'Gymnase Municipal', category: 'Gymnase', lat: 45.1823, lng: 0.7267 },
+  'parc gamenson': { name: 'Parc de Gamenson', category: 'Parc', lat: 45.1789, lng: 0.7134 },
+  
+  // Administration
+  'mairie': { name: 'Mairie de Périgueux', category: 'Mairie', lat: 45.1845, lng: 0.7189 },
+  'mairie perigueux': { name: 'Mairie de Périgueux', category: 'Mairie', lat: 45.1845, lng: 0.7189 },
+  'prefecture': { name: 'Préfecture de la Dordogne', category: 'Préfecture', lat: 45.1856, lng: 0.7178 },
+  'préfecture': { name: 'Préfecture de la Dordogne', category: 'Préfecture', lat: 45.1856, lng: 0.7178 },
+  'caf': { name: 'CAF Périgueux', category: 'Administration', lat: 45.1823, lng: 0.7156 },
+  'pole emploi': { name: 'Pôle Emploi Périgueux', category: 'Administration', lat: 45.1789, lng: 0.7178 },
+  'pôle emploi': { name: 'Pôle Emploi Périgueux', category: 'Administration', lat: 45.1789, lng: 0.7178 },
+  'cpam': { name: 'CPAM Périgueux', category: 'Administration', lat: 45.1801, lng: 0.7189 },
+  'tribunal': { name: 'Tribunal Judiciaire', category: 'Justice', lat: 45.1834, lng: 0.7167 },
+  'poste': { name: 'La Poste Périgueux Centre', category: 'Services', lat: 45.1845, lng: 0.7201 },
+  
+  // Commerces spécialisés
+  'decathlon': { name: 'Decathlon Boulazac', category: 'Sport', lat: 45.1834, lng: 0.7567 },
+  'brico depot': { name: 'Brico Dépôt Périgueux', category: 'Bricolage', lat: 45.1756, lng: 0.7534 },
+  'brico dépôt': { name: 'Brico Dépôt Périgueux', category: 'Bricolage', lat: 45.1756, lng: 0.7534 },
+  'leroy merlin': { name: 'Leroy Merlin Trélissac', category: 'Bricolage', lat: 45.1912, lng: 0.7589 },
+  'mr bricolage': { name: 'Mr Bricolage Coulounieix', category: 'Bricolage', lat: 45.1689, lng: 0.6945 },
+  'action': { name: 'Action Boulazac', category: 'Discount', lat: 45.1823, lng: 0.7556 },
+  'gifi': { name: 'Gifi Trélissac', category: 'Discount', lat: 45.1901, lng: 0.7578 },
+  'la halle': { name: 'La Halle Boulazac', category: 'Vêtements', lat: 45.1812, lng: 0.7545 },
+  'kiabi': { name: 'Kiabi Boulazac', category: 'Vêtements', lat: 45.1823, lng: 0.7534 },
+  'zara': { name: 'Zara (Centre-ville)', category: 'Vêtements', lat: 45.1845, lng: 0.7212 },
+  'fnac': { name: 'Fnac Périgueux', category: 'Culture', lat: 45.1840, lng: 0.7198 },
+  'darty': { name: 'Darty Boulazac', category: 'Électroménager', lat: 45.1812, lng: 0.7556 },
+  'boulanger': { name: 'Boulanger Trélissac', category: 'Électronique', lat: 45.1923, lng: 0.7589 },
+  
+  // Restaurants fast-food
+  'mcdo': { name: "McDonald's Boulazac", category: 'Restaurant', lat: 45.1834, lng: 0.7523 },
+  'mcdonald': { name: "McDonald's Boulazac", category: 'Restaurant', lat: 45.1834, lng: 0.7523 },
+  "mcdonald's": { name: "McDonald's Boulazac", category: 'Restaurant', lat: 45.1834, lng: 0.7523 },
+  'burger king': { name: 'Burger King Trélissac', category: 'Restaurant', lat: 45.1923, lng: 0.7601 },
+  'kfc': { name: 'KFC Boulazac', category: 'Restaurant', lat: 45.1845, lng: 0.7534 },
+  'subway': { name: 'Subway Périgueux', category: 'Restaurant', lat: 45.1840, lng: 0.7189 },
+  'flunch': { name: 'Flunch Boulazac', category: 'Restaurant', lat: 45.1812, lng: 0.7545 },
+  'buffalo grill': { name: 'Buffalo Grill Boulazac', category: 'Restaurant', lat: 45.1801, lng: 0.7534 },
+};
+
+// ===========================================
+// 2. COMMUNES du Grand Périgueux
+// ===========================================
+const LOCAL_COMMUNES = {
+  'perigueux': { name: 'Périgueux', lat: 45.1846, lng: 0.7214 },
+  'périgueux': { name: 'Périgueux', lat: 45.1846, lng: 0.7214 },
+  'boulazac': { name: 'Boulazac Isle Manoire', lat: 45.1823, lng: 0.7534 },
+  'isle manoire': { name: 'Boulazac Isle Manoire', lat: 45.1823, lng: 0.7534 },
+  'trelissac': { name: 'Trélissac', lat: 45.1956, lng: 0.7612 },
+  'trélissac': { name: 'Trélissac', lat: 45.1956, lng: 0.7612 },
+  'coulounieix': { name: 'Coulounieix-Chamiers', lat: 45.1678, lng: 0.6934 },
+  'chamiers': { name: 'Coulounieix-Chamiers', lat: 45.1678, lng: 0.6934 },
+  'coulounieix-chamiers': { name: 'Coulounieix-Chamiers', lat: 45.1678, lng: 0.6934 },
+  'chancelade': { name: 'Chancelade', lat: 45.2012, lng: 0.6823 },
+  'marsac': { name: 'Marsac-sur-l\'Isle', lat: 45.1945, lng: 0.6756 },
+  'marsac sur l isle': { name: 'Marsac-sur-l\'Isle', lat: 45.1945, lng: 0.6756 },
+  'sanilhac': { name: 'Notre-Dame-de-Sanilhac', lat: 45.1423, lng: 0.7312 },
+  'notre dame de sanilhac': { name: 'Notre-Dame-de-Sanilhac', lat: 45.1423, lng: 0.7312 },
+  'razac': { name: 'Razac-sur-l\'Isle', lat: 45.1734, lng: 0.6423 },
+  'razac sur l isle': { name: 'Razac-sur-l\'Isle', lat: 45.1734, lng: 0.6423 },
+  'bassillac': { name: 'Bassillac et Auberoche', lat: 45.1678, lng: 0.7823 },
+  'auberoche': { name: 'Bassillac et Auberoche', lat: 45.1678, lng: 0.7823 },
+  'antonne': { name: 'Antonne-et-Trigonant', lat: 45.2123, lng: 0.7734 },
+  'trigonant': { name: 'Antonne-et-Trigonant', lat: 45.2123, lng: 0.7734 },
+  'atur': { name: 'Atur', lat: 45.1512, lng: 0.7534 },
+  'saint laurent sur manoire': { name: 'Saint-Laurent-sur-Manoire', lat: 45.1534, lng: 0.7823 },
+  'escoire': { name: 'Escoire', lat: 45.2234, lng: 0.7912 },
+  'la chapelle gonaguet': { name: 'La Chapelle-Gonaguet', lat: 45.2312, lng: 0.6612 },
+  'chateau l eveque': { name: 'Château-l\'Évêque', lat: 45.2234, lng: 0.7023 },
+  'château l évêque': { name: 'Château-l\'Évêque', lat: 45.2234, lng: 0.7023 },
+  'cornille': { name: 'Cornille', lat: 45.2156, lng: 0.8012 },
+  'eyliac': { name: 'Eyliac', lat: 45.1312, lng: 0.7623 },
+  'saint astier': { name: 'Saint-Astier', lat: 45.1456, lng: 0.5312 },
+};
+
+// ===========================================
+// 3. ARRÊTS DE BUS GTFS (moins prioritaires)
+// ===========================================
 const GTFS_STOPS = {
-    // Communes - pointent vers l'arrêt central/gare routière
-    'périgueux': { lat: 45.1847, lng: 0.7214, name: 'Périgueux - Gare SNCF', type: 'city' },
-    'perigueux': { lat: 45.1847, lng: 0.7214, name: 'Périgueux - Gare SNCF', type: 'city' },
-    'boulazac': { lat: 45.1780, lng: 0.7480, name: 'Boulazac - Centre', type: 'city' },
-    'trélissac': { lat: 45.1920, lng: 0.7580, name: 'Trélissac - Mairie', type: 'city' },
-    'trelissac': { lat: 45.1920, lng: 0.7580, name: 'Trélissac - Mairie', type: 'city' },
-    'chancelade': { lat: 45.2050, lng: 0.6780, name: 'Chancelade - Mairie', type: 'city' },
-    'coulounieix': { lat: 45.1780, lng: 0.6950, name: 'Coulounieix-Chamiers - Mairie', type: 'city' },
-    'chamiers': { lat: 45.1650, lng: 0.6900, name: 'Coulounieix-Chamiers - Mairie', type: 'city' },
-    'marsac': { lat: 45.1860, lng: 0.6620, name: 'Marsac-sur-l\'Isle - Centre', type: 'city' },
-    'notre-dame-de-sanilhac': { lat: 45.1450, lng: 0.7100, name: 'Notre-Dame-de-Sanilhac', type: 'city' },
-    'sanilhac': { lat: 45.1450, lng: 0.7100, name: 'Notre-Dame-de-Sanilhac', type: 'city' },
-    'saint-astier': { lat: 45.1450, lng: 0.5270, name: 'Saint-Astier - Gare', type: 'city' },
-    'bassillac': { lat: 45.1980, lng: 0.8150, name: 'Bassillac - Centre', type: 'city' },
-    
-    // Arrêts importants / Pôles d'échange
-    'gare': { lat: 45.1871, lng: 0.7085, name: 'Périgueux - Gare SNCF', type: 'station' },
-    'gare sncf': { lat: 45.1871, lng: 0.7085, name: 'Périgueux - Gare SNCF', type: 'station' },
-    'campus': { lat: 45.1971, lng: 0.7181, name: 'Campus Universitaire', type: 'poi' },
-    'université': { lat: 45.1971, lng: 0.7181, name: 'Campus Universitaire', type: 'poi' },
-    'cité': { lat: 45.1890, lng: 0.7160, name: 'Cité - Périgueux', type: 'poi' },
-    'cite': { lat: 45.1890, lng: 0.7160, name: 'Cité - Périgueux', type: 'poi' },
-    'agora': { lat: 45.1795, lng: 0.7520, name: 'Agora - Boulazac', type: 'poi' },
-    'auchan': { lat: 45.1820, lng: 0.7650, name: 'Auchan - Trélissac', type: 'poi' },
-    'super u': { lat: 45.1730, lng: 0.7380, name: 'Super U - Boulazac', type: 'poi' },
-    'médiathèque': { lat: 45.1847, lng: 0.7200, name: 'Médiathèque - Périgueux', type: 'poi' },
-    'mediatheque': { lat: 45.1847, lng: 0.7200, name: 'Médiathèque - Périgueux', type: 'poi' },
-    'hôpital': { lat: 45.1920, lng: 0.7050, name: 'Hôpital - Périgueux', type: 'poi' },
-    'hopital': { lat: 45.1920, lng: 0.7050, name: 'Hôpital - Périgueux', type: 'poi' },
-    'centre hospitalier': { lat: 45.1920, lng: 0.7050, name: 'Centre Hospitalier', type: 'poi' },
-    'mairie périgueux': { lat: 45.1840, lng: 0.7210, name: 'Mairie de Périgueux', type: 'poi' },
-    'pont des barris': { lat: 45.1845, lng: 0.7252, name: 'Pont des Barris', type: 'poi' },
-    'barris': { lat: 45.1845, lng: 0.7252, name: 'Pont des Barris', type: 'poi' },
-    
-    // Quartiers de Trélissac (pour éviter la confusion)
-    'garennes': { lat: 45.1850, lng: 0.7530, name: 'Trélissac - Les Garennes', type: 'neighborhood' },
-    'les garennes': { lat: 45.1850, lng: 0.7530, name: 'Trélissac - Les Garennes', type: 'neighborhood' },
-    'feuilleraie': { lat: 45.1880, lng: 0.7620, name: 'Trélissac - Feuilleraie', type: 'neighborhood' },
-    'bauries': { lat: 45.1950, lng: 0.7700, name: 'Trélissac - Les Bauries', type: 'neighborhood' },
-    'les bauries': { lat: 45.1950, lng: 0.7700, name: 'Trélissac - Les Bauries', type: 'neighborhood' },
+  // Pôles d'échange majeurs
+  'cite': { name: 'Cité', lines: ['A', 'B', 'C', 'D'], lat: 45.1856, lng: 0.7178 },
+  'cité': { name: 'Cité', lines: ['A', 'B', 'C', 'D'], lat: 45.1856, lng: 0.7178 },
+  'bugeaud': { name: 'Bugeaud', lines: ['A', 'B'], lat: 45.1823, lng: 0.7189 },
+  'tourny': { name: 'Tourny', lines: ['A', 'C'], lat: 45.1834, lng: 0.7212 },
+  'montaigne': { name: 'Montaigne', lines: ['A'], lat: 45.1901, lng: 0.7178 },
+  
+  // Arrêts Ligne A
+  'la filature': { name: 'La Filature', lines: ['A'], lat: 45.1789, lng: 0.7534 },
+  'lakanal': { name: 'Lakanal', lines: ['A'], lat: 45.1912, lng: 0.7156 },
+  'maleville': { name: 'Maleville', lines: ['A'], lat: 45.1934, lng: 0.7234 },
+  'saltgourde': { name: 'Saltgourde', lines: ['A'], lat: 45.1956, lng: 0.7345 },
+  'agora': { name: 'Agora', lines: ['A'], lat: 45.1795, lng: 0.7520 },
+  
+  // Arrêts Ligne B
+  'churchill': { name: 'Churchill', lines: ['B'], lat: 45.1723, lng: 0.7089 },
+  'yves guena': { name: 'Yves Guéna', lines: ['B'], lat: 45.1756, lng: 0.7123 },
+  'yves guéna': { name: 'Yves Guéna', lines: ['B'], lat: 45.1756, lng: 0.7123 },
+  'clos chassaing': { name: 'Clos Chassaing', lines: ['B'], lat: 45.1901, lng: 0.7156 },
+  
+  // Arrêts Ligne C
+  'roland galissard': { name: 'Roland Galissard', lines: ['C'], lat: 45.1678, lng: 0.6923 },
+  'borie': { name: 'Borie', lines: ['C'], lat: 45.1634, lng: 0.6856 },
+  'combe des dames': { name: 'Combe des Dames', lines: ['C'], lat: 45.1712, lng: 0.6867 },
+  
+  // Arrêts Ligne D
+  'campniac': { name: 'Campniac', lines: ['D'], lat: 45.1723, lng: 0.7534 },
+  'perigord noir': { name: 'Périgord Noir', lines: ['D'], lat: 45.1689, lng: 0.7623 },
+  'périgord noir': { name: 'Périgord Noir', lines: ['D'], lat: 45.1689, lng: 0.7623 },
+  'barris': { name: 'Pont des Barris', lines: ['D'], lat: 45.1845, lng: 0.7252 },
 };
 
-// Zone stricte du Grand Périgueux (bounding box)
+// ===========================================
+// Zone géographique du Grand Périgueux
+// ===========================================
 const GRAND_PERIGUEUX_BOUNDS = {
-    north: 45.25,
-    south: 45.10,
-    east: 0.85,
-    west: 0.50
+  south: 45.10,
+  west: 0.50,
+  north: 45.28,
+  east: 0.90
 };
 
-// Vérifier si des coordonnées sont dans le Grand Périgueux
-function isInGrandPerigueux(lat, lng) {
-    return lat >= GRAND_PERIGUEUX_BOUNDS.south &&
-           lat <= GRAND_PERIGUEUX_BOUNDS.north &&
-           lng >= GRAND_PERIGUEUX_BOUNDS.west &&
-           lng <= GRAND_PERIGUEUX_BOUNDS.east;
+const CENTER = { lat: 45.1846, lng: 0.7214 };
+
+// ===========================================
+// Fonctions utilitaires
+// ===========================================
+
+function normalize(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[''`-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-// Rechercher dans les arrêts GTFS locaux
-function searchGtfsStops(input) {
-    const query = input.toLowerCase().trim();
-    const results = [];
-    
-    for (const [key, stop] of Object.entries(GTFS_STOPS)) {
-        if (key.includes(query) || stop.name.toLowerCase().includes(query)) {
-            results.push({
-                description: stop.name,
-                placeId: `GTFS_${key}`,
-                mainText: stop.name,
-                secondaryText: 'Grand Périgueux',
-                location: { lat: stop.lat, lng: stop.lng },
-                source: 'gtfs',
-                priority: stop.type === 'city' ? 1 : (stop.type === 'station' ? 2 : 3)
-            });
-        }
+function searchLocal(query, dictionary, maxResults = 5) {
+  const normalizedQuery = normalize(query);
+  const results = [];
+  const seenNames = new Set();
+  
+  // Recherche exacte d'abord
+  for (const [key, data] of Object.entries(dictionary)) {
+    const normalizedKey = normalize(key);
+    if (normalizedKey === normalizedQuery) {
+      const uniqueName = normalize(data.name);
+      if (!seenNames.has(uniqueName)) {
+        seenNames.add(uniqueName);
+        results.push({ ...data, score: 100 });
+      }
     }
+  }
+  
+  // Puis recherche partielle
+  for (const [key, data] of Object.entries(dictionary)) {
+    const normalizedKey = normalize(key);
+    const uniqueName = normalize(data.name);
     
-    // Trier par priorité
-    return results.sort((a, b) => a.priority - b.priority);
+    if (!seenNames.has(uniqueName)) {
+      if (normalizedKey.startsWith(normalizedQuery) || normalizedQuery.startsWith(normalizedKey)) {
+        seenNames.add(uniqueName);
+        results.push({ ...data, score: 80 });
+      } else if (normalizedKey.includes(normalizedQuery)) {
+        seenNames.add(uniqueName);
+        results.push({ ...data, score: 60 });
+      }
+    }
+  }
+  
+  // Trier par score décroissant
+  results.sort((a, b) => b.score - a.score);
+  
+  return results.slice(0, maxResults);
 }
 
-// Cache en mémoire
-const cache = new Map();
-const CACHE_TTL = 120000; // 2 minutes
+function formatResult(item, type, index) {
+  let icon, subtitle;
+  
+  switch (type) {
+    case 'poi':
+      icon = '📍';
+      subtitle = item.category || 'Lieu';
+      break;
+    case 'commune':
+      icon = '🏘️';
+      subtitle = 'Commune du Grand Périgueux';
+      break;
+    case 'stop':
+      icon = '🚏';
+      const lines = item.lines || [];
+      subtitle = lines.length > 0 
+        ? `Arrêt Péribus - Ligne${lines.length > 1 ? 's' : ''} ${lines.join(', ')}`
+        : 'Arrêt Péribus';
+      break;
+    case 'google':
+      icon = '📌';
+      subtitle = item.formattedAddress || '';
+      break;
+    default:
+      icon = '📍';
+      subtitle = '';
+  }
+  
+  return {
+    place_id: `${type}_${index}`,
+    name: `${icon} ${item.name}`,
+    formatted_address: subtitle,
+    geometry: {
+      location: { lat: item.lat, lng: item.lng }
+    },
+    source: type === 'google' ? 'google' : 'local',
+    type: type
+  };
+}
 
-export default async function handler(request) {
-    const url = new URL(request.url);
-    const origin = request.headers.get('origin') || '';
-    
-    const corsHeaders = {
-        'Access-Control-Allow-Origin': origin || '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+// ===========================================
+// Handler principal
+// ===========================================
+
+export default async function handler(req) {
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Vary': 'Origin',
-    };
+      },
+    });
+  }
 
-    if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 200, headers: corsHeaders });
+  const url = new URL(req.url);
+  const input = url.searchParams.get('input')?.trim();
+
+  if (!input || input.length < 2) {
+    return new Response(JSON.stringify({ predictions: [] }), {
+      status: 200,
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+    });
+  }
+
+  const results = [];
+  const seenNames = new Set();
+
+  // ========================================
+  // 1. PRIORITÉ 1 : POI locaux
+  // ========================================
+  const pois = searchLocal(input, LOCAL_POIS, 3);
+  for (let i = 0; i < pois.length; i++) {
+    const item = pois[i];
+    const normalizedName = normalize(item.name);
+    if (!seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName);
+      results.push(formatResult(item, 'poi', i));
     }
+  }
 
-    const apiKey = process.env.GMAPS_SERVER_KEY;
-    if (!apiKey) {
-        return new Response(
-            JSON.stringify({ error: 'Config error' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+  // ========================================
+  // 2. PRIORITÉ 2 : Communes
+  // ========================================
+  const communes = searchLocal(input, LOCAL_COMMUNES, 2);
+  for (let i = 0; i < communes.length; i++) {
+    const item = communes[i];
+    const normalizedName = normalize(item.name);
+    if (!seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName);
+      results.push(formatResult(item, 'commune', i + 100));
     }
+  }
 
-    const input = url.searchParams.get('input') || url.searchParams.get('q');
-    const placeId = url.searchParams.get('placeId');
+  // ========================================
+  // 3. PRIORITÉ 3 : Arrêts de bus
+  // ========================================
+  const stops = searchLocal(input, GTFS_STOPS, 2);
+  for (let i = 0; i < stops.length; i++) {
+    const item = stops[i];
+    const normalizedName = normalize(item.name);
+    if (!seenNames.has(normalizedName)) {
+      seenNames.add(normalizedName);
+      results.push(formatResult(item, 'stop', i + 200));
+    }
+  }
 
+  // ========================================
+  // 4. PRIORITÉ 4 : Google Places (adresses)
+  // ========================================
+  const googleNeeded = 5 - results.length;
+  
+  if (googleNeeded > 0) {
     try {
-        if (input) {
-            // Vérifier le cache
-            const cacheKey = `ac:${input.toLowerCase()}`;
-            const cached = cache.get(cacheKey);
-            if (cached && Date.now() - cached.time < CACHE_TTL) {
-                return new Response(cached.data, { 
-                    status: 200, 
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } 
-                });
-            }
+      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+      if (!apiKey) throw new Error('API key missing');
 
-            // 1. D'abord chercher dans les arrêts GTFS locaux
-            const gtfsResults = searchGtfsStops(input);
+      const requestBody = {
+        input: input,
+        languageCode: 'fr',
+        regionCode: 'FR',
+        locationRestriction: {
+          rectangle: {
+            low: { latitude: GRAND_PERIGUEUX_BOUNDS.south, longitude: GRAND_PERIGUEUX_BOUNDS.west },
+            high: { latitude: GRAND_PERIGUEUX_BOUNDS.north, longitude: GRAND_PERIGUEUX_BOUNDS.east }
+          }
+        }
+      };
+
+      const response = await fetch(
+        'https://places.googleapis.com/v1/places:autocomplete',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const suggestions = data.suggestions || [];
+        
+        let googleCount = 0;
+        for (const suggestion of suggestions) {
+          if (googleCount >= googleNeeded) break;
+          
+          const place = suggestion.placePrediction;
+          if (!place) continue;
+          
+          const placeId = place.placeId;
+          
+          // Récupérer les détails
+          const detailsResponse = await fetch(
+            `https://places.googleapis.com/v1/places/${placeId}?languageCode=fr`,
+            {
+              headers: {
+                'X-Goog-Api-Key': apiKey,
+                'X-Goog-FieldMask': 'id,displayName,formattedAddress,location'
+              }
+            }
+          );
+          
+          if (detailsResponse.ok) {
+            const details = await detailsResponse.json();
+            const name = details.displayName?.text || '';
+            const normalizedName = normalize(name);
             
-            // 2. Ensuite chercher via Google avec restriction géographique stricte
-            let googleResults = [];
-            
-            const response = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Goog-Api-Key': apiKey
+            if (!seenNames.has(normalizedName) && name) {
+              seenNames.add(normalizedName);
+              results.push({
+                place_id: placeId,
+                name: `📌 ${name}`,
+                formatted_address: details.formattedAddress || '',
+                geometry: {
+                  location: details.location || { lat: CENTER.lat, lng: CENTER.lng }
                 },
-                body: JSON.stringify({
-                    input: input,
-                    languageCode: 'fr',
-                    regionCode: 'FR',
-                    // Restriction stricte au Grand Périgueux
-                    locationRestriction: {
-                        rectangle: {
-                            low: { latitude: GRAND_PERIGUEUX_BOUNDS.south, longitude: GRAND_PERIGUEUX_BOUNDS.west },
-                            high: { latitude: GRAND_PERIGUEUX_BOUNDS.north, longitude: GRAND_PERIGUEUX_BOUNDS.east }
-                        }
-                    }
-                })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                googleResults = (data.suggestions || [])
-                    .map(s => {
-                        const place = s.placePrediction;
-                        return {
-                            description: place?.text?.text,
-                            placeId: place?.placeId,
-                            mainText: place?.structuredFormat?.mainText?.text,
-                            secondaryText: place?.structuredFormat?.secondaryText?.text,
-                            source: 'google'
-                        };
-                    })
-                    // Filtrer les résultats hors zone (double sécurité)
-                    .filter(r => {
-                        const text = (r.secondaryText || '').toLowerCase();
-                        // Garder seulement Dordogne / Nouvelle-Aquitaine / France
-                        return text.includes('périgueux') || 
-                               text.includes('perigueux') ||
-                               text.includes('dordogne') ||
-                               text.includes('boulazac') ||
-                               text.includes('trélissac') ||
-                               text.includes('trelissac') ||
-                               text.includes('chancelade') ||
-                               text.includes('coulounieix') ||
-                               text.includes('marsac') ||
-                               text.includes('bassillac') ||
-                               text.includes('24000') ||
-                               text.includes('24750') ||
-                               text.includes('24430') ||
-                               text.includes('24660');
-                    });
+                source: 'google',
+                type: 'address'
+              });
+              googleCount++;
             }
-
-            // 3. Fusionner: GTFS en premier, puis Google (sans doublons)
-            const seenNames = new Set();
-            const predictions = [];
-            
-            // Ajouter les résultats GTFS en priorité
-            for (const r of gtfsResults.slice(0, 3)) {
-                const key = r.mainText.toLowerCase();
-                if (!seenNames.has(key)) {
-                    seenNames.add(key);
-                    predictions.push(r);
-                }
-            }
-            
-            // Ajouter les résultats Google
-            for (const r of googleResults) {
-                const key = (r.mainText || r.description || '').toLowerCase();
-                // Éviter les doublons avec les arrêts GTFS
-                if (!seenNames.has(key) && predictions.length < 8) {
-                    seenNames.add(key);
-                    predictions.push(r);
-                }
-            }
-
-            const responseBody = JSON.stringify({ predictions });
-            
-            cache.set(cacheKey, { data: responseBody, time: Date.now() });
-            if (cache.size > 100) {
-                const oldest = [...cache.entries()].sort((a, b) => a[1].time - b[1].time)[0];
-                if (oldest) cache.delete(oldest[0]);
-            }
-
-            return new Response(responseBody, { 
-                status: 200, 
-                headers: { 
-                    ...corsHeaders, 
-                    'Content-Type': 'application/json',
-                    'Cache-Control': 'public, s-maxage=120',
-                    'X-Cache': 'MISS'
-                } 
-            });
+          }
         }
-
-        // Mode 2: Détails d'un lieu (coordonnées)
-        if (placeId) {
-            // Si c'est un arrêt GTFS local
-            if (placeId.startsWith('GTFS_')) {
-                const key = placeId.replace('GTFS_', '');
-                const stop = GTFS_STOPS[key];
-                if (stop) {
-                    return new Response(JSON.stringify({
-                        placeId,
-                        name: stop.name,
-                        location: { lat: stop.lat, lng: stop.lng },
-                        source: 'gtfs'
-                    }), { 
-                        status: 200, 
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-                    });
-                }
-            }
-
-            // Sinon, chercher via Google
-            const cacheKey = `pd:${placeId}`;
-            const cached = cache.get(cacheKey);
-            if (cached && Date.now() - cached.time < 86400000) {
-                return new Response(cached.data, { 
-                    status: 200, 
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'X-Cache': 'HIT' } 
-                });
-            }
-
-            const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-                headers: {
-                    'X-Goog-Api-Key': apiKey,
-                    'X-Goog-FieldMask': 'location,displayName'
-                }
-            });
-
-            if (!response.ok) {
-                return new Response(
-                    JSON.stringify({ error: 'Place not found' }),
-                    { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                );
-            }
-
-            const data = await response.json();
-            
-            // Vérifier que le lieu est dans le Grand Périgueux
-            if (data.location && !isInGrandPerigueux(data.location.latitude, data.location.longitude)) {
-                return new Response(
-                    JSON.stringify({ error: 'Lieu hors zone Grand Périgueux' }),
-                    { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                );
-            }
-
-            const responseBody = JSON.stringify({
-                placeId,
-                name: data.displayName?.text,
-                location: data.location ? {
-                    lat: data.location.latitude,
-                    lng: data.location.longitude
-                } : null
-            });
-
-            cache.set(cacheKey, { data: responseBody, time: Date.now() });
-
-            return new Response(responseBody, { 
-                status: 200, 
-                headers: { 
-                    ...corsHeaders, 
-                    'Content-Type': 'application/json',
-                    'Cache-Control': 'public, s-maxage=86400'
-                } 
-            });
-        }
-
-        return new Response(
-            JSON.stringify({ error: 'input ou placeId requis' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-
+      }
     } catch (error) {
-        return new Response(
-            JSON.stringify({ error: 'Server error' }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      console.error('Google Places error:', error.message);
     }
+  }
+
+  return new Response(JSON.stringify({ 
+    predictions: results.slice(0, 5)
+  }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, max-age=300',
+    },
+  });
 }
 
 
