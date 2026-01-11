@@ -395,7 +395,8 @@ function formatLeg(leg) {
     to: leg.to,
     duration: leg.duration,
     departureTime: leg.departureTime,
-    arrivalTime: leg.arrivalTime
+    arrivalTime: leg.arrivalTime,
+    polyline: leg.polyline || null // ✅ Préserver la polyline GTFS
   };
 
   if (leg.type === 'transit') {
