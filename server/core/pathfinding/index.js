@@ -409,6 +409,13 @@ export class PathfindingEngine {
         if (shapeId && this.gtfsData.shapes) {
           polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
         }
+        // Fallback: au minimum une ligne droite entre les arrêts pour éviter les polylines nulles
+        if (!polyline) {
+          polyline = this.encodePolyline([
+            [fromStop?.stop_lat, fromStop?.stop_lon],
+            [toStop?.stop_lat, toStop?.stop_lon]
+          ]);
+        }
 
         legs.push({
           type: 'transit',
