@@ -408,6 +408,11 @@ export class PathfindingEngine {
         let polyline = null;
         if (shapeId && this.gtfsData.shapes) {
           polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
+          if (!polyline) {
+            console.log(`⚠️ Polyline non extraite pour shape ${shapeId}, fallback ligne droite`);
+          }
+        } else if (!this.gtfsData.shapes || this.gtfsData.shapes.length === 0) {
+          console.log(`⚠️ Pas de shapes GTFS chargés, fallback ligne droite`);
         }
         // Fallback: au minimum une ligne droite entre les arrêts pour éviter les polylines nulles
         if (!polyline) {

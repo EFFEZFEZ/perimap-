@@ -255,6 +255,9 @@ export async function initializeRouter() {
 
       // Charger les données GTFS
       const gtfsData = await loadGtfsData();
+      
+      // Log des shapes pour debug
+      logger.info(`   📐 Shapes GTFS: ${gtfsData.shapes?.length || 0} points chargés`);
 
       // Créer et initialiser le moteur
       routerEngine = new PathfindingEngine(gtfsData, {
