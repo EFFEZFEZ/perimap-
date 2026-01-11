@@ -206,9 +206,16 @@ export function extractStepPolylines(step) {
         if (poly) collected.push(poly);
     };
     
-    // Priorité 1: BUS avec polyline directe
-    if (step.type === 'BUS') {
+    // V271: Détecter mode transit (BUS ou TRANSIT)
+    const isTransitStep = step.type === 'BUS' || step.travelMode === 'TRANSIT';
+    
+    // Priorité 1: BUS/TRANSIT avec polyline directe
+    if (isTransitStep) {
         pushIfValid(step?.polyline);
+        // V271: Fallback legGeometry pour legs OTP bruts
+        if (collected.length === 0 && step?.legGeometry?.points) {
+            pushIfValid({ encodedPolyline: step.legGeometry.points });
+        }
     }
     // Priorité 2: Tableau polylines (WALK multi-segments)
     else if (Array.isArray(step.polylines) && step.polylines.length) {
@@ -229,9 +236,25 @@ export function extractStepPolylines(step) {
         });
     }
     
+    // V271: Fallback ultime - créer une polyline à partir des coordonnées de départ/arrivée
+    if (collected.length === 0) {
+        const startLoc = step.startLocation?.latLng || step.departureLocation;
+        const endLoc = step.endLocation?.latLng || step.arrivalLocation;
+        if (startLoc && endLoc) {
+            const startLat = startLoc.latitude ?? startLoc.lat;
+            const startLon = startLoc.longitude ?? startLoc.lon ?? startLoc.lng;
+            const endLat = endLoc.latitude ?? endLoc.lat;
+            const endLon = endLoc.longitude ?? endLoc.lon ?? endLoc.lng;
+            if (Number.isFinite(startLat) && Number.isFinite(startLon) &&
+                Number.isFinite(endLat) && Number.isFinite(endLon)) {
+                pushIfValid({ latLngs: [[startLat, startLon], [endLat, endLon]] });
+            }
+        }
+    }
+    
     // Debug pour itinéraires multi-correspondances
     if (collected.length === 0 && step.type !== 'WAIT') {
-        console.warn('[Polyline] Aucune polyline trouvée pour step:', step.type, step.instruction);
+        console.warn('[Polyline] Aucune polyline trouvée pour step:', step.type || step.travelMode, step.instruction);
     }
     
     return collected;
