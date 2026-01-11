@@ -606,17 +606,13 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             const transferPoint = toPoint(transferStop);
             const boardPoint = toPoint(actualTransferBoardStop);
             if (transferPoint && boardPoint) {
-                const walkLabel = `Marcher vers ${getStopDisplayName(actualTransferBoardStop) || actualTransferBoardStop.stop_name}`;
+                const walkLabel = `Correspondance vers ${getStopDisplayName(actualTransferBoardStop) || actualTransferBoardStop.stop_name}`;
                 transferWalkStep = await buildWalkStep(walkLabel, transferPoint, boardPoint);
                 if (transferWalkStep) {
+                    // Modifier l'instruction pour afficher "Correspondance" avec icône marche
+                    transferWalkStep.instruction = walkLabel;
                     itinerary.steps.push(transferWalkStep);
-                    itinerary.summarySegments.push({
-                        type: 'WALK',
-                        name: 'Marche',
-                        color: '#6B7280',
-                        textColor: '#ffffff',
-                        durationMinutes: Math.round((transferWalkStep._durationSeconds || 0) / 60)
-                    });
+                    // Ne pas ajouter de segment "Marche" dans le résumé - c'est implicite dans la correspondance
                 }
             }
         }
