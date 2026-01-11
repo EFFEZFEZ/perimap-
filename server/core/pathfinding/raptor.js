@@ -141,7 +141,14 @@ export class RaptorAlgorithm {
   computeJourneys(originStopId, destStopId, departureTime, dateStr) {
     const { maxRounds, minTransferTime } = this.options;
 
-    console.log(`🚀 RAPTOR.computeJourneys: ${originStopId} → ${destStopId}, départ=${departureTime}s (${Math.floor(departureTime/3600)}h${Math.floor((departureTime%3600)/60)}), date=${dateStr}`);
+    // Correction format date pour isServiceActive (YYYYMMDD sans tirets)
+    let cleanDateStr = dateStr;
+    if (typeof dateStr === 'string' && dateStr.includes('-')) {
+      cleanDateStr = dateStr.replace(/-/g, '');
+    }
+
+    // Log désactivé pour performance
+    // console.log(`🚀 RAPTOR.computeJourneys: ${originStopId} → ${destStopId}, départ=${departureTime}s (${Math.floor(departureTime/3600)}h${Math.floor((departureTime%3600)/60)}), date=${dateStr}`);
 
     // Tableaux RAPTOR
     // τ[k][p] = meilleure heure d'arrivée à l'arrêt p avec exactement k correspondances
@@ -185,23 +192,26 @@ export class RaptorAlgorithm {
         const routes = this.routesAtStop.get(stopId) || [];
         routes.forEach(r => routesToScan.add(r));
       });
-      
-      console.log(`  Round ${k}: ${routesToScan.size} routes à scanner, ${marked.size} arrêts marqués`);
+
+      // Log désactivé pour performance
+      // console.log(`  Round ${k}: ${routesToScan.size} routes à scanner, ${marked.size} arrêts marqués`);
       marked.clear();
 
       // Pour chaque route
       routesToScan.forEach(routeId => {
-        this.scanRoute(k, routeId, departureTime, dateStr, tau, tauStar, marked, journeyPointer);
+        this.scanRoute(k, routeId, departureTime, cleanDateStr, tau, tauStar, marked, journeyPointer);
       });
 
-      // Transferts à pied (si implémentés)
-      // this.processFootpaths(k, tau, tauStar, marked);
+      // Transferts à pied (implémentés)
+      this.processFootpaths(k, tau, tauStar, marked);
 
-      console.log(`  Round ${k} terminé: ${marked.size} nouveaux arrêts améliorés`);
+      // Log désactivé pour performance
+      // console.log(`  Round ${k} terminé: ${marked.size} nouveaux arrêts améliorés`);
 
       // Si aucun arrêt n'a été amélioré, on peut arrêter
       if (marked.size === 0) {
-        console.log(`  → Arrêt à round ${k} (aucune amélioration)`);
+        // Log désactivé pour performance
+        // console.log(`  → Arrêt à round ${k} (aucune amélioration)`);
         break;
       }
     }
@@ -215,6 +225,13 @@ export class RaptorAlgorithm {
 
     // Construire les journeys Pareto-optimaux
     const journeys = this.reconstructJourneys(destStopId, tau, journeyPointer);
+
+    // Debug: afficher le nombre de journeys et leurs legs
+    console.log(`    🔍 RAPTOR reconstruit: ${journeys.length} journey(s), legs: ${journeys.map(j => j.legs?.length || 0).join(',')}`);
+    if (journeys.length > 0 && journeys[0].legs?.length > 0) {
+      const firstLeg = journeys[0].legs[0];
+      console.log(`    📍 Premier leg: ${firstLeg.fromStop} → ${firstLeg.toStop}, route=${firstLeg.routeId}`);
+    }
 
     return journeys;
   }
@@ -233,6 +250,7 @@ export class RaptorAlgorithm {
     // Pour chaque trip de la route
     let activeTrips = 0;
     let inactiveTrips = 0;
+    const minTransferTime = this.options.minTransferTime || 120;
     routeTrips.forEach((tripStopTimes, tripId) => {
       // Vérifier si le trip est actif à cette date
       const serviceId = this.tripServices.get(tripId);
@@ -241,7 +259,7 @@ export class RaptorAlgorithm {
         return; // Trip inactif ce jour-là
       }
       activeTrips++;
-      
+
       let boardingStop = null;
       let boardingTime = null;
 
@@ -253,7 +271,11 @@ export class RaptorAlgorithm {
         // Est-ce qu'on peut monter ici?
         if (boardingStop === null) {
           // On peut monter si on peut atteindre cet arrêt avant le départ du bus
-          const arrivalAtStop = tau[k - 1][stopIndex];
+          let arrivalAtStop = tau[k - 1][stopIndex];
+          // Correction : appliquer minTransferTime si correspondance (k > 1)
+          if (k > 1 && arrivalAtStop !== Infinity) {
+            arrivalAtStop += minTransferTime;
+          }
           if (arrivalAtStop !== Infinity && arrivalAtStop <= st.departure_time) {
             boardingStop = st.stop_id;
             boardingTime = st.departure_time;
@@ -261,12 +283,13 @@ export class RaptorAlgorithm {
         }
 
         // Est-ce qu'on peut descendre ici et améliorer le temps?
-        if (boardingStop !== null) {
+        // Vérifier qu'on ne descend pas au même arrêt où on est monté
+        if (boardingStop !== null && boardingStop !== st.stop_id) {
           const newArrival = st.arrival_time;
-          
+
           if (newArrival < tau[k][stopIndex]) {
             tau[k][stopIndex] = newArrival;
-            
+
             if (newArrival < tauStar.get(st.stop_id)) {
               tauStar.set(st.stop_id, newArrival);
               marked.add(st.stop_id);
@@ -286,11 +309,57 @@ export class RaptorAlgorithm {
         }
       }
     });
-    
+
     if (activeTrips === 0) {
-      console.log(`    ⚠️ Route ${routeId}: 0 trips actifs (${inactiveTrips} inactifs) pour ${dateStr}`);
+      // Log désactivé pour performance (appelé pour chaque route sans service)
+      // console.log(`    ⚠️ Route ${routeId}: 0 trips actifs (${inactiveTrips} inactifs) pour ${dateStr}`);
     }
   }
+
+  /**
+   * Applique les transferts à pied entre arrêts (footpaths)
+   * Pour chaque arrêt marqué, tente d'améliorer les arrêts accessibles à pied
+   *
+   * @param {number} k
+   * @param {Array} tau
+   * @param {Map} tauStar
+   * @param {Set} marked
+   */
+  processFootpaths(k, tau, tauStar, marked) {
+    // Pour chaque arrêt marqué au round précédent, on tente d'améliorer les arrêts voisins à pied
+    const { maxWalkDistance, walkSpeed, minTransferTime } = this.options;
+    const newlyMarked = new Set();
+    this.graph.stops.forEach((fromStop, fromIdx) => {
+      const arrivalTime = tau[k][fromIdx];
+      if (arrivalTime === Infinity) return;
+
+      // Trouver les arrêts accessibles à pied (hors soi-même)
+      this.graph.stops.forEach((toStop, toIdx) => {
+        if (fromStop.stop_id === toStop.stop_id) return;
+        // Distance à vol d'oiseau
+        const distance = this.haversineDistance(fromStop.stop_lat, fromStop.stop_lon, toStop.stop_lat, toStop.stop_lon);
+        if (distance > maxWalkDistance) return;
+        // Temps de marche
+        const walkTime = Math.ceil(distance / walkSpeed);
+        // On applique minTransferTime pour le transfert à pied
+        const transferTime = Math.max(walkTime, minTransferTime);
+        const newArrival = arrivalTime + transferTime;
+        if (newArrival < tau[k][toIdx]) {
+          tau[k][toIdx] = newArrival;
+          if (newArrival < tauStar.get(toStop.stop_id)) {
+            tauStar.set(toStop.stop_id, newArrival);
+            newlyMarked.add(toStop.stop_id);
+          }
+        }
+      });
+    });
+    // Ajouter les nouveaux arrêts améliorés au set marked
+    for (const stopId of newlyMarked) {
+      marked.add(stopId);
+    }
+  }
+    
+    
 
   /**
    * Reconstruit les journeys à partir des pointeurs
@@ -349,22 +418,33 @@ export class RaptorAlgorithm {
    * (non dominés en termes de temps d'arrivée et nombre de correspondances)
    */
   filterParetoOptimal(journeys) {
+    const penalty = this.options.transferPenalty || 0;
     const dominated = new Set();
 
+    // Trier par heure d'arrivée pour accélérer les comparaisons
+    journeys.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
     for (let i = 0; i < journeys.length; i++) {
+      if (dominated.has(i)) continue;
+
       for (let j = 0; j < journeys.length; j++) {
         if (i === j) continue;
+        if (dominated.has(j)) continue;
 
-        const ji = journeys[i];
-        const jj = journeys[j];
+        const ji = journeys[i]; // candidat
+        const jj = journeys[j]; // comparateur
 
-        // j domine i si j est meilleur ou égal sur tous les critères et strictement meilleur sur au moins un
-        if (
-          jj.arrivalTime <= ji.arrivalTime &&
-          jj.transfers <= ji.transfers &&
-          (jj.arrivalTime < ji.arrivalTime || jj.transfers < ji.transfers)
-        ) {
-          dominated.add(i);
+        const costI = ji.arrivalTime + (ji.transfers * penalty);
+        const costJ = jj.arrivalTime + (jj.transfers * penalty);
+
+        const fewerOrSameTransfers = jj.transfers <= ji.transfers;
+        const lowerGeneralizedCost = costJ <= costI;
+
+        if (lowerGeneralizedCost && fewerOrSameTransfers) {
+          if (costJ < costI || jj.transfers < ji.transfers) {
+            dominated.add(i);
+            break;
+          }
         }
       }
     }

@@ -148,27 +148,35 @@ export class PathfindingEngine {
     }
 
     // 2. Pour chaque combinaison origine/destination, calculer l'itinéraire RAPTOR
-    // On essaie progressivement plus de combinaisons pour éviter de rater une paire viable
-    // (les 3 plus proches peuvent être des StopPlace/non-desservis ou juste non connectés à l'heure demandée).
-    const tryLimits = [3, 8, 15, 25];
-    // IMPORTANT: ne pas s'arrêter dès qu'on trouve un trajet.
-    // Un arrêt un peu plus loin (ex: Tourny) + marche finale peut produire
-    // un itinéraire bien plus court que le meilleur parmi les 3 arrêts les plus proches.
-    const maxToCollect = Math.max(this.options.maxResults, 20);
+    // OPTIMISATION V2: réduire drastiquement les combinaisons pour la performance
+    // On limite à 5 arrêts max de chaque côté (25 combinaisons max au lieu de 625)
+    const tryLimits = [3, 5];
+    const maxToCollect = Math.max(this.options.maxResults, 8);
+    const startCompute = Date.now();
+    const MAX_COMPUTE_TIME_MS = 8000; // Timeout global de 8 secondes
 
     for (const limit of tryLimits) {
+      // Vérifier le timeout global
+      if (Date.now() - startCompute > MAX_COMPUTE_TIME_MS) {
+        console.log(`⏱️ Timeout global atteint (${MAX_COMPUTE_TIME_MS}ms), arrêt de la recherche`);
+        break;
+      }
+
       const oLimit = Math.min(limit, originCandidates.length);
       const dLimit = Math.min(limit, destCandidates.length);
       console.log(`🔍 Tentative RAPTOR: ${oLimit} x ${dLimit} combinaisons (top ${limit})`);
 
       for (const originStop of originCandidates.slice(0, oLimit)) {
         for (const destStop of destCandidates.slice(0, dLimit)) {
+          // Timeout check
+          if (Date.now() - startCompute > MAX_COMPUTE_TIME_MS) {
+            console.log(`⏱️ Timeout atteint, arrêt`);
+            break;
+          }
+
           const adjustedDepartureTime = timeSeconds + originStop.walkTime;
 
-          console.log(
-            `  → Essai: ${originStop.stop.stop_name} → ${destStop.stop.stop_name} à ${Math.floor(adjustedDepartureTime / 3600)}h${Math.floor((adjustedDepartureTime % 3600) / 60)}`
-          );
-
+          // Log condensé (une seule ligne par essai)
           const journeys = this.raptor.computeJourneys(
             originStop.stop.stop_id,
             destStop.stop.stop_id,
@@ -176,7 +184,15 @@ export class PathfindingEngine {
             dateStr
           );
 
-          console.log(`  ← Résultat: ${journeys.length} itinéraires trouvés`);
+          if (journeys.length > 0) {
+            console.log(`  ✅ ${originStop.stop.stop_name} → ${destStop.stop.stop_name}: ${journeys.length} itinéraire(s)`);
+            // Debug: afficher les legs du premier journey
+            const firstJ = journeys[0];
+            console.log(`    📋 Journey legs: ${firstJ.legs?.length || 0}, transfers: ${firstJ.transfers}`);
+            if (firstJ.legs?.length > 0) {
+              console.log(`    📍 Legs: ${firstJ.legs.map(l => `${l.fromStop}->${l.toStop}`).join(', ')}`);
+            }
+          }
 
           for (const journey of journeys) {
             const itinerary = this.buildItinerary(
@@ -194,12 +210,14 @@ export class PathfindingEngine {
             break;
           }
         }
-        if (results.length >= maxToCollect) {
+        if (results.length >= maxToCollect || Date.now() - startCompute > MAX_COMPUTE_TIME_MS) {
           break;
         }
       }
 
-      if (results.length >= maxToCollect) {
+      // Early exit si on a assez de résultats
+      if (results.length >= 3) {
+        console.log(`✅ ${results.length} itinéraires trouvés, arrêt anticipé`);
         break;
       }
     }
@@ -243,7 +261,10 @@ export class PathfindingEngine {
       const trip = this.graph.tripsById.get(leg.tripId);
 
       const alightTimeSec = (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime);
-      const transitDurationSec = alightTimeSec - leg.departureTime;
+      const transitDurationSec = Math.max(0, alightTimeSec - leg.departureTime);
+
+      // Debug: log leg info
+      console.log(`    📍 Leg: ${fromStop?.stop_name || leg.fromStop} → ${toStop?.stop_name || leg.toStop}, route=${route?.route_short_name}, dur=${transitDurationSec}s`);
 
       // Attente éventuelle
       const legDepartureTime = this.secondsToDate(baseTime, leg.departureTime);
@@ -268,7 +289,8 @@ export class PathfindingEngine {
       }
 
       // Filtrer les legs transit "vides" (ex: Tourny → Tourny) qui gonflent artificiellement les correspondances
-      if (leg.fromStop !== leg.toStop && transitDurationSec > 0) {
+      // Garder les legs même avec durée 0 si les arrêts sont différents (trajet express)
+      if (leg.fromStop !== leg.toStop) {
         // Récupérer la polyline du shape GTFS si disponible
         const shapeId = trip?.shape_id;
         let polyline = null;
