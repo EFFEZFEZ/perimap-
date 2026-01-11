@@ -3803,26 +3803,38 @@ function drawRouteOnResultsMap(itinerary) {
     }
 
     const stepLayers = [];
+    let polylineStats = { total: 0, withCoords: 0, empty: 0 };
     
-    itinerary.steps.forEach(step => {
+    itinerary.steps.forEach((step, idx) => {
         const style = getLeafletStyleForStep(step);
         
         const polylinesToDraw = extractStepPolylines(step);
+        polylineStats.total += polylinesToDraw.length;
 
         if (!polylinesToDraw.length) {
+            console.warn(`[DrawRoute] Step ${idx} (${step.type}): Aucune polyline extraite`, { 
+                hasPolyline: !!step.polyline, 
+                hasPolylines: Array.isArray(step.polylines) && step.polylines.length > 0,
+                instruction: step.instruction?.substring(0, 50)
+            });
             return;
         }
 
-        polylinesToDraw.forEach(polyline => {
+        polylinesToDraw.forEach((polyline, pIdx) => {
             const latLngs = getPolylineLatLngs(polyline);
             if (!latLngs || !latLngs.length) {
+                polylineStats.empty++;
+                console.warn(`[DrawRoute] Step ${idx}, polyline ${pIdx}: latLngs vide`, polyline);
                 return;
             }
+            polylineStats.withCoords++;
 
             const stepLayer = L.polyline(latLngs, style);
             stepLayers.push(stepLayer);
         });
     });
+
+    console.log(`[DrawRoute] Stats polylines:`, polylineStats, `stepLayers: ${stepLayers.length}`);
 
     if (stepLayers.length > 0) {
         // Créer un groupe avec toutes les couches d'étapes
@@ -3834,8 +3846,13 @@ function drawRouteOnResultsMap(itinerary) {
         // Ajuster la carte pour voir l'ensemble du trajet
         const bounds = currentResultsRouteLayer.getBounds();
         if (bounds && bounds.isValid()) {
+            console.log(`[DrawRoute] Bounds valides, fitBounds:`, bounds.toBBoxString());
             resultsMapRenderer.map.fitBounds(bounds, { padding: [20, 20] });
+        } else {
+            console.warn(`[DrawRoute] Bounds invalides, pas de fitBounds`);
         }
+    } else {
+        console.warn(`[DrawRoute] Aucun stepLayer créé, carte non mise à jour`);
     }
 }
 

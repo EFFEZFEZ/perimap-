@@ -128,6 +128,7 @@ export function getPolylineLatLngs(polyline) {
 
 /**
  * Extrait toutes les polylines d'un step
+ * V323: Version améliorée avec fallbacks multiples
  * @param {Object} step - L'étape
  * @returns {Array} Array de polylines
  */
@@ -139,12 +140,55 @@ export function extractStepPolylines(step) {
         if (poly) collected.push(poly);
     };
 
-    if (step.type === 'BUS') {
+    // V323: Détecter mode transit (BUS ou TRANSIT)
+    const isTransitStep = step.type === 'BUS' || step.travelMode === 'TRANSIT';
+
+    // Priorité 1: BUS/TRANSIT avec polyline directe
+    if (isTransitStep) {
         pushIfValid(step?.polyline);
-    } else if (Array.isArray(step.polylines) && step.polylines.length) {
+        // V323: Fallback legGeometry pour legs OTP bruts
+        if (collected.length === 0 && step?.legGeometry?.points) {
+            pushIfValid({ encodedPolyline: step.legGeometry.points });
+        }
+    }
+    // Priorité 2: Tableau polylines (WALK multi-segments)
+    else if (Array.isArray(step.polylines) && step.polylines.length) {
         step.polylines.forEach(pushIfValid);
-    } else {
+    }
+    // Priorité 3: Polyline unique
+    else {
         pushIfValid(step?.polyline);
+    }
+
+    // Fallback: chercher dans les substeps si aucune polyline trouvée
+    if (collected.length === 0 && step.subSteps && step.subSteps.length > 0) {
+        step.subSteps.forEach(subStep => {
+            pushIfValid(subStep?.polyline);
+            if (Array.isArray(subStep?.polylines)) {
+                subStep.polylines.forEach(pushIfValid);
+            }
+        });
+    }
+
+    // V323: Fallback ultime - créer une polyline à partir des coordonnées de départ/arrivée
+    if (collected.length === 0) {
+        const startLoc = step.startLocation?.latLng || step.departureLocation;
+        const endLoc = step.endLocation?.latLng || step.arrivalLocation;
+        if (startLoc && endLoc) {
+            const startLat = startLoc.latitude ?? startLoc.lat;
+            const startLon = startLoc.longitude ?? startLoc.lon ?? startLoc.lng;
+            const endLat = endLoc.latitude ?? endLoc.lat;
+            const endLon = endLoc.longitude ?? endLoc.lon ?? endLoc.lng;
+            if (Number.isFinite(startLat) && Number.isFinite(startLon) &&
+                Number.isFinite(endLat) && Number.isFinite(endLon)) {
+                pushIfValid({ latLngs: [[startLat, startLon], [endLat, endLon]] });
+            }
+        }
+    }
+
+    // Debug pour itinéraires multi-correspondances
+    if (collected.length === 0 && step.type !== 'WAIT') {
+        console.warn('[Polyline] Aucune polyline trouvée pour step:', step.type || step.travelMode, step.instruction);
     }
 
     return collected;
