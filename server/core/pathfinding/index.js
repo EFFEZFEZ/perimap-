@@ -407,11 +407,8 @@ export class PathfindingEngine {
         const shapeId = trip?.shape_id;
         let polyline = null;
         
-        // Debug: log une fois par requête pour vérifier les shapes
-        if (!this._polylineDebugLogged) {
-          console.log(`🔍 Polyline debug: tripId=${leg.tripId}, trip found=${!!trip}, shapeId=${shapeId}, shapes count=${this.gtfsData.shapes?.length || 0}`);
-          this._polylineDebugLogged = true;
-        }
+        // Debug: toujours log pour diagnostiquer
+        console.log(`🔍 Transit leg: tripId=${leg.tripId}, trip found=${!!trip}, shapeId=${shapeId || 'NULL'}, shapes=${this.gtfsData.shapes?.length || 0}`);
         
         if (shapeId && this.gtfsData.shapes) {
           polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
