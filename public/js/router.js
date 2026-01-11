@@ -466,9 +466,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const boardingStopName = getStopDisplayName(boardingStop);
         const alightingStopName = getStopDisplayName(alightingStop);
 
-        let geometry = dataManager.getRouteGeometry(segment.routeId);
-        if (!geometry && segment.shapeId) {
+        // Priorite au shape_id specifique du trip (evite de confondre K1A Rudeille et K1A Maison Rouge)
+        let geometry = null;
+        if (segment.shapeId) {
             geometry = dataManager.getShapeGeoJSON(segment.shapeId, segment.routeId);
+        }
+        // Fallback sur la geometrie de la route si pas de shape specifique
+        if (!geometry) {
+            geometry = dataManager.getRouteGeometry(segment.routeId);
         }
 
         let latLngPolyline = geometryToLatLngs(geometry);
