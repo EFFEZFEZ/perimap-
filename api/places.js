@@ -37,6 +37,8 @@ function cleanPlacesCache() {
 const LOCAL_POIS = {
   // Grande distribution
   'auchan': { name: 'Auchan Périgueux Boulazac', category: 'Hypermarché', lat: 45.1847, lng: 0.7567 },
+  'auchan boulazac': { name: 'Auchan Périgueux Boulazac', category: 'Hypermarché', lat: 45.1847, lng: 0.7567 },
+  'auchan marsac': { name: 'Auchan Marsac-sur-l\'Isle', category: 'Hypermarché', lat: 45.1978, lng: 0.6789 },
   'leclerc': { name: 'E.Leclerc Trélissac', category: 'Hypermarché', lat: 45.1923, lng: 0.7612 },
   'leclerc trelissac': { name: 'E.Leclerc Trélissac', category: 'Hypermarché', lat: 45.1923, lng: 0.7612 },
   'leclerc boulazac': { name: 'E.Leclerc Boulazac', category: 'Hypermarché', lat: 45.1789, lng: 0.7634 },
@@ -53,6 +55,8 @@ const LOCAL_POIS = {
   'zone commerciale boulazac': { name: 'Zone Commerciale Boulazac', category: 'Zone commerciale', lat: 45.1834, lng: 0.7589 },
   'zone commerciale trelissac': { name: 'Zone Commerciale Trélissac', category: 'Zone commerciale', lat: 45.1912, lng: 0.7601 },
   'zone commerciale marsac': { name: 'Zone Commerciale Marsac', category: 'Zone commerciale', lat: 45.2012, lng: 0.6823 },
+  'la feuilleraie': { name: 'La Feuilleraie', category: 'Quartier résidentiel', lat: 45.1756, lng: 0.7145 },
+  'feuilleraie': { name: 'La Feuilleraie', category: 'Quartier résidentiel', lat: 45.1756, lng: 0.7145 },
   
   // Santé
   'hopital': { name: 'Centre Hospitalier de Périgueux', category: 'Hôpital', lat: 45.1789, lng: 0.7312 },
@@ -112,6 +116,17 @@ const LOCAL_POIS = {
   'patinoire': { name: 'Patinoire de Boulazac', category: 'Patinoire', lat: 45.1801, lng: 0.7545 },
   'gymnase': { name: 'Gymnase Municipal', category: 'Gymnase', lat: 45.1823, lng: 0.7267 },
   'parc gamenson': { name: 'Parc de Gamenson', category: 'Parc', lat: 45.1789, lng: 0.7134 },
+  'gamenson': { name: 'Parc de Gamenson', category: 'Parc', lat: 45.1789, lng: 0.7134 },
+  
+  // Quartiers populaires
+  'chamiers': { name: 'Quartier de Chamiers', category: 'Quartier', lat: 45.1678, lng: 0.6934 },
+  'la beune': { name: 'La Beune', category: 'Quartier', lat: 45.1801, lng: 0.7089 },
+  'beune': { name: 'La Beune', category: 'Quartier', lat: 45.1801, lng: 0.7089 },
+  'tocane': { name: 'Tocane', category: 'Quartier', lat: 45.1834, lng: 0.7156 },
+  'combe des dames': { name: 'Combe des Dames', category: 'Quartier', lat: 45.1889, lng: 0.7123 },
+  'la boetie': { name: 'La Boétie', category: 'Quartier', lat: 45.1867, lng: 0.7201 },
+  'arenes': { name: 'Les Arènes', category: 'Quartier', lat: 45.1823, lng: 0.7145 },
+  'arènes': { name: 'Les Arènes', category: 'Quartier', lat: 45.1823, lng: 0.7145 },
   
   // Administration
   'mairie': { name: 'Mairie de Périgueux', category: 'Mairie', lat: 45.1845, lng: 0.7189 },
@@ -248,6 +263,7 @@ function normalize(str) {
 
 function searchLocal(query, dictionary, maxResults = 5) {
   const normalizedQuery = normalize(query);
+  const queryWords = normalizedQuery.split(' ').filter(w => w.length > 1);
   const results = [];
   const seenNames = new Set();
   
@@ -263,18 +279,52 @@ function searchLocal(query, dictionary, maxResults = 5) {
     }
   }
   
-  // Puis recherche partielle
+  // Recherche partielle (commence par)
   for (const [key, data] of Object.entries(dictionary)) {
     const normalizedKey = normalize(key);
     const uniqueName = normalize(data.name);
     
     if (!seenNames.has(uniqueName)) {
-      if (normalizedKey.startsWith(normalizedQuery) || normalizedQuery.startsWith(normalizedKey)) {
+      if (normalizedKey.startsWith(normalizedQuery)) {
         seenNames.add(uniqueName);
-        results.push({ ...data, score: 80 });
-      } else if (normalizedKey.includes(normalizedQuery)) {
+        results.push({ ...data, score: 90 });
+      } else if (normalizedQuery.startsWith(normalizedKey) && normalizedKey.length >= 3) {
         seenNames.add(uniqueName);
-        results.push({ ...data, score: 60 });
+        results.push({ ...data, score: 85 });
+      }
+    }
+  }
+  
+  // Recherche contient (moins strict)
+  for (const [key, data] of Object.entries(dictionary)) {
+    const normalizedKey = normalize(key);
+    const normalizedName = normalize(data.name);
+    const uniqueName = normalize(data.name);
+    
+    if (!seenNames.has(uniqueName)) {
+      // Match si la clé contient la requête
+      if (normalizedKey.includes(normalizedQuery)) {
+        seenNames.add(uniqueName);
+        results.push({ ...data, score: 70 });
+      }
+      // Match si le nom contient la requête
+      else if (normalizedName.includes(normalizedQuery)) {
+        seenNames.add(uniqueName);
+        results.push({ ...data, score: 65 });
+      }
+      // Match fuzzy par mots (très permissif)
+      else if (queryWords.length > 0) {
+        const keyWords = normalizedKey.split(' ');
+        const nameWords = normalizedName.split(' ');
+        const matchedWords = queryWords.filter(qw => 
+          keyWords.some(kw => kw.includes(qw) || qw.includes(kw)) ||
+          nameWords.some(nw => nw.includes(qw) || qw.includes(nw))
+        );
+        
+        if (matchedWords.length >= Math.min(2, queryWords.length)) {
+          seenNames.add(uniqueName);
+          results.push({ ...data, score: 50 + (matchedWords.length * 5) });
+        }
       }
     }
   }

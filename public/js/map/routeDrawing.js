@@ -196,6 +196,10 @@ export function extractStepPolylines(step) {
 
 // === STYLES LEAFLET ===
 
+// Couleurs Périmap (Leaflet ne supporte pas les variables CSS)
+const PRIMARY_COLOR = '#0066CC';    // Bleu Périmap
+const SECONDARY_COLOR = '#6B7280';  // Gris
+
 /**
  * Détermine le style Leaflet pour une étape d'itinéraire
  * @param {Object} step - L'étape
@@ -205,14 +209,14 @@ export function getLeafletStyleForStep(step) {
     // Vérifie le type simple (vélo/marche)
     if (step.type === 'BIKE') {
         return {
-            color: 'var(--secondary)',
+            color: SECONDARY_COLOR,
             weight: 5,
             opacity: 0.8
         };
     }
     if (step.type === 'WALK') {
         return {
-            color: 'var(--primary)',
+            color: PRIMARY_COLOR,
             weight: 5,
             opacity: 0.8,
             dashArray: '10, 10' // Hachuré
@@ -220,7 +224,7 @@ export function getLeafletStyleForStep(step) {
     }
     // Vérifie le type Bus
     if (step.type === 'BUS') {
-        const busColor = step.routeColor || 'var(--primary)';
+        const busColor = step.routeColor || PRIMARY_COLOR;
         return {
             color: busColor,
             weight: 5,
@@ -235,7 +239,7 @@ export function getLeafletStyleForStep(step) {
 
     // Style par défaut
     return {
-        color: 'var(--primary)',
+        color: PRIMARY_COLOR,
         weight: 5,
         opacity: 0.8
     };

@@ -3083,9 +3083,8 @@ function processIntelligentResults(intelligentResults, searchTime) {
 
     // V115: Passer le searchMode à deduplicateItineraries pour garder les bons horaires
     const searchMode = searchTime?.type || 'partir';
-    // V216: DÉSACTIVÉ - On garde TOUS les trajets, même avec la même structure mais horaires différents
-    // let finalList = deduplicateItineraries(itineraries, searchMode);
-    let finalList = [...itineraries];
+    // V325: Réactivation de la déduplication avec meilleure logique
+    let finalList = deduplicateItineraries(itineraries, searchMode);
 
     // Tri + pagination spécifique au mode "arriver"
     if (searchTime && searchTime.type === 'arriver') {
@@ -3552,22 +3551,27 @@ function setupResultTabs(itineraries) {
 // Anciennes fonctions de rendu (getItineraryType, renderItineraryResults) supprimées.
 
 /**
- * *** MODIFIÉ V44 ***
+ * *** MODIFIÉ V325 ***
  * Helper pour déterminer le style Leaflet (couleur, hachures)
  * en fonction d'une ÉTAPE d'itinéraire.
+ * Note: Leaflet ne supporte pas les variables CSS, on utilise des couleurs hex
  */
 function getLeafletStyleForStep(step) {
+    // Couleurs Périmap (remplace var(--primary) et var(--secondary))
+    const PRIMARY_COLOR = '#0066CC';    // Bleu Périmap
+    const SECONDARY_COLOR = '#6B7280';  // Gris
+    
     // Vérifie le type simple (vélo/marche)
     if (step.type === 'BIKE') {
         return {
-            color: 'var(--secondary)', // Gris
+            color: SECONDARY_COLOR,
             weight: 5,
             opacity: 0.8
         };
     }
     if (step.type === 'WALK') {
         return {
-            color: 'var(--primary)', // Bleu (couleur primaire)
+            color: PRIMARY_COLOR,
             weight: 5,
             opacity: 0.8,
             dashArray: '10, 10' // Hachuré
@@ -3575,7 +3579,7 @@ function getLeafletStyleForStep(step) {
     }
     // Vérifie le type Bus
     if (step.type === 'BUS') {
-        const busColor = step.routeColor || 'var(--primary)'; // Fallback
+        const busColor = step.routeColor || PRIMARY_COLOR;
         return {
             color: busColor,
             weight: 5,
@@ -3590,7 +3594,7 @@ function getLeafletStyleForStep(step) {
 
     // Style par défaut
     return {
-        color: 'var(--primary)',
+        color: PRIMARY_COLOR,
         weight: 5,
         opacity: 0.8
     };
@@ -3824,12 +3828,29 @@ function drawRouteOnResultsMap(itinerary) {
             const latLngs = getPolylineLatLngs(polyline);
             if (!latLngs || !latLngs.length) {
                 polylineStats.empty++;
-                console.warn(`[DrawRoute] Step ${idx}, polyline ${pIdx}: latLngs vide`, polyline);
+                console.warn(`[DrawRoute] Step ${idx}, polyline ${pIdx}: latLngs vide`, {
+                    polylineType: typeof polyline,
+                    hasEncodedPolyline: !!polyline?.encodedPolyline,
+                    hasLatLngs: !!polyline?.latLngs,
+                    hasPoints: !!polyline?.points,
+                    polylineKeys: polyline ? Object.keys(polyline) : []
+                });
+                return;
+            }
+            // V325: Valider que les coordonnées sont dans des plages valides
+            const validLatLngs = latLngs.filter(([lat, lng]) => 
+                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+            );
+            if (validLatLngs.length !== latLngs.length) {
+                console.warn(`[DrawRoute] Step ${idx}: ${latLngs.length - validLatLngs.length} coords invalides filtrées`, latLngs.slice(0, 3));
+            }
+            if (validLatLngs.length === 0) {
+                polylineStats.empty++;
                 return;
             }
             polylineStats.withCoords++;
 
-            const stepLayer = L.polyline(latLngs, style);
+            const stepLayer = L.polyline(validLatLngs, style);
             stepLayers.push(stepLayer);
         });
     });

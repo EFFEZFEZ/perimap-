@@ -66,27 +66,29 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
 }
 
 /**
- * Crée une signature basée sur la STRUCTURE du trajet, pas les horaires.
- * Deux trajets avec les mêmes bus/arrêts mais horaires différents ont la même signature.
+ * V325: Crée une signature basée sur la STRUCTURE du trajet.
+ * Deux trajets avec les mêmes lignes et même heure d'arrivée sont considérés identiques.
+ * On ignore les arrêts de correspondance intermédiaires pour éviter les doublons.
  */
 function createRouteSignature(it) {
   if (!it) return 'null';
   
-  const segments = (it.summarySegments || [])
-    .map(s => s.name || s.routeShortName || 'X')
+  // Lignes utilisées dans l'ordre
+  const lines = (it.summarySegments || [])
+    .filter(s => s.type === 'BUS')
+    .map(s => s.name || 'X')
     .join('>');
   
-  const steps = (it.steps || [])
-    .filter(s => s.type === 'BUS')
-    .map(s => {
-      const route = s.routeShortName || s.route?.route_short_name || '';
-      const from = normalizeStopName(s.departureStop);
-      const to = normalizeStopName(s.arrivalStop);
-      return `${route}:${from}-${to}`;
-    })
-    .join('|');
+  // Arrêt de départ et d'arrivée finale uniquement
+  const busSteps = (it.steps || []).filter(s => s.type === 'BUS');
+  const firstBusStop = busSteps.length > 0 ? normalizeStopName(busSteps[0].departureStop) : '';
+  const lastBusStop = busSteps.length > 0 ? normalizeStopName(busSteps[busSteps.length - 1].arrivalStop) : '';
   
-  return `${it.type}::${segments}::${steps}`;
+  // Heure d'arrivée arrondie à 5 minutes (pour grouper les trajets très similaires)
+  const arrivalMinutes = parseTimeToMinutes(it.arrivalTime);
+  const roundedArrival = Math.floor(arrivalMinutes / 5) * 5;
+  
+  return `${it.type}::${lines}::${firstBusStop}→${lastBusStop}::arr${roundedArrival}`;
 }
 
 function normalizeStopName(name) {

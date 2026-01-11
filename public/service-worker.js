@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v324'; // ✅ v324: Fix polylines extraction pour tracé carte
+const CACHE_VERSION = 'v326'; // ✅ v326: Fix couleurs Leaflet (var CSS → hex) + déduplication + validation coords
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
