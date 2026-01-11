@@ -25,6 +25,17 @@ const logger = createLogger('gtfs-loader');
 const routeAttributes = new Map();
 let isLoaded = false;
 
+// Distance Haversine en mètres entre deux coordonnées
+export function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+    const toRad = (deg) => deg * Math.PI / 180;
+    const R = 6371000; // rayon terrestre en mètres
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
 function normalizeHexColor(input, fallback) {
     if (typeof input !== 'string') return fallback;
     let raw = input.trim();
@@ -155,7 +166,57 @@ export function getRouteAttributes(otpRouteId) {
     };
 }
 
+// Génère des transferts piétons bidirectionnels si absents (pour réparer un GTFS sans transfers.txt)
+export function patchMissingTransfers(data, maxDistanceMeters = 200) {
+    if (!data || !Array.isArray(data.stops)) {
+        return data;
+    }
+
+    const hasTransfers = Array.isArray(data.transfers) && data.transfers.length > 0;
+    if (hasTransfers) {
+        return data;
+    }
+
+    const stops = data.stops;
+    const transfers = [];
+
+    for (let i = 0; i < stops.length; i++) {
+        const from = stops[i];
+        if (!from?.stop_id || typeof from.stop_lat !== 'number' || typeof from.stop_lon !== 'number') continue;
+
+        for (let j = i + 1; j < stops.length; j++) {
+            const to = stops[j];
+            if (!to?.stop_id || typeof to.stop_lat !== 'number' || typeof to.stop_lon !== 'number') continue;
+
+            const distance = haversineDistanceMeters(from.stop_lat, from.stop_lon, to.stop_lat, to.stop_lon);
+            if (distance > maxDistanceMeters || distance === 0) continue;
+
+            const minTransferTime = Math.round(distance / 1.1 + 60); // vitesse piéton ~1.1 m/s + 60s buffer
+
+            transfers.push({
+                from_stop_id: from.stop_id,
+                to_stop_id: to.stop_id,
+                transfer_type: 2,
+                min_transfer_time: minTransferTime,
+            });
+
+            transfers.push({
+                from_stop_id: to.stop_id,
+                to_stop_id: from.stop_id,
+                transfer_type: 2,
+                min_transfer_time: minTransferTime,
+            });
+        }
+    }
+
+    data.transfers = transfers;
+    console.log(`🧭 GTFS patch: ${transfers.length} transferts générés (rayon ${maxDistanceMeters}m)`);
+    return data;
+}
+
 export default {
     loadRouteAttributes,
-    getRouteAttributes
+    getRouteAttributes,
+    patchMissingTransfers,
+    haversineDistanceMeters
 };

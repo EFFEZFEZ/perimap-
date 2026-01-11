@@ -17,6 +17,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { createLogger } from '../utils/logger.js';
 import { PathfindingEngine } from '../core/pathfinding/index.js';
+import { patchMissingTransfers } from '../utils/gtfsLoader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -128,6 +129,9 @@ async function loadGtfsData() {
     arrival_time: parseGtfsTime(st.arrival_time),
     departure_time: parseGtfsTime(st.departure_time)
   }));
+
+  // Générer transfers.txt à la volée si absent pour débloquer les correspondances piétonnes
+  patchMissingTransfers(gtfsData, 200);
 
   return gtfsData;
 }
@@ -338,8 +342,6 @@ export async function planItineraryNative(params) {
           message: 'Aucun itinéraire trouvé'
         }
       };
-      // Mettre en cache les résultats vides aussi (évite recalcul inutile)
-      setCachedResult(cacheKey, emptyResult);
       return emptyResult;
     }
 

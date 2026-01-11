@@ -410,6 +410,7 @@ export class PathfindingEngine {
    * Classe les itinéraires par qualité
    * Priorise fortement les trajets avec moins de correspondances
    * ET assure une diversité des lignes utilisées
+   * FILTRE les itinéraires absurdes (durée > 2x le meilleur)
    */
   rankItineraries(itineraries) {
     // D'abord dédupliquer les itinéraires similaires
@@ -440,10 +441,26 @@ export class PathfindingEngine {
       return scoreA - scoreB;
     });
 
+    // 🛡️ FILTRE QUALITÉ : Rejeter les itinéraires absurdes
+    // Un itinéraire avec durée > 2x le meilleur est clairement mauvais
+    // Exception: si le meilleur est très court (<15min), on accepte jusqu'à +30min
+    const bestDuration = sorted[0]?.totalDuration || Infinity;
+    const maxAcceptableDuration = bestDuration < 900 
+      ? bestDuration + 1800  // Pour trajets courts: +30min max
+      : bestDuration * 2;     // Pour trajets longs: max 2x la durée
+    
+    const filtered = sorted.filter(it => {
+      if (it.totalDuration > maxAcceptableDuration) {
+        console.log(`🚫 Itinéraire rejeté: ${Math.round(it.totalDuration/60)}min > max ${Math.round(maxAcceptableDuration/60)}min`);
+        return false;
+      }
+      return true;
+    });
+
     // Assurer la diversité des lignes : garder au moins un trajet par première ligne utilisée
-    // Cela permet de proposer des alternatives même si elles sont plus lentes
+    // MAIS seulement si l'itinéraire est acceptable (pas 10h de marche!)
     const byFirstRoute = new Map(); // firstRouteName -> [itineraries]
-    for (const it of sorted) {
+    for (const it of filtered) {
       const transitLegs = it.legs.filter(l => l.type === 'transit');
       const firstRoute = transitLegs[0]?.routeName || 'unknown';
       if (!byFirstRoute.has(firstRoute)) {
@@ -470,7 +487,7 @@ export class PathfindingEngine {
     }
 
     // Ensuite ajouter les autres triés par score (sans doublons)
-    for (const it of sorted) {
+    for (const it of filtered) {
       const key = it.legs.filter(l => l.type === 'transit')
         .map(l => `${l.routeName}:${l.from?.stopId}`).join('|');
       if (!includedKeys.has(key)) {
