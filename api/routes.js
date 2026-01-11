@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2026 Périmap. Tous droits réservés.
- * API Routes - Proxy vers Google Routes API
+ * API Routes - Optimisé pour < 500ms
  */
 
 export const config = {
     runtime: 'edge',
-    regions: ['cdg1'],
+    regions: ['cdg1'], // Paris - proche utilisateurs
 };
 
 export default async function handler(request) {
@@ -107,8 +107,12 @@ export default async function handler(request) {
             }
         }
 
-        const fieldMask = request.headers.get('x-goog-fieldmask') 
-            || 'routes.duration,routes.distanceMeters,routes.polyline,routes.legs.steps,routes.legs.polyline';
+        // FieldMask optimisé - minimum requis pour l'affichage
+        // Transit: polyline + steps avec transit details
+        const travelMode = googleBody.travelMode || 'TRANSIT';
+        const fieldMask = travelMode === 'TRANSIT'
+            ? 'routes.duration,routes.polyline.encodedPolyline,routes.legs.steps.transitDetails,routes.legs.steps.travelMode,routes.legs.steps.polyline.encodedPolyline'
+            : 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline';
 
         const response = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
             method: 'POST',

@@ -2217,20 +2217,33 @@ function prefillOtherPlanner(sourceFormName, sourceElements) {
     targetElements.popoverSubmitBtn.textContent = (sourceActiveTab === 'arriver') ? "Valider l'arrivée" : 'Partir maintenant';
 }
 
+// Debounce pour l'autocomplétion
+let autocompleteTimeout = null;
+const AUTOCOMPLETE_DEBOUNCE_MS = 150;
+
 async function handleAutocomplete(query, container, onSelect) {
-    if (query.length < 3) {
+    // Annuler la requête précédente
+    if (autocompleteTimeout) {
+        clearTimeout(autocompleteTimeout);
+    }
+    
+    if (query.length < 2) {
         container.innerHTML = '';
         container.style.display = 'none';
         onSelect(null); 
         return;
     }
-    try {
-        const suggestions = await apiManager.getPlaceAutocomplete(query);
-        renderSuggestions(suggestions, container, onSelect);
-    } catch (error) {
-        console.warn("Erreur d'autocomplétion:", error);
-        container.style.display = 'none';
-    }
+    
+    // Debounce: attendre que l'utilisateur arrête de taper
+    autocompleteTimeout = setTimeout(async () => {
+        try {
+            const suggestions = await apiManager.getPlaceAutocomplete(query);
+            renderSuggestions(suggestions, container, onSelect);
+        } catch (error) {
+            console.warn("Erreur d'autocomplétion:", error);
+            container.style.display = 'none';
+        }
+    }, AUTOCOMPLETE_DEBOUNCE_MS);
 }
 
 function renderSuggestions(suggestions, container, onSelect) {
