@@ -181,6 +181,12 @@ export class RaptorAlgorithm {
     tauStar.set(originStopId, departureTime);
     marked.add(originStopId);
 
+    // NE PAS propager les footpaths au round 0
+    // Cela force l'utilisation de l'arrêt de départ spécifié et évite que RAPTOR
+    // "saute" vers des arrêts plus éloignés avec d'autres lignes.
+    // La propagation footpath pour accéder aux arrêts voisins sera faite par
+    // computeItineraries qui teste plusieurs arrêts de départ.
+
     // Rounds RAPTOR
     for (let k = 1; k <= maxRounds; k++) {
       // Copier les valeurs du round précédent
@@ -203,7 +209,7 @@ export class RaptorAlgorithm {
       });
 
       // Transferts à pied (implémentés)
-      this.processFootpaths(k, tau, tauStar, marked);
+      this.processFootpaths(k, tau, tauStar, marked, journeyPointer);
 
       // Log désactivé pour performance
       // console.log(`  Round ${k} terminé: ${marked.size} nouveaux arrêts améliorés`);
@@ -324,10 +330,14 @@ export class RaptorAlgorithm {
    * @param {Array} tau
    * @param {Map} tauStar
    * @param {Set} marked
+   * @param {Map} journeyPointer - Pointeurs pour reconstruction des trajets
    */
-  processFootpaths(k, tau, tauStar, marked) {
-    // Pour chaque arrêt marqué au round précédent, on tente d'améliorer les arrêts voisins à pied
-    const { maxWalkDistance, walkSpeed, minTransferTime } = this.options;
+  processFootpaths(k, tau, tauStar, marked, journeyPointer) {
+    // Pour les transferts à pied ENTRE arrêts (correspondances), on utilise une distance plus courte
+    // que pour la marche initiale vers un arrêt, pour éviter que l'algorithme "saute" 
+    // vers des arrêts trop éloignés au lieu d'utiliser les lignes disponibles
+    const footpathMaxDistance = Math.min(this.options.maxWalkDistance, 400); // Max 400m pour les correspondances
+    const { walkSpeed, minTransferTime } = this.options;
     const newlyMarked = new Set();
     this.graph.stops.forEach((fromStop, fromIdx) => {
       const arrivalTime = tau[k][fromIdx];
@@ -338,7 +348,7 @@ export class RaptorAlgorithm {
         if (fromStop.stop_id === toStop.stop_id) return;
         // Distance à vol d'oiseau
         const distance = this.haversineDistance(fromStop.stop_lat, fromStop.stop_lon, toStop.stop_lat, toStop.stop_lon);
-        if (distance > maxWalkDistance) return;
+        if (distance > footpathMaxDistance) return;
         // Temps de marche
         const walkTime = Math.ceil(distance / walkSpeed);
         // On applique minTransferTime pour le transfert à pied
@@ -349,6 +359,16 @@ export class RaptorAlgorithm {
           if (newArrival < tauStar.get(toStop.stop_id)) {
             tauStar.set(toStop.stop_id, newArrival);
             newlyMarked.add(toStop.stop_id);
+            
+            // Sauvegarder le transfert à pied pour la reconstruction
+            journeyPointer.set(`${toStop.stop_id}_${k}_footpath`, {
+              round: k,
+              type: 'footpath',
+              fromStop: fromStop.stop_id,
+              toStop: toStop.stop_id,
+              walkTime: transferTime,
+              arrivalTime: newArrival,
+            });
           }
         }
       });
@@ -377,35 +397,89 @@ export class RaptorAlgorithm {
         departureTime: null,
         arrivalTime: tau[k][destIndex],
         duration: 0,
-        transfers: k - 1,
+        transfers: 0,
       };
 
       // Reconstruire le chemin en remontant
       let currentStop = destStopId;
       let currentRound = k;
+      let maxIterations = 20; // Sécurité contre boucle infinie
 
-      while (currentRound > 0) {
-        const pointer = journeyPointer.get(`${currentStop}_${currentRound}`);
-        if (!pointer) break;
+      while (currentRound > 0 && maxIterations-- > 0) {
+        // Chercher d'abord un transit leg pour ce round
+        const transitPointer = journeyPointer.get(`${currentStop}_${currentRound}`);
+        
+        if (transitPointer) {
+          // On a un leg de transport en commun
+          journey.legs.unshift({
+            type: 'transit',
+            tripId: transitPointer.tripId,
+            routeId: transitPointer.routeId,
+            fromStop: transitPointer.boardStop,
+            toStop: transitPointer.alightStop,
+            departureTime: transitPointer.boardTime,
+            arrivalTime: transitPointer.alightTime,
+          });
 
-        journey.legs.unshift({
-          type: 'transit',
-          tripId: pointer.tripId,
-          routeId: pointer.routeId,
-          fromStop: pointer.boardStop,
-          toStop: pointer.alightStop,
-          departureTime: pointer.boardTime,
-          arrivalTime: pointer.alightTime,
-        });
+          currentStop = transitPointer.boardStop;
+          currentRound--;
+          continue;
+        }
 
-        currentStop = pointer.boardStop;
+        // Sinon, chercher un footpath pour ce round
+        const footpathPointer = journeyPointer.get(`${currentStop}_${currentRound}_footpath`);
+        
+        if (footpathPointer) {
+          // On a un transfert à pied
+          journey.legs.unshift({
+            type: 'walk',
+            fromStop: footpathPointer.fromStop,
+            toStop: footpathPointer.toStop,
+            walkTime: footpathPointer.walkTime,
+            arrivalTime: footpathPointer.arrivalTime,
+          });
+
+          currentStop = footpathPointer.fromStop;
+          // On ne décrémente pas currentRound car le footpath est dans le même round
+          // On doit chercher le transit qui nous a amené à fromStop dans ce même round
+          
+          // Chercher le transit pour fromStop dans ce round
+          const prevTransit = journeyPointer.get(`${footpathPointer.fromStop}_${currentRound}`);
+          if (prevTransit) {
+            journey.legs.unshift({
+              type: 'transit',
+              tripId: prevTransit.tripId,
+              routeId: prevTransit.routeId,
+              fromStop: prevTransit.boardStop,
+              toStop: prevTransit.alightStop,
+              departureTime: prevTransit.boardTime,
+              arrivalTime: prevTransit.alightTime,
+            });
+            currentStop = prevTransit.boardStop;
+            currentRound--;
+          } else {
+            // Pas de transit, on essaie le round précédent
+            currentRound--;
+          }
+          continue;
+        }
+
+        // Ni transit ni footpath trouvé, essayer le round précédent
         currentRound--;
       }
 
       if (journey.legs.length > 0) {
-        journey.departureTime = journey.legs[0].departureTime;
+        journey.departureTime = journey.legs[0].departureTime || journey.legs[0].arrivalTime - (journey.legs[0].walkTime || 0);
         journey.duration = journey.arrivalTime - journey.departureTime;
-        journeys.push(journey);
+        // Compter les vrais transferts (nombre de legs transit - 1)
+        const transitLegs = journey.legs.filter(l => l.type === 'transit').length;
+        journey.transfers = Math.max(0, transitLegs - 1);
+        
+        // Ne garder que les journeys avec au moins 1 leg de transport en commun
+        // Les trajets 100% à pied sont gérés séparément
+        if (transitLegs > 0) {
+          journeys.push(journey);
+        }
       }
     }
 

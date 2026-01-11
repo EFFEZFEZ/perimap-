@@ -90,6 +90,12 @@ export class PathfindingEngine {
     const dateStr = this.formatGtfsDate(departureTime);
     const timeSeconds = this.timeToSeconds(departureTime);
 
+    // Calculer la distance directe entre origine et destination
+    const directDistance = this.haversineDistance(origin.lat, origin.lon, destination.lat, destination.lon);
+    const isShortDistance = directDistance < 500; // Moins de 500m
+    const minBusResults = isShortDistance ? 1 : 3; // Minimum 3 bus pour distances normales, 1 pour courtes
+    console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
+
     // 1. Trouver les arrêts proches de l'origine et de la destination
     const originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     const destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
@@ -215,9 +221,10 @@ export class PathfindingEngine {
         }
       }
 
-      // Early exit si on a assez de résultats
-      if (results.length >= 3) {
-        console.log(`✅ ${results.length} itinéraires trouvés, arrêt anticipé`);
+      // Early exit si on a assez de résultats (minimum requis de bus)
+      const busResults = results.filter(r => r.type === 'transit').length;
+      if (busResults >= minBusResults) {
+        console.log(`✅ ${busResults} itinéraires bus trouvés (min: ${minBusResults}), arrêt anticipé`);
         break;
       }
     }
@@ -255,6 +262,40 @@ export class PathfindingEngine {
 
     // Segments de transport
     for (const leg of journey.legs) {
+      // Gérer les legs de marche (footpaths entre arrêts)
+      if (leg.type === 'walk') {
+        const fromStop = this.graph.stopsById.get(leg.fromStop);
+        const toStop = this.graph.stopsById.get(leg.toStop);
+        const walkDuration = leg.walkTime || 120; // Durée de marche en secondes
+        
+        console.log(`    📍 Walk: ${fromStop?.stop_name || leg.fromStop} → ${toStop?.stop_name || leg.toStop}, dur=${walkDuration}s`);
+        
+        // Ajouter le leg de marche entre arrêts
+        if (fromStop && toStop) {
+          legs.push({
+            type: 'walk',
+            from: {
+              lat: fromStop.stop_lat,
+              lon: fromStop.stop_lon,
+              name: fromStop.stop_name,
+              stopId: leg.fromStop,
+            },
+            to: {
+              lat: toStop.stop_lat,
+              lon: toStop.stop_lon,
+              name: toStop.stop_name,
+              stopId: leg.toStop,
+            },
+            distance: this.haversineDistance(fromStop.stop_lat, fromStop.stop_lon, toStop.stop_lat, toStop.stop_lon),
+            duration: walkDuration,
+            departureTime: currentTime.toISOString(),
+            arrivalTime: new Date(currentTime.getTime() + walkDuration * 1000).toISOString(),
+          });
+          currentTime = new Date(currentTime.getTime() + walkDuration * 1000);
+        }
+        continue;
+      }
+
       const fromStop = this.graph.stopsById.get(leg.fromStop);
       const toStop = this.graph.stopsById.get(leg.toStop);
       const route = this.graph.routesById.get(leg.routeId);
@@ -368,6 +409,7 @@ export class PathfindingEngine {
   /**
    * Classe les itinéraires par qualité
    * Priorise fortement les trajets avec moins de correspondances
+   * ET assure une diversité des lignes utilisées
    */
   rankItineraries(itineraries) {
     // D'abord dédupliquer les itinéraires similaires
@@ -381,7 +423,8 @@ export class PathfindingEngine {
       return true;
     });
 
-    return unique.sort((a, b) => {
+    // Trier par score (durée + pénalité correspondances)
+    const sorted = unique.sort((a, b) => {
       // 1. Prioriser FORTEMENT moins de correspondances (pénalité de 20 min par correspondance)
       const transferPenalty = 1200; // 20 minutes
       const scoreA = a.totalDuration + a.transfers * transferPenalty;
@@ -396,6 +439,47 @@ export class PathfindingEngine {
 
       return scoreA - scoreB;
     });
+
+    // Assurer la diversité des lignes : garder au moins un trajet par première ligne utilisée
+    // Cela permet de proposer des alternatives même si elles sont plus lentes
+    const byFirstRoute = new Map(); // firstRouteName -> [itineraries]
+    for (const it of sorted) {
+      const transitLegs = it.legs.filter(l => l.type === 'transit');
+      const firstRoute = transitLegs[0]?.routeName || 'unknown';
+      if (!byFirstRoute.has(firstRoute)) {
+        byFirstRoute.set(firstRoute, []);
+      }
+      byFirstRoute.get(firstRoute).push(it);
+    }
+
+    // Prendre le meilleur de chaque première ligne + les meilleurs globaux
+    const diversified = [];
+    const includedKeys = new Set();
+
+    // D'abord ajouter le meilleur de chaque première ligne
+    for (const [route, routeItineraries] of byFirstRoute) {
+      if (routeItineraries.length > 0) {
+        const best = routeItineraries[0];
+        const key = best.legs.filter(l => l.type === 'transit')
+          .map(l => `${l.routeName}:${l.from?.stopId}`).join('|');
+        if (!includedKeys.has(key)) {
+          diversified.push(best);
+          includedKeys.add(key);
+        }
+      }
+    }
+
+    // Ensuite ajouter les autres triés par score (sans doublons)
+    for (const it of sorted) {
+      const key = it.legs.filter(l => l.type === 'transit')
+        .map(l => `${l.routeName}:${l.from?.stopId}`).join('|');
+      if (!includedKeys.has(key)) {
+        diversified.push(it);
+        includedKeys.add(key);
+      }
+    }
+
+    return diversified;
   }
 
   /**
@@ -546,6 +630,24 @@ export class PathfindingEngine {
     result.setHours(0, 0, 0, 0);
     result.setSeconds(seconds);
     return result;
+  }
+
+  /**
+   * Calcule la distance Haversine entre deux points (en mètres)
+   */
+  haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Rayon de la Terre en mètres
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c;
   }
 
   /**
