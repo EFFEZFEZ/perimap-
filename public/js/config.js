@@ -17,60 +17,29 @@
 
 /**
  * Détermine le mode backend à utiliser
- * ✅ V310: FORCÉ SUR ORACLE (RAPTOR) - Google désactivé
- * @returns {'vercel' | 'otp' | 'oracle' | 'google'} Le mode backend
+ * @returns {'vercel' | 'google'} Le mode backend
  */
 export function getBackendMode() {
-  // ✅ V310: FORCER LE MODE ORACLE (Oracle Cloud backend)
-  console.log('[Config] 🔧 getBackendMode() appelé');
-  console.log('[Config] 📍 URL actuelle:', window.location.href);
-  console.log('[Config] 📍 Origin:', window.location.origin);
-  console.log('[Config] 📍 Hostname:', window.location.hostname);
-  console.log('[Config] 📍 Port:', window.location.port);
-  
-  // Forcer Oracle (backend Oracle Cloud). Le moteur côté serveur est RAPTOR natif.
-  console.log('[Config] ✅ MODE FORCÉ: oracle (Oracle Cloud / RAPTOR)');
-  return 'oracle';
-  
-  /* DÉSACTIVÉ - Code original commenté
-  // 1. Configuration explicite via window.__APP_CONFIG
-  if (window.__APP_CONFIG?.backendMode) {
-    return window.__APP_CONFIG.backendMode;
-  }
-  
-  // 2. Détection automatique basée sur l'URL du serveur
-  // Si on est sur localhost:3000 (serveur Express), utiliser OTP
-  if (window.location.port === '3000' && window.location.hostname === 'localhost') {
-    return 'otp';
-  }
-  
-  // 3. Si clé Google présente, mode dev direct
-  if (window.__APP_CONFIG?.googleApiKey) {
-    return 'google';
-  }
-  
-  // 4. Par défaut: proxy Vercel (production)
+  // Mode Vercel : utilise les proxies Vercel Edge → Google APIs
+  // OTP/Oracle désactivé temporairement
   return 'vercel';
-  */
 }
 
 /**
  * Indique si le mode proxy est activé (clé API côté serveur)
- * @returns {boolean} true si on utilise les proxies Vercel ou OTP
+ * @returns {boolean} true si on utilise les proxies Vercel
  */
 export function useServerProxy() {
   const mode = getBackendMode();
-  // En mode oracle (backend local/Oracle Cloud), on appelle directement l'API locale → pas de proxy
-  return mode === 'vercel' || mode === 'otp';
+  return mode === 'vercel';
 }
 
 /**
- * Indique si on utilise le backend OTP/Photon
- * @returns {boolean} true si on utilise le serveur Express avec OTP
+ * Indique si on utilise le backend OTP/Photon (désactivé)
+ * @returns {boolean} false - OTP désactivé
  */
 export function useOtpBackend() {
-  const mode = getBackendMode();
-  return mode === 'otp' || mode === 'oracle';
+  return false;
 }
 
 /**
@@ -113,69 +82,32 @@ export function getAdminToken() {
  */
 export const API_ENDPOINTS = {
   routes: '/api/routes',
-  googleRoutes: '/api/google-routes',
   places: '/api/places',
   geocode: '/api/geocode'
 };
 
 /**
- * URLs des APIs du serveur Express (OTP/Photon)
- * ✅ V310: /api/places supporte ?q= et ?input=
- */
-export const OTP_API_ENDPOINTS = {
-  routes: '/api/routes',
-  places: '/api/places',
-  reverse: '/api/places/reverse',
-  realtime: '/api/realtime'
-};
-
-/**
- * Retourne les endpoints appropriés selon le mode backend
- * ✅ V310: LOGS DÉTAILLÉS
- * @returns {Object} Endpoints API
+ * Retourne les endpoints appropriés
+ * @returns {Object} Endpoints API (Google via Vercel)
  */
 export function getApiEndpoints() {
-  const useOtp = useOtpBackend();
-  console.log('[Config] 🔧 getApiEndpoints() - useOtpBackend():', useOtp);
-  if (useOtp) {
-    console.log('[Config] ✅ Utilisation OTP_API_ENDPOINTS:', JSON.stringify(OTP_API_ENDPOINTS));
-    return OTP_API_ENDPOINTS;
-  }
-  console.log('[Config] ⚠️ Utilisation API_ENDPOINTS (Google):', JSON.stringify(API_ENDPOINTS));
   return API_ENDPOINTS;
 }
 
 /**
  * Retourne la configuration globale de l'application
- * ✅ V310: LOGS DÉTAILLÉS
- * @returns {Object} Configuration avec googleApiKey, adminToken, etc.
+ * @returns {Object} Configuration
  */
 export function getAppConfig() {
-  console.log('[Config] ═══════════════════════════════════════');
-  console.log('[Config] 🔧 getAppConfig() appelé');
-  
-  const mode = getBackendMode();
-  const useProxy = useServerProxy();
-  const useOtp = useOtpBackend();
-  const endpoints = getApiEndpoints();
-  
-  console.log('[Config] 📦 Résultats:');
-  console.log('[Config]   - backendMode:', mode);
-  console.log('[Config]   - useProxy:', useProxy);
-  console.log('[Config]   - useOtp:', useOtp);
-  console.log('[Config]   - apiEndpoints:', JSON.stringify(endpoints));
-  console.log('[Config] ═══════════════════════════════════════');
-  
   return {
     googleApiKey: getGoogleApiKey(),
     adminToken: getAdminToken(),
-    useProxy: useProxy,
-    useOtp: useOtp,
-    backendMode: mode,
-    apiEndpoints: endpoints,
+    useProxy: true,
+    useOtp: false,
+    backendMode: 'vercel',
+    apiEndpoints: API_ENDPOINTS,
     arrivalPageSize: 6,
     minBusItineraries: 3,
     maxBottomSheetLevels: 3
   };
 }
-

@@ -1060,12 +1060,9 @@ function initBottomSheetControls() {
 }
 
 function setupStaticEventListeners() {
-    // Ne chargez Google Maps que si une clé est présente et que le backend n'est pas forcé sur Oracle
-    const shouldLoadGoogle = Boolean(APP_CONFIG.googleApiKey) && apiManager?.backendMode !== 'oracle';
-    if (shouldLoadGoogle) {
+    // Charger Google Maps si une clé est présente (mode dev)
+    if (APP_CONFIG.googleApiKey) {
         try { apiManager.loadGoogleMapsAPI(); } catch (error) { console.error("Impossible de charger l'API Google:", error); }
-    } else {
-        console.log('Google Maps non chargé (pas de clé ou mode oracle actif)');
     }
     populateTimeSelects();
 
@@ -1684,7 +1681,7 @@ async function executeItinerarySearch(source, sourceElements) {
         const fromLabel = sourceElements.fromInput?.value || '';
         const toLabel = sourceElements.toInput?.value || '';
 
-        // 🚀 Routage optimisé - backend Oracle (RAPTOR). Router GTFS local reste désactivé (ENABLE_GTFS_ROUTER=false)
+        // Routage via Google Routes API
         const routingStart = performance.now();
         
         let hybridItins = [];
@@ -1703,7 +1700,7 @@ async function executeItinerarySearch(source, sourceElements) {
             }
         }
 
-        // Backend principal (Oracle/RAPTOR via /api/routes)
+        // Backend principal (Google Routes via Vercel proxy)
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
             .catch(e => { console.error('Erreur routage principal:', e); return null; });
         

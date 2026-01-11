@@ -38,31 +38,13 @@ export class ApiManager {
         this.apiKey = apiKey;
         this.sessionToken = null;
         
-        // ✅ V310: LOGS DÉTAILLÉS POUR DEBUG
-        console.log('[ApiManager] ═══════════════════════════════════════');
-        console.log('[ApiManager] 🚀 Initialisation ApiManager');
-        console.log('[ApiManager] 📍 apiKey fournie:', apiKey ? '***' + apiKey.slice(-4) : 'AUCUNE');
-        
-        // ✅ V230: Configuration multi-backend
+        // Configuration
         const config = getAppConfig();
-        
-        console.log('[ApiManager] 📦 Configuration reçue de getAppConfig():');
-        console.log('[ApiManager]   - useProxy:', config.useProxy);
-        console.log('[ApiManager]   - useOtp:', config.useOtp);
-        console.log('[ApiManager]   - backendMode:', config.backendMode);
-        console.log('[ApiManager]   - apiEndpoints:', JSON.stringify(config.apiEndpoints));
         
         this.useProxy = config.useProxy;
         this.useOtp = config.useOtp || false;
         this.backendMode = config.backendMode || 'vercel';
         this.apiEndpoints = config.apiEndpoints || getApiEndpoints();
-        
-        console.log('[ApiManager] ✅ Valeurs finales:');
-        console.log('[ApiManager]   - this.useProxy:', this.useProxy);
-        console.log('[ApiManager]   - this.useOtp:', this.useOtp);
-        console.log('[ApiManager]   - this.backendMode:', this.backendMode);
-        console.log('[ApiManager]   - this.apiEndpoints:', JSON.stringify(this.apiEndpoints));
-        console.log('[ApiManager] ═══════════════════════════════════════');
 
         // Zone du Grand Périgueux / Dordogne
         this.perigueuxBounds = {
@@ -274,29 +256,18 @@ export class ApiManager {
 
     /**
      * Récupère les suggestions d'autocomplétion
-     * ✅ V310: LOGS DÉTAILLÉS POUR DEBUG ORACLE CLOUD
-     * ✅ V230: Support OTP/Photon backend
      * ✅ V181: Utilise le proxy Vercel /api/places en production
      * ✅ V48: Intègre les alias de lieux (Campus = Pôle Universitaire Grenadière)
      */
     async getPlaceAutocomplete(inputString) {
-        console.log('[ApiManager] ═══════════════════════════════════════');
-        console.log('[ApiManager] 🔍 getPlaceAutocomplete() appelé');
-        console.log('[ApiManager]   - inputString:', inputString);
-        console.log('[ApiManager]   - this.useOtp:', this.useOtp);
-        console.log('[ApiManager]   - this.useProxy:', this.useProxy);
-        console.log('[ApiManager]   - this.backendMode:', this.backendMode);
-        console.log('[ApiManager]   - this.apiEndpoints.places:', this.apiEndpoints.places);
-        
         // ✅ V48: Vérifier si l'entrée correspond à un alias
         const aliasMatch = this._checkPlaceAlias(inputString);
         
         try {
             let results = [];
             
-            // ✅ V230: Mode OTP - utiliser l'endpoint Photon du serveur Express
+            // Mode OTP (désactivé)
             if (this.useOtp) {
-                console.log("[ApiManager] 🌐 Mode Oracle activé - Appel backend Oracle Cloud (RAPTOR)");
                 
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
                 url.searchParams.set('q', inputString);
@@ -304,46 +275,26 @@ export class ApiManager {
                 url.searchParams.set('lon', this.perigueuxCenter.lng);
                 url.searchParams.set('limit', '10');
                 
-                console.log('[ApiManager] 📡 URL construite:', url.toString());
-                console.log('[ApiManager] ⏳ Envoi de la requête fetch...');
-                
-                const startTime = Date.now();
                 const response = await fetch(url.toString());
-                const elapsed = Date.now() - startTime;
-                
-                console.log('[ApiManager] 📥 Réponse reçue en', elapsed, 'ms');
-                console.log('[ApiManager]   - response.ok:', response.ok);
-                console.log('[ApiManager]   - response.status:', response.status);
-                console.log('[ApiManager]   - response.statusText:', response.statusText);
-                console.log('[ApiManager]   - Content-Type:', response.headers.get('content-type'));
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('[ApiManager] ❌ Erreur HTTP:', response.status);
-                    console.error('[ApiManager] ❌ Corps de l\'erreur:', errorText);
                     throw new Error(`Erreur OTP: ${response.status} - ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log('[ApiManager] 📦 Données JSON reçues:', JSON.stringify(data).substring(0, 500));
-                console.log('[ApiManager]   - Nombre de suggestions:', data.suggestions?.length || 0);
                 
-                // ✅ V230: Format OTP: { suggestions: [{lat, lon, description, city, type}] }
+                // Format OTP: { suggestions: [{lat, lon, description, city, type}] }
                 results = (data.suggestions || []).map(s => ({
                     description: s.description + (s.city ? `, ${s.city}` : ''),
-                    // Pour OTP, on utilise les coordonnées directement (pas de placeId Google)
                     placeId: null,
                     coordinates: { lat: s.lat, lng: s.lon },
                     type: s.type || 'place',
                     source: s.source || 'photon'
                 }));
-                
-                console.log(`[ApiManager] ✅ ${results.length} suggestions mappées (OTP/Photon)`);
-                console.log('[ApiManager] ═══════════════════════════════════════');
             }
-            // ✅ V181: Mode proxy Vercel - utiliser Google Places
+            // Mode proxy Vercel - utiliser Google Places
             else if (this.useProxy) {
-                console.log("🔍 Recherche autocomplétion (proxy):", inputString);
                 
                 const url = new URL(this.apiEndpoints.places, window.location.origin);
                 url.searchParams.set('input', inputString);
@@ -1367,11 +1318,8 @@ export class ApiManager {
     }
 
     async _tryEmergencyGoogleFallback({ originCoords, destCoords, otpMode }) {
-        // En mode oracle/RAPTOR, on ne mélange pas avec Google → pas de fallback
-        if (this.backendMode === 'oracle') return null;
-
         // On ne fallback que si on a un proxy serveur disponible.
-        const googleEndpoint = this.apiEndpoints?.googleRoutes || '/api/google-routes';
+        const googleEndpoint = this.apiEndpoints?.routes || '/api/routes';
         if (!this.useProxy) return null;
 
         const travelMode = String(otpMode || '').toUpperCase().includes('BICYCLE')
