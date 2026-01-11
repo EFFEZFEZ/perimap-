@@ -286,17 +286,6 @@ router.get('/health', async (_req, res) => {
 });
 
 // Debug helper: exécute un calcul d'itinéraire fixe (contournement du parsing JSON)
-router.get('/debug-run', async (_req, res) => {
-  try {
-    const origin = { lat: 48.8566, lon: 2.3522 };
-    const destination = { lat: 48.8584, lon: 2.2945 };
-    const result = await planItineraryNative({ origin, destination, time: new Date(), mode: 'TRANSIT' });
-    return res.json({ ok: true, result });
-  } catch (error) {
-    return res.status(500).json({ ok: false, error: error.message, stack: error.stack });
-  }
-});
-
 // === HELPERS ===
 
 /**

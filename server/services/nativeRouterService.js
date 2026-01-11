@@ -36,7 +36,7 @@ const CACHE_MAX_SIZE = 500;
 const CACHE_TTL_MS = 120000; // 2 minutes
 const routeCache = new Map();
 
-function getCacheKey(origin, destination, time, mode) {
+function getCacheKey(origin, destination, time, mode, maxWalkDistance, maxTransfers) {
   // Arrondir les coordonnées à 4 décimales (~11m de précision)
   const oLat = origin.lat.toFixed(4);
   const oLon = origin.lon.toFixed(4);
@@ -44,7 +44,10 @@ function getCacheKey(origin, destination, time, mode) {
   const dLon = destination.lon.toFixed(4);
   // Arrondir le temps à 5 minutes
   const timeSlot = Math.floor(new Date(time).getTime() / 300000);
-  return `${oLat},${oLon}|${dLat},${dLon}|${timeSlot}|${mode}`;
+  // Inclure les contraintes utilisateurs pour éviter la pollution du cache
+  const walk = Math.max(0, Math.round(maxWalkDistance || 0));
+  const transfers = Number.isFinite(maxTransfers) ? Math.max(0, Math.round(maxTransfers)) : 0;
+  return `${oLat},${oLon}|${dLat},${dLon}|${timeSlot}|${mode}|walk:${walk}|xfer:${transfers}`;
 }
 
 function getCachedResult(key) {
@@ -299,7 +302,7 @@ export async function planItineraryNative(params) {
 
   // Pour WALK ou BICYCLE, retourner un itinéraire direct
   if (mode === 'WALK' || mode === 'BICYCLE') {
-    return planDirectItinerary(origin, destination, mode);
+    return planDirectItinerary(origin, destination, mode, time);
   }
 
   // Parser le temps - s'assurer que c'est une Date valide
@@ -316,7 +319,7 @@ export async function planItineraryNative(params) {
   // ═══════════════════════════════════════════════════════════════════════
   // VÉRIFIER LE CACHE D'ABORD (OPTIMISATION VITESSE)
   // ═══════════════════════════════════════════════════════════════════════
-  const cacheKey = getCacheKey(origin, destination, departureTime, mode);
+  const cacheKey = getCacheKey(origin, destination, departureTime, mode, maxWalkDistance, maxTransfers);
   const cachedResult = getCachedResult(cacheKey);
   if (cachedResult) {
     logger.info(`⚡ Cache HIT: ${cacheKey.slice(0, 30)}...`);
@@ -419,7 +422,7 @@ function formatLeg(leg) {
 /**
  * Calcule un itinéraire direct (marche/vélo)
  */
-function planDirectItinerary(origin, destination, mode) {
+function planDirectItinerary(origin, destination, mode, requestedTime) {
   const distance = haversineDistance(
     origin.lat, origin.lon,
     destination.lat, destination.lon
@@ -428,8 +431,9 @@ function planDirectItinerary(origin, destination, mode) {
   const speed = mode === 'BICYCLE' ? 4.17 : 1.25; // m/s (15 km/h ou 4.5 km/h)
   const duration = Math.round(distance / speed);
 
-  const now = new Date();
-  const arrivalTime = new Date(now.getTime() + duration * 1000);
+  const departure = requestedTime ? new Date(requestedTime) : new Date();
+  const validDeparture = isNaN(departure.getTime()) ? new Date() : departure;
+  const arrivalTime = new Date(validDeparture.getTime() + duration * 1000);
 
   return {
     routes: [{
@@ -437,7 +441,7 @@ function planDirectItinerary(origin, destination, mode) {
       duration,
       walkDistance: mode === 'WALK' ? Math.round(distance) : 0,
       transfers: 0,
-      departureTime: now.toISOString(),
+      departureTime: validDeparture.toISOString(),
       arrivalTime: arrivalTime.toISOString(),
       legs: [{
         mode: mode.toUpperCase(),
@@ -445,7 +449,7 @@ function planDirectItinerary(origin, destination, mode) {
         to: { lat: destination.lat, lon: destination.lon },
         duration,
         distance: Math.round(distance),
-        departureTime: now.toISOString(),
+        departureTime: validDeparture.toISOString(),
         arrivalTime: arrivalTime.toISOString()
       }]
     }],

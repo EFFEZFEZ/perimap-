@@ -96,12 +96,11 @@ export class PathfindingEngine {
     const directDistance = this.haversineDistance(origin.lat, origin.lon, destination.lat, destination.lon);
     const isShortDistance = directDistance < 500; // Moins de 500m
     const minBusResults = isShortDistance ? 1 : 5; // Minimum 5 bus pour distances normales
-    console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
 
     // ════════════════════════════════════════════════════════════════════════
     // Clé unique pour le trip (combinaison des lignes utilisées et heures de départ)
     const SEARCH_OFFSETS = [0, 30, 60, 90]; // Moins d'offsets mais couvrant plus large (0, +30, +1h, +1h30)
-    const seenTrips = new Map(); // Pour dédupliquer les mêmes trips (TripId -> Result)
+    const seenTrips = new Map(); // Pour dédupliquer les mêmes trips (TripId -> {result, index})
     
     // ⚡ PARALLELISATION: Lancer toutes les recherches en même temps
     // Node.js est single-threaded, mais cela évite d'attendre séquentiellement les I/O si existants
@@ -122,24 +121,26 @@ export class PathfindingEngine {
         const transitLegs = result.legs.filter(l => l.type === 'transit');
         
         // Clé basée uniquement sur le PREMIER bus (TripId)
-        // Si on a déjà un itinéraire qui part avec ce bus, on ignore les variantes mineures
-        // sauf si l'arrivée est significativement plus tôt (> 5 min)
+        // Si on a déjà un itinéraire qui part avec ce bus, on garde celui qui arrive le plus tôt
         const firstLeg = transitLegs[0];
         if (!firstLeg) continue; // Walk only traité à part
 
         const firstTripKey = `${firstLeg.routeId}_${firstLeg.tripId}`;
-        
-        // Si on a déjà vu ce départ bus, on ne garde que le meilleur (celui qui arrive le plus tôt)
-        if (seenTrips.has(firstTripKey)) {
-          const existing = seenTrips.get(firstTripKey);
-          if (result.arrivalTime < existing.arrivalTime - 300000) { // 5 min mieux
-             // On remplace si nettement meilleur (rare)
-             // ici on simplifie: on garde le premier trouvé (souvent le meilleur car recherché cronologiquement)
+        const arrivalMs = new Date(result.arrivalTime).getTime();
+        const existing = seenTrips.get(firstTripKey);
+
+        if (existing) {
+          const existingArrival = new Date(existing.result.arrivalTime).getTime();
+          // Remplacer uniquement si nettement meilleur (>5 min) pour limiter les variantes
+          if (Number.isFinite(arrivalMs) && Number.isFinite(existingArrival) && arrivalMs < existingArrival - 300000) {
+            seenTrips.set(firstTripKey, { result, index: existing.index });
+            allResults[existing.index] = result;
           }
-          continue; // On saute ce doublon
+          continue; // On ne duplique pas la même première montée
         }
 
-        seenTrips.set(firstTripKey, result);
+        const stored = { result, index: allResults.length };
+        seenTrips.set(firstTripKey, stored);
         allResults.push(result);
       }
     }
@@ -239,7 +240,7 @@ export class PathfindingEngine {
     const tryLimits = [3, 5];
     const maxToCollect = Math.max(this.options.maxResults, 8);
     const startCompute = Date.now();
-    const MAX_COMPUTE_TIME_MS = 8000; // Timeout global de 8 secondes
+    const MAX_COMPUTE_TIME_MS = 2500; // Timeout global réduit pour respecter la cible de 2s
 
     for (const limit of tryLimits) {
       // Vérifier le timeout global
@@ -250,13 +251,10 @@ export class PathfindingEngine {
 
       const oLimit = Math.min(limit, originCandidates.length);
       const dLimit = Math.min(limit, destCandidates.length);
-      console.log(`🔍 Tentative RAPTOR: ${oLimit} x ${dLimit} combinaisons (top ${limit})`);
-
       for (const originStop of originCandidates.slice(0, oLimit)) {
         for (const destStop of destCandidates.slice(0, dLimit)) {
           // Timeout check
           if (Date.now() - startCompute > MAX_COMPUTE_TIME_MS) {
-            console.log(`⏱️ Timeout atteint, arrêt`);
             break;
           }
 
@@ -269,17 +267,6 @@ export class PathfindingEngine {
             adjustedDepartureTime,
             dateStr
           );
-
-          if (journeys.length > 0) {
-            console.log(`  ✅ ${originStop.stop.stop_name} → ${destStop.stop.stop_name}: ${journeys.length} itinéraire(s)`);
-            // Debug: afficher les legs du premier journey
-            const firstJ = journeys[0];
-            console.log(`    📋 Journey legs: ${firstJ.legs?.length || 0}, transfers: ${firstJ.transfers}`);
-            if (firstJ.legs?.length > 0) {
-              console.log(`    📍 Legs: ${firstJ.legs.map(l => `${l.fromStop}->${l.toStop}`).join(', ')}`);
-            }
-          }
-
           for (const journey of journeys) {
             const itinerary = this.buildItinerary(
               origin,
@@ -348,8 +335,6 @@ export class PathfindingEngine {
         const toStop = this.graph.stopsById.get(leg.toStop);
         const walkDuration = leg.walkTime || 120; // Durée de marche en secondes
         
-        console.log(`    📍 Walk: ${fromStop?.stop_name || leg.fromStop} → ${toStop?.stop_name || leg.toStop}, dur=${walkDuration}s`);
-        
         // Ajouter le leg de marche entre arrêts
         if (fromStop && toStop) {
           legs.push({
@@ -383,9 +368,6 @@ export class PathfindingEngine {
 
       const alightTimeSec = (Number.isFinite(leg.arrivalTime) ? leg.arrivalTime : leg.alightTime);
       const transitDurationSec = Math.max(0, alightTimeSec - leg.departureTime);
-
-      // Debug: log leg info
-      console.log(`    📍 Leg: ${fromStop?.stop_name || leg.fromStop} → ${toStop?.stop_name || leg.toStop}, route=${route?.route_short_name}, dur=${transitDurationSec}s`);
 
       // Attente éventuelle
       const legDepartureTime = this.secondsToDate(baseTime, leg.departureTime);
