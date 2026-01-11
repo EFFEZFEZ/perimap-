@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v314'; // ✅ v314: Forcer refresh bundle/worker après fixes OTP/RAPTOR
+const CACHE_VERSION = 'v315'; // ✅ v315: Force refresh global après correctifs polylines
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

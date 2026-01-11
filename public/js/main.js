@@ -3141,11 +3141,21 @@ async function ensureItineraryPolylines(itineraries) {
             if (!step || step.type !== 'BUS' || isWaitStep(step)) continue;
 
                 const hasLatLngs = Array.isArray(step?.polyline?.latLngs) && step.polyline.latLngs.length >= 2;
+                // V270: accepter davantage de formats d'encodage déjà présents sur le leg
+                const encodedCandidate = step?.polyline?.encodedPolyline
+                    || step?.polyline?.points
+                    || step?.legGeometry?.points
+                    || (typeof step?.polyline === 'string' ? step.polyline : null);
+
                 // Si on a déjà une polyline encodée, la décoder et sortir pour éviter les lignes droites
-                if (!hasLatLngs && step?.polyline?.encodedPolyline) {
-                    const decoded = decodePolyline(step.polyline.encodedPolyline) || [];
+                if (!hasLatLngs && encodedCandidate) {
+                    const decoded = decodePolyline(encodedCandidate) || [];
                     if (decoded.length >= 2) {
-                        step.polyline.latLngs = decoded.map(([lat, lon]) => [Number(lat), Number(lon)]).filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
+                        step.polyline = step.polyline || {};
+                        step.polyline.latLngs = decoded
+                            .map(([lat, lon]) => [Number(lat), Number(lon)])
+                            .filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon));
+                        step.polyline.encodedPolyline = step.polyline.encodedPolyline || encodedCandidate;
                         if (step.polyline.latLngs.length >= 2) {
                             continue;
                         }
