@@ -99,7 +99,7 @@ export class PathfindingEngine {
 
     // ════════════════════════════════════════════════════════════════════════
     // Clé unique pour le trip (combinaison des lignes utilisées et heures de départ)
-    const SEARCH_OFFSETS = [0, 30, 60]; // Fenêtre réduite pour limiter le temps de calcul
+    const SEARCH_OFFSETS = [0, 20, 40]; // Fenêtre encore réduite pour limiter le temps de calcul
     const seenTrips = new Map(); // Pour dédupliquer les mêmes trips (TripId -> {result, index})
     
     // ⚡ PARALLELISATION: Lancer toutes les recherches en même temps
@@ -194,7 +194,7 @@ export class PathfindingEngine {
     
     // ⚡ OPTIMISATION: Limiter drastiquement les candidats (Max 5)
     // C'est ici qu'on gagne la vitesse. Inutile de tester 120 arrêts.
-    const MAX_CANDIDATES = 4; 
+    const MAX_CANDIDATES = 3; 
     
     let originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     let destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
@@ -239,9 +239,9 @@ export class PathfindingEngine {
     // OPTIMISATION V2: réduire drastiquement les combinaisons pour la performance
     // On limite à 5 arrêts max de chaque côté (25 combinaisons max au lieu de 625)
     const tryLimits = [3];
-    const maxToCollect = Math.max(this.options.maxResults, 6);
+    const maxToCollect = Math.max(this.options.maxResults, 5);
     const startCompute = Date.now();
-    const MAX_COMPUTE_TIME_MS = 1500; // Timeout global resserré pour viser <2s
+    const MAX_COMPUTE_TIME_MS = 1200; // Timeout global resserré pour viser <2s (cible ~1.5s)
 
     for (const limit of tryLimits) {
       // Vérifier le timeout global
