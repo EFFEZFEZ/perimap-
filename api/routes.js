@@ -1,12 +1,71 @@
-/*
+/**
  * Copyright (c) 2026 Périmap. Tous droits réservés.
- * API Routes - Optimisé pour < 500ms
+ * API Routes - Optimisé avec cache intelligent
+ * 
+ * Stratégie de cache:
+ * - Cache CDN Vercel: 60s (s-maxage)
+ * - Cache applicatif: normalisation temporelle par buckets de 5 minutes
+ * - Si départ à 14h03, on arrondit à 14h05 → même cache pour 14h00-14h05
  */
 
 export const config = {
     runtime: 'edge',
     regions: ['cdg1'], // Paris - proche utilisateurs
 };
+
+// Cache en mémoire pour les requêtes récentes (limité à 100 entrées)
+const routeCache = new Map();
+const CACHE_MAX_SIZE = 100;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Arrondit une date au prochain bucket de 5 minutes
+ * Ex: 14h03 → 14h05, 14h07 → 14h10
+ */
+function roundToNext5Minutes(date) {
+    const ms = 5 * 60 * 1000;
+    return new Date(Math.ceil(date.getTime() / ms) * ms);
+}
+
+/**
+ * Génère une clé de cache unique pour un trajet
+ */
+function generateCacheKey(origin, destination, departureTime, travelMode) {
+    const roundedTime = departureTime ? roundToNext5Minutes(new Date(departureTime)) : null;
+    const timeKey = roundedTime ? roundedTime.toISOString().slice(0, 16) : 'now';
+    
+    // Arrondir les coordonnées à 4 décimales (précision ~11m)
+    const roundCoord = (c) => Math.round(c * 10000) / 10000;
+    
+    const originKey = origin.location?.latLng 
+        ? `${roundCoord(origin.location.latLng.latitude)},${roundCoord(origin.location.latLng.longitude)}`
+        : JSON.stringify(origin);
+    
+    const destKey = destination.location?.latLng
+        ? `${roundCoord(destination.location.latLng.latitude)},${roundCoord(destination.location.latLng.longitude)}`
+        : JSON.stringify(destination);
+    
+    return `${originKey}|${destKey}|${timeKey}|${travelMode}`;
+}
+
+/**
+ * Nettoie les entrées expirées du cache
+ */
+function cleanExpiredCache() {
+    const now = Date.now();
+    for (const [key, entry] of routeCache.entries()) {
+        if (now - entry.timestamp > CACHE_TTL_MS) {
+            routeCache.delete(key);
+        }
+    }
+    
+    // Si toujours trop grand, supprimer les plus anciennes
+    if (routeCache.size > CACHE_MAX_SIZE) {
+        const entries = [...routeCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
+        const toDelete = entries.slice(0, routeCache.size - CACHE_MAX_SIZE);
+        toDelete.forEach(([key]) => routeCache.delete(key));
+    }
+}
 
 export default async function handler(request) {
     const origin = request.headers.get('origin') || '';
@@ -107,9 +166,45 @@ export default async function handler(request) {
             }
         }
 
-        // FieldMask optimisé - minimum requis pour l'affichage
-        // Transit: polyline + steps avec transit details
+        // ============================================
+        // CACHE INTELLIGENT - Vérifier le cache
+        // ============================================
         const travelMode = googleBody.travelMode || 'TRANSIT';
+        const departureTime = googleBody.departureTime || googleBody.arrivalTime || null;
+        const cacheKey = generateCacheKey(
+            googleBody.origin, 
+            googleBody.destination, 
+            departureTime, 
+            travelMode
+        );
+        
+        // Nettoyer les entrées expirées
+        cleanExpiredCache();
+        
+        // Vérifier si on a un cache valide
+        const cachedEntry = routeCache.get(cacheKey);
+        if (cachedEntry && (Date.now() - cachedEntry.timestamp < CACHE_TTL_MS)) {
+            console.log(`[Routes] ✅ Cache HIT: ${cacheKey.slice(0, 50)}...`);
+            return new Response(
+                JSON.stringify(cachedEntry.data),
+                { 
+                    status: 200, 
+                    headers: { 
+                        ...corsHeaders, 
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'public, s-maxage=60, max-age=30',
+                        'X-Backend': 'google-routes',
+                        'X-Cache': 'HIT'
+                    } 
+                }
+            );
+        }
+
+        // ============================================
+        // Appel à Google Routes API
+        // ============================================
+        
+        // FieldMask optimisé - minimum requis pour l'affichage
         const fieldMask = travelMode === 'TRANSIT'
             ? 'routes.duration,routes.polyline.encodedPolyline,routes.legs.steps.transitDetails,routes.legs.steps.travelMode,routes.legs.steps.polyline.encodedPolyline'
             : 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline';
@@ -126,6 +221,17 @@ export default async function handler(request) {
 
         const data = await response.json().catch(() => ({}));
 
+        // ============================================
+        // Stocker dans le cache si succès
+        // ============================================
+        if (response.ok && data.routes && data.routes.length > 0) {
+            routeCache.set(cacheKey, {
+                data: data,
+                timestamp: Date.now()
+            });
+            console.log(`[Routes] 📦 Cache STORE: ${cacheKey.slice(0, 50)}... (${routeCache.size} entries)`);
+        }
+
         return new Response(
             JSON.stringify(data),
             { 
@@ -133,8 +239,9 @@ export default async function handler(request) {
                 headers: { 
                     ...corsHeaders, 
                     'Content-Type': 'application/json',
-                    'Cache-Control': 's-maxage=60',
-                    'X-Backend': 'google-routes'
+                    'Cache-Control': 'public, s-maxage=60, max-age=30',
+                    'X-Backend': 'google-routes',
+                    'X-Cache': 'MISS'
                 } 
             }
         );

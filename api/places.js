@@ -11,6 +11,27 @@ export const config = {
 };
 
 // ===========================================
+// Cache pour les résultats Google Places
+// ===========================================
+const placesCache = new Map();
+const PLACES_CACHE_MAX_SIZE = 200;
+const PLACES_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+function cleanPlacesCache() {
+  const now = Date.now();
+  for (const [key, entry] of placesCache.entries()) {
+    if (now - entry.timestamp > PLACES_CACHE_TTL_MS) {
+      placesCache.delete(key);
+    }
+  }
+  if (placesCache.size > PLACES_CACHE_MAX_SIZE) {
+    const entries = [...placesCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp);
+    const toDelete = entries.slice(0, placesCache.size - PLACES_CACHE_MAX_SIZE);
+    toDelete.forEach(([key]) => placesCache.delete(key));
+  }
+}
+
+// ===========================================
 // 1. POI LOCAUX - Points d'intérêt populaires
 // ===========================================
 const LOCAL_POIS = {
@@ -383,30 +404,48 @@ export default async function handler(req) {
   const googleNeeded = 5 - results.length;
   
   if (googleNeeded > 0) {
-    try {
-      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-      if (!apiKey) throw new Error('API key missing');
-
-      const requestBody = {
-        input: input,
-        languageCode: 'fr',
-        regionCode: 'FR',
-        locationRestriction: {
-          rectangle: {
-            low: { latitude: GRAND_PERIGUEUX_BOUNDS.south, longitude: GRAND_PERIGUEUX_BOUNDS.west },
-            high: { latitude: GRAND_PERIGUEUX_BOUNDS.north, longitude: GRAND_PERIGUEUX_BOUNDS.east }
-          }
+    // Nettoyer le cache
+    cleanPlacesCache();
+    
+    // Clé de cache basée sur la requête normalisée
+    const cacheKey = normalize(input);
+    const cachedGoogle = placesCache.get(cacheKey);
+    
+    if (cachedGoogle && (Date.now() - cachedGoogle.timestamp < PLACES_CACHE_TTL_MS)) {
+      // Utiliser les résultats en cache
+      console.log(`[Places] ✅ Cache HIT: "${input}"`);
+      for (const item of cachedGoogle.data.slice(0, googleNeeded)) {
+        if (!seenNames.has(normalize(item.name))) {
+          seenNames.add(normalize(item.name));
+          results.push(item);
         }
-      };
+      }
+    } else {
+      // Appeler Google Places API
+      try {
+        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+        if (!apiKey) throw new Error('API key missing');
 
-      const response = await fetch(
-        'https://places.googleapis.com/v1/places:autocomplete',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': apiKey,
-          },
+        const requestBody = {
+          input: input,
+          languageCode: 'fr',
+          regionCode: 'FR',
+          locationRestriction: {
+            rectangle: {
+              low: { latitude: GRAND_PERIGUEUX_BOUNDS.south, longitude: GRAND_PERIGUEUX_BOUNDS.west },
+              high: { latitude: GRAND_PERIGUEUX_BOUNDS.north, longitude: GRAND_PERIGUEUX_BOUNDS.east }
+            }
+          }
+        };
+
+        const response = await fetch(
+          'https://places.googleapis.com/v1/places:autocomplete',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Goog-Api-Key': apiKey,
+            },
           body: JSON.stringify(requestBody),
         }
       );
@@ -416,6 +455,8 @@ export default async function handler(req) {
         const suggestions = data.suggestions || [];
         
         let googleCount = 0;
+        const googleResults = [];
+        
         for (const suggestion of suggestions) {
           if (googleCount >= googleNeeded) break;
           
@@ -443,22 +484,35 @@ export default async function handler(req) {
             if (!seenNames.has(normalizedName) && name) {
               seenNames.add(normalizedName);
               const location = details.location || { latitude: CENTER.lat, longitude: CENTER.lng };
-              results.push({
+              const item = {
                 description: `📌 ${name}, ${details.formattedAddress || ''}`,
                 placeId: placeId,
                 coordinates: { lat: location.latitude, lng: location.longitude },
                 source: 'google',
-                type: 'address'
-              });
+                type: 'address',
+                name: name
+              };
+              results.push(item);
+              googleResults.push(item);
               googleCount++;
             }
           }
+        }
+        
+        // Stocker dans le cache
+        if (googleResults.length > 0) {
+          placesCache.set(cacheKey, {
+            data: googleResults,
+            timestamp: Date.now()
+          });
+          console.log(`[Places] 📦 Cache STORE: "${input}" (${googleResults.length} results)`);
         }
       }
     } catch (error) {
       console.error('Google Places error:', error.message);
     }
-  }
+    } // Fin du else (pas de cache)
+  } // Fin du if (googleNeeded > 0)
 
   return new Response(JSON.stringify({ 
     predictions: results.slice(0, 5)

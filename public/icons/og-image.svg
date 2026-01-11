@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Fond dégradé -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#16a34a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Motif décoratif - lignes de bus -->
+  <g opacity="0.1" stroke="#22c55e" stroke-width="2" fill="none">
+    <path d="M0,150 Q300,100 600,150 T1200,150"/>
+    <path d="M0,300 Q400,250 800,300 T1200,280"/>
+    <path d="M0,450 Q350,400 700,450 T1200,430"/>
+  </g>
+  
+  <!-- Icônes de bus simplifiées -->
+  <g fill="#22c55e" opacity="0.15">
+    <rect x="100" y="80" width="60" height="40" rx="8"/>
+    <rect x="1040" y="500" width="60" height="40" rx="8"/>
+    <rect x="900" y="100" width="50" height="30" rx="6"/>
+  </g>
+  
+  <!-- Logo/Icône centrale -->
+  <g transform="translate(500, 180)">
+    <circle cx="100" cy="50" r="70" fill="url(#green)"/>
+    <text x="100" y="70" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="50" font-weight="bold">🚌</text>
+  </g>
+  
+  <!-- Titre principal -->
+  <text x="600" y="340" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="72" font-weight="bold">
+    PériMap
+  </text>
+  
+  <!-- Sous-titre -->
+  <text x="600" y="400" text-anchor="middle" fill="#22c55e" font-family="Arial, sans-serif" font-size="32" font-weight="600">
+    Horaires et Itinéraires Péribus
+  </text>
+  
+  <!-- Description -->
+  <text x="600" y="470" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="24">
+    Application gratuite pour le réseau de bus du Grand Périgueux
+  </text>
+  
+  <!-- Badges des lignes -->
+  <g transform="translate(400, 520)">
+    <rect x="0" y="0" width="50" height="50" rx="8" fill="#22c55e"/>
+    <text x="25" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="bold">A</text>
+    
+    <rect x="70" y="0" width="50" height="50" rx="8" fill="#3b82f6"/>
+    <text x="95" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="bold">B</text>
+    
+    <rect x="140" y="0" width="50" height="50" rx="8" fill="#f59e0b"/>
+    <text x="165" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="bold">C</text>
+    
+    <rect x="210" y="0" width="50" height="50" rx="8" fill="#ef4444"/>
+    <text x="235" y="35" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="bold">D</text>
+  </g>
+  
+  <!-- URL -->
+  <text x="600" y="610" text-anchor="middle" fill="#64748b" font-family="Arial, sans-serif" font-size="18">
+    périmap.fr
+  </text>
+</svg>

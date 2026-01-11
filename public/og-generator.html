@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OG Image Generator - PériMap</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background: #1a1a2e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .og-container {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .decorative-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+        }
+        .decorative-lines svg {
+            width: 100%;
+            height: 100%;
+        }
+        .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 40px;
+        }
+        .logo-container {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(34, 197, 94, 0.4);
+        }
+        .logo-icon {
+            font-size: 70px;
+        }
+        .title {
+            font-size: 72px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+        }
+        .subtitle {
+            font-size: 32px;
+            font-weight: 600;
+            color: #22c55e;
+            margin-bottom: 25px;
+        }
+        .description {
+            font-size: 22px;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        .line-badges {
+            display: flex;
+            gap: 15px;
+        }
+        .badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+        .badge-a { background: #22c55e; }
+        .badge-b { background: #3b82f6; }
+        .badge-c { background: #f59e0b; }
+        .badge-d { background: #ef4444; }
+        .url {
+            position: absolute;
+            bottom: 25px;
+            font-size: 18px;
+            color: #64748b;
+        }
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #2a2a4a;
+            border-radius: 8px;
+            color: #ccc;
+            max-width: 600px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="og-container" id="og-image">
+            <div class="decorative-lines">
+                <svg viewBox="0 0 1200 630" preserveAspectRatio="none">
+                    <path d="M0,150 Q300,100 600,150 T1200,150" stroke="#22c55e" stroke-width="3" fill="none"/>
+                    <path d="M0,300 Q400,250 800,300 T1200,280" stroke="#22c55e" stroke-width="3" fill="none"/>
+                    <path d="M0,480 Q350,430 700,480 T1200,460" stroke="#22c55e" stroke-width="3" fill="none"/>
+                </svg>
+            </div>
+            <div class="content">
+                <div class="logo-container">
+                    <span class="logo-icon">🚌</span>
+                </div>
+                <h1 class="title">PériMap</h1>
+                <p class="subtitle">Horaires et Itinéraires Péribus</p>
+                <p class="description">Application gratuite pour le réseau de bus du Grand Périgueux</p>
+                <div class="line-badges">
+                    <div class="badge badge-a">A</div>
+                    <div class="badge badge-b">B</div>
+                    <div class="badge badge-c">C</div>
+                    <div class="badge badge-d">D</div>
+                </div>
+                <span class="url">périmap.fr</span>
+            </div>
+        </div>
+        <div class="instructions">
+            <strong>Instructions :</strong><br>
+            1. Faites une capture d'écran de l'image ci-dessus (1200x630px)<br>
+            2. Sauvegardez-la comme <code>og-image.png</code><br>
+            3. Placez-la dans <code>public/icons/</code><br>
+            <br>
+            <small>Ou utilisez un outil comme html2canvas / Puppeteer pour l'exporter automatiquement</small>
+        </div>
+    </div>
+</body>
+</html>
