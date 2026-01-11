@@ -476,22 +476,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
 
         let latLngPolyline = geometryToLatLngs(geometry);
-        
-        // DEBUG K1A polyline
-        const routeDebug = segment.route?.route_short_name || segment.routeId;
-        console.log(`[POLYLINE DEBUG] Route ${routeDebug}, shapeId=${segment.shapeId}, geometry=${geometry ? 'OK(' + (geometry.coordinates?.length || 'array') + ' pts)' : 'NULL'}, latLngPolyline=${latLngPolyline ? latLngPolyline.length + ' pts' : 'NULL'}`);
-        if (latLngPolyline && latLngPolyline.length > 0) {
-            console.log(`[POLYLINE DEBUG] First point: [${latLngPolyline[0]}], Last point: [${latLngPolyline[latLngPolyline.length-1]}]`);
-            console.log(`[POLYLINE DEBUG] boardingPoint: lat=${boardingPoint.lat}, lon=${boardingPoint.lon}`);
-            console.log(`[POLYLINE DEBUG] alightingPoint: lat=${alightingPoint.lat}, lon=${alightingPoint.lon}`);
-        }
-        
         let slicedPolyline = slicePolylineBetween(latLngPolyline, boardingPoint, alightingPoint);
-        
-        console.log(`[POLYLINE DEBUG] slicedPolyline=${slicedPolyline ? slicedPolyline.length + ' pts' : 'NULL'}`);
-        
         if (!slicedPolyline || slicedPolyline.length < 2) {
-            console.log('[POLYLINE DEBUG] Using fallback 2-point polyline');
             slicedPolyline = [
                 [boardingPoint.lat, boardingPoint.lon],
                 [alightingPoint.lat, alightingPoint.lon]
