@@ -96,11 +96,12 @@ export default async function handler(request) {
             );
         }
 
-        // Déterminer si c'est une requête OTP-compat (fromPlace/toPlace/date/time)
-        // ou une requête Google Routes (origin/destination/travelMode)
-        const isGoogleFormat = !!(body.travelMode || body.origin || body.destination);
+        // Déterminer le type de payload sans exclure OTP quand travelMode est présent
+        // (le frontend envoie travelMode même pour OTP).
+        const hasOtpFields = !!(body.fromPlace && body.toPlace);
+        const hasGoogleFields = !!(body.origin && body.destination) && !hasOtpFields;
         const requestedMode = body.mode || body.travelMode || 'TRANSIT';
-        const isOtpPayload = !!(body.fromPlace && body.toPlace && !isGoogleFormat);
+        const isOtpPayload = hasOtpFields;
 
         // ========== MODE OTP: Proxy vers Oracle Cloud ==========
         if (isOtpPayload) {

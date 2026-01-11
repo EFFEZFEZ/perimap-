@@ -167,7 +167,7 @@ export function getRouteAttributes(otpRouteId) {
 }
 
 // Génère des transferts piétons bidirectionnels si absents (pour réparer un GTFS sans transfers.txt)
-export function patchMissingTransfers(data, maxDistanceMeters = 200) {
+export function patchMissingTransfers(data) {
     if (!data || !Array.isArray(data.stops)) {
         return data;
     }
@@ -177,40 +177,81 @@ export function patchMissingTransfers(data, maxDistanceMeters = 200) {
         return data;
     }
 
-    const stops = data.stops;
+    const NAME_RADIUS = 300; // m, arrêts au nom similaire
+    const CLOSE_RADIUS = 60; // m, très proche physiquement même si nom différent
+
+    const stops = data.stops.filter((s) => s?.stop_id && typeof s.stop_lat === 'number' && typeof s.stop_lon === 'number');
     const transfers = [];
+    const seen = new Set(); // evite doublons
 
-    for (let i = 0; i < stops.length; i++) {
-        const from = stops[i];
-        if (!from?.stop_id || typeof from.stop_lat !== 'number' || typeof from.stop_lon !== 'number') continue;
+    // Normalise un nom pour détecter les quais voisins
+    const normalizeName = (name) => {
+        if (typeof name !== 'string') return '';
+        return name
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/quai\s*\d+[a-z]?/gi, '')
+            .replace(/quai\s*[a-z]?\d+/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    };
 
-        for (let j = i + 1; j < stops.length; j++) {
-            const to = stops[j];
-            if (!to?.stop_id || typeof to.stop_lat !== 'number' || typeof to.stop_lon !== 'number') continue;
+    const byName = new Map();
+    for (const stop of stops) {
+        const key = normalizeName(stop.stop_name || '');
+        if (!byName.has(key)) byName.set(key, []);
+        byName.get(key).push(stop);
+    }
 
-            const distance = haversineDistanceMeters(from.stop_lat, from.stop_lon, to.stop_lat, to.stop_lon);
-            if (distance > maxDistanceMeters || distance === 0) continue;
+    const addTransfer = (from, to, distance) => {
+        const key = `${from.stop_id}->${to.stop_id}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const minTransferTime = Math.round(distance / 1.1 + 60); // piéton ~1.1 m/s + 60s buffer
+        transfers.push({
+            from_stop_id: from.stop_id,
+            to_stop_id: to.stop_id,
+            transfer_type: 2,
+            min_transfer_time: minTransferTime,
+        });
+    };
 
-            const minTransferTime = Math.round(distance / 1.1 + 60); // vitesse piéton ~1.1 m/s + 60s buffer
-
-            transfers.push({
-                from_stop_id: from.stop_id,
-                to_stop_id: to.stop_id,
-                transfer_type: 2,
-                min_transfer_time: minTransferTime,
-            });
-
-            transfers.push({
-                from_stop_id: to.stop_id,
-                to_stop_id: from.stop_id,
-                transfer_type: 2,
-                min_transfer_time: minTransferTime,
-            });
+    try {
+        // 1) Arrêts au nom similaire (quais, mêmes lieux)
+        for (const [, list] of byName.entries()) {
+            if (list.length < 2) continue;
+            for (let i = 0; i < list.length; i++) {
+                for (let j = i + 1; j < list.length; j++) {
+                    const a = list[i];
+                    const b = list[j];
+                    const d = haversineDistanceMeters(a.stop_lat, a.stop_lon, b.stop_lat, b.stop_lon);
+                    if (d > 0 && d <= NAME_RADIUS) {
+                        addTransfer(a, b, d);
+                        addTransfer(b, a, d);
+                    }
+                }
+            }
         }
+
+        // 2) Très proches physiquement (même si nom différent)
+        for (let i = 0; i < stops.length; i++) {
+            const a = stops[i];
+            for (let j = i + 1; j < stops.length; j++) {
+                const b = stops[j];
+                const d = haversineDistanceMeters(a.stop_lat, a.stop_lon, b.stop_lat, b.stop_lon);
+                if (d > 0 && d <= CLOSE_RADIUS) {
+                    addTransfer(a, b, d);
+                    addTransfer(b, a, d);
+                }
+            }
+        }
+    } catch (err) {
+        logger.error('❌ Transferts auto: erreur durant le calcul', err);
     }
 
     data.transfers = transfers;
-    console.log(`🧭 GTFS patch: ${transfers.length} transferts générés (rayon ${maxDistanceMeters}m)`);
+    logger.info(`🧭 GTFS patch: ${transfers.length} transferts générés (nom~${NAME_RADIUS}m, proches~${CLOSE_RADIUS}m)`);
     return data;
 }
 
