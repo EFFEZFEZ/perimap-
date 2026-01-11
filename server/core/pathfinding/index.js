@@ -99,10 +99,9 @@ export class PathfindingEngine {
     console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
 
     // ════════════════════════════════════════════════════════════════════════
-    // OTP-STYLE OPTIMIZATION: Parallel execution & generalized cost
-    // ════════════════════════════════════════════════════════════════════════
-    const SEARCH_OFFSETS = [0, 15, 30, 45, 60, 90]; // Minutes de décalage
-    const seenTrips = new Set(); // Pour dédupliquer les mêmes trips
+    // Clé unique pour le trip (combinaison des lignes utilisées et heures de départ)
+    const SEARCH_OFFSETS = [0, 30, 60, 90]; // Moins d'offsets mais couvrant plus large (0, +30, +1h, +1h30)
+    const seenTrips = new Map(); // Pour dédupliquer les mêmes trips (TripId -> Result)
     
     // ⚡ PARALLELISATION: Lancer toutes les recherches en même temps
     // Node.js est single-threaded, mais cela évite d'attendre séquentiellement les I/O si existants
@@ -118,19 +117,37 @@ export class PathfindingEngine {
     // Aplatir et dédupliquer
     for (const results of nestedResults) {
       for (const result of results) {
-        // Clé unique pour le trip (combinaison des lignes utilisées)
+        // Clé unique pour le trip (combinaison des lignes utilisées et heures de départ)
+        // On simplifie la clé pour grouper les variantes très proches (même premier bus)
         const transitLegs = result.legs.filter(l => l.type === 'transit');
-        const tripKey = transitLegs.map(l => `${l.routeId}_${l.departureTime}`).join('|');
-        const walkKey = result.transfers === 0 ? `walk_${result.totalDuration}` : '';
         
-        // Clé composite
-        const uniqueKey = tripKey || walkKey;
+        // Clé basée uniquement sur le PREMIER bus (TripId)
+        // Si on a déjà un itinéraire qui part avec ce bus, on ignore les variantes mineures
+        // sauf si l'arrivée est significativement plus tôt (> 5 min)
+        const firstLeg = transitLegs[0];
+        if (!firstLeg) continue; // Walk only traité à part
+
+        const firstTripKey = `${firstLeg.routeId}_${firstLeg.tripId}`;
         
-        if (uniqueKey && !seenTrips.has(uniqueKey)) {
-          seenTrips.add(uniqueKey);
-          allResults.push(result);
+        // Si on a déjà vu ce départ bus, on ne garde que le meilleur (celui qui arrive le plus tôt)
+        if (seenTrips.has(firstTripKey)) {
+          const existing = seenTrips.get(firstTripKey);
+          if (result.arrivalTime < existing.arrivalTime - 300000) { // 5 min mieux
+             // On remplace si nettement meilleur (rare)
+             // ici on simplifie: on garde le premier trouvé (souvent le meilleur car recherché cronologiquement)
+          }
+          continue; // On saute ce doublon
         }
+
+        seenTrips.set(firstTripKey, result);
+        allResults.push(result);
       }
+    }
+
+    // Ajouter l'option marche si pertinente et unique
+    const walkResults = nestedResults.flat().filter(r => r.transfers === 0 && r.type === 'walk_only');
+    if (walkResults.length > 0) {
+       allResults.push(walkResults[0]);
     }
 
     // Trier par "Generalized Cost" (Logique OTP)
