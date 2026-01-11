@@ -16,10 +16,10 @@ import { parseTimeStringToMinutes } from '../utils/formatters.js';
 const MIN_BUS_ITINERARIES = 5;
 
 /**
- * Déduplique les itinéraires par structure de trajet (même séquence bus/arrêts).
- * En mode "partir", garde le premier départ pour chaque structure.
- * En mode "arriver", garde les 3 meilleurs horaires par structure (plus de choix).
- * V115: Amélioration - en mode arriver, on garde plusieurs variantes horaires
+ * V327: Déduplication intelligente
+ * - Garde plusieurs horaires de départ différents (17:44, 17:53, 18:05...)
+ * - Pour un MÊME départ, garde la meilleure correspondance (arrivée la plus tôt)
+ * - Signature = lignes utilisées + heure de départ arrondie à 2 min
  */
 export function deduplicateItineraries(list, searchMode = 'partir') {
   if (!Array.isArray(list)) return [];
@@ -41,22 +41,18 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
       return;
     }
     
-    // Trier les variantes par heure de départ
+    // Trier les variantes par heure d'arrivée
     variants.sort((a, b) => {
-      const depA = parseTimeToMinutes(a.departureTime);
-      const depB = parseTimeToMinutes(b.departureTime);
-      return depA - depB;
+      const arrA = parseTimeToMinutes(a.arrivalTime);
+      const arrB = parseTimeToMinutes(b.arrivalTime);
+      return arrA - arrB; // Plus tôt = meilleur
     });
     
-    if (searchMode === 'arriver') {
-      // V115: En mode arriver, on garde les 3 derniers départs (les plus proches de l'heure demandée)
-      // Cela donne plus de choix à l'utilisateur
-      const MAX_VARIANTS_ARRIVER = 3;
-      const startIdx = Math.max(0, variants.length - MAX_VARIANTS_ARRIVER);
-      result.push(...variants.slice(startIdx));
-    } else {
-      // En mode partir, on veut le premier départ seulement
-      result.push(variants[0]);
+    // Garder la meilleure (arrivée la plus tôt pour ce départ)
+    result.push(variants[0]);
+    
+    if (variants.length > 1) {
+      console.log(`🔄 Dédup: ${variants.length} variantes pour départ ${variants[0].departureTime}, gardé arrivée ${variants[0].arrivalTime}`);
     }
   });
   
@@ -66,9 +62,9 @@ export function deduplicateItineraries(list, searchMode = 'partir') {
 }
 
 /**
- * V325: Crée une signature basée sur la STRUCTURE du trajet.
- * Deux trajets avec les mêmes lignes et même heure d'arrivée sont considérés identiques.
- * On ignore les arrêts de correspondance intermédiaires pour éviter les doublons.
+ * V327: Signature basée sur les LIGNES + HEURE DE DÉPART
+ * Deux trajets avec le même départ et mêmes lignes = même signature
+ * → On garde celui avec la meilleure arrivée
  */
 function createRouteSignature(it) {
   if (!it) return 'null';
@@ -79,16 +75,11 @@ function createRouteSignature(it) {
     .map(s => s.name || 'X')
     .join('>');
   
-  // Arrêt de départ et d'arrivée finale uniquement
-  const busSteps = (it.steps || []).filter(s => s.type === 'BUS');
-  const firstBusStop = busSteps.length > 0 ? normalizeStopName(busSteps[0].departureStop) : '';
-  const lastBusStop = busSteps.length > 0 ? normalizeStopName(busSteps[busSteps.length - 1].arrivalStop) : '';
+  // Heure de départ arrondie à 2 minutes (pour grouper les départs très proches)
+  const depMinutes = parseTimeToMinutes(it.departureTime);
+  const roundedDep = Math.floor(depMinutes / 2) * 2;
   
-  // Heure d'arrivée arrondie à 5 minutes (pour grouper les trajets très similaires)
-  const arrivalMinutes = parseTimeToMinutes(it.arrivalTime);
-  const roundedArrival = Math.floor(arrivalMinutes / 5) * 5;
-  
-  return `${it.type}::${lines}::${firstBusStop}→${lastBusStop}::arr${roundedArrival}`;
+  return `${it.type}::${lines}::dep${roundedDep}`;
 }
 
 function normalizeStopName(name) {
