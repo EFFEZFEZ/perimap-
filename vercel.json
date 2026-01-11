@@ -55,10 +55,6 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "http://79.72.24.141.nip.io/api/$1"
-    },
-    {
       "source": "/carte",
       "destination": "/index.html"
     },
