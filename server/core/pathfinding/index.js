@@ -99,81 +99,97 @@ export class PathfindingEngine {
     console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
 
     // ════════════════════════════════════════════════════════════════════════
-    // MULTI-DEPARTURE SEARCH: Faire plusieurs recherches à des heures décalées
-    // pour obtenir plusieurs départs successifs (comme OTP)
+    // OTP-STYLE OPTIMIZATION: Parallel execution & generalized cost
     // ════════════════════════════════════════════════════════════════════════
     const SEARCH_OFFSETS = [0, 15, 30, 45, 60, 90]; // Minutes de décalage
-    const MAX_TOTAL_RESULTS = 8;
     const seenTrips = new Set(); // Pour dédupliquer les mêmes trips
     
-    for (const offsetMinutes of SEARCH_OFFSETS) {
-      if (allResults.length >= MAX_TOTAL_RESULTS) break;
-      
+    // ⚡ PARALLELISATION: Lancer toutes les recherches en même temps
+    // Node.js est single-threaded, mais cela évite d'attendre séquentiellement les I/O si existants
+    // et permet de grouper le processing.
+    const promises = SEARCH_OFFSETS.map(offsetMinutes => {
       const searchTime = new Date(departureTime.getTime() + offsetMinutes * 60000);
       const timeSeconds = this.timeToSeconds(searchTime);
-      
-      const results = await this._computeSingleSearch(origin, destination, searchTime, dateStr, timeSeconds, seenTrips);
-      
+      return this._computeSingleSearch(origin, destination, searchTime, dateStr, timeSeconds);
+    });
+
+    const nestedResults = await Promise.all(promises);
+    
+    // Aplatir et dédupliquer
+    for (const results of nestedResults) {
       for (const result of results) {
-        // Vérifier que ce résultat n'est pas un doublon (même trip principal)
+        // Clé unique pour le trip (combinaison des lignes utilisées)
         const transitLegs = result.legs.filter(l => l.type === 'transit');
-        const tripKey = transitLegs.map(l => l.tripId).join('|');
+        const tripKey = transitLegs.map(l => `${l.routeId}_${l.departureTime}`).join('|');
+        const walkKey = result.transfers === 0 ? `walk_${result.totalDuration}` : '';
         
-        if (!seenTrips.has(tripKey)) {
-          seenTrips.add(tripKey);
+        // Clé composite
+        const uniqueKey = tripKey || walkKey;
+        
+        if (uniqueKey && !seenTrips.has(uniqueKey)) {
+          seenTrips.add(uniqueKey);
           allResults.push(result);
         }
       }
     }
 
-    // Trier et filtrer les résultats
-    const sorted = this.rankItineraries(allResults);
+    // Trier par "Generalized Cost" (Logique OTP)
+    const sorted = this.rankItinerariesSmart(allResults);
     return sorted.slice(0, this.options.maxResults);
+  }
+
+  /**
+   * Trie les itinéraires selon le coût généralisé (Logique OTP)
+   * On penalise la marche et les correspondances plus que le temps pur.
+   */
+  rankItinerariesSmart(itineraries) {
+    // Poids (inspirés d'OpenTripPlanner)
+    const WALK_RELUCTANCE = 2.0;       // 1 min de marche "coûte" 2 min de temps perçu
+    const TRANSFER_PENALTY_COST = 600; // 1 transfert "coûte" 10 min (600s) de pénalité fixe
+    const WAIT_RELUCTANCE = 1.0;       // L'attente est normale
+
+    return itineraries.sort((a, b) => {
+      // Calcul du coût pour A
+      const walkCostA = (a.walkDistance / this.options.walkSpeed) * WALK_RELUCTANCE;
+      const transferCostA = a.transfers * TRANSFER_PENALTY_COST;
+      const durationA = a.totalDuration;
+      const generalizedCostA = durationA + transferCostA + walkCostA;
+
+      // Calcul du coût pour B
+      const walkCostB = (b.walkDistance / this.options.walkSpeed) * WALK_RELUCTANCE;
+      const transferCostB = b.transfers * TRANSFER_PENALTY_COST;
+      const durationB = b.totalDuration;
+      const generalizedCostB = durationB + transferCostB + walkCostB;
+
+      return generalizedCostA - generalizedCostB;
+    });
   }
 
   /**
    * Effectue une seule recherche RAPTOR pour une heure donnée
    */
-  async _computeSingleSearch(origin, destination, departureTime, dateStr, timeSeconds, seenTrips) {
+  async _computeSingleSearch(origin, destination, departureTime, dateStr, timeSeconds) {
     const results = [];
 
-    // Calculer la distance directe entre origine et destination
+    // Calculer la distance directe
     const directDistance = this.haversineDistance(origin.lat, origin.lon, destination.lat, destination.lon);
-    const isShortDistance = directDistance < 500; // Moins de 500m
-    const minBusResults = isShortDistance ? 1 : 3; // Minimum 3 bus pour distances normales, 1 pour courtes
-    console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
+    
+    // ⚡ OPTIMISATION: Limiter drastiquement les candidats (Max 5)
+    // C'est ici qu'on gagne la vitesse. Inutile de tester 120 arrêts.
+    const MAX_CANDIDATES = 5; 
+    
+    let originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
+    let destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
 
-    // 1. Trouver les arrêts proches de l'origine et de la destination
-    const originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
-    const destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
-
-    // Filtrer: privilégier les quais (StopPlace/parent stations ne sont souvent pas dans stop_times)
-    // et exclure les arrêts qui n'ont aucune route (impossible d'embarquer/débarquer en TC)
-    const isQuayLike = stop => {
-      const id = stop?.stop_id || '';
-      if (id.includes(':StopPlace:')) return false;
-      if (stop?.location_type !== undefined && String(stop.location_type) === '1') return false;
-      return true;
-    };
-    const hasRoutes = stopId => {
-      const routes = this.raptor.routesAtStop.get(stopId);
-      return Array.isArray(routes) ? routes.length > 0 : false;
-    };
-
-    const originCandidates = originStops.filter(s => isQuayLike(s.stop) && hasRoutes(s.stop.stop_id));
-    const destCandidates = destStops.filter(s => isQuayLike(s.stop) && hasRoutes(s.stop.stop_id));
-
-    console.log(`🔍 Arrêts proches origine (${origin.lat.toFixed(4)}, ${origin.lon.toFixed(4)}): ${originStops.length} trouvés (${originCandidates.length} utilisables)`);
-    if (originStops.length > 0) {
-      console.log(`   → ${originStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
-    }
-    console.log(`🔍 Arrêts proches destination (${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}): ${destStops.length} trouvés (${destCandidates.length} utilisables)`);
-    if (destStops.length > 0) {
-      console.log(`   → ${destStops.slice(0, 3).map(s => `${s.stop.stop_name} (${Math.round(s.distance)}m)`).join(', ')}`);
-    }
+    const isQuay = stop => !stop?.stop_id?.includes(':StopPlace:');
+    
+    // Garder seulement les X plus proches qui sont des quais
+    const originCandidates = originStops.filter(s => isQuay(s.stop)).slice(0, MAX_CANDIDATES);
+    const destCandidates = destStops.filter(s => isQuay(s.stop)).slice(0, MAX_CANDIDATES);
 
     if (originCandidates.length === 0 || destCandidates.length === 0) {
-      // Pas d'arrêts à proximité, retourner uniquement le trajet à pied
+      // Fallback marche
+
       const walkPath = this.astar.computeDirectPath(
         origin.lat, origin.lon,
         destination.lat, destination.lon
