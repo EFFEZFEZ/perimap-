@@ -80,7 +80,7 @@
     }
   ],
   "functions": {
-    "api/google-routes.js": {
+    "api/routes.js": {
       "maxDuration": 15,
       "memory": 256
     },
