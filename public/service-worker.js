@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v318'; // ✅ v318: Retour API Google - optimisation vitesse
+const CACHE_VERSION = 'v320'; // ✅ v319: Autocomplétion Grand Périgueux + arrêts GTFS prioritaires
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

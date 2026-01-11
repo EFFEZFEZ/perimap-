@@ -1,7 +1,7 @@
 {
   "name": "PériMap - Horaires Bus Péribus Périgueux",
   "short_name": "PériMap",
-  "version": "3.26.0",
+  "version": "3.27.0",
   "start_url": "/?source=pwa",
   "scope": "/",
   "id": "perimap-app",
@@ -18,15 +18,15 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/perimap-logo.webp",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/perimap-logo.webp",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     }
   ],
