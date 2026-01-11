@@ -62,7 +62,6 @@ export default async function handler(request) {
                     input: input,
                     languageCode: 'fr',
                     regionCode: 'FR',
-                    includedPrimaryTypes: ['transit_station', 'bus_station', 'establishment', 'point_of_interest', 'street_address', 'route'],
                     locationBias: {
                         circle: {
                             center: { latitude: 45.184, longitude: 0.721 },
