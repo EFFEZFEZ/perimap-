@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v316'; // ✅ v316: Polylines améliorées avec fallback coords
+const CACHE_VERSION = 'v317'; // ✅ v317: Fix polylines backend Oracle + PM2 path
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
