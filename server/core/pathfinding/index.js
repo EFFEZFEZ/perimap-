@@ -293,8 +293,9 @@ export class PathfindingEngine {
 
       // Early exit si on a assez de résultats (minimum requis de bus)
       const busResults = results.filter(r => r.type === 'transit').length;
-      if (busResults >= minBusResults) {
-        console.log(`✅ ${busResults} itinéraires bus trouvés (min: ${minBusResults}), arrêt anticipé`);
+      const minBusNeeded = 3; // Valeur par défaut raisonnable
+      if (busResults >= minBusNeeded) {
+        console.log(`✅ ${busResults} itinéraires bus trouvés (min: ${minBusNeeded}), arrêt anticipé`);
         break;
       }
     }
