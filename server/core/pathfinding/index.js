@@ -75,6 +75,8 @@ export class PathfindingEngine {
 
   /**
    * Calcule les itinéraires entre deux points géographiques
+   * Effectue plusieurs recherches RAPTOR à des heures décalées pour obtenir
+   * plusieurs départs successifs (comble les "trous" horaires)
    * 
    * @param {Object} origin - {lat, lon, name?}
    * @param {Object} destination - {lat, lon, name?}
@@ -86,9 +88,54 @@ export class PathfindingEngine {
       throw new Error('PathfindingEngine not ready. Call buildGraph() first.');
     }
 
-    const results = [];
+    const allResults = [];
     const dateStr = this.formatGtfsDate(departureTime);
-    const timeSeconds = this.timeToSeconds(departureTime);
+    const baseTimeSeconds = this.timeToSeconds(departureTime);
+
+    // Calculer la distance directe entre origine et destination
+    const directDistance = this.haversineDistance(origin.lat, origin.lon, destination.lat, destination.lon);
+    const isShortDistance = directDistance < 500; // Moins de 500m
+    const minBusResults = isShortDistance ? 1 : 5; // Minimum 5 bus pour distances normales
+    console.log(`📏 Distance directe: ${Math.round(directDistance)}m (${isShortDistance ? 'courte' : 'normale'}, min ${minBusResults} bus)`);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // MULTI-DEPARTURE SEARCH: Faire plusieurs recherches à des heures décalées
+    // pour obtenir plusieurs départs successifs (comme OTP)
+    // ════════════════════════════════════════════════════════════════════════
+    const SEARCH_OFFSETS = [0, 15, 30, 45, 60, 90]; // Minutes de décalage
+    const MAX_TOTAL_RESULTS = 8;
+    const seenTrips = new Set(); // Pour dédupliquer les mêmes trips
+    
+    for (const offsetMinutes of SEARCH_OFFSETS) {
+      if (allResults.length >= MAX_TOTAL_RESULTS) break;
+      
+      const searchTime = new Date(departureTime.getTime() + offsetMinutes * 60000);
+      const timeSeconds = this.timeToSeconds(searchTime);
+      
+      const results = await this._computeSingleSearch(origin, destination, searchTime, dateStr, timeSeconds, seenTrips);
+      
+      for (const result of results) {
+        // Vérifier que ce résultat n'est pas un doublon (même trip principal)
+        const transitLegs = result.legs.filter(l => l.type === 'transit');
+        const tripKey = transitLegs.map(l => l.tripId).join('|');
+        
+        if (!seenTrips.has(tripKey)) {
+          seenTrips.add(tripKey);
+          allResults.push(result);
+        }
+      }
+    }
+
+    // Trier et filtrer les résultats
+    const sorted = this.rankItineraries(allResults);
+    return sorted.slice(0, this.options.maxResults);
+  }
+
+  /**
+   * Effectue une seule recherche RAPTOR pour une heure donnée
+   */
+  async _computeSingleSearch(origin, destination, departureTime, dateStr, timeSeconds, seenTrips) {
+    const results = [];
 
     // Calculer la distance directe entre origine et destination
     const directDistance = this.haversineDistance(origin.lat, origin.lon, destination.lat, destination.lon);
