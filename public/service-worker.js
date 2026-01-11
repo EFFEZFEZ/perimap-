@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v329'; // ✅ v329: Fix variable env GMAPS_SERVER_KEY pour Google Places
+const CACHE_VERSION = 'v330'; // ✅ v330: Fix correspondances K1A - recherche hubs par proximité EN PLUS des exacts + temps de marche
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

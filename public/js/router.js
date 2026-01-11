@@ -539,7 +539,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         firstSegment,
         secondSegment,
         boardingStop,
-        transferStop,
+        transferStop,       // Arrêt où on descend du 1er bus
+        transferBoardStop,  // Arrêt où on monte dans le 2ème bus (peut être différent si hub par proximité)
+        walkDistanceBetweenStops, // Distance de marche entre les deux arrêts (null si même arrêt)
         finalStop,
         origin,
         destination,
@@ -550,6 +552,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         startStopSet = new Set(),
         endStopSet = new Set()
     }) => {
+        // Si transferBoardStop non fourni, utiliser transferStop (correspondance au même arrêt)
+        const actualTransferBoardStop = transferBoardStop || transferStop;
+        
         if (!firstSegment || !secondSegment || !boardingStop || !transferStop || !finalStop) {
             console.warn('assembleTransferItinerary: missing required params', {
                 firstSegment: !!firstSegment,
@@ -595,9 +600,31 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         itinerary.steps.push(firstLeg.step);
         itinerary.summarySegments.push(firstLeg.summary);
 
+        // Si les arrêts de correspondance sont différents, ajouter une étape de marche
+        let transferWalkStep = null;
+        if (actualTransferBoardStop.stop_id !== transferStop.stop_id && walkDistanceBetweenStops) {
+            const transferPoint = toPoint(transferStop);
+            const boardPoint = toPoint(actualTransferBoardStop);
+            if (transferPoint && boardPoint) {
+                const walkLabel = `Marcher vers ${getStopDisplayName(actualTransferBoardStop) || actualTransferBoardStop.stop_name}`;
+                transferWalkStep = await buildWalkStep(walkLabel, transferPoint, boardPoint);
+                if (transferWalkStep) {
+                    itinerary.steps.push(transferWalkStep);
+                    itinerary.summarySegments.push({
+                        type: 'WALK',
+                        name: 'Marche',
+                        color: '#6B7280',
+                        textColor: '#ffffff',
+                        durationMinutes: Math.round((transferWalkStep._durationSeconds || 0) / 60)
+                    });
+                }
+            }
+        }
+
         const waitSeconds = Math.max(0, secondSegment.departureSeconds - firstSegment.arrivalSeconds);
 
-        const secondLeg = buildBusLegStep(secondSegment, transferStop, finalStop);
+        // Utiliser actualTransferBoardStop pour le 2ème leg si différent
+        const secondLeg = buildBusLegStep(secondSegment, actualTransferBoardStop, finalStop);
         if (!secondLeg) {
             console.warn('assembleTransferItinerary: secondLeg build failed');
             return null;
@@ -618,6 +645,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const totalDurationSeconds =
             (approachStep?._durationSeconds || 0) +
             (firstLeg.step?._durationSeconds || 0) +
+            (transferWalkStep?._durationSeconds || 0) +  // Temps de marche entre les arrêts de correspondance
             waitSeconds +
             (secondLeg.step?._durationSeconds || 0) +
             (egressStep?._durationSeconds || 0);
@@ -626,10 +654,12 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         itinerary._hybridDiagnostics = {
             boardingStopId: boardingStop.stop_id,
             transferStopId: transferStop.stop_id,
+            transferBoardStopId: actualTransferBoardStop.stop_id,
             alightingStopId: finalStop.stop_id,
             firstTripId: firstSegment.tripId,
             secondTripId: secondSegment.tripId,
             transfers: 1,
+            transferWalkMeters: walkDistanceBetweenStops || 0,
             startDistanceMeters: (originMatch && originMatch.distance != null) ? Math.round(originMatch.distance) : null,
             endDistanceMeters: (destMatch && destMatch.distance != null) ? Math.round(destMatch.distance) : null,
             requestedWindow: { start: windowStartSec, end: windowEndSec },
@@ -725,9 +755,11 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             }
         }
         
-        // 2. Si pas de hub direct, chercher des arrêts proches (< 300m)
-        if (transferHubs.size === 0) {
-            const PROXIMITY_RADIUS = 300; // mètres
+        // 2. TOUJOURS chercher des arrêts proches (< 300m) EN PLUS des hubs exacts
+        // Cela permet de trouver des correspondances comme Tourny Pompidou -> Tourny (K1A)
+        const PROXIMITY_RADIUS = 300; // mètres
+        {
+            // Bloc de recherche par proximité (exécuté toujours)
             
             for (const [startRouteId, startStops] of startRoutes) {
                 for (const [endRouteId, endStops] of endRoutes) {
@@ -768,6 +800,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                     }
                 }
             }
+        }
+
+        // Log du nombre de hubs trouvés par type
+        const exactHubs = Array.from(transferHubs.values()).filter(h => h.isExact !== false).length;
+        const proximityHubs = Array.from(transferHubs.values()).filter(h => h.isExact === false).length;
+        if (!globalThis._hubTypeLogged) {
+            globalThis._hubTypeLogged = true;
+            console.log(`🚏 Hubs: ${exactHubs} exacts, ${proximityHubs} par proximité`);
         }
         
         return { startRoutes, endRoutes, transferHubs };
@@ -997,6 +1037,8 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                                     secondSegment,
                                     boardingStop: firstBoardingStop,
                                     transferStop: transferAlightStop,
+                                    transferBoardStop: hub.isExact ? null : transferBoardStop,  // Si hub par proximité, passer l'arrêt de montée différent
+                                    walkDistanceBetweenStops: hub.isExact ? null : hub.walkDistance,  // Distance de marche entre les arrêts
                                     finalStop,
                                     origin,
                                     destination,
@@ -1021,11 +1063,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                                 }
                                 
                                 if (itinerary) {
-                                    // Ajouter info sur la marche entre arrêts si différents
-                                    if (!hub.isExact && hub.walkDistance) {
-                                        itinerary._transferInfo.walkBetweenStops = hub.walkDistance;
-                                        itinerary._transferInfo.transferBoardStopName = transferBoardStop?.stop_name;
-                                    }
+                                    // Les infos de marche sont maintenant gérées dans assembleTransferItinerary
                                     allCandidates.push(itinerary);
                                 }
                             }
