@@ -3738,6 +3738,29 @@ function addItineraryMarkers(itinerary, map, markerLayer) {
         markerLayer.addLayer(marker);
     });
     
+    // V334: Ajouter marqueur de destination finale si dernière étape est WALK
+    const lastStep = itinerary.steps[itinerary.steps.length - 1];
+    if (lastStep && lastStep.type === 'WALK' && lastStep.polyline) {
+        const walkLatLngs = getPolylineLatLngs(lastStep.polyline) || getPolylineLatLngs(lastStep.polylines?.[lastStep.polylines.length - 1]);
+        if (walkLatLngs && walkLatLngs.length > 0) {
+            const [destLat, destLng] = walkLatLngs[walkLatLngs.length - 1];
+            if (Number.isFinite(destLat) && Number.isFinite(destLng)) {
+                const destIcon = L.divIcon({
+                    className: 'itinerary-stop-marker destination',
+                    html: '<span class="walk-icon">🚶</span>',
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13]
+                });
+                const destMarker = L.marker([destLat, destLng], {
+                    icon: destIcon,
+                    zIndexOffset: 1300
+                });
+                markerLayer.addLayer(destMarker);
+                console.log('📍 Marqueur destination finale ajouté (marche)');
+            }
+        }
+    }
+    
     console.log(`📍 ${stopPoints.length} marqueurs ajoutés (${stopPoints.filter(p => p.role === 'intermediate').length} arrêts intermédiaires)`);
 }
 

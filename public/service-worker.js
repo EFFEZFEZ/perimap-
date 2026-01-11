@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v333'; // v333: Nettoyage repo + suppression _server-disabled + scripts obsoletes
+const CACHE_VERSION = 'v334'; // v334: Fix polyline encoding bug + marqueur destination marche
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

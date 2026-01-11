@@ -49,8 +49,7 @@ function computeWalkDurationSeconds(distanceMeters) {
 }
 
 export function encodePolyline(points) {
-    const encodeSigned = (num) => {
-        let sgnNum = Math.round(num * 1e5);
+    const encodeSignedValue = (sgnNum) => {
         sgnNum = sgnNum < 0 ? ~(sgnNum << 1) : sgnNum << 1;
         let out = '';
         while (sgnNum >= 0x20) {
@@ -69,8 +68,8 @@ export function encodePolyline(points) {
         const lngE5 = Math.round(lng * 1e5);
         const dLat = latE5 - lastLat;
         const dLng = lngE5 - lastLng;
-        result += encodeSigned(dLat);
-        result += encodeSigned(dLng);
+        result += encodeSignedValue(dLat);
+        result += encodeSignedValue(dLng);
         lastLat = latE5;
         lastLng = lngE5;
     }
@@ -477,8 +476,22 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
 
         let latLngPolyline = geometryToLatLngs(geometry);
+        
+        // DEBUG K1A polyline
+        const routeDebug = segment.route?.route_short_name || segment.routeId;
+        console.log(`[POLYLINE DEBUG] Route ${routeDebug}, shapeId=${segment.shapeId}, geometry=${geometry ? 'OK(' + (geometry.coordinates?.length || 'array') + ' pts)' : 'NULL'}, latLngPolyline=${latLngPolyline ? latLngPolyline.length + ' pts' : 'NULL'}`);
+        if (latLngPolyline && latLngPolyline.length > 0) {
+            console.log(`[POLYLINE DEBUG] First point: [${latLngPolyline[0]}], Last point: [${latLngPolyline[latLngPolyline.length-1]}]`);
+            console.log(`[POLYLINE DEBUG] boardingPoint: lat=${boardingPoint.lat}, lon=${boardingPoint.lon}`);
+            console.log(`[POLYLINE DEBUG] alightingPoint: lat=${alightingPoint.lat}, lon=${alightingPoint.lon}`);
+        }
+        
         let slicedPolyline = slicePolylineBetween(latLngPolyline, boardingPoint, alightingPoint);
+        
+        console.log(`[POLYLINE DEBUG] slicedPolyline=${slicedPolyline ? slicedPolyline.length + ' pts' : 'NULL'}`);
+        
         if (!slicedPolyline || slicedPolyline.length < 2) {
+            console.log('[POLYLINE DEBUG] Using fallback 2-point polyline');
             slicedPolyline = [
                 [boardingPoint.lat, boardingPoint.lon],
                 [alightingPoint.lat, alightingPoint.lon]
