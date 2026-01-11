@@ -11,7 +11,7 @@
 
 // Runtime Node.js serverless (permet HTTP vers Oracle)
 export const config = {
-    runtime: 'nodejs20.x',
+    runtime: 'nodejs',
     maxDuration: 30,
 };
 
