@@ -406,6 +406,13 @@ export class PathfindingEngine {
         // Récupérer la polyline du shape GTFS si disponible
         const shapeId = trip?.shape_id;
         let polyline = null;
+        
+        // Debug: log une fois par requête pour vérifier les shapes
+        if (!this._polylineDebugLogged) {
+          console.log(`🔍 Polyline debug: tripId=${leg.tripId}, trip found=${!!trip}, shapeId=${shapeId}, shapes count=${this.gtfsData.shapes?.length || 0}`);
+          this._polylineDebugLogged = true;
+        }
+        
         if (shapeId && this.gtfsData.shapes) {
           polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
           if (!polyline) {
@@ -413,6 +420,8 @@ export class PathfindingEngine {
           }
         } else if (!this.gtfsData.shapes || this.gtfsData.shapes.length === 0) {
           console.log(`⚠️ Pas de shapes GTFS chargés, fallback ligne droite`);
+        } else if (!shapeId) {
+          console.log(`⚠️ Pas de shape_id pour trip ${leg.tripId}, fallback ligne droite`);
         }
         // Fallback: au minimum une ligne droite entre les arrêts pour éviter les polylines nulles
         if (!polyline) {
