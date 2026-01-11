@@ -18,7 +18,7 @@ function copyStaticFolders() {
     name: 'copy-static-folders',
     closeBundle() {
       // Copier les dossiers
-      const folders = ['views', 'data', 'icons', 'css'];
+      const folders = ['views', 'data', 'icons', 'css', 'js'];
       folders.forEach(folder => {
         const src = resolve(__dirname, 'public', folder);
         const dest = resolve(__dirname, 'dist', folder);
