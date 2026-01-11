@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v330'; // ✅ v330: Fix correspondances K1A - recherche hubs par proximité EN PLUS des exacts + temps de marche
+const CACHE_VERSION = 'v331'; // v331: Instruction "Prendre la X direction Y" + retrait emojis logs
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

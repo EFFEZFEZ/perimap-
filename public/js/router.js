@@ -331,12 +331,12 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         }
 
         if (!point && candidates.length === 0) {
-            console.warn(`⚠️ Hybrid: aucun repère géographique pour ${label}, utilisation d'un fallback par lignes principales.`);
+            console.warn(`[Hybrid] Aucun repere geographique pour ${label}, utilisation d'un fallback par lignes principales.`);
             dataManager.stops.slice(0, MAX_STOP_CANDIDATES).forEach(stop => addCandidate(stop, null));
         }
 
         if (!candidates.length) {
-            console.warn(`⚠️ Hybrid: aucun arrêt trouvé pour ${label}.`);
+            console.warn(`[Hybrid] Aucun arret trouve pour ${label}.`);
             return [];
         }
 
@@ -367,7 +367,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         if (best) {
             const distanceLabel = (best.distance != null) ? `${Math.round(best.distance)} m` : 'distance inconnue';
             const bestName = getStopDisplayName(best.stop) || best.stop.stop_name || best.stop.stop_id || 'arrêt inconnu';
-            console.log(`🔎 Hybrid: ${limited.length} arrêt(s) candidats pour ${label}. Meilleur: ${bestName} (${distanceLabel}).`);
+            console.log(`[Hybrid] ${limited.length} arret(s) candidats pour ${label}. Meilleur: ${bestName} (${distanceLabel}).`);
         }
         return limited;
     };
@@ -393,7 +393,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             baseDate.setHours(hour, minute, 0, 0);
             return baseDate;
         } catch (err) {
-            console.warn('⚠️ Hybrid: date invalide, utilisation de la date courante.', err);
+            console.warn('[Hybrid] Date invalide, utilisation de la date courante.', err);
             return new Date();
         }
     };
@@ -506,10 +506,15 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
             })
             .filter(s => s.name); // Filtrer les arrêts sans nom
         const route = segment.route || dataManager.getRoute(segment.routeId);
+        const routeName = route?.route_short_name || segment.routeId;
+        const headsign = segment.headsign;
+        const instruction = headsign 
+            ? `Prendre la ${routeName} direction ${headsign}`
+            : `Prendre la ${routeName}`;
         const busStep = {
             type: 'BUS',
             icon: ICONS.BUS,
-            instruction: `Prendre ${route?.route_short_name || segment.routeId}`,
+            instruction,
             polyline: { encodedPolyline: busPolylineEncoded, latLngs: busPolylineLatLngs },
             routeColor: route?.route_color ? `#${route.route_color}` : '#3388ff',
             routeTextColor: route?.route_text_color ? `#${route.route_text_color}` : '#ffffff',
@@ -803,7 +808,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         const proximityHubs = Array.from(transferHubs.values()).filter(h => h.isExact === false).length;
         if (!globalThis._hubTypeLogged) {
             globalThis._hubTypeLogged = true;
-            console.log(`🚏 Hubs: ${exactHubs} exacts, ${proximityHubs} par proximité`);
+            console.log(`[Hubs] ${exactHubs} exacts, ${proximityHubs} par proximite`);
         }
         
         return { startRoutes, endRoutes, transferHubs };
@@ -837,7 +842,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         // Log diagnostic
         if (!globalThis._transferHubsLogged) {
             globalThis._transferHubsLogged = true;
-            console.log('🎯 Analyse des correspondances:', {
+            console.log('[Correspondances] Analyse:', {
                 routesDepuisDepart: startRoutes.size,
                 routesVersArrivee: endRoutes.size,
                 hubsTrouves: transferHubs.size
@@ -855,9 +860,9 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                         toRoutes: hub.endRoutes.size
                     };
                 });
-                console.log('🚏 Hubs de correspondance:', hubSamples);
+                console.log('[Hubs] Correspondances:', hubSamples);
             } else {
-                console.log('❌ Aucun hub de correspondance trouvé entre les lignes');
+                console.log('[Hubs] Aucun hub de correspondance trouve entre les lignes');
             }
         }
         
@@ -905,7 +910,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                     if (boardingIdx !== -1 && alightIdx !== -1 && boardingIdx < alightIdx) {
                         const depSec = dataManager.timeToSeconds(stopTimes[boardingIdx].departure_time);
                         const arrSec = dataManager.timeToSeconds(stopTimes[alightIdx].arrival_time);
-                        // ✅ FIX: En mode "arriver", filtrer différemment - on veut des départs qui permettent d'arriver à temps
+                        // FIX: En mode "arriver", filtrer differemment - on veut des departs qui permettent d'arriver a temps
                         // En mode "partir", on filtre sur le départ (>= heure demandée)
                         // En mode "arriver", on garde les départs dans la fenêtre (ils seront filtrés plus tard sur l'arrivée finale)
                         const isArriveMode = searchTime?.type === 'arriver';
@@ -949,7 +954,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                 const hubName = hub.isExact 
                     ? dataManager.getStop(hubKey)?.stop_name 
                     : `${dataManager.getStop(hub.alightStop)?.stop_name} → ${dataManager.getStop(hub.boardStop)?.stop_name}`;
-                console.log(`🔎 Hub #1 "${hubName}":`, {
+                console.log(`[Hub] #1 "${hubName}":`, {
                     alightStopId,
                     boardStopId,
                     startRoutes: Array.from(hub.startRoutes).map(r => r.split(':').pop()),
@@ -1009,6 +1014,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                                     routeId: firstLeg.trip.route_id,
                                     route: dataManager.getRoute(firstLeg.trip.route_id),
                                     shapeId: firstLeg.trip.shape_id || null,
+                                    headsign: firstLeg.trip.trip_headsign || null,
                                     boardingStopId: firstLeg.stopTimes[firstLeg.boardingIdx].stop_id,
                                     alightingStopId: alightStopId,
                                     departureSeconds: firstLeg.depSec,
@@ -1021,6 +1027,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                                     routeId: trip.route_id,
                                     route: dataManager.getRoute(trip.route_id),
                                     shapeId: trip.shape_id || null,
+                                    headsign: trip.trip_headsign || null,
                                     boardingStopId: boardStopId,
                                     alightingStopId: stopTimes[alightIdx].stop_id,
                                     departureSeconds: depSec,
@@ -1049,7 +1056,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
                                 // Debug: pourquoi l'itinéraire est null ?
                                 if (!itinerary && !globalThis._assembleDebugLogged) {
                                     globalThis._assembleDebugLogged = true;
-                                    console.log('⚠️ assembleTransferItinerary returned null:', {
+                                    console.log('[Debug] assembleTransferItinerary returned null:', {
                                         firstBoardingStop: firstBoardingStop?.stop_name,
                                         transferAlightStop: transferAlightStop?.stop_name,
                                         finalStop: finalStop?.stop_name,
@@ -1072,7 +1079,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         // Trier tous les candidats selon le mode de recherche
         const isArriveMode = searchTime?.type === 'arriver';
         if (isArriveMode) {
-            // ✅ FIX: Mode ARRIVER - filtrer pour ne garder que les arrivées <= heure demandée
+            // FIX: Mode ARRIVER - filtrer pour ne garder que les arrivees <= heure demandee
             const filteredCandidates = allCandidates.filter(it => {
                 const arrSec = it._arrivalSeconds || dataManager.timeToSeconds(it.arrivalTime) || 0;
                 return arrSec <= reqSeconds; // Arrivée avant ou à l'heure demandée
@@ -1094,17 +1101,17 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         // Log de synthèse
         if (!globalThis._transferResultsLogged) {
             globalThis._transferResultsLogged = true;
-            console.log('🔄 Résultat correspondances:', {
+            console.log('[Correspondances] Resultat:', {
                 hubsAnalyses: hubsProcessed,
                 firstLegTripsTotal,
                 candidatsTotal: allCandidates.length,
                 itinerairesGardés: transferResults.length
             });
             if (firstLegTripsTotal === 0) {
-                console.log('⚠️ Aucun trip first leg trouvé - vérifier startStopSet vs alightStopId');
+                console.log('[Debug] Aucun trip first leg trouve - verifier startStopSet vs alightStopId');
             }
             if (transferResults.length > 0) {
-                console.log('✅ Itinéraires de correspondance:', transferResults.map(it => ({
+                console.log('[Correspondances] Itineraires:', transferResults.map(it => ({
                     departure: it.departureTime,
                     arrival: it.arrivalTime,
                     stepsCount: it.steps?.length,
@@ -1174,14 +1181,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     const dayOfWeek = dayNames[reqDate.getDay()];
     const activeServices = dataManager.getServiceIds(reqDate);
     
-    console.log(`📅 V192 Date: ${dateStr} (${dayOfWeek}) - ${activeServices.size} service(s) actif(s)`);
-    console.log(`📅 V192 Services actifs:`, Array.from(activeServices));
+    console.log(`[V192] Date: ${dateStr} (${dayOfWeek}) - ${activeServices.size} service(s) actif(s)`);
+    console.log(`[V192] Services actifs:`, Array.from(activeServices));
     
     if (activeServices.size === 0) {
-        console.warn(`⚠️ AUCUN SERVICE ACTIF pour ${dateStr} - Les bus ne circulent peut-être pas ce jour`);
+        console.warn(`[WARN] Aucun service actif pour ${dateStr} - Les bus ne circulent peut-etre pas ce jour`);
     }
     
-    console.log(`⏰ Fenêtre de recherche (${searchTime?.type || 'partir'}):`, {
+    console.log(`[Fenetre] Recherche (${searchTime?.type || 'partir'}):`, {
         demandé: formatSec(reqSeconds),
         fenêtre: `${formatSec(windowStartSec)} - ${formatSec(windowEndSec)}`,
         durée: `${SEARCH_WINDOW/3600}h`
@@ -1205,7 +1212,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     const sampleKey = Object.keys(dataManager.groupedStopMap || {})[0];
     if (sampleKey && !globalThis._routerGroupMapLogged) {
         globalThis._routerGroupMapLogged = true;
-        console.log('🗺️ groupedStopMap sample:', sampleKey, '->', dataManager.groupedStopMap[sampleKey]);
+        console.log('[Debug] groupedStopMap sample:', sampleKey, '->', dataManager.groupedStopMap[sampleKey]);
     }
 
     const startStopSet = new Set();
@@ -1222,14 +1229,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     const expandedEndIds = Array.from(endStopSet);
 
     // Log détaillé une seule fois pour diagnostiquer
-    console.log(`🔍 Router: Recherche directe`, {
+    console.log(`[Router] Recherche directe`, {
         startIds: expandedStartIds.slice(0, 5),
         endIds: expandedEndIds.slice(0, 5),
         fenetre: `${Math.floor(windowStartSec/3600)}h${Math.floor((windowStartSec%3600)/60)} - ${Math.floor(windowEndSec/3600)}h${Math.floor((windowEndSec%3600)/60)}`,
         mode: searchTime?.type || 'partir'
     });
 
-    // ✅ FIX: Passer le mode de recherche pour filtrer correctement sur départ ou arrivée
+    // FIX: Passer le mode de recherche pour filtrer correctement sur depart ou arrivee
     const searchMode = searchTime?.type || 'partir';
     const trips = getCachedTripsBetweenStops(
         expandedStartIds,
@@ -1241,14 +1248,14 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     );
     
     if (trips?.length > 0) {
-        console.log(`✅ Router: ${trips.length} trip(s) direct(s) trouvé(s)`);
+        console.log(`[Router] ${trips.length} trip(s) direct(s) trouve(s)`);
         // V195: Log TOUS les horaires trouvés pour diagnostic
         const horaires = trips.map(t => ({
             dep: formatSec(t.departureSeconds),
             arr: formatSec(t.arrivalSeconds),
             ligne: t.route?.route_short_name || t.routeId
         }));
-        console.log(`📋 V195 Tous les horaires GTFS:`, horaires);
+        console.log(`[V195] Tous les horaires GTFS:`, horaires);
     }
     
     const itineraries = [];
@@ -1331,7 +1338,7 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
     }
 
     if ((!trips || !trips.length) && HYBRID_ROUTING_CONFIG.ENABLE_TRANSFERS) {
-        console.warn('⚠️ Hybrid: aucun trip direct trouvé, tentative avec correspondances.');
+        console.warn('[Hybrid] Aucun trip direct trouve, tentative avec correspondances.');
         const transferItins = await buildTransferItineraries({
             origin,
             destination,
@@ -1373,18 +1380,18 @@ async function computeHybridItineraryInternal(context, fromCoordsRaw, toCoordsRa
         });
     }
     
-    console.log(`📊 V190 Itinéraires (${isArriveMode ? 'ARRIVER' : 'PARTIR'}):`, itineraries.slice(0, 5).map(it => ({
+    console.log(`[V190] Itineraires (${isArriveMode ? 'ARRIVER' : 'PARTIR'}):`, itineraries.slice(0, 5).map(it => ({
         dep: it.departureTime,
         arr: it.arrivalTime,
         type: it.type,
-        avant: it._isPreviousDeparture ? '⬅️' : ''
+        avant: it._isPreviousDeparture ? '<-' : ''
     })));
 
     if (!itineraries.length) {
-        console.warn('⚠️ Hybrid: aucun itinéraire GTFS (direct ou correspondance) trouvé.');
-        console.log('🔍 DEBUG - expandedStartIds:', expandedStartIds);
-        console.log('🔍 DEBUG - expandedEndIds:', expandedEndIds);
-        console.log('🔍 DEBUG - groupedStopMap keys sample:', Object.keys(dataManager.groupedStopMap || {}).slice(0, 10));
+        console.warn('[Hybrid] Aucun itineraire GTFS (direct ou correspondance) trouve.');
+        console.log('[DEBUG] expandedStartIds:', expandedStartIds);
+        console.log('[DEBUG] expandedEndIds:', expandedEndIds);
+        console.log('[DEBUG] groupedStopMap keys sample:', Object.keys(dataManager.groupedStopMap || {}).slice(0, 10));
         console.table({
             startCandidates: originCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
             endCandidates: destCandidates.map(c => ({ id: c.stop.stop_id, name: getStopDisplayName(c.stop) || c.stop.stop_name, dist: c.distance != null ? Math.round(c.distance) : null })),
