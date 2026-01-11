@@ -268,7 +268,9 @@ export class PathfindingEngine {
             adjustedDepartureTime,
             dateStr
           );
+          console.log(`🚌 computeJourneys retourne ${journeys.length} journey(s)`);
           for (const journey of journeys) {
+            console.log(`📦 Journey avec ${journey.legs?.length || 0} legs, types: ${journey.legs?.map(l => l.type).join(',') || 'none'}`);
             const itinerary = this.buildItinerary(
               origin,
               destination,
