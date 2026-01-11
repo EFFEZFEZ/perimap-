@@ -157,24 +157,35 @@ router.get('/autocomplete', handleAutocomplete);
 
 /**
  * Détermine la priorité d'affichage selon le type
- * 1 = Villes (affichées en premier)
- * 2 = POIs / Lieux importants
+ * 1 = POIs / Lieux importants (Écoles, Admin...)
+ * 2 = Arrêts de transport
  * 3 = Adresses / Rues
- * 4 = Arrêts de transport
+ * 4 = Villes (Moins précis)
  */
 function getCategoryPriority(type) {
   const t = (type || '').toLowerCase();
   
-  // Arrêts de transport (GTFS) - PRIORITÉ MAXIMALE
-  if (['stop', 'transport', 'bus_stop', 'station'].includes(t)) {
+  // 1. POIs et lieux importants (Écoles, Services publics, Commerces...)
+  if (['amenity', 'shop', 'leisure', 'tourism', 'historic', 'building', 'school', 'college', 'university', 'hall', 'hospital', 'public', 'office', 'work'].includes(t)) {
     return 1;
   }
-  
-  // Villes et localités
-  if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb', 'municipality', 'administrative'].includes(t)) {
+
+  // 2. Arrêts de transport (GTFS)
+  if (['stop', 'transport', 'bus_stop', 'station'].includes(t)) {
     return 2;
   }
-  return 3; // Par défaut: priorité moyenne
+  
+  // 3. Adresses et rues
+  if (['street', 'road', 'way', 'house', 'residential', 'address', 'highway'].includes(t)) {
+    return 3;
+  }
+
+  // 4. Villes et localités (En dernier car souvent trop vague)
+  if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb', 'municipality', 'administrative'].includes(t)) {
+    return 4;
+  }
+  
+  return 3; // Par défaut
 }
 
 /**
