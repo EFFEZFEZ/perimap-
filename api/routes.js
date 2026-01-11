@@ -11,8 +11,8 @@
 
 // Runtime Node.js serverless (permet HTTP vers Oracle)
 export const config = {
-    runtime: 'nodejs',
-    maxDuration: 30,
+    runtime: 'edge',
+    regions: ['cdg1'],
 };
 
 function parseBoolean(value) {
@@ -26,8 +26,8 @@ function parseBoolean(value) {
     return false;
 }
 
-// URL du backend Oracle Cloud - IP directe avec Host header
-const ORACLE_BACKEND = 'http://79.72.24.141';
+// URL du backend Oracle Cloud - utilise nip.io pour Edge runtime
+const ORACLE_BACKEND = 'http://79.72.24.141.nip.io';
 const ORACLE_HOST = 'oracle.perimap.fr';
 
 function parseLatLonString(value) {
