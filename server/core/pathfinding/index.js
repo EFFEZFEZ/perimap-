@@ -99,7 +99,7 @@ export class PathfindingEngine {
 
     // ════════════════════════════════════════════════════════════════════════
     // Clé unique pour le trip (combinaison des lignes utilisées et heures de départ)
-    const SEARCH_OFFSETS = [0, 30, 60, 90]; // Moins d'offsets mais couvrant plus large (0, +30, +1h, +1h30)
+    const SEARCH_OFFSETS = [0, 30, 60]; // Fenêtre réduite pour limiter le temps de calcul
     const seenTrips = new Map(); // Pour dédupliquer les mêmes trips (TripId -> {result, index})
     
     // ⚡ PARALLELISATION: Lancer toutes les recherches en même temps
@@ -194,7 +194,7 @@ export class PathfindingEngine {
     
     // ⚡ OPTIMISATION: Limiter drastiquement les candidats (Max 5)
     // C'est ici qu'on gagne la vitesse. Inutile de tester 120 arrêts.
-    const MAX_CANDIDATES = 5; 
+    const MAX_CANDIDATES = 4; 
     
     let originStops = this.raptor.findNearbyStops(origin.lat, origin.lon);
     let destStops = this.raptor.findNearbyStops(destination.lat, destination.lon);
@@ -222,7 +222,8 @@ export class PathfindingEngine {
             to: destination,
             distance: walkPath.distance,
             duration: walkPath.duration,
-            polyline: walkPath.coordinates,
+            // Encode la polyline (liste lat/lon) pour affichage carte
+            polyline: this.encodePolyline(walkPath.coordinates.map(c => [c.lat, c.lon])),
           }],
           totalDuration: walkPath.duration,
           totalDistance: walkPath.distance,
@@ -237,10 +238,10 @@ export class PathfindingEngine {
     // 2. Pour chaque combinaison origine/destination, calculer l'itinéraire RAPTOR
     // OPTIMISATION V2: réduire drastiquement les combinaisons pour la performance
     // On limite à 5 arrêts max de chaque côté (25 combinaisons max au lieu de 625)
-    const tryLimits = [3, 5];
-    const maxToCollect = Math.max(this.options.maxResults, 8);
+    const tryLimits = [3];
+    const maxToCollect = Math.max(this.options.maxResults, 6);
     const startCompute = Date.now();
-    const MAX_COMPUTE_TIME_MS = 2500; // Timeout global réduit pour respecter la cible de 2s
+    const MAX_COMPUTE_TIME_MS = 1500; // Timeout global resserré pour viser <2s
 
     for (const limit of tryLimits) {
       // Vérifier le timeout global
@@ -321,6 +322,10 @@ export class PathfindingEngine {
         },
         distance: originStop.distance,
         duration: originStop.walkTime,
+        polyline: this.encodePolyline([
+          [origin.lat, origin.lon],
+          [originStop.stop.stop_lat, originStop.stop.stop_lon]
+        ]),
         departureTime: currentTime.toISOString(),
         arrivalTime: new Date(currentTime.getTime() + originStop.walkTime * 1000).toISOString(),
       });
@@ -353,6 +358,10 @@ export class PathfindingEngine {
             },
             distance: this.haversineDistance(fromStop.stop_lat, fromStop.stop_lon, toStop.stop_lat, toStop.stop_lon),
             duration: walkDuration,
+            polyline: this.encodePolyline([
+              [fromStop.stop_lat, fromStop.stop_lon],
+              [toStop.stop_lat, toStop.stop_lon]
+            ]),
             departureTime: currentTime.toISOString(),
             arrivalTime: new Date(currentTime.getTime() + walkDuration * 1000).toISOString(),
           });
@@ -444,6 +453,10 @@ export class PathfindingEngine {
         to: destination,
         distance: destStop.distance,
         duration: destStop.walkTime,
+        polyline: this.encodePolyline([
+          [destStop.stop.stop_lat, destStop.stop.stop_lon],
+          [destination.lat, destination.lon]
+        ]),
         departureTime: currentTime.toISOString(),
         arrivalTime: new Date(currentTime.getTime() + destStop.walkTime * 1000).toISOString(),
       });
