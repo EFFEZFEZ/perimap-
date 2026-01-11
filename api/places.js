@@ -292,14 +292,15 @@ function formatResult(item, type, index) {
       subtitle = '';
   }
   
+  // Format compatible avec le client (description + placeId/coordinates)
+  const displayName = `${icon} ${item.name}`;
+  const description = subtitle ? `${displayName}, ${subtitle}` : displayName;
+  
   return {
-    place_id: `${type}_${index}`,
-    name: `${icon} ${item.name}`,
-    formatted_address: subtitle,
-    geometry: {
-      location: { lat: item.lat, lng: item.lng }
-    },
-    source: type === 'google' ? 'google' : 'local',
+    description: description,
+    placeId: `local_${type}_${index}`,
+    coordinates: { lat: item.lat, lng: item.lng },
+    source: 'local',
     type: type
   };
 }
@@ -441,13 +442,11 @@ export default async function handler(req) {
             
             if (!seenNames.has(normalizedName) && name) {
               seenNames.add(normalizedName);
+              const location = details.location || { latitude: CENTER.lat, longitude: CENTER.lng };
               results.push({
-                place_id: placeId,
-                name: `📌 ${name}`,
-                formatted_address: details.formattedAddress || '',
-                geometry: {
-                  location: details.location || { lat: CENTER.lat, lng: CENTER.lng }
-                },
+                description: `📌 ${name}, ${details.formattedAddress || ''}`,
+                placeId: placeId,
+                coordinates: { lat: location.latitude, lng: location.longitude },
                 source: 'google',
                 type: 'address'
               });
@@ -472,5 +471,3 @@ export default async function handler(req) {
     },
   });
 }
-
-

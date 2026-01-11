@@ -309,7 +309,9 @@ export class ApiManager {
                 const data = await response.json();
                 results = (data.predictions || []).map(p => ({
                     description: p.description,
-                    placeId: p.placeId
+                    placeId: p.placeId,
+                    coordinates: p.coordinates,
+                    source: p.source || 'proxy'
                 }));
                 
                 console.log(`✅ ${results.length} suggestions trouvées (proxy)`);
