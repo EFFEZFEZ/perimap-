@@ -268,9 +268,7 @@ export class PathfindingEngine {
             adjustedDepartureTime,
             dateStr
           );
-          console.log(`🚌 computeJourneys retourne ${journeys.length} journey(s)`);
           for (const journey of journeys) {
-            console.log(`📦 Journey avec ${journey.legs?.length || 0} legs, types: ${journey.legs?.map(l => l.type).join(',') || 'none'}`);
             const itinerary = this.buildItinerary(
               origin,
               destination,
@@ -309,7 +307,6 @@ export class PathfindingEngine {
    * Construit un itinéraire complet avec les segments de marche
    */
   buildItinerary(origin, destination, originStop, destStop, journey, baseTime) {
-    console.log(`🏗️ buildItinerary appelé: journey.legs=${JSON.stringify(journey.legs?.map(l => ({type: l.type, from: l.fromStop, to: l.toStop})))}`);
     const legs = [];
     let currentTime = new Date(baseTime);
 
@@ -410,9 +407,6 @@ export class PathfindingEngine {
         // Récupérer la polyline du shape GTFS si disponible
         const shapeId = trip?.shape_id;
         let polyline = null;
-        
-        // Debug: toujours log pour diagnostiquer
-        console.log(`🔍 Transit leg: tripId=${leg.tripId}, trip found=${!!trip}, shapeId=${shapeId || 'NULL'}, shapes=${this.gtfsData.shapes?.length || 0}`);
         
         if (shapeId && this.gtfsData.shapes) {
           polyline = this.extractShapePolyline(shapeId, fromStop, toStop);
