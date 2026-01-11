@@ -597,7 +597,15 @@ export class PathfindingEngine {
       .filter(s => s.shape_id === shapeId)
       .sort((a, b) => parseInt(a.shape_pt_sequence) - parseInt(b.shape_pt_sequence));
 
-    if (shapePoints.length < 2) return null;
+    if (shapePoints.length < 2) {
+      // Debug: afficher quelques shape_ids pour comparer
+      if (!this._shapeDebugLogged) {
+        const sampleShapeIds = [...new Set(this.gtfsData.shapes.slice(0, 10).map(s => s.shape_id))];
+        console.log(`🔍 Shape debug: trip.shape_id="${shapeId}", sample shapes:`, sampleShapeIds);
+        this._shapeDebugLogged = true;
+      }
+      return null;
+    }
 
     const fromLat = parseFloat(fromStop?.stop_lat);
     const fromLon = parseFloat(fromStop?.stop_lon);
