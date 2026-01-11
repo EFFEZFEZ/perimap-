@@ -165,21 +165,14 @@ router.get('/autocomplete', handleAutocomplete);
 function getCategoryPriority(type) {
   const t = (type || '').toLowerCase();
   
-  // Villes et localités
-  if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb', 'municipality', 'administrative'].includes(t)) {
+  // Arrêts de transport (GTFS) - PRIORITÉ MAXIMALE
+  if (['stop', 'transport', 'bus_stop', 'station'].includes(t)) {
     return 1;
   }
-  // POIs et lieux importants
-  if (['amenity', 'shop', 'leisure', 'tourism', 'historic', 'building', 'school', 'hospital', 'university', 'college', 'supermarket', 'mall'].includes(t)) {
+  
+  // Villes et localités
+  if (['city', 'town', 'village', 'hamlet', 'borough', 'suburb', 'municipality', 'administrative'].includes(t)) {
     return 2;
-  }
-  // Adresses et rues
-  if (['street', 'road', 'way', 'house', 'residential', 'address', 'highway'].includes(t)) {
-    return 3;
-  }
-  // Arrêts de transport (GTFS)
-  if (['stop', 'transport', 'bus_stop', 'station'].includes(t)) {
-    return 4;
   }
   return 3; // Par défaut: priorité moyenne
 }

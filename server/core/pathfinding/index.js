@@ -23,8 +23,8 @@ export class PathfindingEngine {
       maxWalkDistance: options.maxWalkDistance || 1000,
       walkSpeed: options.walkSpeed || 1.25,
       maxTransfers: options.maxTransfers || 3,
-      minTransferTime: options.minTransferTime || 120,
-      transferPenalty: options.transferPenalty || 300,
+      minTransferTime: options.minTransferTime || 180, // 3 minutes min de correspondance
+      transferPenalty: options.transferPenalty || 600, // 10 minutes de pénalité pour limiter les correspondances inutiles
       maxResults: options.maxResults || 5,
       nearbyStopRadius: options.nearbyStopRadius || 500,
       ...options,

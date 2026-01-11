@@ -58,8 +58,8 @@ async function loadAutocompleteCache() {
                 _words: splitWords(nameLower),
                 lat: parseFloat(row.stop_lat),
                 lon: parseFloat(row.stop_lon),
-                type: 'stop',           // Catégorie basse priorité
-                priority: 4,            // 1=ville, 2=POI, 3=adresse, 4=arrêt
+                type: 'stop',           // Catégorie HAUTE priorité
+                priority: 1,            // 1=arrêt, 2=ville, 3=POI/adresse
                 category: 'transport'
               });
             })
