@@ -1,14 +1,18 @@
 /*
  * Copyright (c) 2026 Périmap. Tous droits réservés.
- * API Routes - Version Edge Function (hybride)
- * V315 - Supporte OTP (Oracle) + fallback Google (secours)
+ * API Routes - Version Serverless Function (hybride)
+ * V316 - Supporte OTP (Oracle) + fallback Google (secours)
  * 
  * - Mode OTP (TRANSIT/WALK/BICYCLE): Proxy vers Oracle Cloud
  * - Fallback: Google Routes API si Oracle/OTP échoue
+ * 
+ * Note: Utilise runtime Node.js (pas Edge) car Edge bloque HTTP non-sécurisé
  */
 
+// Runtime Node.js serverless (permet HTTP vers Oracle)
 export const config = {
-    runtime: 'edge',
+    runtime: 'nodejs20.x',
+    maxDuration: 30,
 };
 
 function parseBoolean(value) {
@@ -22,8 +26,9 @@ function parseBoolean(value) {
     return false;
 }
 
-// URL du backend Oracle Cloud (via nip.io pour contourner restriction Vercel)
-const ORACLE_BACKEND = 'http://79.72.24.141.nip.io';
+// URL du backend Oracle Cloud - IP directe avec Host header
+const ORACLE_BACKEND = 'http://79.72.24.141';
+const ORACLE_HOST = 'oracle.perimap.fr';
 
 function parseLatLonString(value) {
     if (typeof value !== 'string') return null;
@@ -37,10 +42,18 @@ function parseLatLonString(value) {
 
 async function fetchWithTimeout(url, options, timeoutMs) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => {
+        console.error('[routes V316] TIMEOUT after', timeoutMs, 'ms for', url);
+        controller.abort();
+    }, timeoutMs);
     try {
+        console.log('[routes V316] Fetching:', url);
         const resp = await fetch(url, { ...options, signal: controller.signal });
+        console.log('[routes V316] Fetch success, status:', resp.status);
         return resp;
+    } catch (err) {
+        console.error('[routes V316] Fetch error:', err.name, err.message);
+        throw err;
     } finally {
         clearTimeout(timeoutId);
     }
@@ -57,7 +70,7 @@ export default async function handler(request) {
         'Vary': 'Origin',
     };
 
-    console.log('[routes edge V315] Requête reçue:', request.method);
+    console.log('[routes V316] Requête reçue:', request.method);
 
     if (request.method === 'OPTIONS') {
         return new Response(null, { status: 200, headers: corsHeaders });
@@ -72,8 +85,8 @@ export default async function handler(request) {
 
     try {
         const body = await request.json();
-        console.log('[routes edge V315] Mode:', body.mode || body.travelMode || 'non spécifié');
-        console.log('[routes edge V315] Body keys:', Object.keys(body).join(', '));
+        console.log('[routes V316] Mode:', body.mode || body.travelMode || 'non spécifié');
+        console.log('[routes V316] Body keys:', Object.keys(body).join(', '));
 
         // Support both fromPlace/toPlace and origin/destination formats
         if (!body || (!body.fromPlace && !body.origin) || (!body.toPlace && !body.destination)) {
@@ -91,7 +104,7 @@ export default async function handler(request) {
 
         // ========== MODE OTP: Proxy vers Oracle Cloud ==========
         if (isOtpPayload) {
-            console.log('[routes edge V315] Mode OTP → Oracle');
+            console.log('[routes V316] Mode OTP → Oracle');
             
             // Transform Perimap format to OTP v2 format
             let { fromPlace, toPlace, date, time, arriveBy, maxWalkDistance, numItineraries } = body;
@@ -160,39 +173,44 @@ export default async function handler(request) {
                 arriveBy: parseBoolean(arriveBy),
             };
 
-            console.log('[routes edge V315] Proxy vers Oracle:', oracleRoutesUrl);
-            console.log('[routes edge V315] Payload OTP-compat:', oraclePayload);
+            console.log('[routes V316] Proxy vers Oracle:', oracleRoutesUrl);
+            console.log('[routes V316] Payload OTP-compat:', oraclePayload);
 
             try {
+                const startTime = Date.now();
                 const response = await fetchWithTimeout(oracleRoutesUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'User-Agent': 'Perimap-Vercel-Edge/1.0'
+                        'User-Agent': 'Perimap-Vercel/1.0',
+                        'Host': ORACLE_HOST
                     },
                     body: JSON.stringify(oraclePayload),
-                }, 20000);
+                }, 25000);
+                
+                const elapsed = Date.now() - startTime;
+                console.log('[routes V316] Oracle réponse reçue en', elapsed, 'ms');
 
                 let data;
                 try {
                     data = await response.json();
                 } catch (e) {
-                    console.error('[routes edge V315] Failed to parse JSON:', e.message);
+                    console.error('[routes V316] Failed to parse JSON:', e.message);
                     data = { error: 'Invalid JSON response from OTP' };
                 }
 
-                console.log('[routes edge V315] Oracle réponse:', response.status, '- error:', data.error || 'none', '- itineraires:', data.plan?.itineraries?.length || 0);
+                console.log('[routes V316] Oracle réponse:', response.status, '- error:', data.error || 'none', '- itineraires:', data.plan?.itineraries?.length || 0);
 
                 // If OTP returns an error, log the full response and error message
                 if (!response.ok) {
-                    console.error('[routes edge V315] Oracle error response:', JSON.stringify(data));
+                    console.error('[routes V316] Oracle error response:', JSON.stringify(data));
                     throw new Error(data.error?.message || data.error || 'oracle-error');
                 }
 
                 // If OTP returns 200 but no itineraries
                 if (!data.plan || !data.plan.itineraries || data.plan.itineraries.length === 0) {
-                    console.warn('[routes edge V315] Oracle returned no itineraries');
+                    console.warn('[routes V316] Oracle returned no itineraries');
                     return new Response(
                         JSON.stringify({ 
                             success: false, 
@@ -212,7 +230,7 @@ export default async function handler(request) {
                     }
                 );
             } catch (otpError) {
-                console.error('[routes edge V315] Backend Oracle indisponible:', otpError?.message || otpError);
+                console.error('[routes V316] Backend Oracle indisponible:', otpError?.message || otpError);
 
                 // Fallback Google (secours) si une clé serveur existe.
                 const apiKey = process.env.GMAPS_SERVER_KEY;
@@ -289,7 +307,7 @@ export default async function handler(request) {
         }
         
         // ========== Payload Google: proxy computeRoutes (utilisé uniquement si le client l'envoie) ==========
-        console.log('[routes edge V315] Payload Google → Google');
+        console.log('[routes V316] Payload Google → Google');
         
         const apiKey = process.env.GMAPS_SERVER_KEY;
         if (!apiKey) {
