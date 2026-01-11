@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v328'; // ✅ v328: Suppression POI inventés - utilise Google Places pour données réelles
+const CACHE_VERSION = 'v329'; // ✅ v329: Fix variable env GMAPS_SERVER_KEY pour Google Places
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

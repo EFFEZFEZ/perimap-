@@ -250,7 +250,7 @@ export default async function handler(req) {
     }
   } else {
     try {
-      const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+      const apiKey = process.env.GMAPS_SERVER_KEY;
       if (!apiKey) throw new Error('API key missing');
 
       const requestBody = {
