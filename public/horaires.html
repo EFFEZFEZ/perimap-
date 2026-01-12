@@ -123,8 +123,17 @@
   </main>
 
   <script>
-    // Redirection douce (UX), tout en gardant une page HTML indexable
-    setTimeout(() => { window.location.href = '/#horaires'; }, 1200);
+    // Redirection seulement pour les vrais utilisateurs (pas les bots Google)
+    const isBot = /bot|crawl|spider|googlebot|bingbot|yandex|baidu|duckduck/i.test(navigator.userAgent);
+    if (!isBot) {
+      const redirectBtn = document.querySelector('.btn-primary');
+      if (redirectBtn) {
+        redirectBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = '/#horaires';
+        });
+      }
+    }
   </script>
 </body>
 </html>

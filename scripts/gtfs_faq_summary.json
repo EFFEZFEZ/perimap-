@@ -1,0 +1,234 @@
+{
+  "A": {
+    "weekday": {
+      "0": {
+        "ref_date": "20260112",
+        "start": "06h47",
+        "end": "20h08",
+        "trips": 42,
+        "headway": {
+          "median_min": 18,
+          "p10_min": 13,
+          "p90_min": 27
+        },
+        "terminus_from": "ZAE Marsac",
+        "terminus_to": "Centre Hospitalier"
+      },
+      "1": {
+        "ref_date": "20260112",
+        "start": "06h34",
+        "end": "20h02",
+        "trips": 40,
+        "headway": {
+          "median_min": 21,
+          "p10_min": 14,
+          "p90_min": 28
+        },
+        "terminus_from": "Centre Hospitalier",
+        "terminus_to": "ZAE Marsac"
+      }
+    },
+    "saturday": {
+      "0": {
+        "ref_date": "20260117",
+        "start": "07h21",
+        "end": "20h10",
+        "trips": 22,
+        "headway": {
+          "median_min": 33,
+          "p10_min": 33,
+          "p90_min": 60
+        },
+        "terminus_from": "ZAE Marsac",
+        "terminus_to": "Centre Hospitalier"
+      },
+      "1": {
+        "ref_date": "20260117",
+        "start": "06h51",
+        "end": "19h38",
+        "trips": 22,
+        "headway": {
+          "median_min": 33,
+          "p10_min": 33,
+          "p90_min": 58
+        },
+        "terminus_from": "Centre Hospitalier",
+        "terminus_to": "ZAE Marsac"
+      }
+    }
+  },
+  "B": {
+    "weekday": {
+      "0": {
+        "ref_date": "20260112",
+        "start": "06h13",
+        "end": "19h36",
+        "trips": 49,
+        "headway": {
+          "median_min": 17,
+          "p10_min": 10,
+          "p90_min": 21
+        },
+        "terminus_from": "Les Tournesols",
+        "terminus_to": "Gare SNCF"
+      },
+      "1": {
+        "ref_date": "20260112",
+        "start": "06h29",
+        "end": "19h34",
+        "trips": 48,
+        "headway": {
+          "median_min": 17,
+          "p10_min": 12,
+          "p90_min": 20
+        },
+        "terminus_from": "Gare SNCF",
+        "terminus_to": "Les Tournesols"
+      }
+    },
+    "saturday": {
+      "0": {
+        "ref_date": "20260117",
+        "start": "06h48",
+        "end": "19h44",
+        "trips": 26,
+        "headway": {
+          "median_min": 28,
+          "p10_min": 24,
+          "p90_min": 54
+        },
+        "terminus_from": "Boulazac Centre commercial",
+        "terminus_to": "Gare SNCF"
+      },
+      "1": {
+        "ref_date": "20260117",
+        "start": "07h15",
+        "end": "19h39",
+        "trips": 26,
+        "headway": {
+          "median_min": 28,
+          "p10_min": 24,
+          "p90_min": 41
+        },
+        "terminus_from": "Gare SNCF",
+        "terminus_to": "Boulazac Centre commercial"
+      }
+    }
+  },
+  "C": {
+    "weekday": {
+      "0": {
+        "ref_date": "20260112",
+        "start": "06h46",
+        "end": "19h29",
+        "trips": 40,
+        "headway": {
+          "median_min": 19,
+          "p10_min": 12,
+          "p90_min": 26
+        },
+        "terminus_from": "ZAE Marsac",
+        "terminus_to": "P+r Aquacap"
+      },
+      "1": {
+        "ref_date": "20260112",
+        "start": "06h37",
+        "end": "19h27",
+        "trips": 40,
+        "headway": {
+          "median_min": 19,
+          "p10_min": 15,
+          "p90_min": 26
+        },
+        "terminus_from": "P+r Aquacap",
+        "terminus_to": "ZAE Marsac"
+      }
+    },
+    "saturday": {
+      "0": {
+        "ref_date": "20260117",
+        "start": "06h50",
+        "end": "19h57",
+        "trips": 22,
+        "headway": {
+          "median_min": 35,
+          "p10_min": 28,
+          "p90_min": 61
+        },
+        "terminus_from": "ZAE Marsac",
+        "terminus_to": "P+r Aquacap"
+      },
+      "1": {
+        "ref_date": "20260117",
+        "start": "07h25",
+        "end": "19h26",
+        "trips": 21,
+        "headway": {
+          "median_min": 34,
+          "p10_min": 30,
+          "p90_min": 39
+        },
+        "terminus_from": "P+r Aquacap",
+        "terminus_to": "ZAE Marsac"
+      }
+    }
+  },
+  "D": {
+    "weekday": {
+      "0": {
+        "ref_date": "20260112",
+        "start": "06h29",
+        "end": "19h57",
+        "trips": 40,
+        "headway": {
+          "median_min": 18,
+          "p10_min": 11,
+          "p90_min": 30
+        },
+        "terminus_from": "P+r Charriéras",
+        "terminus_to": "Tourny"
+      },
+      "1": {
+        "ref_date": "20260112",
+        "start": "06h34",
+        "end": "19h22",
+        "trips": 39,
+        "headway": {
+          "median_min": 18,
+          "p10_min": 12,
+          "p90_min": 30
+        },
+        "terminus_from": "Tourny",
+        "terminus_to": "P+r Charriéras"
+      }
+    },
+    "saturday": {
+      "0": {
+        "ref_date": "20260117",
+        "start": "07h13",
+        "end": "19h55",
+        "trips": 26,
+        "headway": {
+          "median_min": 28,
+          "p10_min": 21,
+          "p90_min": 49
+        },
+        "terminus_from": "Trélissac Les Garennes",
+        "terminus_to": "Tourny"
+      },
+      "1": {
+        "ref_date": "20260117",
+        "start": "06h43",
+        "end": "19h21",
+        "trips": 26,
+        "headway": {
+          "median_min": 26,
+          "p10_min": 21,
+          "p90_min": 51
+        },
+        "terminus_from": "Tourny",
+        "terminus_to": "Trélissac Les Garennes"
+      }
+    }
+  }
+}
