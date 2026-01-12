@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v336'; // v336: Update line pages links/FAQ
+const CACHE_VERSION = 'v338'; // v338: Cache local icons + remove ibb.co network-only
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -24,7 +24,10 @@ const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
 const CRITICAL_ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/perimap-logo.webp'
 ];
 
 // Assets secondaires: pages HTML statiques et views
@@ -52,7 +55,7 @@ const SECONDARY_ASSETS = [
 ];
 
 // Patterns pour Network-Only
-const NETWORK_ONLY = ['/api/', 'google', 'googleapis', 'ibb.co', 'line-status.json'];
+const NETWORK_ONLY = ['/api/', 'google', 'googleapis', 'line-status.json'];
 
 // Patterns pour données GTFS (cache long terme)
 const GTFS_PATTERNS = ['/data/gtfs/', '.json', '.txt'];
