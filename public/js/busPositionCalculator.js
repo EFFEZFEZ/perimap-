@@ -1,15 +1,11 @@
-﻿/*
- * Copyright (c) 2025 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
-/**
+﻿/**
  * busPositionCalculator.js
  * * Calcule les positions géographiques interpolées des bus entre deux arrêts
- * * OPTIMISÉ V3 (Cache Géométrique):
- * * - Élimine les calculs trigonométriques (Haversine) dans la boucle d'animation.
- * * - Met en cache les segments de route et leurs distances cumulées.
- * * - Réduit drastiquement l'usage CPU/Batterie.
- * * V305: Intégration temps réel pour ajustement de vitesse
+ * * OPTIMISÉ V306 (Correction Temps Réel):
+ * * - V305: Intégration temps réel pour ajustement de vitesse
+ * * - V306: Validation de cohérence RT pour éviter positions aberrantes
+ * * - V306: Indicateur de confiance (hasRealtime, isEstimated)
+ * * - V306: Correction du problème "bus face à soi mais absent de la carte"
  */
 
 export class BusPositionCalculator {
@@ -26,6 +22,14 @@ export class BusPositionCalculator {
         // Clé: tripId, Valeur: { rtMinutes, fetchedAt, adjustedProgress }
         this.rtAdjustmentCache = new Map();
         this.rtCacheMaxAge = 30000; // 30 secondes
+        
+        // V306: Seuils de validation pour éviter positions aberrantes
+        this.validationThresholds = {
+            maxProgressJump: 0.5,        // Max 50% de saut de progress en une mise à jour
+            maxRtDeviation: 0.3,         // Max 30% de déviation RT vs théorique avant alerte
+            minSegmentDuration: 30,      // 30 secondes minimum entre 2 arrêts
+            rtFreshnessLimit: 60000      // Données RT valables 60 secondes max
+        };
     }
     
     /**
@@ -37,7 +41,7 @@ export class BusPositionCalculator {
 
     /**
      * Calcule la position interpolée d'un bus entre deux arrêts
-     * V305: Supporte l'ajustement via données RT
+     * V306: Amélioration avec validation de cohérence et indicateurs de confiance
      */
     calculatePosition(segment, routeId = null, tripId = null, routeShortName = null) {
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) {
@@ -54,10 +58,13 @@ export class BusPositionCalculator {
             return null;
         }
 
-        // V305: Utiliser progress ajusté par RT si disponible
-        let progress = segment.progress; // 0.0 à 1.0
+        // V306: Récupérer le progress théorique (basé sur l'heure)
+        let theoreticalProgress = segment.progress; // 0.0 à 1.0
+        let finalProgress = theoreticalProgress;
         let rtInfo = null;
+        let positionConfidence = 'theoretical'; // 'realtime', 'adjusted', 'theoretical'
         
+        // V306: Tenter d'ajuster avec le temps réel
         if (tripId && routeShortName && this.realtimeManager) {
             rtInfo = this.getRealtimeAdjustedProgress(
                 tripId, 
@@ -67,8 +74,22 @@ export class BusPositionCalculator {
                 segment.departureTime,
                 segment.arrivalTime
             );
+            
             if (rtInfo && rtInfo.adjustedProgress !== null) {
-                progress = rtInfo.adjustedProgress;
+                // V306: Valider la cohérence du progress RT
+                const validatedProgress = this.validateRtProgress(
+                    theoreticalProgress, 
+                    rtInfo.adjustedProgress,
+                    rtInfo.isRealtime
+                );
+                
+                finalProgress = validatedProgress.progress;
+                positionConfidence = validatedProgress.confidence;
+                
+                // V306: Enrichir rtInfo avec les infos de validation
+                rtInfo.validated = validatedProgress.isValid;
+                rtInfo.deviation = validatedProgress.deviation;
+                rtInfo.confidence = positionConfidence;
             }
         }
 
@@ -84,11 +105,14 @@ export class BusPositionCalculator {
                     routeCoordinates, 
                     fromLat, fromLon, 
                     toLat, toLon, 
-                    progress
+                    finalProgress
                 );
                 if (position) {
-                    // V305: Ajouter les infos RT à la position
+                    // V306: Ajouter les infos enrichies à la position
                     position.rtInfo = rtInfo;
+                    position.confidence = positionConfidence;
+                    position.hasRealtime = rtInfo?.isRealtime === true;
+                    position.isEstimated = positionConfidence !== 'realtime';
                     return position;
                 }
             }
@@ -96,15 +120,73 @@ export class BusPositionCalculator {
 
         // Fallback: Interpolation linéaire simple (ligne droite) si pas de GeoJSON
         // ou si le calcul géométrique a échoué
-        const lat = fromLat + (toLat - fromLat) * progress;
-        const lon = fromLon + (toLon - fromLon) * progress;
+        const lat = fromLat + (toLat - fromLat) * finalProgress;
+        const lon = fromLon + (toLon - fromLon) * finalProgress;
 
         return {
             lat,
             lon,
-            progress,
+            progress: finalProgress,
             bearing: this.calculateLinearBearing(fromLat, fromLon, toLat, toLon),
-            rtInfo // V305: Infos temps réel
+            rtInfo,
+            confidence: positionConfidence,
+            hasRealtime: rtInfo?.isRealtime === true,
+            isEstimated: positionConfidence !== 'realtime'
+        };
+    }
+    
+    /**
+     * V306: Valide la cohérence du progress temps réel par rapport au théorique
+     * Évite les sauts brusques de position qui peuvent perdre la confiance utilisateur
+     * 
+     * @param {number} theoreticalProgress - Progress calculé depuis l'horaire
+     * @param {number} rtProgress - Progress calculé depuis le temps réel
+     * @param {boolean} isRealtime - Si la donnée vient bien du temps réel (pas théorique)
+     * @returns {Object} { progress, confidence, isValid, deviation }
+     */
+    validateRtProgress(theoreticalProgress, rtProgress, isRealtime) {
+        const deviation = Math.abs(rtProgress - theoreticalProgress);
+        
+        // Si pas de données temps réel réelles, utiliser le théorique
+        if (!isRealtime) {
+            return {
+                progress: theoreticalProgress,
+                confidence: 'theoretical',
+                isValid: true,
+                deviation: 0
+            };
+        }
+        
+        // Cas 1: Déviation acceptable (< 30%) - Utiliser le temps réel
+        if (deviation <= this.validationThresholds.maxRtDeviation) {
+            return {
+                progress: rtProgress,
+                confidence: 'realtime',
+                isValid: true,
+                deviation
+            };
+        }
+        
+        // Cas 2: Déviation modérée (30-50%) - Moyenne pondérée RT/théorique
+        if (deviation <= this.validationThresholds.maxProgressJump) {
+            // Pondérer 70% RT, 30% théorique pour lisser les sauts
+            const smoothedProgress = rtProgress * 0.7 + theoreticalProgress * 0.3;
+            return {
+                progress: smoothedProgress,
+                confidence: 'adjusted',
+                isValid: true,
+                deviation
+            };
+        }
+        
+        // Cas 3: Déviation trop grande (> 50%) - Probablement erreur, utiliser théorique
+        // Cela évite qu'un bus "saute" brutalement sur la carte
+        console.warn(`[BusPosition] Déviation RT trop grande: ${(deviation * 100).toFixed(1)}% - utilisation théorique`);
+        return {
+            progress: theoreticalProgress,
+            confidence: 'theoretical',
+            isValid: false,
+            deviation
         };
     }
     
@@ -367,8 +449,11 @@ export class BusPositionCalculator {
                 ...bus,
                 position,
                 bearing,
-                // V305: Propager les infos RT
-                rtInfo: position.rtInfo || null
+                // V306: Propager les infos RT et indicateurs de confiance
+                rtInfo: position.rtInfo || null,
+                hasRealtime: position.hasRealtime || false,
+                isEstimated: position.isEstimated !== false, // true par défaut
+                positionConfidence: position.confidence || 'unknown'
             };
         }).filter(bus => bus !== null);
     }

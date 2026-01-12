@@ -74,6 +74,106 @@ export const HAWK_KEY_BY_STOP_CODE = {
     "BEa01": "213", "CLA01": "527", "Cde02": "12378"
 };
 
+/**
+ * ARRÊTS PRIORITAIRES À PRÉCHARGER
+ * Ces arrêts sont les plus fréquentés et seront préchargés au démarrage
+ * Format: { stopPlaceId, name, stopCodes: [{code, hawkKey}] }
+ */
+export const PRIORITY_STOPS = [
+    {
+        name: 'Taillefer',
+        stopPlaceId: 'MOBIITI:StopPlace:77017',
+        stopCodes: [
+            { code: 'Tai01', hawkKey: '12359' },
+            { code: 'Tai02', hawkKey: '375' }
+        ]
+    },
+    {
+        name: 'Maurois',
+        stopPlaceId: 'MOBIITI:StopPlace:77038',
+        stopCodes: [
+            { code: 'BUG01', hawkKey: '45' },
+            { code: 'BUG02', hawkKey: '46' }
+        ]
+    },
+    {
+        name: 'PEM',
+        stopPlaceId: 'MOBIITI:StopPlace:77139',
+        stopCodes: [
+            { code: 'PEM01', hawkKey: '12343' },
+            { code: 'PEM02', hawkKey: '747' },
+            { code: 'PEM03', hawkKey: '755' },
+            { code: 'PEM04', hawkKey: '757' }
+        ]
+    },
+    {
+        name: 'Gare SNCF',
+        stopPlaceId: 'MOBIITI:StopPlace:77029',
+        stopCodes: [
+            { code: 'SNC01', hawkKey: '42' },
+            { code: 'SNC02', hawkKey: '43' }
+        ]
+    },
+    {
+        name: 'Tourny Pompidou',
+        stopPlaceId: 'MOBIITI:StopPlace:77028',
+        stopCodes: [
+            { code: 'TOU01', hawkKey: '661' },
+            { code: 'TOU02', hawkKey: '718' }
+        ]
+    },
+    {
+        name: 'Médiathèque (Périgueux)',
+        stopPlaceId: 'MOBIITI:StopPlace:68201',
+        stopCodes: [
+            { code: 'MEd01', hawkKey: '138' },
+            { code: 'MEd02', hawkKey: '139' }
+        ]
+    },
+    {
+        name: 'Boulazac Centre Commercial',
+        stopPlaceId: 'MOBIITI:StopPlace:59652',
+        stopCodes: [
+            { code: 'BLZ01', hawkKey: '525' },
+            { code: 'BLZ02', hawkKey: '87' }
+        ]
+    }
+];
+
+/**
+ * Retourne toutes les clés hawk des arrêts prioritaires
+ * @returns {string[]} Liste des hawk keys à précharger
+ */
+export function getPriorityHawkKeys() {
+    const keys = [];
+    for (const stop of PRIORITY_STOPS) {
+        for (const sc of stop.stopCodes) {
+            keys.push(sc.hawkKey);
+        }
+    }
+    return keys;
+}
+
+/**
+ * Retourne les infos d'un arrêt prioritaire par son hawkKey
+ * @param {string} hawkKey
+ * @returns {Object|null} { stopName, stopCode, stopPlaceId }
+ */
+export function getPriorityStopByHawkKey(hawkKey) {
+    for (const stop of PRIORITY_STOPS) {
+        for (const sc of stop.stopCodes) {
+            if (sc.hawkKey === hawkKey) {
+                return {
+                    stopName: stop.name,
+                    stopCode: sc.code,
+                    stopPlaceId: stop.stopPlaceId
+                };
+            }
+        }
+    }
+    return null;
+}
+
 // Cache pour le mapping stopId -> stopCode (chargé dynamiquement)
 let stopIdToStopCodeCache = null;
 
@@ -170,8 +270,11 @@ export function isRealtimeEnabled(stopId, stopCode = null) {
 
 export default {
     HAWK_KEY_BY_STOP_CODE,
+    PRIORITY_STOPS,
     loadStopIdMapping,
     getHawkKeyForStop,
     getHawkKeysForStopPlace,
-    isRealtimeEnabled
+    isRealtimeEnabled,
+    getPriorityHawkKeys,
+    getPriorityStopByHawkKey
 };

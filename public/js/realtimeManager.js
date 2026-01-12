@@ -2,15 +2,16 @@
  * realtimeManager.js - Gestion des horaires temps réel Péribus
  * Scrape hawk.perimouv.fr pour obtenir les prochains passages en temps réel
  * 
- * V2 - OPTIMISÉ AVEC PRÉCHARGEMENT INTELLIGENT:
- * - Précharge les horaires des lignes principales au démarrage
- * - Utilise les données analytiques pour optimiser les chargements
+ * V3 - PRÉCHARGEMENT PRIORITAIRE + AUTO-REFRESH:
+ * - Précharge les arrêts prioritaires (Taillefer, Gare, PEM, etc.) au démarrage
+ * - Auto-refresh des arrêts prioritaires toutes les 45 secondes
  * - Cache agressif pour éviter les appels API répétés
+ * - Chargement à la demande conservé pour les autres arrêts
  * 
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
  */
 
-import { getHawkKeyForStop, getHawkKeysForStopPlace, isRealtimeEnabled, loadStopIdMapping } from './config/stopKeyMapping.js';
+import { getHawkKeyForStop, getHawkKeysForStopPlace, isRealtimeEnabled, loadStopIdMapping, PRIORITY_STOPS, getPriorityHawkKeys } from './config/stopKeyMapping.js';
 import { analyticsManager } from './analyticsManager.js';
 import { LINE_CATEGORIES } from './config/routes.js';
 
@@ -41,15 +42,16 @@ export class RealtimeManager {
             preloadFailures: 0
         };
 
-        // Configuration du préchargement
+        // V3: Configuration du préchargement PRIORITAIRE
         this.preloadConfig = {
-            mainLinesOnly: true, // Précharger seulement lignes majeures au démarrage
-            preloadTopStops: true, // Précharger les arrêts les plus consultés
-            maxPreloadRequests: 50, // Limiter le nombre de préchargements parallèles
-            delayBetweenRequests: 100 // 100ms entre les requêtes pour éviter surcharge
+            enabled: true,                    // Activer le préchargement prioritaire
+            autoRefreshInterval: 60 * 1000,   // Rafraîchir les prioritaires toutes les 60s (sync avec Hawk)
+            delayBetweenRequests: 150,        // 150ms entre requêtes pour éviter surcharge
+            maxConcurrentRequests: 5          // Max 5 requêtes simultanées
         };
 
         this.isPreloading = false;
+        this.autoRefreshTimer = null; // V3: Timer pour auto-refresh
     }
 
     /**
@@ -61,108 +63,182 @@ export class RealtimeManager {
         this.stops = stops;
         loadStopIdMapping(stops);
 
-        // Lancer le préchargement intelligent en arrière-plan
-        if (autoPreload) {
+        // V3: Lancer le préchargement des arrêts PRIORITAIRES uniquement
+        if (autoPreload && this.preloadConfig.enabled) {
             // Attendre un peu pour ne pas bloquer le démarrage de l'app
-            setTimeout(() => this.preloadMainLinesAndTopStops(), 500);
+            setTimeout(() => this.preloadPriorityStops(), 800);
         }
     }
 
     /**
-     * Précharge les horaires des lignes principales et arrêts fréquents
-     * S'exécute en arrière-plan sans bloquer l'interface
-     * NOTE: Le préchargement est actuellement désactivé car les données temps réel
-     * sont chargées efficacement à la demande quand l'utilisateur clique sur un arrêt
+     * V3: Précharge UNIQUEMENT les arrêts prioritaires (les plus fréquentés)
+     * Liste définie dans PRIORITY_STOPS: Taillefer, Maurois, PEM, Gare SNCF, Tourny, Médiathèque, Boulazac CC
+     * 
+     * Avantages:
+     * - Charge ~15 hawkKeys au lieu de centaines
+     * - Données disponibles instantanément pour les arrêts populaires
+     * - Auto-refresh toutes les 45s pour maintenir les données fraîches
      */
-    async preloadMainLinesAndTopStops() {
+    async preloadPriorityStops() {
         if (this.isPreloading) {
             console.warn('[Realtime] Préchargement déjà en cours');
             return;
         }
 
         this.isPreloading = true;
-        console.log('[Realtime] 🚀 Démarrage du préchargement intelligent...');
+        const priorityHawkKeys = getPriorityHawkKeys();
+        
+        console.log(`[Realtime] 🚀 Préchargement des ${priorityHawkKeys.length} arrêts prioritaires...`);
+        console.log('[Realtime] Arrêts prioritaires:', PRIORITY_STOPS.map(s => s.name).join(', '));
+
+        let successCount = 0;
+        let failureCount = 0;
 
         try {
-            const stopsToPreload = new Set();
-
-            // 1. Ajouter tous les arrêts des lignes majeures (A, B, C, D, express)
-            // NOTE: Le préchargement est optimisé car les données temps réel
-            // sont mieux chargées à la demande (réduction de la charge serveur)
-            if (this.preloadConfig.mainLinesOnly && this.stops) {
-                const mainLines = [
-                    ...LINE_CATEGORIES.majeures.lines,
-                    ...LINE_CATEGORIES.express.lines
-                ];
-
-                // Les stops GTFS ne contiennent pas les lignes qui les desservent
-                // Cette info est implicite dans les stop_times. 
-                // Le préchargement à la demande est plus efficace
-                this.stops.forEach(stop => {
-                    if (isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
-                        // Ajouter seulement les arrêts avec temps réel actif
-                        // Le filtrage par ligne sera fait lors du chargement
-                        stopsToPreload.add(stop);
-                    }
-                });
-
-                console.log(`[Realtime] ${stopsToPreload.size} arrêts avec temps réel actif identifiés`);
-            }
-
-            // 2. Ajouter les arrêts les plus consultés (selon analytics) - PLUS PERTINENT
-            if (this.preloadConfig.preloadTopStops && analyticsManager) {
-                const topStops = analyticsManager.getTopStops(20);
-                topStops.forEach(topStop => {
-                    if (this.stops) {
-                        const stop = this.stops.find(s => s.stop_id === topStop.stopId);
-                        if (stop && isRealtimeEnabled(stop.stop_id, stop.stop_code)) {
-                            stopsToPreload.add(stop);
-                        }
-                    }
-                });
-
-                console.log(`[Realtime] +${topStops.length} arrêts populaires identifiés`);
-            }
-
-            // 3. Lancer le préchargement par batch pour éviter surcharge
-            const stopsArray = Array.from(stopsToPreload).slice(0, this.preloadConfig.maxPreloadRequests);
-            const batchSize = 10;
-            let successCount = 0;
-            let failureCount = 0;
-
-            for (let i = 0; i < stopsArray.length; i += batchSize) {
-                const batch = stopsArray.slice(i, i + batchSize);
-                const promises = batch.map((stop, index) => {
+            // Charger par petits lots pour éviter surcharge
+            const batchSize = this.preloadConfig.maxConcurrentRequests;
+            
+            for (let i = 0; i < priorityHawkKeys.length; i += batchSize) {
+                const batch = priorityHawkKeys.slice(i, i + batchSize);
+                
+                const promises = batch.map((hawkKey, index) => {
                     return new Promise(resolve => {
-                        // Délai pour éviter surcharge serveur
                         setTimeout(async () => {
                             try {
-                                await this.getRealtimeForStop(stop.stop_id, stop.stop_code);
-                                this.preloadedStops.add(stop.stop_id);
+                                await this.fetchRealtimeByHawkKey(hawkKey);
                                 successCount++;
-                                resolve();
+                                resolve({ success: true, hawkKey });
                             } catch (error) {
                                 failureCount++;
-                                resolve();
+                                resolve({ success: false, hawkKey, error: error.message });
                             }
                         }, index * this.preloadConfig.delayBetweenRequests);
                     });
                 });
 
                 await Promise.all(promises);
-                console.log(`[Realtime] Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(stopsArray.length / batchSize)} complété`);
             }
 
-            this.stats.preloadRequests = stopsArray.length;
-            this.stats.preloadSuccesses = successCount;
-            this.stats.preloadFailures = failureCount;
+            this.stats.preloadRequests += priorityHawkKeys.length;
+            this.stats.preloadSuccesses += successCount;
+            this.stats.preloadFailures += failureCount;
 
-            console.log(`[Realtime] ✅ Préchargement terminé: ${successCount} succès, ${failureCount} erreurs`);
+            console.log(`[Realtime] ✅ Préchargement prioritaire terminé: ${successCount}/${priorityHawkKeys.length} succès`);
+            
+            // V3: Démarrer l'auto-refresh des arrêts prioritaires
+            this.startAutoRefresh();
+
         } catch (error) {
-            console.error('[Realtime] Erreur lors du préchargement:', error);
+            console.error('[Realtime] Erreur lors du préchargement prioritaire:', error);
         } finally {
             this.isPreloading = false;
         }
+    }
+
+    /**
+     * V3: Récupère les données temps réel directement par hawkKey (sans passer par stopId)
+     * @param {string} hawkKey - La clé hawk de l'arrêt
+     * @returns {Promise<Object|null>}
+     */
+    async fetchRealtimeByHawkKey(hawkKey) {
+        const cacheKey = `hawk_${hawkKey}`;
+        
+        // Vérifier le cache (sauf si refresh forcé)
+        const cached = this.cache.get(cacheKey);
+        if (cached && Date.now() - cached.fetchedAt < this.cacheMaxAge) {
+            return cached.data;
+        }
+
+        this.stats.requests++;
+
+        try {
+            const response = await fetch(`${this.proxyUrl}?stop=${hawkKey}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                signal: AbortSignal.timeout(8000)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            // Mettre en cache
+            this.cache.set(cacheKey, {
+                data,
+                fetchedAt: Date.now()
+            });
+
+            this.isAvailable = true;
+            this.stats.successes++;
+            
+            return data;
+
+        } catch (error) {
+            this.stats.failures++;
+            throw error;
+        }
+    }
+
+    /**
+     * V3: Démarre l'auto-refresh des arrêts prioritaires
+     * Rafraîchit les données toutes les 45 secondes
+     */
+    startAutoRefresh() {
+        if (this.autoRefreshTimer) {
+            clearInterval(this.autoRefreshTimer);
+        }
+
+        console.log(`[Realtime] ⏰ Auto-refresh activé (intervalle: ${this.preloadConfig.autoRefreshInterval / 1000}s)`);
+
+        this.autoRefreshTimer = setInterval(async () => {
+            if (this.isPreloading) return; // Ne pas interférer avec un préchargement en cours
+            
+            const priorityHawkKeys = getPriorityHawkKeys();
+            console.log(`[Realtime] 🔄 Auto-refresh des ${priorityHawkKeys.length} arrêts prioritaires...`);
+            
+            let refreshCount = 0;
+            
+            for (const hawkKey of priorityHawkKeys) {
+                try {
+                    // Invalider le cache pour forcer le refresh
+                    const cacheKey = `hawk_${hawkKey}`;
+                    this.cache.delete(cacheKey);
+                    
+                    await this.fetchRealtimeByHawkKey(hawkKey);
+                    refreshCount++;
+                    
+                    // Petit délai entre les requêtes
+                    await new Promise(r => setTimeout(r, 100));
+                } catch (error) {
+                    // Ignorer les erreurs silencieusement pour l'auto-refresh
+                }
+            }
+            
+            console.log(`[Realtime] ✅ Auto-refresh: ${refreshCount}/${priorityHawkKeys.length} mis à jour`);
+            
+        }, this.preloadConfig.autoRefreshInterval);
+    }
+
+    /**
+     * V3: Arrête l'auto-refresh (ex: quand l'utilisateur quitte la page)
+     */
+    stopAutoRefresh() {
+        if (this.autoRefreshTimer) {
+            clearInterval(this.autoRefreshTimer);
+            this.autoRefreshTimer = null;
+            console.log('[Realtime] ⏹️ Auto-refresh désactivé');
+        }
+    }
+
+    /**
+     * V3: Vérifie si un arrêt fait partie des prioritaires
+     * @param {string} hawkKey
+     * @returns {boolean}
+     */
+    isPriorityStop(hawkKey) {
+        return getPriorityHawkKeys().includes(hawkKey);
     }
 
     /**

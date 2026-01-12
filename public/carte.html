@@ -86,7 +86,19 @@
   </main>
 
   <script>
-    setTimeout(() => { window.location.href = '/#carte'; }, 1200);
+    // Redirection seulement pour les vrais utilisateurs (pas les bots Google)
+    // Google détecte les redirections JS et refuse d'indexer la page
+    const isBot = /bot|crawl|spider|googlebot|bingbot|yandex|baidu|duckduck/i.test(navigator.userAgent);
+    if (!isBot) {
+      // Proposer une redirection douce après interaction ou délai long
+      const redirectBtn = document.querySelector('.btn-primary');
+      if (redirectBtn) {
+        redirectBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = '/#carte';
+        });
+      }
+    }
   </script>
 </body>
 </html>
