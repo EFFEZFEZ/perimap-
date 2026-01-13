@@ -731,17 +731,26 @@ export class RealtimeManager {
      * (Uniquement si le retard est significatif : > 1 min ou < -1 min)
      */
     sendDelayStat(line, stop, scheduled, delay) {
-        if (Math.abs(delay) < 1) return;
+        // Toujours envoyer l'observation — inclure aussi les bus à l'heure (delay === 0)
+        // Pour éviter de surcharger le serveur, on ajoute un jitter et on envoie silencieusement.
 
-        // Délai aléatoire (1-3s) pour lisser la charge serveur
+        const payload = { line, stop, scheduled, delay };
+
+        // Délai aléatoire (0.5-3s) pour lisser la charge serveur
+        const jitter = 500 + Math.random() * 2500;
         setTimeout(() => {
             fetch('/api/record-delay', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ line, stop, scheduled, delay }),
+                body: JSON.stringify(payload),
                 keepalive: true
-            }).catch(e => console.debug('Stat upload silent fail', e));
-        }, 1000 + Math.random() * 2000);
+            }).then(resp => {
+                if (!resp.ok) {
+                    // silent fail
+                    console.debug('[DelayStat] upload failed', resp.status);
+                }
+            }).catch(e => console.debug('[DelayStat] upload error', e));
+        }, jitter);
     }
 
     /**
