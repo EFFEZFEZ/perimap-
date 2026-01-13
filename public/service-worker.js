@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v356'; // v356: Fix trafic view rendering + immediate bottom nav update on back
+const CACHE_VERSION = 'v357'; // v357: Header visible on all views + replace placeholder green icons
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -27,6 +27,10 @@ const CRITICAL_ASSETS = [
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/shortcut-route.png',
+  '/icons/shortcut-schedule.png',
+  '/icons/shortcut-map.png',
+  '/icons/shortcut-alert.png',
   '/icons/perimap-logo.webp'
 ];
 

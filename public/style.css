@@ -1578,8 +1578,7 @@ body.detail-view-open {
     touch-action: none;
 }
 
-/* V67: Cacher header/footer Perimap sur la vue détail itinéraire */
-body.detail-view-open #main-header,
+/* V67: Ne plus cacher l'en-tête sur la vue détail itinéraire (uniformisation) */
 body.detail-view-open #site-footer,
 body.detail-view-open #legal-strip {
     display: none !important;
@@ -1652,15 +1651,23 @@ body.view-map-locked {
 /* V120: Forcer la vue carte en plein écran sur mobile */
 body.view-map-locked #map-container {
     position: fixed !important;
-    top: 0 !important;
+    top: 64px !important; /* garder l'en-tête visible */
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
-    height: 100% !important;
-    height: 100vh !important; /* Fallback */
-    height: 100svh !important; /* Stable viewport height */
+    height: calc(100svh - 64px) !important; /* Stable viewport height */
+    height: calc(100vh - 64px) !important; /* Fallback */
     z-index: 2000; /* Plein écran fiable; les contrôles ont leurs propres z-index */
+}
+
+/* V357: En mode carte plein écran, fixer l'en-tête au-dessus du container carte */
+body.view-map-locked #main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2500;
 }
 
 body.view-map-locked #map-view {
@@ -1723,23 +1730,16 @@ body.view-is-locked #legal-strip {
     display: none;
 }
 
-/* V135+: Plein écran carte : enlever le chrome global pour libérer les contrôles (retour, heure, filtre) */
-body.view-map-locked #main-header,
+/* V135+: Plein écran carte : garder l'en-tête PériMap, cacher seulement le bas */
 body.view-map-locked #site-footer,
 body.view-map-locked #legal-strip {
     display: none !important;
 }
 
-/* V67: Cacher header/footer sur la vue liste itinéraire */
-body.itinerary-view-active #main-header,
+/* V67: Uniformisation : garder l'en-tête PériMap sur la vue itinéraire, cacher seulement le bas */
 body.itinerary-view-active #site-footer,
 body.itinerary-view-active #legal-strip {
     display: none !important;
-}
-
-/* V81: Retirer le padding-top quand le header est caché */
-body.itinerary-view-active {
-    padding-top: 0 !important;
 }
 
 .header-content {
