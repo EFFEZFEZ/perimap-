@@ -375,46 +375,100 @@ export class MapRenderer {
         const markersToAdd = [];
         const markersToRemove = [];
         const activeBusIds = new Set();
-        
-        // 1. Trouver les marqueurs à supprimer
-        busesWithPositions.forEach(bus => activeBusIds.add(bus.tripId));
 
-        Object.keys(this.busMarkers).forEach(busId => {
-            if (!activeBusIds.has(busId)) {
-                // Si le bus sélectionné disparaît, fermer le popup
-                if (busId === this.selectedBusId) {
-                    this.busPopup.close();
-                    this.selectedBusId = null;
-                }
-                const markerData = this.busMarkers[busId];
-                markersToRemove.push(markerData.marker);
-                delete this.busMarkers[busId];
-            }
+        const nowSeconds = typeof currentSeconds === 'number' ? currentSeconds : Math.floor(Date.now() / 1000);
+        const STALE_SECONDS = 10; // Garde le marqueur visible pendant X secondes si feed intermittent
+
+        // 1. Marquer les bus actifs pour cette mise à jour
+        busesWithPositions.forEach(bus => {
+            if (bus && bus.tripId) activeBusIds.add(bus.tripId);
         });
 
-        // 2. Mettre à jour les marqueurs existants et ajouter les nouveaux
+        // 2. Mettre à jour/ajouter les marqueurs à partir des données reçues
         busesWithPositions.forEach(bus => {
-            const busId = bus.tripId;
+            const busId = bus?.tripId;
             if (!busId) return;
-            
-            const { lat, lon } = bus.position;
-            
+
+            // Valider et parser les coordonnées
+            const lat = parseFloat(bus.position?.lat);
+            const lon = parseFloat(bus.position?.lon);
+            const hasValidCoords = !Number.isNaN(lat) && !Number.isNaN(lon) && isFinite(lat) && isFinite(lon);
+
             if (this.busMarkers[busId]) {
-                // Marqueur existant
+                // Marqueur existant — mettre à jour en place
                 const markerData = this.busMarkers[busId];
                 markerData.bus = bus;
-                
-                // On met TOUJOURS à jour la position du marqueur
-                markerData.marker.setLatLng([lat, lon]);
+                markerData.lastSeen = nowSeconds;
+
+                if (hasValidCoords) {
+                    try {
+                        markerData.marker.setLatLng([lat, lon]);
+                        markerData.lastLatLng = [lat, lon];
+                    } catch (e) {
+                        console.error('[MapRenderer] setLatLng failed for', busId, e);
+                    }
+                } else {
+                    // Pas de nouvelles coordonnées valides — conserver la dernière position connue
+                    if (!markerData.lastLatLng) {
+                        // Si jamais aucune position n'a été définie, ignorer
+                        console.warn('[MapRenderer] missing coords for', busId);
+                    }
+                }
+
+                // Mettre à jour l'icône si nécessaire (route/status changé)
+                try {
+                    const currentIcon = markerData.marker.getIcon && markerData.marker.getIcon();
+                    const route = bus.route || {};
+                    const routeShortName = route.route_short_name || route.route_id || '?';
+                    const routeColor = route.route_color ? `#${route.route_color}` : null;
+                    const textColor = route.route_text_color ? `#${route.route_text_color}` : null;
+                    const newHtml = `<div style="background-color: ${routeColor || '#FFC107'}; color: ${textColor || '#ffffff'};">${routeShortName}</div>`;
+                    // Simple heuristic: si html diffère, recréer l'icône
+                    if (!currentIcon || currentIcon.options?.html !== newHtml) {
+                        const newIcon = L.divIcon({
+                            className: currentIcon ? currentIcon.options.className : 'bus-icon-rect',
+                            html: newHtml,
+                            iconSize: currentIcon ? currentIcon.options.iconSize : [32, 32],
+                            iconAnchor: currentIcon ? currentIcon.options.iconAnchor : [16, 16],
+                            popupAnchor: currentIcon ? currentIcon.options.popupAnchor : [0, -16]
+                        });
+                        markerData.marker.setIcon(newIcon);
+                    }
+                } catch (e) {
+                    // Ne pas bloquer la boucle pour des erreurs d'icône
+                }
 
             } else {
-                // Nouveau marqueur
+                // Nouveau marqueur — n'ajouter que si on a des coordonnées valides
+                if (!hasValidCoords) {
+                    console.warn('[MapRenderer] skipping createBusMarker due to invalid coords for', busId);
+                    return;
+                }
                 const markerData = this.createBusMarker(bus, tripScheduler, busId);
+                markerData.lastSeen = nowSeconds;
+                markerData.lastLatLng = [lat, lon];
                 this.busMarkers[busId] = markerData;
                 if (this.clusterGroup) {
                     markersToAdd.push(markerData.marker);
                 } else {
                     markerData.marker.addTo(this.map);
+                }
+            }
+        });
+
+        // 3. Déterminer les marqueurs réellement obsolètes (non vus depuis STALE_SECONDS)
+        Object.keys(this.busMarkers).forEach(busId => {
+            const markerData = this.busMarkers[busId];
+            if (!activeBusIds.has(busId)) {
+                const lastSeen = markerData.lastSeen || 0;
+                if ((nowSeconds - lastSeen) > STALE_SECONDS) {
+                    // Si le bus sélectionné disparaît, fermer le popup
+                    if (busId === this.selectedBusId) {
+                        this.busPopup.close();
+                        this.selectedBusId = null;
+                    }
+                    markersToRemove.push(markerData.marker);
+                    delete this.busMarkers[busId];
                 }
             }
         });
