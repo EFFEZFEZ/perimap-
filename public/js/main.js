@@ -5345,14 +5345,12 @@ function updateData() {
                                 ? lineStatuses[routeId].status 
                                 : 'normal';
             
-            // V303: Définir isRealtime basé sur les données temps réel disponibles
-            // Un bus est "temps réel" si on a des données récentes dans le cache
-            if (bus.segment?.toStopInfo?.stop_id && realtimeManager) {
-                const stopId = bus.segment.toStopInfo.stop_id;
-                const stopCode = bus.segment.toStopInfo.stop_code;
-                // Vérifier si le realtimeManager a préchargé des données pour cet arrêt
-                bus.isRealtime = realtimeManager.hasRealtimeDataForStop?.(stopId, stopCode) ?? false;
+            // CORRECTION V307: Utiliser le flag hasRealtime calculé précisément par busPositionCalculator
+            // Cela confirme que CE bus spécifique a été matché avec un horaire en direct
+            if (bus.hasRealtime === true) {
+                bus.isRealtime = true;
             } else {
+                // Fallback: si le calculateur n'a pas confirmé, rester prudent (false par défaut)
                 bus.isRealtime = false;
             }
         }

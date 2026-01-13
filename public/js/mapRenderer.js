@@ -415,27 +415,30 @@ export class MapRenderer {
                     }
                 }
 
-                // Mettre à jour l'icône si nécessaire (route/status changé)
+                // Mettre à jour l'icône si nécessaire (changement route ou changement statut RT)
                 try {
                     const currentIcon = markerData.marker.getIcon && markerData.marker.getIcon();
                     const route = bus.route || {};
                     const routeShortName = route.route_short_name || route.route_id || '?';
-                    const routeColor = route.route_color ? `#${route.route_color}` : null;
-                    const textColor = route.route_text_color ? `#${route.route_text_color}` : null;
-                    const newHtml = `<div style="background-color: ${routeColor || '#FFC107'}; color: ${textColor || '#ffffff'};">${routeShortName}</div>`;
-                    // Simple heuristic: si html diffère, recréer l'icône
-                    if (!currentIcon || currentIcon.options?.html !== newHtml) {
-                        const newIcon = L.divIcon({
-                            className: currentIcon ? currentIcon.options.className : 'bus-icon-rect',
-                            html: newHtml,
-                            iconSize: currentIcon ? currentIcon.options.iconSize : [32, 32],
-                            iconAnchor: currentIcon ? currentIcon.options.iconAnchor : [16, 16],
-                            popupAnchor: currentIcon ? currentIcon.options.popupAnchor : [0, -16]
-                        });
-                        markerData.marker.setIcon(newIcon);
+                    const isRealtime = bus.isRealtime || bus.hasRealtime;
+                    
+                    // On vérifie si l'état RT a changé pour forcer la regénération de l'icône
+                    const wasRealtime = currentIcon && typeof currentIcon.options?.className === 'string' 
+                        ? currentIcon.options.className.includes('is-realtime-active') 
+                        : false;
+                    
+                    // Si le HTML ou l'état RT change, on recrée l'icône
+                    if (!currentIcon || wasRealtime !== isRealtime) {
+                        // On réutilise createBusMarker pour avoir la nouvelle icône correcte
+                        const tempData = this.createBusMarker(bus, tripScheduler, busId);
+                        try {
+                            markerData.marker.setIcon(tempData.marker.getIcon());
+                        } catch (e) {
+                            // fallback: ignore
+                        }
                     }
                 } catch (e) {
-                    // Ne pas bloquer la boucle pour des erreurs d'icône
+                    // Ne pas bloquer la boucle
                 }
 
             } else {
@@ -644,6 +647,7 @@ export class MapRenderer {
 
     /**
      * V24 - Crée un marqueur et lui attache un 'click' event
+     * V307 - Ajout du style visuel Temps Réel (Bordure verte / Icône)
      */
     createBusMarker(bus, tripScheduler, busId) {
         const { lat, lon } = bus.position;
@@ -652,14 +656,32 @@ export class MapRenderer {
         const routeColor = route?.route_color ? `#${route.route_color}` : '#FFC107';
         const textColor = route?.route_text_color ? `#${route.route_text_color}` : '#ffffff';
 
-        const iconClassName = 'bus-icon-rect bus-appear';
+        // V307: Détection du mode Temps Réel
+        const isRealtime = bus.isRealtime || bus.hasRealtime;
+        
+        // Classes de base
+        let iconClassName = 'bus-icon-rect bus-appear';
+        if (isRealtime) {
+            iconClassName += ' is-realtime-active'; // Classe CSS pour l'effet vert/pulse
+        }
+
         const statusClass = bus.currentStatus ? `bus-status-${bus.currentStatus}` : 'bus-status-normal';
+        
+        // V307: Ajout d'un indicateur visuel (point vert ou icône wifi) si temps réel
+        const rtIndicator = isRealtime 
+            ? `<div class="bus-rt-badge"></div>` 
+            : '';
 
         const icon = L.divIcon({
             className: `${iconClassName} ${statusClass}`,
-            html: `<div style="background-color: ${routeColor}; color: ${textColor};">${routeShortName}</div>`,
-            iconSize: [32, 32],    // Dimensions carrées pour cercle parfait
-            iconAnchor: [16, 16],  // Centre du cercle
+            html: `
+                <div class="bus-icon-content" style="background-color: ${routeColor}; color: ${textColor};">
+                    ${routeShortName}
+                </div>
+                ${rtIndicator}
+            `,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
             popupAnchor: [0, -16]
         });
 
@@ -671,12 +693,9 @@ export class MapRenderer {
         if (this.busPaneName) markerOptions.pane = this.busPaneName;
         const marker = L.marker([lat, lon], markerOptions);
         
-        // *** V24 - NE PAS UTILISER bindPopup ***
-        // marker.bindPopup(...);
-        
-        // Attacher un simple 'click' avec log pour debug
+        // Attacher un simple 'click'
         marker.on('click', (e) => {
-            console.log('[MapRenderer] 🚌 Bus clicked:', busId);
+            console.log('[MapRenderer] 🚌 Bus clicked:', busId, 'RT:', isRealtime);
             L.DomEvent.stopPropagation(e);
             
             this.selectedBusId = busId;
@@ -687,17 +706,14 @@ export class MapRenderer {
                 return;
             }
             
-            // Mettre à jour le contenu AVANT de l'ouvrir
             this.updateBusPopupContent(this.busPopupDomElement, markerData.bus, tripScheduler);
             
-            // Ouvrir le popup global
             this.busPopup
                 .setLatLng(marker.getLatLng())
                 .setContent(this.busPopupDomElement)
                 .openOn(this.map);
         });
         
-        // Créer l'objet markerData (sans popupDomElement, car il est global)
         const markerData = {
             marker: marker,
             bus: bus
