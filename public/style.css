@@ -4022,8 +4022,8 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     .map-fab-button {
         position: fixed !important;
         bottom: calc(var(--bottom-nav-height) + 12px + env(safe-area-inset-bottom));
-        /* Move FAB to the right by the same gap (12px) used from bottom nav */
-        right: calc(20px + 12px) !important;
+        /* Align horizontal offset to match bottom gap (12px) and respect safe area on the right */
+        right: calc(12px + env(safe-area-inset-right)) !important;
         left: auto !important;
         width: 48px;
         height: 48px;
@@ -4054,6 +4054,15 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     #map-container #btn-toggle-filter svg {
         width: 20px;
         height: 20px;
+    }
+}
+
+/* V: Remove small visual gap between header and map on mobile by nudging map upward */
+@media (max-width: 768px) {
+    body:not(.view-map-locked) #map-container {
+        transform: translateY(-8px);
+        /* keep layout stable and avoid reflow */
+        will-change: transform;
     }
 }
 
