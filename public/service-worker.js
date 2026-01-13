@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v394'; // v394: Add @vercel/postgres and force reload
+const CACHE_VERSION = 'v395'; // v395: Add CSP-init.js for safe initialization
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -25,6 +25,7 @@ const CRITICAL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/js/csp-init.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/shortcut-route.png',

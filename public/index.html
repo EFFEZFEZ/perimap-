@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hawk.perimouv.fr https://openrouteservice.org https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://vercel.live https://www.xn--primap-bva.fr; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hawk.perimouv.fr https://openrouteservice.org https://fonts.googleapis.com https://maps.googleapis.com https://routes.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
     
     <!-- SEO Principal - Mots-clés stratégiques -->
     <title>Périmap, Horaires et plan du Péribus</title>
@@ -53,12 +53,7 @@
     <!-- La clé n'est plus exposée côté client pour des raisons de sécurité -->
     
     <!-- Admin Token (injected from Vercel env at build time) -->
-    <script>
-        window.__ADMIN_TOKEN = '__VITE_ADMIN_TOKEN__';
-        if (window.__ADMIN_TOKEN === '__VITE_ADMIN_TOKEN__') {
-            window.__ADMIN_TOKEN = '';
-        }
-    </script>
+    <!-- Initialization moved to /js/csp-init.js for CSP compliance -->
     
     <!-- Favicons & Icons -->
     <link rel="manifest" href="/manifest.json">
@@ -83,11 +78,11 @@
     <!-- CSS externes non-bloquants -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
-          crossorigin="" media="print" onload="this.media='all'"/>
+          crossorigin="" media="print"/>
     <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"></noscript>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" media="print" onload="this.media='all'"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" media="print"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" media="print"/>
 
     <!-- Scripts externes avec defer (non-bloquants) -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -97,8 +92,11 @@
     <script defer src="https://unpkg.com/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
     
     <!-- Font avec display=swap pour éviter FOIT -->
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- CSP-Safe Initialization: admin token, stylesheet handlers -->
+    <script src="/js/csp-init.js" defer></script>
     
     <!-- Schema.org - Application de transport -->
     <script type="application/ld+json">
