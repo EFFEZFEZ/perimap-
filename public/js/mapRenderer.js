@@ -902,6 +902,7 @@ export class MapRenderer {
             
             if (realtimeData && realtimeData.departures && realtimeData.departures.length > 0) {
                 console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
+                console.debug('[fetchAndUpdateRealtime] realtimeData sample:', JSON.parse(JSON.stringify(realtimeData)).departures?.slice(0,3));
                 
                 // Convertir au format attendu par createStopPopupContent
                 const realtimeForPopup = {
@@ -925,6 +926,7 @@ export class MapRenderer {
                         firstDepartureTime,
                         realtimeForPopup
                     );
+                    console.debug('[fetchAndUpdateRealtime] updating popup content for', masterStop.stop_id, 'with', (realtimeForPopup.schedules || []).length, 'rt entries');
                     popup.setContent(newContent);
                     
                     // Ré-attacher les listeners
@@ -1119,6 +1121,9 @@ export class MapRenderer {
                                 }
                                 if (matchedBusETA) {
                                     displayTime = matchedBusETA.formatted;
+                                    console.debug('[createStopPopupContent] using computed ETA from active bus for', routeShort, '->', displayTime, 'matchedBus:', matchedBusETA);
+                                } else {
+                                    console.debug('[createStopPopupContent] no active-bus ETA found for', routeShort, 'falling back to RT feed value:', rt.temps);
                                 }
                             } catch (e) {
                                 // ignore
