@@ -2828,6 +2828,13 @@ body.dark-theme .stats-section .stat-label {
     pointer-events: auto;
     max-height: 5000px;
     opacity: 1;
+    /* V352: Padding pour le header avec bouton retour */
+    padding-top: 0.75rem;
+}
+
+/* V352: Bouton retour dans dashboard-content-view positionné uniformément */
+#dashboard-content-view #btn-back-to-hall {
+    margin: 0 1rem 1rem 1rem;
 }
 
 #btn-back-to-hall:not(.app-back-btn) {
@@ -2849,16 +2856,38 @@ body.dark-theme .stats-section .stat-label {
 
 /* =========================================
  * BOUTONS RETOUR - STYLE UNIQUE (aligné sur la vue carte)
+ * V352: Taille et position uniformes sur toutes les vues
  * ========================================= */
 .app-back-btn {
     cursor: pointer;
     border: none !important;
     background: rgba(255, 255, 255, 0.95) !important;
     color: #1a1a2e !important;
+    /* V352: Taille uniforme */
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    height: 36px !important;
+    padding: 0 14px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .app-back-btn svg {
     color: #22c55e;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+}
+
+.app-back-btn span {
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .app-back-btn:hover {
@@ -6448,6 +6477,19 @@ body.dark-theme .real-select option {
     z-index: 100;
 }
 
+/* Uniformiser le bouton retour dans itinerary-top-bar */
+.itinerary-top-bar .app-back-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.itinerary-top-bar .app-back-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 .itinerary-top-bar h2 {
     font-size: 1rem;
     font-weight: 700;
@@ -6481,17 +6523,19 @@ body.dark-theme .real-select option {
 
 .compact-input-group .input-icon {
     position: absolute;
-    left: 0.75rem;
+    left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: var(--primary);
     z-index: 1;
     pointer-events: none;
+    width: 18px;
+    height: 18px;
 }
 
 .compact-input-group input[type="text"] {
     width: 100%;
-    padding: 0.625rem 2.5rem 0.625rem 2.25rem;
+    padding: 0.625rem 2.5rem 0.625rem 2.75rem;
     background: #f3f4f6;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
@@ -7362,15 +7406,17 @@ body.dark-theme .next-departures-label {
         gap: 0.375rem;
     }
     
+    /* V352: Fix padding pour les icônes */
     .compact-input-group input[type="text"] {
         min-height: 40px;
         font-size: 0.8125rem;
-        padding: 0.5rem 2.25rem 0.5rem 2rem;
+        padding: 0.5rem 2.25rem 0.5rem 2.5rem;
     }
     
     .compact-input-group .input-icon {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
+        left: 0.75rem;
     }
     
     .btn-swap-compact {
