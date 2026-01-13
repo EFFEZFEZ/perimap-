@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v396'; // v396: Add worker-src blob: and connect-src CDN for source maps
+const CACHE_VERSION = 'v397'; // v397: Robust fetch handling + avoid caching cross-origin/unsupported schemes
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -149,7 +149,10 @@ self.addEventListener('activate', (event) => {
             });
             // Tenter de naviguer le client vers lui-même pour forcer le reload
             if (client.url) {
-              await client.navigate(client.url);
+              const clientOrigin = new URL(client.url).origin;
+              if (clientOrigin === self.location.origin) {
+                await client.navigate(client.url);
+              }
             }
           } catch (e) {
             console.warn('[SW] Impossible de forcer reload du client:', e?.message || e);
@@ -169,9 +172,16 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Ignorer les schémas non supportés (ex: chrome-extension:)
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
   
   // Ignorer non-GET
   if (request.method !== 'GET') return;
+
+  // Ne pas intercepter les requêtes cross-origin (tiles, images, scripts CDN, etc.)
+  // Cela évite les erreurs CSP connect-src côté SW et les problèmes de cache opaque.
+  if (url.origin !== self.location.origin) return;
   
   // Network-only pour APIs externes
   if (NETWORK_ONLY.some(p => request.url.includes(p))) {
@@ -207,7 +217,13 @@ async function cacheFirst(request, cacheName) {
   
   try {
     const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+    if (response.ok) {
+      try {
+        await cache.put(request, response.clone());
+      } catch (e) {
+        // ignore cache put errors (quota, opaque, etc.)
+      }
+    }
     return response;
   } catch {
     return caches.match('/index.html');
@@ -223,13 +239,29 @@ async function staleWhileRevalidate(request, cacheName) {
   
   // Revalidation en arrière-plan
   const networkPromise = fetch(request)
-    .then(response => {
-      if (response.ok) cache.put(request, response.clone());
+    .then(async (response) => {
+      if (response && response.ok) {
+        try {
+          await cache.put(request, response.clone());
+        } catch (e) {
+          // ignore cache put errors
+        }
+      }
       return response;
     })
     .catch(() => null);
-  
-  return cached || networkPromise || caches.match('/index.html');
+
+  if (cached) {
+    // Laisser le refresh se faire en arrière-plan, sans casser la réponse.
+    networkPromise.catch(() => null);
+    return cached;
+  }
+
+  const networkResponse = await networkPromise;
+  if (networkResponse) return networkResponse;
+
+  const fallback = await caches.match('/index.html');
+  return fallback || new Response('', { status: 504 });
 }
 
 /**
