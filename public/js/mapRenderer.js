@@ -452,14 +452,50 @@ export class MapRenderer {
                     console.warn('[MapRenderer] skipping createBusMarker due to invalid coords for', busId);
                     return;
                 }
-                const markerData = this.createBusMarker(bus, tripScheduler, busId);
-                markerData.lastSeen = nowSeconds;
-                markerData.lastLatLng = [lat, lon];
-                this.busMarkers[busId] = markerData;
-                if (this.busLayer) {
-                    this.busLayer.addLayer(markerData.marker);
-                } else {
-                    markerData.marker.addTo(this.map);
+
+                // Tentative V308+: éviter les doublons causés par IDs instables
+                // Chercher un marqueur existant très proche (<=25m) et réutiliser si trouvé
+                let adopted = false;
+                try {
+                    const proximityMeters = 25; // seuil de proximité pour considérer le même bus
+                    for (const existingId of Object.keys(this.busMarkers)) {
+                        const existing = this.busMarkers[existingId];
+                        if (!existing || !existing.lastLatLng) continue;
+                        const [prevLat, prevLon] = existing.lastLatLng;
+                        // Utiliser dataManager pour Haversine
+                        const dist = this.dataManager ? this.dataManager.calculateDistance(prevLat, prevLon, lat, lon) : null;
+                        if (dist !== null && dist <= proximityMeters) {
+                            // Adopter ce marqueur pour le nouveau busId
+                            console.debug('[MapRenderer] Adopting nearby marker', existingId, 'for', busId, 'dist_m=', dist);
+                            // Supprimer l'ancienne clé pour éviter collision
+                            delete this.busMarkers[existingId];
+                            existing.bus = bus;
+                            existing.lastSeen = nowSeconds;
+                            existing.lastLatLng = [lat, lon];
+                            this.busMarkers[busId] = existing;
+                            // Mettre à jour l'icône si nécessaire
+                            try {
+                                const temp = this.createBusMarker(bus, tripScheduler, busId);
+                                existing.marker.setIcon(temp.marker.getIcon());
+                            } catch (e) { /* ignore */ }
+                            adopted = true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // ignore proximity adoption errors
+                }
+
+                if (!adopted) {
+                    const markerData = this.createBusMarker(bus, tripScheduler, busId);
+                    markerData.lastSeen = nowSeconds;
+                    markerData.lastLatLng = [lat, lon];
+                    this.busMarkers[busId] = markerData;
+                    if (this.busLayer) {
+                        this.busLayer.addLayer(markerData.marker);
+                    } else {
+                        markerData.marker.addTo(this.map);
+                    }
                 }
             }
         });
