@@ -3888,7 +3888,7 @@ details[open] .accordion-content {
 
 /* Etirer la carte sous l'en-tête en mode normal (hors view-map-locked) */
 body:not(.view-map-locked) #map-container {
-    min-height: calc(100vh - 64px);
+    min-height: 100vh;
     margin-top: 0;
     padding-top: 0;
 }
@@ -4016,7 +4016,7 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     #map-container #btn-toggle-filter,
     .map-fab-button {
         position: fixed !important;
-        bottom: calc(var(--bottom-nav-height) + 72px + env(safe-area-inset-bottom));
+        bottom: calc(var(--bottom-nav-height) + 32px + env(safe-area-inset-bottom));
         right: 16px !important;
         left: auto !important;
         width: 48px;
