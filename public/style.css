@@ -3979,7 +3979,8 @@ details[open] .accordion-content {
 /* Footer: ne jamais être recouvert par le bottom nav sur mobile */
 @media (max-width: 768px) {
     #site-footer {
-        margin-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+        /* V365: Ne pas ajouter de margin car il crée un espace vide en bas */
+        /* Le footer est de toute façon caché sur mobile avec display: none sur les vues principales */
     }
 }
 
@@ -8789,7 +8790,7 @@ body.dark-theme .stat-item {
     margin-top: auto;
     padding: 0;
     position: relative;
-    z-index: 999;
+    z-index: 10; /* V365: Très bas, jamais au-dessus des popovers/modales */
 }
 
 /* Cache le footer sur les vues plein écran */
