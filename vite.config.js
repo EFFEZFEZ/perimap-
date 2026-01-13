@@ -65,19 +65,14 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false, // Garder console.log en dev
         drop_debugger: true,
-        pure_funcs: ['console.debug'],
-        passes: 3,
-        unsafe: true,
-        unsafe_methods: true
+        pure_funcs: ['console.debug']
       },
-      mangle: true,
       format: {
         comments: false
       }
     },
-    sourcemap: false,
     
     // Code splitting pour optimiser le chargement
     rollupOptions: {
