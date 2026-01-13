@@ -1099,6 +1099,8 @@ body.dark-theme .leaflet-control-attribution a,
 
 /* *** CORRECTION V28 + V59 + V347 SCROLL MOBILE *** */
 html, body {
+    margin: 0;
+    padding: 0;
     height: auto; /* V59: Permettre au contenu de définir la hauteur */
     min-height: 100%;
     width: 100%;
@@ -3923,6 +3925,34 @@ body:not(.view-map-locked) #map-container {
     z-index: 10;
 }
 
+#status-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+#status-info #bus-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+}
+
+#status-info #bus-count svg {
+    width: 14px;
+    height: 14px;
+}
+
+body.dark-theme #status-info {
+    background: rgba(24, 24, 27, 0.9);
+    color: var(--text-primary);
+}
+
 /* V135: Bouton Filtrer visible (desktop = badge en haut à droite, mobile = FAB) */
 #btn-toggle-filter {
     display: inline-flex;
@@ -3944,6 +3974,15 @@ body:not(.view-map-locked) #map-container {
     height: 20px;
 }
 
+body.dark-theme #map-container #btn-toggle-filter {
+    background: #0ea54f;
+    color: #fff;
+}
+
+body.dark-theme #map-container #btn-toggle-filter svg {
+    color: #fff;
+}
+
 #map-container #btn-toggle-filter:hover,
 .map-fab-button:hover {
     transform: scale(1.02);
@@ -3955,38 +3994,37 @@ body:not(.view-map-locked) #map-container {
     transform: scale(0.97);
 }
 
-/* Desktop : badge fixe en haut à droite - V156: Décalé pour ne pas chevaucher status-info */
+/* Desktop : badge fixe en haut à droite (pilule ronde) */
 @media (min-width: 769px) {
     #map-container #btn-toggle-filter {
         position: absolute;
-        top: 60px;
-        right: 16px;
-        width: auto;
-        height: 36px;
-        border-radius: 20px;
-        padding: 0 16px;
+        top: 12px;
+        right: 12px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        padding: 0;
         z-index: 1200;
-        font-size: 13px;
+        font-size: 0;
         font-weight: 600;
     }
-    #map-container #btn-toggle-filter span { display: inline; }
+    #map-container #btn-toggle-filter span { display: none; }
 }
 
-/* Mobile : FAB ronde en bas à droite */
+/* Mobile : FAB ronde en bas à droite, au-dessus de la zone trafic/bottom-nav */
 @media (max-width: 768px) {
     #map-container #btn-toggle-filter,
     .map-fab-button {
         position: fixed !important;
-        /* Aligné sur les contrôles Leaflet (locate) et au-dessus du bottom nav */
-        bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
-        right: 68px !important; /* à gauche du bouton localisation (évite la superposition) */
+        bottom: calc(var(--bottom-nav-height) + 72px + env(safe-area-inset-bottom));
+        right: 16px !important;
         left: auto !important;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: #ffffff !important;
-        color: #22c55e !important;
-        border: none;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--primary) !important;
+        color: #fff !important;
+        border: 1px solid rgba(0,0,0,0.06);
         box-shadow:
             0 2px 10px rgba(0, 0, 0, 0.12),
             0 1px 4px rgba(0, 0, 0, 0.08);
