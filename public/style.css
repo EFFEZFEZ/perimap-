@@ -829,17 +829,20 @@ body.dark-theme .pm-skeleton-card {
         bottom: calc(10px + env(safe-area-inset-bottom));
         height: var(--bottom-nav-height);
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.92);
+        background: rgba(255, 255, 255, 0.94);
         border: 1px solid rgba(15, 23, 42, 0.10);
         box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         z-index: 12000;
         overflow: hidden;
+        will-change: transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
     }
 
     body.dark-theme .bottom-nav {
-        background: rgba(10, 14, 22, 0.78);
+        background: rgba(10, 14, 22, 0.82);
         border-color: rgba(255, 255, 255, 0.08);
         box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55);
     }
