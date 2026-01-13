@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v362'; // v362: Fix z-index popover/footer + btn-time-picker clickable + header overlap
+const CACHE_VERSION = 'v363'; // v363: Fix bottom-nav z-index above map, popover visibility
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

@@ -834,7 +834,7 @@ body.dark-theme .pm-skeleton-card {
         box-shadow: 0 18px 40px rgba(2, 6, 23, 0.18);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        z-index: 1050;
+        z-index: 15000; /* V362: Plus haut que map-container (2000) et popovers */
         overflow: hidden;
         will-change: transform;
         -webkit-backface-visibility: hidden;
@@ -6034,7 +6034,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
-    z-index: 13000;
+    z-index: 16000; /* V362: Au dessus de la bottom-nav (15000) */
     overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -6042,6 +6042,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     opacity: 0;
     transform: translateY(-10px);
     pointer-events: none;
+    visibility: hidden; /* V362: Empêche toute interaction même invisible */
 }
 /* Positionnement spécifique pour le popover des résultats */
 #results-planner-options-popover {
@@ -6529,6 +6530,8 @@ body.itinerary-view-active #itinerary-results-container {
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     padding: 1rem;
+    position: relative; /* V362: Contexte pour le popover absolute */
+    z-index: 100; /* V362: Au dessus du contenu mais sous la bottom-nav */
 }
 
 /* =========================================
