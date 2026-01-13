@@ -806,6 +806,30 @@ export class MapRenderer {
             bus: bus
         };
 
+        // Runtime sanity check: if the marker element renders with an empty
+        // `.bus-icon-content` (which can appear as a black/empty circle),
+        // remove it immediately and log for diagnostics.
+        setTimeout(() => {
+            try {
+                const el = marker.getElement && marker.getElement();
+                if (el) {
+                    const contentEl = el.querySelector && el.querySelector('.bus-icon-content');
+                    const contentText = contentEl ? (contentEl.textContent || '').trim() : null;
+                    // If there's no text and no RT badge, it's likely an empty ghost
+                    const hasRtBadge = !!(el.querySelector && el.querySelector('.bus-rt-badge'));
+                    if (!contentText && !hasRtBadge) {
+                        console.warn('[MapRenderer] Removing newly created empty marker for', busId);
+                        try {
+                            if (this.busLayer) this.busLayer.removeLayer(marker);
+                            else this.map.removeLayer(marker);
+                        } catch (e) { /* ignore */ }
+                    }
+                }
+            } catch (e) {
+                // Never let this break rendering
+            }
+        }, 50);
+
         return markerData;
     }
 
