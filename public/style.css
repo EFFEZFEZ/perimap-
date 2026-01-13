@@ -6430,85 +6430,273 @@ body.dark-theme .real-select option {
     -webkit-overflow-scrolling: touch;
 }
 
-/* NOUVEAU : Panneau d'édition IDFM */
-#itinerary-edit-panel {
-    background: var(--bg-main);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    padding: 0.5rem 1rem; /* COMPACT: Réduction du padding */
-}
+/* =========================================
+ * V351: FORMULAIRE ITINÉRAIRE COMPACT
+ * Design harmonisé, moins d'espace vertical
+ * ========================================= */
 
-/* V66: En-tête itinéraire - visible sur desktop uniquement */
-.itinerary-edit-header {
+/* Top bar unifié avec carte et autres vues */
+.itinerary-top-bar {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0 0 0.25rem 0; /* COMPACT: Réduction du padding */
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.itinerary-edit-header h2 {
-    font-size: 1rem; /* COMPACT: Réduction de la taille */
+.itinerary-top-bar h2 {
+    font-size: 1rem;
     font-weight: 700;
     margin: 0;
     color: var(--text-primary);
 }
 
-/* V66: Formulaire harmonisé avec le style du hall */
+/* Panneau compact */
+#itinerary-edit-panel {
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+}
+
+/* Formulaire compact en colonne serrée */
+.itinerary-compact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.compact-input-group {
+    position: relative;
+}
+
+.compact-input-group .input-with-icon {
+    position: relative;
+}
+
+.compact-input-group .input-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.compact-input-group input[type="text"] {
+    width: 100%;
+    padding: 0.625rem 2.5rem 0.625rem 2.25rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    min-height: 42px;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+}
+
+.compact-input-group input[type="text"]::placeholder {
+    color: #9ca3af;
+}
+
+.compact-input-group input[type="text"]:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    outline: none;
+}
+
+/* Bouton géolocalisation compact */
+.compact-input-group .btn-geolocate {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--primary);
+    border: 1px solid #e5e7eb;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    z-index: 2;
+}
+
+.compact-input-group .btn-geolocate:hover:not(:disabled) {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
+.compact-input-group .btn-geolocate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Bouton inverser compact (centré entre les inputs) */
+.btn-swap-compact {
+    align-self: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin: -0.25rem 0;
+    flex-shrink: 0;
+}
+
+.btn-swap-compact:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+    transform: rotate(180deg);
+}
+
+/* Ligne d'actions : heure + bouton rechercher */
+.compact-actions-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+/* Bouton heure compact */
+.btn-when-compact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.btn-when-compact svg {
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.btn-when-compact .chevron {
+    color: var(--text-secondary);
+    margin-left: 0.125rem;
+}
+
+.btn-when-compact:hover {
+    background: var(--bg-main);
+    border-color: var(--primary);
+}
+
+/* Bouton rechercher compact */
+.btn-search-compact {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 10px;
+    min-height: 38px;
+}
+
+/* Dark theme */
+body.dark-theme .compact-input-group input[type="text"] {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .compact-input-group input[type="text"]:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+}
+
+body.dark-theme .compact-input-group .btn-geolocate {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-theme .btn-swap-compact {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-theme .btn-when-compact {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================================
+ * ANCIEN STYLES - Conservés pour compatibilité
+ * ========================================= */
+
+/* V66: En-tête itinéraire (ancien, remplacé par itinerary-top-bar) */
+.itinerary-edit-header {
+    display: none; /* Remplacé par .itinerary-top-bar */
+}
+
+/* V66: Formulaire harmonisé avec le style du hall (ancien) */
 .itinerary-edit-form {
     padding: 0;
     position: relative;
 }
 
 .itinerary-edit-form .form-group {
-    margin-bottom: 0.4rem; /* COMPACT: Réduction des marges */
+    margin-bottom: 0.4rem;
 }
 
 .itinerary-edit-form .form-group:last-of-type {
-    margin-bottom: 0.5rem; /* COMPACT: Réduction des marges */
+    margin-bottom: 0.5rem;
 }
 
-/* V66: Inputs harmonisés avec le style planner-block du hall */
-.itinerary-edit-form .form-group input[type="text"],
+/* Inputs style général */
 #results-planner-from,
 #results-planner-to {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 10px; /* COMPACT: Réduction du radius */
-    padding: 0.6rem 0.875rem; /* COMPACT: Réduction du padding */
-    font-size: 0.9rem; /* COMPACT: Réduction de la taille */
+    border-radius: 10px;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.875rem;
     color: var(--text-primary);
     width: 100%;
-    transition: all 0.2s ease;
-    min-height: 40px; /* COMPACT: Réduction de la hauteur */
+    transition: all 0.15s ease;
+    min-height: 42px;
     box-sizing: border-box;
 }
 
-.itinerary-edit-form .form-group input[type="text"]::placeholder {
-    color: #94a3b8;
-}
-
-.itinerary-edit-form .form-group input[type="text"]:focus,
 #results-planner-from:focus,
 #results-planner-to:focus {
     background: #ffffff;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
     outline: none;
 }
 
-/* V66: Labels plus discrets comme dans le hall */
-.itinerary-edit-form .form-group label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.375rem;
-    display: block;
-}
-
 /* Dark theme pour les inputs itinéraire */
-body.dark-theme .itinerary-edit-form .form-group input[type="text"],
 body.dark-theme #results-planner-from,
 body.dark-theme #results-planner-to {
     background: rgba(255, 255, 255, 0.05);
@@ -6516,7 +6704,6 @@ body.dark-theme #results-planner-to {
     color: var(--text-primary);
 }
 
-body.dark-theme .itinerary-edit-form .form-group input[type="text"]:focus,
 body.dark-theme #results-planner-from:focus,
 body.dark-theme #results-planner-to:focus {
     background: rgba(255, 255, 255, 0.08);
@@ -7158,22 +7345,58 @@ body.dark-theme .next-departures-label {
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
     }
     
-    /* V69: Garder l'en-tête "Itinéraires" visible sur mobile */
-    .itinerary-edit-header {
-        display: flex;
-        padding: 1rem 0.75rem 0.5rem;
+    /* V351: Nouveau header compact pour mobile */
+    .itinerary-top-bar {
+        padding: 0.625rem 0.75rem;
     }
     
-    .itinerary-edit-form {
-        padding: 0 0.75rem 1rem;
+    .itinerary-top-bar h2 {
+        font-size: 0.9375rem;
     }
     
     #itinerary-edit-panel {
-        padding: 1rem 0.75rem;
+        padding: 0.5rem 0.75rem 0.75rem;
     }
     
-    .results-planner-inputs {
-        width: 100%;
+    .itinerary-compact-form {
+        gap: 0.375rem;
+    }
+    
+    .compact-input-group input[type="text"] {
+        min-height: 40px;
+        font-size: 0.8125rem;
+        padding: 0.5rem 2.25rem 0.5rem 2rem;
+    }
+    
+    .compact-input-group .input-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .btn-swap-compact {
+        width: 28px;
+        height: 28px;
+        margin: -0.125rem 0;
+    }
+    
+    .btn-swap-compact svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .compact-actions-row {
+        margin-top: 0.125rem;
+    }
+    
+    .btn-when-compact {
+        padding: 0.4rem 0.625rem;
+        font-size: 0.75rem;
+    }
+    
+    .btn-search-compact {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+        min-height: 36px;
     }
 
     /* --- Styles mobiles pour les détails d'itinéraire (ACCORDÉON PC) --- */
