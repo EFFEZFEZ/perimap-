@@ -1,25 +1,28 @@
 /*
- * Copyright (c) 2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
+ * Copyright (c) 2026 Pï¿½rimap. Tous droits rï¿½servï¿½s.
+ * Ce code ne peut ï¿½tre ni copiï¿½, ni distribuï¿½, ni modifiï¿½ sans l'autorisation ï¿½crite de l'auteur.
  */
 /**
- * API Vercel Serverless pour récupérer le token admin
+ * API Vercel Serverless pour rï¿½cupï¿½rer le token admin
  * Route: /api/admin-token
- * Sécurité: Nécessite le bon mot de passe
+ * Sï¿½curitï¿½: Nï¿½cessite le bon mot de passe
  */
 
 export default function handler(req, res) {
-  // CORS headers (optionnellement restreints via ALLOWED_ORIGINS)
+  // CORS headers: Accepter les origins locaux (dev) + domaine production
   const normalizeOrigin = (value) => (typeof value === 'string' ? value.trim().replace(/\/+$/, '') : '');
   const origin = normalizeOrigin(req.headers?.origin);
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-    .split(',')
-    .map(normalizeOrigin)
-    .filter(Boolean);
-  const originAllowed = !origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin);
+  
+  // Accepter: localhost:*, 127.0.0.1:*, domaine production, ou vide (same-origin)
+  const isAllowedOrigin = !origin || 
+    origin.startsWith('http://localhost') || 
+    origin.startsWith('http://127.0.0.1') ||
+    origin.includes('perimap') ||
+    origin.includes('perigueux') ||
+    (process.env.ALLOWED_ORIGINS && process.env.ALLOWED_ORIGINS.split(',').map(normalizeOrigin).includes(origin));
 
   res.setHeader('Vary', 'Origin');
-  if (origin && originAllowed) {
+  if (origin && isAllowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else if (!origin) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,13 +31,13 @@ export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    if (origin && !originAllowed) {
+    if (origin && !isAllowedOrigin) {
       return res.status(403).json({ error: 'Origin not allowed' });
     }
     return res.status(200).end();
   }
 
-  if (origin && !originAllowed) {
+  if (origin && !isAllowedOrigin) {
     return res.status(403).json({ error: 'Origin not allowed' });
   }
 
@@ -44,7 +47,7 @@ export default function handler(req, res) {
 
   const { password } = req.body || {};
 
-  // Sécurité: pas de mot de passe codé en dur.
+  // Sï¿½curitï¿½: pas de mot de passe codï¿½ en dur.
   const expectedPassword = process.env.ADMIN_PASSWORD;
   if (!expectedPassword) {
     return res.status(503).json({ error: 'Admin endpoint disabled (ADMIN_PASSWORD not configured)' });
