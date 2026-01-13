@@ -2660,16 +2660,21 @@ function renderSuggestions(suggestions, container, onSelect) {
         const mainText = suggestion.description.split(',')[0];
         const secondaryText = suggestion.description.substring(mainText.length);
         item.innerHTML = `<strong>${mainText}</strong>${secondaryText}`;
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (ev) => {
+            // Prevent clicks from bubbling to underlying elements (no click-through)
+            ev.stopPropagation();
+            ev.preventDefault();
             if (inputElement) {
                 inputElement.value = suggestion.description;
+                // Move focus back to input for accessibility
+                try { inputElement.focus(); } catch (e) {}
             }
             // V313: En mode OTP/Photon, les coordonnées sont directement dans la suggestion
             // On passe l'objet coordinates si disponible, sinon le placeId Google
             const selectionValue = suggestion.coordinates || suggestion.placeId;
             console.log('[renderSuggestions] Sélection:', suggestion.description, '→', selectionValue);
             onSelect(selectionValue); 
-            container.innerHTML = ''; 
+            container.innerHTML = '';
             container.style.display = 'none';
         });
         container.appendChild(item);
