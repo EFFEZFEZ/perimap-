@@ -4810,6 +4810,9 @@ function showDashboardHall() {
     const fromScreen = getVisibleAppScreen();
     animateScreenSwap(fromScreen, dashboardContainer);
 
+    // V348: Scroll doux vers le haut
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     // V347: Reset immédiat et complet des états de vue
     if (dashboardContainer) dashboardContainer.classList.remove('hidden');
     document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
@@ -4820,8 +4823,7 @@ function showDashboardHall() {
     if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
     if (dashboardHall) dashboardHall.classList.add('view-is-active');
     
-    // V347: Reset scroll immédiat
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Reset scroll du hall
     if (dashboardHall) dashboardHall.scrollTop = 0;
 
     // V265: Différer le nettoyage lourd pour UI instantanée
@@ -5003,6 +5005,9 @@ function resetDetailPanelScroll() {
 
 
 function showDashboardView(viewName) {
+    // V348: Scroll en haut AVANT le changement pour éviter le saut brutal
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // V347: Reset explicite de TOUTES les vues d'abord
     document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
         card.classList.remove('view-active');
@@ -5011,8 +5016,6 @@ function showDashboardView(viewName) {
     dashboardHall.classList.remove('view-is-active');
     dashboardContentView.classList.add('view-is-active');
 
-    // V27/V28 : On scrolle le body, pas le dashboard-main
-    window.scrollTo({ top: 0, behavior: 'instant' });
     // Reset scroll du container aussi
     if (dashboardContentView) dashboardContentView.scrollTop = 0;
     
@@ -5040,10 +5043,12 @@ function showDashboardView(viewName) {
             renderInfoTraficCard();
         }
         
-        // V347: Affichage IMMEDIAT de la carte active (pas de setTimeout qui cause des bugs)
-        activeCard.classList.add('view-active');
-        // Reset scroll de la carte elle-même
-        activeCard.scrollTop = 0;
+        // V348: Petit délai pour laisser le DOM se stabiliser puis afficher
+        requestAnimationFrame(() => {
+            activeCard.classList.add('view-active');
+            // Reset scroll de la carte elle-même
+            activeCard.scrollTop = 0;
+        });
     }
 }
 

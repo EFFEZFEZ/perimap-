@@ -2793,16 +2793,16 @@ body.dark-theme .stats-section .stat-label {
 
 
 /* =========================================
- * VUES INTERNES & TRANSITIONS (V48 - SANS ANIMATION)
+ * VUES INTERNES & TRANSITIONS (V348 - TRANSITIONS DOUCES)
  * ========================================= */
 #dashboard-hall {
-    /* SUPPRIMÉ: transition */
     visibility: visible;
     overflow-y: visible; /* V59: Permettre le scroll */
-    padding-bottom: 40px; /* V59: Espace pour scroll complet en bas */
+    /* V348: Transition douce pour le fade */
+    opacity: 1;
+    transition: opacity 0.15s ease-out;
 }
 #dashboard-hall:not(.view-is-active) {
-    /* SUPPRIMÉ: opacity, transform */
     display: none; /* V48 - Remplacement immédiat */
     pointer-events: none;
     max-height: 0;
@@ -2811,20 +2811,23 @@ body.dark-theme .stats-section .stat-label {
     padding-bottom: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+    opacity: 0;
 }
 
 #dashboard-content-view {
-    /* SUPPRIMÉ: opacity, transform, transition */
     display: none; /* V48 - Remplacement immédiat */
     pointer-events: none;
     max-height: 0;
     overflow: hidden;
+    /* V348: Transition douce */
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
 }
 #dashboard-content-view.view-is-active {
-    /* SUPPRIMÉ: opacity, transform */
     display: block; /* V48 - Remplacement immédiat */
     pointer-events: auto;
-    max-height: 5000px; 
+    max-height: 5000px;
+    opacity: 1;
 }
 
 #btn-back-to-hall:not(.app-back-btn) {
@@ -2923,12 +2926,15 @@ body.dark-theme .app-back-btn svg {
     overflow: hidden;
     padding: 0 1.5rem;
     display: none; /* V48: Caché par défaut */
+    /* V348: Transition douce */
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
 }
 #dashboard-content-view .card.view-active {
-    /* SUPPRIMÉ (V48): opacity, transform */
     display: block; /* V48: Affiché si actif */
     max-height: 2000px; 
-    padding: 1.5rem; 
+    padding: 1.5rem;
+    opacity: 1;
 }
 
 #fiche-horaire-container {
@@ -3934,7 +3940,7 @@ details[open] .accordion-content {
 /* Footer: ne jamais être recouvert par le bottom nav sur mobile */
 @media (max-width: 768px) {
     #site-footer {
-        margin-bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
+        margin-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
     }
 }
 

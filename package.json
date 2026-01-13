@@ -1,6 +1,6 @@
 {
   "name": "perimap",
-  "version": "2.3.8",
+  "version": "2.3.9",
   "description": "Périmap - Application de transport en commun Grand Périgueux",
   "private": true,
   "type": "module",
