@@ -555,6 +555,26 @@ export class RealtimeManager {
             if (matchedRealtime) {
                 // V304: Utiliser le temps réel, conserver les infos statiques
                 const realtimeMinutes = this.parseTemps(matchedRealtime.temps);
+
+                // --- DÉBUT AJOUT STATS ---
+                try {
+                    const staticMinutes = this.getMinutesFromTime(staticDep.time);
+                    if (realtimeMinutes < 900 && staticMinutes < 900) {
+                        const delay = realtimeMinutes - staticMinutes;
+                        // Si le retard est cohérent (ex: pas dû à un bug d'horaire > 2h)
+                        if (Math.abs(delay) < 120) {
+                            this.sendDelayStat(
+                                staticDep.routeShortName,
+                                // On utilise le nom statique comme référence
+                                staticDep.stop_name || 'Arrêt', 
+                                staticDep.time,
+                                delay
+                            );
+                        }
+                    }
+                } catch (e) { /* silent ignore */ }
+                // --- FIN AJOUT STATS ---
+
                 merged.push({
                     ...staticDep,
                     isRealtime: true,
@@ -661,6 +681,24 @@ export class RealtimeManager {
         }
 
         return 999; // Inconnu
+    }
+
+    /**
+     * Envoie les statistiques de retard au serveur
+     * (Uniquement si le retard est significatif : > 1 min ou < -1 min)
+     */
+    sendDelayStat(line, stop, scheduled, delay) {
+        if (Math.abs(delay) < 1) return;
+
+        // Délai aléatoire (1-3s) pour lisser la charge serveur
+        setTimeout(() => {
+            fetch('/api/record-delay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ line, stop, scheduled, delay }),
+                keepalive: true
+            }).catch(e => console.debug('Stat upload silent fail', e));
+        }, 1000 + Math.random() * 2000);
     }
 
     /**
