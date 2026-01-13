@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v392'; // v392: Deploy latest fixes (map + popup + autocomplete)
+const CACHE_VERSION = 'v393'; // v393: Deploy GTFS-RT pivot & preload fixes
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
@@ -137,15 +137,23 @@ self.addEventListener('activate', (event) => {
         await self.clients.claim();
         console.log('[SW] ✅ Tous les clients réclamés');
         
-        // 4. Notifier tous les clients
-        const allClients = await self.clients.matchAll();
-        allClients.forEach(client => {
-          client.postMessage({
-            type: 'CACHE_UPDATED',
-            version: CACHE_VERSION,
-            message: 'Nouvelle version Périmap disponible - Page rechargée'
-          });
-        });
+        // 4. Notifier tous les clients et forcer un reload sécurisé
+        const allClients = await self.clients.matchAll({ type: 'window' });
+        for (const client of allClients) {
+          try {
+            client.postMessage({
+              type: 'CACHE_UPDATED',
+              version: CACHE_VERSION,
+              message: 'Nouvelle version Périmap disponible - rechargement en cours'
+            });
+            // Tenter de naviguer le client vers lui-même pour forcer le reload
+            if (client.url) {
+              await client.navigate(client.url);
+            }
+          } catch (e) {
+            console.warn('[SW] Impossible de forcer reload du client:', e?.message || e);
+          }
+        }
 
       } catch (err) {
         console.error('[SW] Erreur activation:', err);
