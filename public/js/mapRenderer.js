@@ -99,13 +99,9 @@ export class MapRenderer {
         this.currentTheme = null;
         this.isDarkTheme = false;
 
-        /* Initialisation du groupe de clusters */
-        this.clusterGroup = L.markerClusterGroup({
-            spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true,
-            disableClusteringAtZoom: 16 
-        });
+        /* Bus layer (no clustering for moving vehicles) */
+        this.busPaneName = null; // will be set in initializeMap()
+        this.busLayer = null; // L.layerGroup for live bus markers
     }
 
     /**
@@ -125,9 +121,13 @@ export class MapRenderer {
         /* Initialisation des couches */
         this.stopLayer = L.layerGroup().addTo(this.map);
         
-        if (useClusters) {
-            this.map.addLayer(this.clusterGroup);
+        // Create a dedicated pane for bus markers to control z-index and avoid clustering
+        this.busPaneName = 'busPane';
+        if (this.map.createPane) {
+            this.map.createPane(this.busPaneName);
+            this.map.getPane(this.busPaneName).style.zIndex = 650;
         }
+        this.busLayer = L.layerGroup().addTo(this.map);
         
         console.log(`🗺️ Carte ${this.mapElementId} initialisée`);
         this.map.on('click', () => {
@@ -448,8 +448,8 @@ export class MapRenderer {
                 markerData.lastSeen = nowSeconds;
                 markerData.lastLatLng = [lat, lon];
                 this.busMarkers[busId] = markerData;
-                if (this.clusterGroup) {
-                    markersToAdd.push(markerData.marker);
+                if (this.busLayer) {
+                    this.busLayer.addLayer(markerData.marker);
                 } else {
                     markerData.marker.addTo(this.map);
                 }
@@ -494,12 +494,9 @@ export class MapRenderer {
         }
 
         // Nettoyage final des couches
-        if (this.clusterGroup) {
+        if (this.busLayer) {
             if (markersToRemove.length > 0) {
-                this.clusterGroup.removeLayers(markersToRemove);
-            }
-            if (markersToAdd.length > 0) {
-                this.clusterGroup.addLayers(markersToAdd);
+                markersToRemove.forEach(m => this.busLayer.removeLayer(m));
             }
         } else {
              if (markersToRemove.length > 0) {
@@ -666,11 +663,13 @@ export class MapRenderer {
             popupAnchor: [0, -16]
         });
 
-        const marker = L.marker([lat, lon], { 
+        const markerOptions = {
             icon,
             interactive: true,
             bubblingMouseEvents: false
-        });
+        };
+        if (this.busPaneName) markerOptions.pane = this.busPaneName;
+        const marker = L.marker([lat, lon], markerOptions);
         
         // *** V24 - NE PAS UTILISER bindPopup ***
         // marker.bindPopup(...);
