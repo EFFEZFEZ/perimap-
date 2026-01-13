@@ -844,6 +844,12 @@ async function initializeApp() {
         tripScheduler = new TripScheduler(dataManager, delayManager);
         // V305: Passer realtimeManager pour l'ajustement de position basé sur RT
         busPositionCalculator = new BusPositionCalculator(dataManager, realtimeManager);
+        // Précharger aussi les pivots résolus pour les lignes prioritaires (si présents)
+        try {
+            await realtimeManager.preloadPivotStopsFromCalculator(busPositionCalculator);
+        } catch (e) {
+            console.warn('[Main] preloadPivotStopsFromCalculator failed', e);
+        }
         
         // Exposer les managers pour le data exporter
         window.delayManager = delayManager;

@@ -154,6 +154,66 @@ export class RealtimeManager {
     }
 
     /**
+     * Précharge une liste additionnelle de hawkKeys (sans interrompre le preload principal)
+     * @param {string[]} extraHawkKeys
+     */
+    async preloadExtraStops(extraHawkKeys = []) {
+        if (!Array.isArray(extraHawkKeys) || extraHawkKeys.length === 0) return;
+        if (this.isSleeping()) return;
+
+        // Dédupliquer et ignorer ceux déjà en cache
+        const unique = Array.from(new Set(extraHawkKeys));
+        const toFetch = unique.filter(k => {
+            const cacheKey = `hawk_${k}`;
+            const cached = this.cache.get(cacheKey);
+            return !(cached && Date.now() - cached.fetchedAt < this.cacheMaxAge);
+        });
+        if (toFetch.length === 0) return;
+
+        console.log(`[Realtime] Préchargement additionnel de ${toFetch.length} hawkKeys`);
+
+        const batchSize = this.preloadConfig.maxConcurrentRequests;
+        for (let i = 0; i < toFetch.length; i += batchSize) {
+            const batch = toFetch.slice(i, i + batchSize);
+            const promises = batch.map((hawkKey, index) => {
+                return new Promise(resolve => {
+                    setTimeout(async () => {
+                        try {
+                            await this.fetchRealtimeByHawkKey(hawkKey);
+                            resolve({ success: true, hawkKey });
+                        } catch (error) {
+                            resolve({ success: false, hawkKey, error: error?.message || error });
+                        }
+                    }, index * this.preloadConfig.delayBetweenRequests);
+                });
+            });
+            await Promise.all(promises);
+        }
+    }
+
+    /**
+     * Résout les pivots présents dans une instance de BusPositionCalculator
+     * et lance leur préchargement via hawk keys.
+     * @param {BusPositionCalculator} busPosCalc
+     */
+    async preloadPivotStopsFromCalculator(busPosCalc) {
+        if (!busPosCalc || !busPosCalc.PIVOT_STOP_IDS) return;
+        const hawkKeys = [];
+        for (const routeKey of Object.keys(busPosCalc.PIVOT_STOP_IDS)) {
+            const entries = busPosCalc.PIVOT_STOP_IDS[routeKey] || [];
+            for (const e of entries) {
+                try {
+                    const hawk = getHawkKeyForStop(e.stop_id, e.stop_code);
+                    if (hawk) hawkKeys.push(hawk);
+                } catch (err) {
+                    // ignore
+                }
+            }
+        }
+        await this.preloadExtraStops(hawkKeys);
+    }
+
+    /**
      * V3: Récupère les données temps réel directement par hawkKey (sans passer par stopId)
      * @param {string} hawkKey - La clé hawk de l'arrêt
      * @returns {Promise<Object|null>}
