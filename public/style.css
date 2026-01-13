@@ -8794,6 +8794,13 @@ body.dark-theme .stat-item {
     z-index: 10; /* V365: Très bas, jamais au-dessus des popovers/modales */
 }
 
+/* V367: Cacher le footer sur mobile (liens accessibles via menu hamburger) */
+@media (max-width: 768px) {
+    #site-footer {
+        display: none !important;
+    }
+}
+
 /* Cache le footer sur les vues plein écran */
 body.view-is-locked #site-footer {
     display: none;

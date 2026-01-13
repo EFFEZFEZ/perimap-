@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v367'; // v367: Bottom-nav collée en bas (style IDFM/Google Maps) - stable et prévisible
+const CACHE_VERSION = 'v368'; // v368: Hide footer on mobile, move links to hamburger menu
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
