@@ -4788,6 +4788,12 @@ function renderAlertBanner() {
 function showMapView() {
     const fromScreen = getVisibleAppScreen();
     resetDetailViewState();
+    
+    // V350: Nettoyer les états de vues internes du dashboard avant de partir
+    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+    if (dashboardHall) dashboardHall.classList.add('view-is-active');
+    
     animateScreenSwap(fromScreen, mapContainer);
     document.body.classList.remove('itinerary-view-active');
     document.body.classList.add('view-map-locked'); 
@@ -4841,8 +4847,14 @@ function showDashboardHall() {
 
 function showResultsView() {
     const fromScreen = getVisibleAppScreen();
-    animateScreenSwap(fromScreen, itineraryResultsContainer);
     resetDetailViewState();
+    
+    // V350: Nettoyer les états de vues internes du dashboard avant de partir
+    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+    if (dashboardHall) dashboardHall.classList.add('view-is-active');
+    
+    animateScreenSwap(fromScreen, itineraryResultsContainer);
     // V67: Cacher header/footer Perimap sur la vue itinéraire
     // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
     document.body.classList.remove('view-map-locked', 'view-is-locked');
