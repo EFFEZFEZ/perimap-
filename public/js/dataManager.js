@@ -721,7 +721,7 @@ export class DataManager {
             const trip = this.tripsByTripId[dep.tripId];
             const route = this.routesById[trip.route_id];
             const stopTimes = this.stopTimesByTrip[dep.tripId];
-            const destination = this.getTripDestination(stopTimes);
+            const destination = this.getTripDestination(stopTimes, trip);
             
             return {
                 ...dep,
@@ -779,7 +779,7 @@ export class DataManager {
                         const route = this.routesById[trip.route_id];
                         if (!route) return;
 
-                        const destination = this.getTripDestination(stopTimes);
+                        const destination = this.getTripDestination(stopTimes, trip);
                         
                         allFutureDepartures.push({
                             departureSeconds,
@@ -997,7 +997,13 @@ export class DataManager {
         return nearestIndex;
     }
 
-    getTripDestination(stopTimes) {
+    getTripDestination(stopTimes, trip = null) {
+        // V370: Utiliser trip_headsign en priorité (pour distinguer Charriéras/Garennes sur ligne D)
+        if (trip && trip.trip_headsign && trip.trip_headsign.trim()) {
+            return trip.trip_headsign.trim();
+        }
+
+        // Fallback: nom du dernier arrêt
         if (!stopTimes || stopTimes.length === 0) {
             return 'Destination inconnue';
         }

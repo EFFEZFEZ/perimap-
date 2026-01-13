@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v369'; // v369: Hide back button text on mobile, lock body scroll to prevent Chrome UI movement, clean mobile menu
+const CACHE_VERSION = 'v370'; // v370: Use trip_headsign for line D directions (Charriéras vs Les Garennes)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
