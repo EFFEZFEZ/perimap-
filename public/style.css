@@ -420,14 +420,14 @@ body.dark-theme .card, body.dark-theme .instruction-content {
 }
 
 body.dark-theme .leaflet-popup-content-wrapper {
-    background: rgba(15, 23, 42, 0.95) !important;
+    background: #0f172a !important;
     border-color: rgba(255,255,255,0.1) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
 }
 
 body.dark-theme .leaflet-popup-tip {
-    background: rgba(15, 23, 42, 0.95) !important;
+    background: #0f172a !important;
 }
 
 /* V229: Popup arrêts complètement opaque en dark mode */
@@ -5022,7 +5022,7 @@ body.dark-theme .install-tip-steps section {
     border-radius: 14px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
     border: 1px solid var(--border) !important;
-    background: var(--bg-primary) !important;
+    background: var(--bg-main, #ffffff) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     padding: 0 !important;
@@ -5048,7 +5048,7 @@ body.dark-theme .install-tip-steps section {
 }
 
 .leaflet-popup-tip {
-    background: var(--bg-primary) !important;
+    background: var(--bg-main, #ffffff) !important;
     pointer-events: none;
     width: 14px !important;
     height: 14px !important;
@@ -6440,6 +6440,22 @@ body.dark-theme .real-select option {
     width: 100%;
     height: 100vh;
     z-index: 100;
+}
+
+/* V359: La vue itinéraire est en position fixed (plein écran),
+   donc on la décale sous l'en-tête PériMap pour éviter le chevauchement. */
+body.itinerary-view-active #itinerary-results-container {
+    top: 64px;
+    height: calc(100svh - 64px);
+    height: calc(100vh - 64px);
+}
+
+@media (max-width: 768px) {
+    body.itinerary-view-active #itinerary-results-container {
+        top: 56px;
+        height: calc(100svh - 56px);
+        height: calc(100vh - 56px);
+    }
 }
 
 /* NOUVEAU : Panneau latéral (colonne) */

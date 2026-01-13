@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v358'; // v358: Desktop keeps header/nav layout; mobile-only design gated to touch devices
+const CACHE_VERSION = 'v359'; // v359: Fix itinerary header overlap + make line-status popups opaque
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
