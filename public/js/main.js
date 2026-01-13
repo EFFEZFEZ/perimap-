@@ -336,6 +336,7 @@ let detailPanelWrapper, detailPanelContent;
 let hallPlannerSubmitBtn, hallFromInput, hallToInput, hallFromSuggestions, hallToSuggestions;
 let hallWhenBtn, hallPopover, hallDate, hallHour, hallMinute, hallPopoverSubmitBtn, hallSwapBtn, hallGeolocateBtn;
 let installTipContainer, installTipCloseBtn;
+let bottomNav;
 
 let fromPlaceId = null;
 let toPlaceId = null;
@@ -343,6 +344,136 @@ let toPlaceId = null;
 // LINE_CATEGORIES est maintenant importée depuis config/routes.js
 
 const DETAIL_SHEET_TRANSITION_MS = 380; // Doit être >= à la transition CSS (350ms + marge)
+
+// UI transitions (short & functional)
+const SCREEN_TRANSITION_MS = 180;
+
+function prefersReducedMotion() {
+    try {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch (_) {
+        return false;
+    }
+}
+
+function getVisibleAppScreen() {
+    // Only consider the top-level screens (not detail overlay)
+    const candidates = [dashboardContainer, mapContainer, itineraryResultsContainer];
+    return candidates.find(el => el && !el.classList.contains('hidden')) || null;
+}
+
+function animateScreenSwap(fromEl, toEl) {
+    if (!toEl || fromEl === toEl) {
+        if (toEl) toEl.classList.remove('hidden');
+        return;
+    }
+
+    // Reduced motion: instant
+    if (prefersReducedMotion()) {
+        if (fromEl) fromEl.classList.add('hidden');
+        toEl.classList.remove('hidden');
+        return;
+    }
+
+    // Ensure target is visible before animating
+    toEl.classList.remove('hidden');
+
+    // ENTER
+    toEl.classList.add('page-transition-enter');
+    requestAnimationFrame(() => {
+        toEl.classList.add('page-transition-enter-active');
+        toEl.classList.remove('page-transition-enter');
+    });
+
+    // EXIT
+    if (fromEl) {
+        fromEl.classList.add('page-transition-exit');
+        requestAnimationFrame(() => {
+            fromEl.classList.add('page-transition-exit-active');
+        });
+    }
+
+    setTimeout(() => {
+        toEl.classList.remove('page-transition-enter-active');
+        if (fromEl) {
+            fromEl.classList.remove('page-transition-exit', 'page-transition-exit-active');
+            fromEl.classList.add('hidden');
+        }
+    }, SCREEN_TRANSITION_MS);
+}
+
+function setBottomNavActive(action) {
+    if (!bottomNav) bottomNav = document.getElementById('bottom-nav');
+    if (!bottomNav) return;
+    const normalized = (action || '').toLowerCase();
+    bottomNav.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        const isActive = (btn.dataset.action || '').toLowerCase() === normalized;
+        btn.classList.toggle('is-active', isActive);
+        if (isActive) {
+            btn.setAttribute('aria-current', 'page');
+        } else {
+            btn.removeAttribute('aria-current');
+        }
+    });
+}
+
+function setupTapFeedback() {
+    if (window.__pmTapFeedbackReady) return;
+    window.__pmTapFeedbackReady = true;
+
+    const selector = [
+        '.btn',
+        '.btn-icon-round',
+        '.quick-action-card',
+        '.nav-dropdown-item',
+        '.mobile-menu-item',
+        '.bottom-nav-item',
+        '.route-option'
+    ].join(',');
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!event.isPrimary) return;
+        const target = event.target instanceof Element ? event.target.closest(selector) : null;
+        if (!target) return;
+        if (target.matches('input, textarea, select')) return;
+
+        // Press feedback
+        target.classList.add('pm-is-pressed');
+
+        // Ripple (skip if explicitly disabled)
+        if (target.getAttribute('data-ripple') === 'false') return;
+        if (prefersReducedMotion()) return;
+
+        target.classList.add('pm-ripple-host');
+        const rect = target.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = (event.clientX - rect.left) - size / 2;
+        const y = (event.clientY - rect.top) - size / 2;
+
+        const ripple = document.createElement('span');
+        ripple.className = 'pm-ripple';
+        ripple.style.width = `${size}px`;
+        ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        target.appendChild(ripple);
+
+        // Cleanup
+        window.setTimeout(() => {
+            try { ripple.remove(); } catch (_) {}
+        }, 520);
+    }, { passive: true, capture: true });
+
+    const clearPressed = (event) => {
+        const el = event.target instanceof Element ? event.target.closest(selector) : null;
+        if (!el) return;
+        el.classList.remove('pm-is-pressed');
+    };
+
+    document.addEventListener('pointerup', clearPressed, { passive: true, capture: true });
+    document.addEventListener('pointercancel', clearPressed, { passive: true, capture: true });
+    document.addEventListener('pointerleave', clearPressed, { passive: true, capture: true });
+}
 
 // getCategoryForRoute est maintenant importée depuis config/routes.js
 
@@ -405,11 +536,35 @@ function initializeDomElements() {
     hallGeolocateBtn = document.getElementById('hall-geolocate-btn');
     installTipContainer = document.getElementById('install-tip');
     installTipCloseBtn = document.getElementById('install-tip-close');
+    bottomNav = document.getElementById('bottom-nav');
 }
 
 async function initializeApp() {
     // Initialise les références DOM
     initializeDomElements();
+
+    // UX: skeleton sur les fiches horaires pendant le chargement GTFS
+    if (ficheHoraireContainer && (!dataManager || !dataManager.isLoaded)) {
+        ficheHoraireContainer.innerHTML = `
+            <div class="pm-skeleton-stack" aria-hidden="true">
+                <div class="pm-skeleton-card">
+                    <div class="skeleton" style="height:14px;width:55%;margin-bottom:10px;"></div>
+                    <div class="skeleton" style="height:10px;width:85%;margin-bottom:8px;"></div>
+                    <div class="skeleton" style="height:10px;width:72%;"></div>
+                </div>
+                <div class="pm-skeleton-card">
+                    <div class="skeleton" style="height:14px;width:48%;margin-bottom:10px;"></div>
+                    <div class="skeleton" style="height:10px;width:88%;margin-bottom:8px;"></div>
+                    <div class="skeleton" style="height:10px;width:66%;"></div>
+                </div>
+                <div class="pm-skeleton-card">
+                    <div class="skeleton" style="height:14px;width:60%;margin-bottom:10px;"></div>
+                    <div class="skeleton" style="height:10px;width:80%;margin-bottom:8px;"></div>
+                    <div class="skeleton" style="height:10px;width:70%;"></div>
+                </div>
+            </div>
+        `;
+    }
 
     // Instanciation du renderer (après sélection des éléments DOM)
     resultsRenderer = createResultsRenderer({
@@ -1346,6 +1501,12 @@ function setupStaticEventListeners() {
 
     // === NAVIGATION DROPDOWN IDFM-STYLE ===
     setupNavigationDropdowns();
+
+    // Touch feedback (ripple + subtle press)
+    setupTapFeedback();
+
+    // Default highlight (home) until navigation occurs
+    setBottomNavActive('hall');
     
     initBottomSheetControls();
 }
@@ -1413,6 +1574,19 @@ function setupNavigationDropdowns() {
             handleNavigationAction(action);
         });
     });
+
+    // Bottom navigation (mobile-first)
+    document.querySelectorAll('.bottom-nav-item[data-action]').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = item.dataset.action;
+            // Close mobile menu if open
+            if (mobileMenuToggle) mobileMenuToggle.classList.remove('is-active');
+            if (mobileMenu) mobileMenu.classList.add('hidden');
+            document.body.classList.remove('mobile-menu-open');
+            handleNavigationAction(action);
+        });
+    });
     
     // Fermer les menus au clic ailleurs
     document.addEventListener('click', (e) => {
@@ -1451,6 +1625,9 @@ async function handleNavigationAction(action) {
     }
     
     switch(action) {
+        case 'hall':
+            showDashboardHall();
+            break;
         case 'itineraire':
             // Aller à la vue résultats d'itinéraire (sans recherche préalable)
             showResultsView();
@@ -1531,7 +1708,7 @@ async function reloadDashboardFromTarifs() {
         
         // Réafficher les fiches horaires
         if (dataManager && ficheHoraireContainer) {
-            renderFicheHoraire();
+            buildFicheHoraireList();
         }
         
         // Afficher le hall
@@ -4407,11 +4584,12 @@ function renderAlertBanner() {
  * V304: Amélioration du timing invalidateSize pour éviter les problèmes d'affichage
  */
 function showMapView() {
-    dashboardContainer.classList.add('hidden');
-    itineraryResultsContainer.classList.add('hidden');
+    const fromScreen = getVisibleAppScreen();
     resetDetailViewState();
-    mapContainer.classList.remove('hidden');
+    animateScreenSwap(fromScreen, mapContainer);
+    document.body.classList.remove('itinerary-view-active');
     document.body.classList.add('view-map-locked'); 
+    setBottomNavActive('carte');
     
     // V304: Appeler invalidateSize avec un délai pour laisser le CSS s'appliquer
     if (mapRenderer && mapRenderer.map) {
@@ -4429,23 +4607,15 @@ function showMapView() {
 }
 
 function showDashboardHall() {
-    // V265: Changement visuel IMMÉDIAT via requestAnimationFrame
+    const fromScreen = getVisibleAppScreen();
+    animateScreenSwap(fromScreen, dashboardContainer);
+
     requestAnimationFrame(() => {
-        // Cacher les conteneurs lourds visuellement d'abord
-        if (mapContainer) mapContainer.classList.add('hidden');
-        if (itineraryResultsContainer) itineraryResultsContainer.classList.add('hidden');
-        
-        // Afficher le hall
         if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-        
-        // Nettoyage des classes body
+
         document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
-        
-        // Gestion des vues internes
         if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
         if (dashboardHall) dashboardHall.classList.add('view-is-active');
-        
-        // Retirer la classe active des cartes
         document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
     });
 
@@ -4454,16 +4624,19 @@ function showDashboardHall() {
         resetDetailViewState();
         if (dataManager) renderAlertBanner();
     }, 50);
+
+    setBottomNavActive('hall');
 }
 
 function showResultsView() {
-    dashboardContainer.classList.add('hidden');
-    itineraryResultsContainer.classList.remove('hidden');
+    const fromScreen = getVisibleAppScreen();
+    animateScreenSwap(fromScreen, itineraryResultsContainer);
     resetDetailViewState();
-    mapContainer.classList.add('hidden');
     // V67: Cacher header/footer Perimap sur la vue itinéraire
     document.body.classList.add('itinerary-view-active');
     // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
+
+    setBottomNavActive('itineraire');
 
     if (resultsListContainer) {
         resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
@@ -4625,11 +4798,17 @@ function showDashboardView(viewName) {
     // de préserver l'en-tête et le scroll.
     document.body.classList.remove('view-map-locked');
     document.body.classList.remove('view-is-locked');
+    document.body.classList.remove('itinerary-view-active');
     
     // V84: Masquer le bandeau d'alerte sur les sous-vues pour ne pas bloquer le bouton retour
     if (alertBanner) {
         alertBanner.classList.add('hidden');
     }
+
+    // Update bottom nav highlight (keeps the app-like feel)
+    if (viewName === 'horaires') setBottomNavActive('horaires');
+    else if (viewName === 'info-trafic') setBottomNavActive('info-trafic');
+    else setBottomNavActive('hall');
 
     document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
         card.classList.remove('view-active');

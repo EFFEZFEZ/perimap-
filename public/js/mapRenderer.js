@@ -601,7 +601,7 @@ export class MapRenderer {
         const routeColor = route?.route_color ? `#${route.route_color}` : '#FFC107';
         const textColor = route?.route_text_color ? `#${route.route_text_color}` : '#ffffff';
 
-        const iconClassName = 'bus-icon-rect';
+        const iconClassName = 'bus-icon-rect bus-appear';
         const statusClass = bus.currentStatus ? `bus-status-${bus.currentStatus}` : 'bus-status-normal';
 
         const icon = L.divIcon({
@@ -772,8 +772,15 @@ export class MapRenderer {
         // L'utilisateur peut centrer manuellement s'il le souhaite
         const isMobile = window.innerWidth <= 768;
         
-        // V25: Créer d'abord le popup avec les données statiques
-        const popupContent = this.createStopPopupContent(masterStop, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, null);
+        // V25 + UX: Créer d'abord le popup avec les données statiques + skeleton "temps réel"
+        const popupContent = this.createStopPopupContent(
+            masterStop,
+            departuresByLine,
+            currentSeconds,
+            isNextDayDepartures,
+            firstDepartureTime,
+            { __loading: true }
+        );
         
         const popup = L.popup({ 
             maxHeight: 350, 
@@ -903,6 +910,7 @@ export class MapRenderer {
             });
         }
         const hasRealtime = Object.keys(realtimeByLine).length > 0;
+        const isRealtimeLoading = !!(realtimeData && realtimeData.__loading);
         
         // Regrouper par ligne (route_short_name)
         const lineGroups = {};
@@ -946,6 +954,10 @@ export class MapRenderer {
                     <span class="popup-stop-name">${masterStop.stop_name}</span>`;
         if (hasRealtime) {
             html += `<span class="realtime-badge">${REALTIME_ICON} Live</span>`;
+        } else if (isRealtimeLoading) {
+            html += `<span class="realtime-badge realtime-badge--loading" aria-label="Chargement temps réel">
+                        <span class="skeleton" style="width:54px;height:12px;"></span>
+                     </span>`;
         }
         html += `</div>`;
         
