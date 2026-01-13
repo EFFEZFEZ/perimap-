@@ -4216,7 +4216,7 @@ body.dark-theme .map-theme-toggle:hover {
 /* =========================================
  * DESIGN MOBILE (VUE CARTE & SOUS-PAGES)
  * ========================================= */
-@media (max-width: 768px) {
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
     
     .main-nav-buttons-condensed {
         grid-template-columns: 1fr;
@@ -9106,7 +9106,7 @@ body:not(.view-is-locked) {
     padding-top: 0; /* Reset default padding */
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
     body:not(.view-is-locked) {
         padding-top: 56px; /* Header only */
     }
@@ -9587,7 +9587,7 @@ body.dark-theme .mobile-menu-items {
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+@media (max-width: 900px) and (hover: none) and (pointer: coarse) {
     .header-nav-main {
         display: none;
     }
