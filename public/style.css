@@ -153,7 +153,7 @@ body.dark-theme .map-btn-locate.has-error {
  * ========================================= */
 @media (max-width: 768px) {
     .leaflet-bottom.leaflet-right .map-floating-controls {
-        margin-bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
+        margin-bottom: calc(var(--bottom-nav-height) + 8px + env(safe-area-inset-bottom));
         margin-right: 12px;
     }
     
@@ -165,6 +165,11 @@ body.dark-theme .map-btn-locate.has-error {
         width: 44px;
         height: 44px;
     }
+    
+/* Hide geolocation control when requested by user */
+.leaflet-bottom.leaflet-right .map-floating-controls {
+    display: none !important;
+}
     
     .map-btn-locate svg {
         width: 20px;
@@ -4016,8 +4021,8 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     #map-container #btn-toggle-filter,
     .map-fab-button {
         position: fixed !important;
-        bottom: calc(var(--bottom-nav-height) + 32px + env(safe-area-inset-bottom));
-        right: 16px !important;
+        bottom: calc(var(--bottom-nav-height) + 12px + env(safe-area-inset-bottom));
+        right: 20px !important;
         left: auto !important;
         width: 48px;
         height: 48px;
@@ -4384,9 +4389,9 @@ body.dark-theme .map-theme-toggle:hover {
         border: none;
     }
     
-    /* Bouton Retour - gauche */
+    /* Bouton Retour - gauche (placé sous l'en-tête) */
     #map-container #map-view #top-bar > #btn-back-to-dashboard-from-map {
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 8px + env(safe-area-inset-top));
         left: 12px;
         display: inline-flex !important;
         align-items: center;
@@ -4401,11 +4406,11 @@ body.dark-theme .map-theme-toggle:hover {
         height: 14px;
     }
     
-    /* Horloge - centre */
+    /* Horloge - centre (sous l'en-tête) */
     #map-container #map-view #top-bar > #clock {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 8px + env(safe-area-inset-top));
         left: 50%;
         transform: translateX(-50%);
         gap: 6px;
@@ -4418,11 +4423,11 @@ body.dark-theme .map-theme-toggle:hover {
     }
     #map-container #map-view #top-bar > #clock #date-indicator { display: none; }
     
-    /* Bus count - droite */
+    /* Bus count - droite (sous l'en-tête) */
     #map-container #map-view #top-bar > #status-info {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 8px + env(safe-area-inset-top));
         right: 12px;
         left: auto;
         margin-left: 0;
@@ -4436,7 +4441,7 @@ body.dark-theme .map-theme-toggle:hover {
     /* Groupe droite : status + toggle thème (compact mobile) */
     #top-right-controls {
         position: fixed;
-        top: calc(var(--spacing-3) + env(safe-area-inset-top));
+        top: calc(64px + 8px + env(safe-area-inset-top));
         right: var(--spacing-3);
         display: inline-flex;
         align-items: center;
