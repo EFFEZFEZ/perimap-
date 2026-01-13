@@ -860,7 +860,25 @@ export class MapRenderer {
         }, 50);
 
         // V25: Tenter de récupérer les données temps réel en arrière-plan
+        // Appel initial
         this.fetchAndUpdateRealtime(masterStop, popup, departuresByLine, currentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon);
+
+        // AJOUT V306: Rafraîchir automatiquement tant que le popup est ouvert
+        const REFRESH_INTERVAL_MS = 30000; // toutes les 30s
+        const refreshHandler = () => {
+            try {
+                if (popup && popup.isOpen && popup.isOpen()) {
+                    const newCurrentSeconds = this.timeManager.getCurrentSeconds();
+                    this.fetchAndUpdateRealtime(masterStop, popup, departuresByLine, newCurrentSeconds, isNextDayDepartures, firstDepartureTime, lat, lon);
+                }
+            } catch (e) { /* ignore */ }
+        };
+        const refreshIntervalId = setInterval(refreshHandler, REFRESH_INTERVAL_MS);
+
+        // Nettoyage: arrêter le timer quand le popup est fermé
+        popup.on('remove', () => {
+            try { clearInterval(refreshIntervalId); } catch (e) {}
+        });
     }
 
     /**

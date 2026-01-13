@@ -5300,7 +5300,43 @@ function updateData() {
     updateClock(currentSeconds);
     
     const activeBuses = tripScheduler.getActiveTrips(currentSeconds, currentDate);
-    const allBusesWithPositions = busPositionCalculator.calculateAllPositions(activeBuses);
+    let allBusesWithPositions = busPositionCalculator.calculateAllPositions(activeBuses);
+
+    // V306: Corriger la position visuelle des bus retardés en "rembobinant" le temps
+    // Si le RT indique un temps restant plus élevé que le théorique, on calcule une
+    // position alternative en utilisant currentSeconds - delaySeconds.
+    allBusesWithPositions = allBusesWithPositions.map(bus => {
+        try {
+            if (!bus || !bus.segment) return bus;
+
+            // rtInfo peut provenir du calcul initial; si absent, on skip
+            const rtMinutes = bus.rtInfo?.rtMinutes ?? null;
+            if (rtMinutes === null) return bus;
+
+            const rtRemainingSeconds = Number(rtMinutes) * 60;
+            const remainingSecondsTheoretical = (bus.segment.arrivalTime - currentSeconds);
+            const delaySeconds = Math.max(0, rtRemainingSeconds - remainingSecondsTheoretical);
+
+            const MIN_DELAY_FOR_REWIND = 30; // seulement si retard > 30s
+            if (delaySeconds > MIN_DELAY_FOR_REWIND) {
+                const effectiveTime = currentSeconds - delaySeconds;
+                const seg = bus.segment;
+                const adjustedProgress = tripScheduler.calculateProgress(seg.departureTime, seg.arrivalTime, effectiveTime);
+                const adjustedSegment = Object.assign({}, seg, { progress: adjustedProgress });
+                const adjustedPosition = busPositionCalculator.calculatePosition(adjustedSegment, bus.route?.route_id, bus.tripId, bus.route?.route_short_name);
+                if (adjustedPosition) {
+                    return Object.assign({}, bus, {
+                        position: adjustedPosition,
+                        bearing: adjustedPosition.bearing || bus.bearing
+                    });
+                }
+            }
+        } catch (e) {
+            // Fail silently and return original
+            console.warn('[updateData] position rewind failed for', bus?.tripId, e);
+        }
+        return bus;
+    });
 
     allBusesWithPositions.forEach(bus => {
         if (bus && bus.route) {
