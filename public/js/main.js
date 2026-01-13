@@ -4818,10 +4818,13 @@ function showMapView() {
 }
 
 /**
- * V355: Optimisation showDashboardHall avec RAF
+ * V356: Optimisation showDashboardHall avec RAF + bottom nav immédiat
  */
 function showDashboardHall() {
     const fromScreen = getVisibleAppScreen();
+    
+    // V356: Mettre à jour la bottom nav IMMÉDIATEMENT (avant RAF)
+    setBottomNavActive('hall');
     
     requestAnimationFrame(() => {
         if (fromScreen !== dashboardContainer) {
@@ -4850,8 +4853,6 @@ function showDashboardHall() {
             resetDetailViewState();
             if (dataManager) renderAlertBanner();
         }, 50);
-
-        setBottomNavActive('hall');
     });
 }
 
@@ -5067,18 +5068,16 @@ function showDashboardView(viewName) {
 
         const activeCard = document.getElementById(viewName);
         if (activeCard) {
-            // V355: Charger les données en parallèle pendant la transition
-            if (viewName === 'info-trafic') {
-                // Différer le rendu lourd pour ne pas bloquer l'animation
-                requestIdleCallback ? requestIdleCallback(() => renderInfoTraficCard(), { timeout: 100 }) 
-                                    : setTimeout(() => renderInfoTraficCard(), 50);
-            }
-            
             // Affichage après transition
             const delay = fromScreen !== dashboardContainer ? SCREEN_TRANSITION_MS : 0;
             setTimeout(() => {
                 activeCard.classList.add('view-active');
                 activeCard.scrollTop = 0;
+                
+                // V356: Rendre les infos trafic APRÈS que la carte soit visible
+                if (viewName === 'info-trafic') {
+                    renderInfoTraficCard();
+                }
             }, delay);
         }
     });
