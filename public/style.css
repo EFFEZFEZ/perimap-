@@ -6502,135 +6502,172 @@ body.dark-theme .real-select option {
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    padding: 0.75rem 1rem;
+    padding: 1rem;
 }
 
-/* Formulaire compact en colonne serrée */
-.itinerary-compact-form {
+/* =========================================
+ * V353: FORMULAIRE ITINÉRAIRE STYLE GOOGLE MAPS
+ * Design épuré avec indicateurs visuels latéraux
+ * ========================================= */
+
+.route-input-container {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    position: relative;
+}
+
+/* Indicateurs visuels (points + ligne) */
+.route-visual-indicators {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 0;
+    flex-shrink: 0;
+    width: 20px;
+}
+
+.indicator-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.indicator-dot.origin {
+    background: var(--primary);
+    border: 2px solid #fff;
+}
+
+.indicator-dot.destination {
+    background: #ef4444;
+    border: 2px solid #fff;
+}
+
+.indicator-line {
+    flex: 1;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), #ef4444);
+    margin: 4px 0;
+    border-radius: 1px;
+    min-height: 20px;
+}
+
+/* Stack des inputs */
+.route-inputs-stack {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    min-width: 0;
+}
+
+.route-input-wrapper {
     position: relative;
 }
 
-.compact-input-group {
-    position: relative;
-}
-
-.compact-input-group .input-with-icon {
-    position: relative;
-}
-
-.compact-input-group .input-icon {
-    position: absolute;
-    left: 0.875rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--primary);
-    z-index: 1;
-    pointer-events: none;
-    width: 18px;
-    height: 18px;
-}
-
-.compact-input-group input[type="text"] {
+/* Input style épuré */
+.route-input {
     width: 100%;
-    padding: 0.625rem 2.5rem 0.625rem 2.75rem;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    font-size: 0.875rem;
+    padding: 0.75rem 2.75rem 0.75rem 0.875rem;
+    background: var(--bg-secondary);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.9375rem;
     color: var(--text-primary);
-    min-height: 42px;
+    min-height: 44px;
     box-sizing: border-box;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
 }
 
-.compact-input-group input[type="text"]::placeholder {
-    color: #9ca3af;
+.route-input::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 400;
 }
 
-.compact-input-group input[type="text"]:focus {
-    background: #ffffff;
+.route-input:hover {
+    background: var(--bg-main);
+    border-color: var(--border);
+}
+
+.route-input:focus {
+    background: var(--bg-main);
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
     outline: none;
 }
 
-/* Bouton géolocalisation compact */
-.compact-input-group .btn-geolocate {
+/* Bouton géolocalisation minimal */
+.btn-geolocate-minimal {
     position: absolute;
     right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
-    background: #ffffff;
-    color: var(--primary);
-    border: 1px solid #e5e7eb;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     cursor: pointer;
     transition: all 0.15s ease;
-    z-index: 2;
 }
 
-.compact-input-group .btn-geolocate:hover:not(:disabled) {
+.btn-geolocate-minimal:hover:not(:disabled) {
     background: var(--primary);
     color: #ffffff;
-    border-color: var(--primary);
 }
 
-.compact-input-group .btn-geolocate:disabled {
-    opacity: 0.5;
+.btn-geolocate-minimal:disabled {
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
-/* Bouton inverser compact (centré entre les inputs) */
-.btn-swap-compact {
+/* Bouton inverser minimal */
+.btn-swap-minimal {
     align-self: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    border: none;
     color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
-    margin: -0.25rem 0;
+    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
-.btn-swap-compact:hover {
+.btn-swap-minimal:hover {
     background: var(--primary);
-    border-color: var(--primary);
     color: #ffffff;
     transform: rotate(180deg);
 }
 
-/* Ligne d'actions : heure + bouton rechercher */
-.compact-actions-row {
+/* Actions row */
+.route-actions {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
 }
 
-/* Bouton heure compact */
-.btn-when-compact {
+/* Bouton time picker */
+.btn-time-picker {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
     background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-primary);
     cursor: pointer;
@@ -6638,60 +6675,67 @@ body.dark-theme .real-select option {
     white-space: nowrap;
 }
 
-.btn-when-compact svg {
+.btn-time-picker svg {
     color: var(--primary);
     flex-shrink: 0;
 }
 
-.btn-when-compact .chevron {
-    color: var(--text-secondary);
+.btn-time-picker .chevron {
+    color: var(--text-tertiary);
     margin-left: 0.125rem;
 }
 
-.btn-when-compact:hover {
+.btn-time-picker:hover {
     background: var(--bg-main);
-    border-color: var(--primary);
+    border-color: var(--border);
 }
 
-/* Bouton rechercher compact */
-.btn-search-compact {
+/* Bouton rechercher */
+.btn-search-route {
     flex: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9375rem;
     font-weight: 600;
-    border-radius: 10px;
-    min-height: 38px;
+    border-radius: 8px;
+    min-height: 42px;
 }
 
 /* Dark theme */
-body.dark-theme .compact-input-group input[type="text"] {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
+body.dark-theme .route-input {
+    background: rgba(255, 255, 255, 0.06);
 }
 
-body.dark-theme .compact-input-group input[type="text"]:focus {
+body.dark-theme .route-input:hover {
     background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-theme .route-input:focus {
+    background: rgba(255, 255, 255, 0.1);
     border-color: var(--primary);
 }
 
-body.dark-theme .compact-input-group .btn-geolocate {
+body.dark-theme .btn-swap-minimal,
+body.dark-theme .btn-time-picker {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .btn-swap-minimal:hover {
+    background: var(--primary);
+}
+
+body.dark-theme .btn-time-picker:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.15);
 }
 
-body.dark-theme .btn-swap-compact {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-body.dark-theme .btn-when-compact {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.12);
+body.dark-theme .indicator-dot.origin,
+body.dark-theme .indicator-dot.destination {
+    border-color: var(--bg-main);
 }
 
 /* =========================================
@@ -7389,9 +7433,9 @@ body.dark-theme .next-departures-label {
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
     }
     
-    /* V351: Nouveau header compact pour mobile */
+    /* V353: Header compact pour mobile */
     .itinerary-top-bar {
-        padding: 0.625rem 0.75rem;
+        padding: 0.5rem 0.75rem;
     }
     
     .itinerary-top-bar h2 {
@@ -7399,50 +7443,72 @@ body.dark-theme .next-departures-label {
     }
     
     #itinerary-edit-panel {
-        padding: 0.5rem 0.75rem 0.75rem;
+        padding: 0.75rem;
     }
     
-    .itinerary-compact-form {
-        gap: 0.375rem;
+    /* V353: Formulaire Google Maps style mobile */
+    .route-input-container {
+        gap: 0.5rem;
     }
     
-    /* V352: Fix padding pour les icônes */
-    .compact-input-group input[type="text"] {
-        min-height: 40px;
-        font-size: 0.8125rem;
-        padding: 0.5rem 2.25rem 0.5rem 2.5rem;
-    }
-    
-    .compact-input-group .input-icon {
+    .route-visual-indicators {
         width: 16px;
-        height: 16px;
-        left: 0.75rem;
+        padding: 0.625rem 0;
     }
     
-    .btn-swap-compact {
+    .indicator-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .route-input {
+        min-height: 40px;
+        font-size: 0.875rem;
+        padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+        border-radius: 6px;
+    }
+    
+    .btn-geolocate-minimal {
         width: 28px;
         height: 28px;
-        margin: -0.125rem 0;
     }
     
-    .btn-swap-compact svg {
+    .btn-geolocate-minimal svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .btn-swap-minimal {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .btn-swap-minimal svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .route-actions {
+        margin-top: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .btn-time-picker {
+        padding: 0.5rem 0.625rem;
+        font-size: 0.8125rem;
+        border-radius: 6px;
+    }
+    
+    .btn-time-picker svg:first-child {
         width: 14px;
         height: 14px;
     }
     
-    .compact-actions-row {
-        margin-top: 0.125rem;
-    }
-    
-    .btn-when-compact {
-        padding: 0.4rem 0.625rem;
-        font-size: 0.75rem;
-    }
-    
-    .btn-search-compact {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8125rem;
-        min-height: 36px;
+    .btn-search-route {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        min-height: 38px;
+        border-radius: 6px;
     }
 
     /* --- Styles mobiles pour les détails d'itinéraire (ACCORDÉON PC) --- */

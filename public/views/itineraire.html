@@ -1,6 +1,6 @@
 <div id="itinerary-results-container" class="hidden app-screen">
         <div id="results-side-panel">
-        <!-- V351: Header unifié avec bouton retour aligné sur les autres vues -->
+        <!-- V353: Header unifié -->
         <div class="itinerary-top-bar">
             <button id="btn-back-to-dashboard-from-results" class="topbar-pill app-back-btn" aria-label="Retour">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -9,69 +9,74 @@
             <h2>Itinéraires</h2>
         </div>
 
-        <!-- V351: Formulaire compact sans labels -->
+        <!-- V353: Formulaire redesigné style Google Maps -->
         <div id="itinerary-edit-panel">
-            <div class="itinerary-compact-form">
-                <div class="compact-input-group">
-                    <div class="input-with-action input-with-icon">
-                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>
-                        <input type="text" id="results-planner-from" placeholder="D'où partez-vous ?" autocomplete="off">
-                        <button class="btn-icon-round btn-geolocate" id="results-geolocate-btn" aria-label="Utiliser ma position" disabled>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                                <circle cx="12" cy="10" r="3"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="results-from-suggestions" class="autocomplete-suggestions"></div>
-                </div>
-
-                <button class="btn-swap-compact" id="results-btn-swap-direction" aria-label="Inverser">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/></svg>
-                </button>
-
-                <div class="compact-input-group">
-                    <div class="input-with-action input-with-icon">
-                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <input type="text" id="results-planner-to" placeholder="Où allez-vous ?" autocomplete="off">
-                    </div>
-                    <div id="results-to-suggestions" class="autocomplete-suggestions"></div>
-                </div>
-
-                <div class="compact-actions-row">
-                    <button id="results-planner-when-btn" class="btn-when-compact">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        <span>Maintenant</span>
-                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <button id="results-planner-submit-btn" class="btn btn-primary btn-search-compact">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                        Rechercher
-                    </button>
+            <div class="route-input-container">
+                <!-- Indicateurs visuels verticaux -->
+                <div class="route-visual-indicators">
+                    <div class="indicator-dot origin"></div>
+                    <div class="indicator-line"></div>
+                    <div class="indicator-dot destination"></div>
                 </div>
                 
-                <div id="results-planner-options-popover" class="hidden">
-                    <div class="popover-tabs">
-                        <button class="popover-tab active" data-tab="partir">Partir</button>
-                        <button class="popover-tab" data-tab="arriver">Arriver</button>
+                <!-- Champs de saisie -->
+                <div class="route-inputs-stack">
+                    <div class="route-input-wrapper">
+                        <input type="text" id="results-planner-from" class="route-input" placeholder="Point de départ" autocomplete="off">
+                        <button class="btn-geolocate-minimal" id="results-geolocate-btn" aria-label="Ma position" disabled>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                            </svg>
+                        </button>
+                        <div id="results-from-suggestions" class="autocomplete-suggestions"></div>
                     </div>
-                    <div class="popover-content">
+                    
+                    <div class="route-input-wrapper">
+                        <input type="text" id="results-planner-to" class="route-input" placeholder="Destination" autocomplete="off">
+                        <div id="results-to-suggestions" class="autocomplete-suggestions"></div>
+                    </div>
+                </div>
+                
+                <!-- Bouton inverser -->
+                <button class="btn-swap-minimal" id="results-btn-swap-direction" aria-label="Inverser">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/></svg>
+                </button>
+            </div>
+            
+            <!-- Options et recherche -->
+            <div class="route-actions">
+                <button id="results-planner-when-btn" class="btn-time-picker">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <span>Partir maintenant</span>
+                    <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <button id="results-planner-submit-btn" class="btn btn-primary btn-search-route">
+                    Rechercher
+                </button>
+            </div>
+            
+            <div id="results-planner-options-popover" class="hidden">
+                <div class="popover-tabs">
+                    <button class="popover-tab active" data-tab="partir">Partir</button>
+                    <button class="popover-tab" data-tab="arriver">Arriver</button>
+                </div>
+                <div class="popover-content">
+                    <div class="form-group">
+                        <label for="results-popover-date">Quel jour ?</label>
+                        <select id="results-popover-date" class="real-select"></select>
+                    </div>
+                    <div class="popover-time-inputs">
                         <div class="form-group">
-                            <label for="results-popover-date">Quel jour ?</label>
-                            <select id="results-popover-date" class="real-select"></select>
+                            <label for="results-popover-hour">Heure</label>
+                            <select id="results-popover-hour" class="real-select"></select>
                         </div>
-                        <div class="popover-time-inputs">
-                            <div class="form-group">
-                                <label for="results-popover-hour">Heure</label>
-                                <select id="results-popover-hour" class="real-select"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="results-popover-minute">Minutes</label>
-                                <select id="results-popover-minute" class="real-select"></select>
-                            </div>
+                        <div class="form-group">
+                            <label for="results-popover-minute">Minutes</label>
+                            <select id="results-popover-minute" class="real-select"></select>
                         </div>
-                        <button id="results-popover-submit-btn" class="btn btn-primary btn-popover-submit">Partir maintenant</button>
                     </div>
+                    <button id="results-popover-submit-btn" class="btn btn-primary btn-popover-submit">Partir maintenant</button>
                 </div>
             </div>
         </div>
