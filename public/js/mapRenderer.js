@@ -1096,8 +1096,35 @@ export class MapRenderer {
                         if (matchingRealtime.length > realtimeUsed) {
                             const rt = matchingRealtime[realtimeUsed];
                             realtimeUsed++;
-                            // Afficher le temps réel en vert avec icône
-                            html += `<span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${rt.temps}</span>`;
+                            // Prefer ETA computed from active bus positions when available to avoid conflicting info
+                            let displayTime = rt.temps;
+                            try {
+                                // Chercher un bus actif correspondant à cette ligne et qui a pour prochain arrêt celui-ci
+                                const routeShort = lineGroup.routeShortName?.toString();
+                                let matchedBusETA = null;
+                                for (const mbId in this.busMarkers) {
+                                    const mb = this.busMarkers[mbId];
+                                    const b = mb?.bus;
+                                    if (!b || !b.route) continue;
+                                    if ((b.route.route_short_name || b.route.route_id || '').toString() !== routeShort) continue;
+                                    // Vérifier si le segment cible correspond à l'arrêt actuel
+                                    if (b.segment && b.segment.toStopInfo && b.segment.toStopInfo.stop_id == masterStop.stop_id) {
+                                        // Calculer l'ETA basé sur le segment et le currentSeconds du bus
+                                        const etaObj = tripScheduler.getNextStopETA(b.segment, b.currentSeconds || currentSeconds);
+                                        if (etaObj && etaObj.formatted) {
+                                            matchedBusETA = etaObj;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (matchedBusETA) {
+                                    displayTime = matchedBusETA.formatted;
+                                }
+                            } catch (e) {
+                                // ignore
+                            }
+                            // Afficher le temps réel (ou ETA calculée) en vert avec icône
+                            html += `<span class="popup-time realtime" title="Temps réel">${REALTIME_ICON}${displayTime}</span>`;
                         } else {
                             // Horaire statique GTFS
                             html += `<span class="popup-time">${dep.time.substring(0, 5)}</span>`;
