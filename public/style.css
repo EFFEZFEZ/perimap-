@@ -6386,7 +6386,8 @@ body.dark-theme .real-select option {
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: var(--elevation-2);
     /* Doit passer AU-DESSUS des contrôles du planner (popover/when button) */
-    z-index: calc(var(--z-popover) + 50) !important;
+    /* Must be above planner popover (which uses z-index:16000) */
+    z-index: 20000 !important;
     max-height: 250px;
     overflow-y: auto;
     display: none;
