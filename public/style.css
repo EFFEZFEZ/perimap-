@@ -4022,7 +4022,8 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     .map-fab-button {
         position: fixed !important;
         bottom: calc(var(--bottom-nav-height) + 12px + env(safe-area-inset-bottom));
-        right: 20px !important;
+        /* Move FAB to the right by the same gap (12px) used from bottom nav */
+        right: calc(20px + 12px) !important;
         left: auto !important;
         width: 48px;
         height: 48px;
@@ -4389,9 +4390,9 @@ body.dark-theme .map-theme-toggle:hover {
         border: none;
     }
     
-    /* Bouton Retour - gauche (placé sous l'en-tête) */
+    /* Bouton Retour - gauche (remis à sa position d'avant, proche du haut) */
     #map-container #map-view #top-bar > #btn-back-to-dashboard-from-map {
-        top: calc(64px + 8px + env(safe-area-inset-top));
+        top: calc(12px + env(safe-area-inset-top));
         left: 12px;
         display: inline-flex !important;
         align-items: center;
@@ -4406,11 +4407,11 @@ body.dark-theme .map-theme-toggle:hover {
         height: 14px;
     }
     
-    /* Horloge - centre (sous l'en-tête) */
+    /* Horloge - centre (remise à la position d'avant) */
     #map-container #map-view #top-bar > #clock {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(64px + 8px + env(safe-area-inset-top));
+        top: calc(12px + env(safe-area-inset-top));
         left: 50%;
         transform: translateX(-50%);
         gap: 6px;
@@ -4423,11 +4424,11 @@ body.dark-theme .map-theme-toggle:hover {
     }
     #map-container #map-view #top-bar > #clock #date-indicator { display: none; }
     
-    /* Bus count - droite (sous l'en-tête) */
+    /* Bus count - droite (remis en haut) */
     #map-container #map-view #top-bar > #status-info {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(64px + 8px + env(safe-area-inset-top));
+        top: calc(12px + env(safe-area-inset-top));
         right: 12px;
         left: auto;
         margin-left: 0;
@@ -4441,7 +4442,7 @@ body.dark-theme .map-theme-toggle:hover {
     /* Groupe droite : status + toggle thème (compact mobile) */
     #top-right-controls {
         position: fixed;
-        top: calc(64px + 8px + env(safe-area-inset-top));
+        top: calc(12px + env(safe-area-inset-top));
         right: var(--spacing-3);
         display: inline-flex;
         align-items: center;
