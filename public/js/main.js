@@ -4727,18 +4727,17 @@ function buildFicheHoraireList() {
         }
     }
     
-    const allDetails = document.querySelectorAll('#fiche-horaire-container details');
-    allDetails.forEach(details => {
-        details.addEventListener('toggle', (event) => {
-            if (event.target.open) {
-                allDetails.forEach(d => {
-                    if (d !== event.target && d.open) {
-                        d.open = false;
-                    }
-                });
-            }
-        });
-    });
+    // V355: Event delegation au lieu d'attacher des listeners individuels
+    ficheHoraireContainer.addEventListener('toggle', (event) => {
+        if (event.target.tagName === 'DETAILS' && event.target.open) {
+            const allDetails = ficheHoraireContainer.querySelectorAll('details');
+            allDetails.forEach(d => {
+                if (d !== event.target && d.open) {
+                    d.open = false;
+                }
+            });
+        }
+    }, true);
 }
 
 function renderAlertBanner() {
@@ -4782,111 +4781,124 @@ function renderAlertBanner() {
 
 
 /**
- * Logique de changement de VUE
- * V304: Amélioration du timing invalidateSize pour éviter les problèmes d'affichage
+ * V355: Optimisation showMapView avec RAF et lazy invalidateSize
  */
 function showMapView() {
     const fromScreen = getVisibleAppScreen();
-    resetDetailViewState();
     
-    // V350: Nettoyer les états de vues internes du dashboard avant de partir
-    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
-    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
-    if (dashboardHall) dashboardHall.classList.add('view-is-active');
-    
-    animateScreenSwap(fromScreen, mapContainer);
-    document.body.classList.remove('itinerary-view-active');
-    document.body.classList.add('view-map-locked'); 
-    setBottomNavActive('carte');
+    requestAnimationFrame(() => {
+        resetDetailViewState();
+        
+        // Nettoyer les états dashboard
+        document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+        if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+        if (dashboardHall) dashboardHall.classList.add('view-is-active');
+        
+        animateScreenSwap(fromScreen, mapContainer);
+        document.body.classList.remove('itinerary-view-active');
+        document.body.classList.add('view-map-locked'); 
+        setBottomNavActive('carte');
 
-    // Fermer le panneau filtre si ouvert (évite overlay persistant)
-    const routeFilterPanel = document.getElementById('route-filter-panel');
-    if (routeFilterPanel) routeFilterPanel.classList.add('hidden');
-    
-    // V305: Optimiser invalidateSize pour réduire le lag au chargement carte
-    if (mapRenderer && mapRenderer.map) {
-        // Appeler une seule fois après que les styles se stabilisent
-        requestAnimationFrame(() => {
-            mapRenderer.map.invalidateSize();
-        });
-    }
+        // Fermer le panneau filtre
+        const routeFilterPanel = document.getElementById('route-filter-panel');
+        if (routeFilterPanel) routeFilterPanel.classList.add('hidden');
+        
+        // V355: InvalidateSize après transition complète pour éviter le lag
+        if (mapRenderer && mapRenderer.map) {
+            // Première invalidation rapide
+            requestAnimationFrame(() => {
+                mapRenderer.map.invalidateSize({ animate: false, pan: false });
+            });
+            // Deuxième invalidation après transition
+            setTimeout(() => {
+                mapRenderer.map.invalidateSize({ animate: false, pan: false });
+            }, SCREEN_TRANSITION_MS + 50);
+        }
+    });
 }
 
+/**
+ * V355: Optimisation showDashboardHall avec RAF
+ */
 function showDashboardHall() {
     const fromScreen = getVisibleAppScreen();
     
-    // V349: Transitionner vers le dashboard seulement si on n'y est pas déjà
-    if (fromScreen !== dashboardContainer) {
-        animateScreenSwap(fromScreen, dashboardContainer);
-    }
+    requestAnimationFrame(() => {
+        if (fromScreen !== dashboardContainer) {
+            animateScreenSwap(fromScreen, dashboardContainer);
+        }
 
-    // V348: Scroll doux vers le haut
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll instantané
+        window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // V347: Reset immédiat et complet des états de vue
-    if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-    document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
-    
-    // Reset toutes les cartes AVANT de changer l'état
-    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
-    
-    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
-    if (dashboardHall) dashboardHall.classList.add('view-is-active');
-    
-    // Reset scroll du hall
-    if (dashboardHall) dashboardHall.scrollTop = 0;
+        if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+        
+        // Reset cartes en batch
+        document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+        
+        if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+        if (dashboardHall) dashboardHall.classList.add('view-is-active');
+        
+        if (dashboardHall) dashboardHall.scrollTop = 0;
 
-    // V265: Différer le nettoyage lourd pour UI instantanée
-    setTimeout(() => {
-        resetDetailViewState();
-        if (dataManager) renderAlertBanner();
-    }, 50);
+        // Différer le nettoyage lourd
+        requestIdleCallback ? requestIdleCallback(() => {
+            resetDetailViewState();
+            if (dataManager) renderAlertBanner();
+        }, { timeout: 150 }) : setTimeout(() => {
+            resetDetailViewState();
+            if (dataManager) renderAlertBanner();
+        }, 50);
 
-    setBottomNavActive('hall');
+        setBottomNavActive('hall');
+    });
 }
 
 function showResultsView() {
     const fromScreen = getVisibleAppScreen();
-    resetDetailViewState();
     
-    // V350: Nettoyer les états de vues internes du dashboard avant de partir
-    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
-    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
-    if (dashboardHall) dashboardHall.classList.add('view-is-active');
-    
-    animateScreenSwap(fromScreen, itineraryResultsContainer);
-    // V67: Cacher header/footer Perimap sur la vue itinéraire
-    // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
-    document.body.classList.remove('view-map-locked', 'view-is-locked');
-    document.body.classList.add('itinerary-view-active');
-    // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
+    // V355: Optimisation avec RAF pour fluidité
+    requestAnimationFrame(() => {
+        resetDetailViewState();
+        
+        // V350: Nettoyer les états de vues internes du dashboard avant de partir
+        document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+        if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+        if (dashboardHall) dashboardHall.classList.add('view-is-active');
+        
+        animateScreenSwap(fromScreen, itineraryResultsContainer);
+        // V67: Cacher header/footer Perimap sur la vue itinéraire
+        // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
+        document.body.classList.remove('view-map-locked', 'view-is-locked');
+        document.body.classList.add('itinerary-view-active');
+        // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
-    setBottomNavActive('itineraire');
+        setBottomNavActive('itineraire');
 
-    // Reset scroll internes (side panel + list) pour éviter un état persistant
-    try {
-        const sidePanel = document.getElementById('results-side-panel');
-        if (sidePanel) sidePanel.scrollTop = 0;
-        const listWrapper = itineraryResultsContainer ? itineraryResultsContainer.querySelector('.results-list-wrapper') : null;
-        if (listWrapper) listWrapper.scrollTop = 0;
-    } catch (_) {}
+        // Reset scroll internes (side panel + list) pour éviter un état persistant
+        try {
+            const sidePanel = document.getElementById('results-side-panel');
+            if (sidePanel) sidePanel.scrollTop = 0;
+            const listWrapper = itineraryResultsContainer ? itineraryResultsContainer.querySelector('.results-list-wrapper') : null;
+            if (listWrapper) listWrapper.scrollTop = 0;
+        } catch (_) {}
 
-    if (resultsListContainer) {
-        resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
-    }
-    
-    // V151: Invalider la carte PC avec plusieurs délais pour s'assurer qu'elle s'affiche
-    if (resultsMapRenderer && resultsMapRenderer.map) {
-        // Délai immédiat
-        setTimeout(() => {
-            resultsMapRenderer.map.invalidateSize();
-        }, 50);
-        // Délai après le rendu complet
-        setTimeout(() => {
-            resultsMapRenderer.map.invalidateSize();
-            console.log('🗺️ Carte PC invalidée (300ms)');
-        }, 300);
-    }
+        if (resultsListContainer) {
+            resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
+        }
+        
+        // V355: Invalider la carte avec RAF pour synchronisation optimale
+        if (resultsMapRenderer && resultsMapRenderer.map) {
+            requestAnimationFrame(() => {
+                resultsMapRenderer.map.invalidateSize({ animate: false, pan: false });
+            });
+            // Après la transition
+            setTimeout(() => {
+                resultsMapRenderer.map.invalidateSize({ animate: false, pan: false });
+            }, SCREEN_TRANSITION_MS + 50);
+        }
+    });
 }
 
 /**
@@ -5021,61 +5033,55 @@ function resetDetailPanelScroll() {
 
 
 function showDashboardView(viewName) {
-    // V349: D'ABORD transitionner vers le dashboard si on n'y est pas
+    // V355: Optimisation - utiliser requestAnimationFrame pour la fluidité
     const fromScreen = getVisibleAppScreen();
-    if (fromScreen !== dashboardContainer) {
-        // On vient d'une autre vue (carte, itinéraire) - transitionner d'abord
-        animateScreenSwap(fromScreen, dashboardContainer);
-    }
     
-    // S'assurer que le dashboard est visible
-    if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-    
-    // V348: Scroll en haut AVANT le changement pour éviter le saut brutal
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // V347: Reset explicite de TOUTES les vues d'abord
-    document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
-        card.classList.remove('view-active');
-    });
-
-    dashboardHall.classList.remove('view-is-active');
-    dashboardContentView.classList.add('view-is-active');
-
-    // Reset scroll du container aussi
-    if (dashboardContentView) dashboardContentView.scrollTop = 0;
-    
-    // Correctif: garantir que les classes de verrouillage (utilisées pour les vues plein écran)
-    // sont retirées quand on affiche une sous-vue interne (horaires, info-trafic) afin
-    // de préserver l'en-tête et le scroll.
-    document.body.classList.remove('view-map-locked');
-    document.body.classList.remove('view-is-locked');
-    document.body.classList.remove('itinerary-view-active');
-    
-    // V84: Masquer le bandeau d'alerte sur les sous-vues pour ne pas bloquer le bouton retour
-    if (alertBanner) {
-        alertBanner.classList.add('hidden');
-    }
-
-    // Update bottom nav highlight (keeps the app-like feel)
-    if (viewName === 'horaires') setBottomNavActive('horaires');
-    else if (viewName === 'info-trafic') setBottomNavActive('info-trafic');
-    else setBottomNavActive('hall');
-
-    const activeCard = document.getElementById(viewName);
-    if (activeCard) {
-        // V90: Rafraîchir les données trafic si on affiche info-trafic
-        if (viewName === 'info-trafic') {
-            renderInfoTraficCard();
+    // V355: Transition optimisée avec RAF
+    requestAnimationFrame(() => {
+        if (fromScreen !== dashboardContainer) {
+            animateScreenSwap(fromScreen, dashboardContainer);
         }
         
-        // V349: Affichage après que la transition screen soit terminée
-        setTimeout(() => {
-            activeCard.classList.add('view-active');
-            // Reset scroll de la carte elle-même
-            activeCard.scrollTop = 0;
-        }, fromScreen !== dashboardContainer ? SCREEN_TRANSITION_MS + 20 : 10);
-    }
+        if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+        
+        // V355: Scroll instantané pour éviter le lag
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        
+        // Reset des vues en batch
+        const cards = document.querySelectorAll('#dashboard-content-view .card');
+        cards.forEach(card => card.classList.remove('view-active'));
+
+        dashboardHall.classList.remove('view-is-active');
+        dashboardContentView.classList.add('view-is-active');
+        
+        if (dashboardContentView) dashboardContentView.scrollTop = 0;
+        
+        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+        
+        if (alertBanner) alertBanner.classList.add('hidden');
+
+        // Update bottom nav
+        if (viewName === 'horaires') setBottomNavActive('horaires');
+        else if (viewName === 'info-trafic') setBottomNavActive('info-trafic');
+        else setBottomNavActive('hall');
+
+        const activeCard = document.getElementById(viewName);
+        if (activeCard) {
+            // V355: Charger les données en parallèle pendant la transition
+            if (viewName === 'info-trafic') {
+                // Différer le rendu lourd pour ne pas bloquer l'animation
+                requestIdleCallback ? requestIdleCallback(() => renderInfoTraficCard(), { timeout: 100 }) 
+                                    : setTimeout(() => renderInfoTraficCard(), 50);
+            }
+            
+            // Affichage après transition
+            const delay = fromScreen !== dashboardContainer ? SCREEN_TRANSITION_MS : 0;
+            setTimeout(() => {
+                activeCard.classList.add('view-active');
+                activeCard.scrollTop = 0;
+            }, delay);
+        }
+    });
 }
 
 

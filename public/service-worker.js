@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v354'; // v354: Cache refresh
+const CACHE_VERSION = 'v355'; // v355: Performance optimizations (RAF, requestIdleCallback, event delegation)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
