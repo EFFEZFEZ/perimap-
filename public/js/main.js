@@ -4816,6 +4816,11 @@ function showDashboardView(viewName) {
 
     const activeCard = document.getElementById(viewName);
     if (activeCard) {
+        // V90: Rafraîchir les données trafic si on affiche info-trafic
+        if (viewName === 'info-trafic') {
+            renderInfoTraficCard();
+        }
+        
         setTimeout(() => {
             activeCard.classList.add('view-active');
         }, 50);

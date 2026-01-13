@@ -4163,7 +4163,8 @@ body.dark-theme .map-theme-toggle:hover {
     
     /* V48: Règle simplifiée */
     #dashboard-content-view.view-is-active {
-        padding-top: 0; 
+        padding-top: 0;
+        padding-bottom: 90px; /* Espace pour bottom nav fixe */
     }
     #btn-back-to-hall {
         margin-bottom: 1rem; 
@@ -8397,6 +8398,12 @@ body.view-is-locked #site-footer {
     max-width: 1300px;
     margin: 0 auto;
     padding: 2.5rem 1.5rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        padding-bottom: 100px; /* Espace pour bottom nav fixe */
+    }
 }
 
 .footer-main {
