@@ -201,6 +201,15 @@ body.dark-theme .map-btn-locate.has-error {
     font-size: 13px;
     transition: all 0.3s ease;
 }
+
+/* Hide accidental/empty marker elements that render as small black circles
+   If a marker's .bus-icon-content ends up empty (no text), don't display it. */
+.bus-icon-rect .bus-icon-content:empty {
+    display: none !important;
+}
+.bus-icon-rect:empty {
+    display: none !important;
+}
     
     .map-btn-locate svg {
         width: 20px;

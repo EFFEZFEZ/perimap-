@@ -45,6 +45,29 @@ const LIGHT_TILE_CONFIG = Object.freeze({
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }
+
+    /**
+     * Supprime proprement un marqueur de bus existant
+     */
+    removeBusMarker(busId) {
+        const markerData = this.busMarkers[busId];
+        if (!markerData) return;
+        try {
+            if (this.busLayer) {
+                this.busLayer.removeLayer(markerData.marker);
+            } else if (markerData.marker && this.map.hasLayer && this.map.hasLayer(markerData.marker)) {
+                this.map.removeLayer(markerData.marker);
+            }
+        } catch (e) {
+            console.warn('[MapRenderer] failed to remove marker for', busId, e);
+        }
+        // Close popup if it references this marker
+        if (this.selectedBusId === busId) {
+            try { this.busPopup.close(); } catch (e) {}
+            this.selectedBusId = null;
+        }
+        delete this.busMarkers[busId];
+    }
 });
 
 const DARK_TILE_CONFIG = Object.freeze({
@@ -394,6 +417,14 @@ export class MapRenderer {
             const lon = parseFloat(bus.position?.lon);
             const hasValidCoords = !Number.isNaN(lat) && !Number.isNaN(lon) && isFinite(lat) && isFinite(lon);
 
+            // V310 Guard: don't render markers with invalid coordinates (prevents black empty circles)
+            if (!hasValidCoords) {
+                if (this.busMarkers[busId]) {
+                    console.debug('[MapRenderer] Removing marker for', busId, 'due to invalid coords');
+                    this.removeBusMarker(busId);
+                }
+                return;
+            }
             if (this.busMarkers[busId]) {
                 // Marqueur existant — mettre à jour en place
                 const markerData = this.busMarkers[busId];
@@ -457,7 +488,7 @@ export class MapRenderer {
                 // Chercher un marqueur existant très proche (<=25m) et réutiliser si trouvé
                 let adopted = false;
                 try {
-                    const proximityMeters = 25; // seuil de proximité pour considérer le même bus
+                    const proximityMeters = 50; // seuil de proximité pour considérer le même bus (increase to reduce duplicates)
                     for (const existingId of Object.keys(this.busMarkers)) {
                         const existing = this.busMarkers[existingId];
                         if (!existing || !existing.lastLatLng) continue;
@@ -495,6 +526,21 @@ export class MapRenderer {
                         this.busLayer.addLayer(markerData.marker);
                     } else {
                         markerData.marker.addTo(this.map);
+                    }
+
+                    // Debug: inspect DOM of the created marker to detect empty/ghost elements
+                    try {
+                        const el = markerData.marker.getElement && markerData.marker.getElement();
+                        if (el) {
+                            const contentEl = el.querySelector && el.querySelector('.bus-icon-content');
+                            const contentText = contentEl ? (contentEl.textContent || '').trim() : null;
+                            console.debug('[MapRenderer] created marker DOM for', busId, 'html=', el.outerHTML.slice(0, 300));
+                            if (!contentText) {
+                                console.warn('[MapRenderer] created marker has empty .bus-icon-content for', busId, '— this may create an empty black circle');
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[MapRenderer] debug inspect marker failed', e);
                     }
                 }
             }

@@ -43,7 +43,7 @@ export class BusPositionCalculator {
      * Calcule la position interpolée d'un bus entre deux arrêts
      * V306: Amélioration avec validation de cohérence et indicateurs de confiance
      */
-    calculatePosition(segment, routeId = null, tripId = null, routeShortName = null) {
+    calculatePosition(segment, routeId = null, tripId = null, routeShortName = null, bus = null) {
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) {
             return null;
         }
@@ -65,7 +65,25 @@ export class BusPositionCalculator {
         let positionConfidence = 'theoretical'; // 'realtime', 'adjusted', 'theoretical'
         
         // V306: Tenter d'ajuster avec le temps réel
-        if (tripId && routeShortName && this.realtimeManager) {
+        // V310: Virtual Time - prefer position computed at (now - delay) when delay is known
+        if (bus && bus.hasRealtime && typeof bus.delay === 'number' && segment.departureTime && segment.arrivalTime) {
+            try {
+                const nowSec = Math.floor(Date.now() / 1000);
+                const virtualTime = nowSec - Math.floor(bus.delay);
+                const totalStaticSeconds = segment.arrivalTime - segment.departureTime;
+                if (totalStaticSeconds > 0) {
+                    const virtualProgress = (virtualTime - segment.departureTime) / totalStaticSeconds;
+                    const clamped = Math.max(0, Math.min(1, virtualProgress));
+                    finalProgress = clamped;
+                    positionConfidence = 'realtime-virtual';
+                    rtInfo = rtInfo || {};
+                    rtInfo.source = 'realtime-virtual';
+                    rtInfo.delaySeconds = bus.delay;
+                }
+            } catch (e) {
+                console.warn('[BusPositionCalculator] Virtual time computation failed', e);
+            }
+        } else if (tripId && routeShortName && this.realtimeManager) {
             rtInfo = this.getRealtimeAdjustedProgress(
                 tripId, 
                 routeShortName, 
@@ -429,7 +447,7 @@ export class BusPositionCalculator {
             if (bus.segment) {
                 // Cas 1: Bus en mouvement
                 // V305: Passer tripId et routeShortName pour l'ajustement RT
-                position = this.calculatePosition(bus.segment, routeId, tripId, routeShortName);
+                position = this.calculatePosition(bus.segment, routeId, tripId, routeShortName, bus);
                 // Si le calcul de position a réussi, on calcule l'angle
                 if (position) {
                     // Petite amélioration : si on a un GeoJSON, l'angle devrait être celui du segment courant
