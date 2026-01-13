@@ -3884,6 +3884,13 @@ details[open] .accordion-content {
     position: relative; /* Ancre les boutons flottants (Filtrer desktop) */
 }
 
+/* Etirer la carte sous l'en-tête en mode normal (hors view-map-locked) */
+body:not(.view-map-locked) #map-container {
+    min-height: calc(100vh - 64px);
+    margin-top: 0;
+    padding-top: 0;
+}
+
 #map-view {
     display: flex;
     flex-direction: column;
