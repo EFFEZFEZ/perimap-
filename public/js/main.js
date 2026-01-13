@@ -350,6 +350,8 @@ const SCREEN_TRANSITION_MS = 180;
 
 let __pmScreenSwapToken = 0;
 let __pmScreenSwapTimeoutId = null;
+let __pmIsScreenSwapping = false;
+let __pmPendingNavAction = null;
 
 function prefersReducedMotion() {
     try {
@@ -368,6 +370,8 @@ function getVisibleAppScreen() {
 function animateScreenSwap(fromEl, toEl) {
     __pmScreenSwapToken += 1;
     const swapToken = __pmScreenSwapToken;
+    __pmIsScreenSwapping = true;
+
     if (__pmScreenSwapTimeoutId) {
         clearTimeout(__pmScreenSwapTimeoutId);
         __pmScreenSwapTimeoutId = null;
@@ -375,6 +379,7 @@ function animateScreenSwap(fromEl, toEl) {
 
     if (!toEl || fromEl === toEl) {
         if (toEl) toEl.classList.remove('hidden');
+        __pmIsScreenSwapping = false;
         return;
     }
 
@@ -392,6 +397,16 @@ function animateScreenSwap(fromEl, toEl) {
     if (prefersReducedMotion()) {
         if (fromEl) fromEl.classList.add('hidden');
         toEl.classList.remove('hidden');
+        __pmIsScreenSwapping = false;
+
+        // Replay pending action if any
+        if (__pmPendingNavAction) {
+            const pending = __pmPendingNavAction;
+            __pmPendingNavAction = null;
+            setTimeout(() => {
+                try { handleNavigationAction(pending); } catch (_) {}
+            }, 0);
+        }
         return;
     }
 
@@ -428,6 +443,16 @@ function animateScreenSwap(fromEl, toEl) {
             fromEl.classList.add('hidden');
         }
         __pmScreenSwapTimeoutId = null;
+        __pmIsScreenSwapping = false;
+
+        // If user tapped quickly, replay the last requested action after swap
+        if (__pmPendingNavAction) {
+            const pending = __pmPendingNavAction;
+            __pmPendingNavAction = null;
+            setTimeout(() => {
+                try { handleNavigationAction(pending); } catch (_) {}
+            }, 0);
+        }
     }, SCREEN_TRANSITION_MS);
 }
 
@@ -1644,6 +1669,12 @@ async function ensureDashboardLoaded() {
 
 // Gérer les actions de navigation
 async function handleNavigationAction(action) {
+    // Empêcher les transitions concurrentes: on garde la dernière action demandée
+    if (__pmIsScreenSwapping) {
+        __pmPendingNavAction = action;
+        return;
+    }
+
     // V75: Pour les actions qui nécessitent le dashboard, s'assurer qu'il est chargé
     const needsDashboard = ['itineraire', 'horaires', 'info-trafic', 'carte'].includes(action);
     
@@ -4671,6 +4702,14 @@ function showResultsView() {
     // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
     setBottomNavActive('itineraire');
+
+    // Reset scroll internes (side panel + list) pour éviter un état persistant
+    try {
+        const sidePanel = document.getElementById('results-side-panel');
+        if (sidePanel) sidePanel.scrollTop = 0;
+        const listWrapper = itineraryResultsContainer ? itineraryResultsContainer.querySelector('.results-list-wrapper') : null;
+        if (listWrapper) listWrapper.scrollTop = 0;
+    } catch (_) {}
 
     if (resultsListContainer) {
         resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';

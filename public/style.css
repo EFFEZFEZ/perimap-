@@ -153,7 +153,7 @@ body.dark-theme .map-btn-locate.has-error {
  * ========================================= */
 @media (max-width: 768px) {
     .leaflet-bottom.leaflet-right .map-floating-controls {
-        margin-bottom: 90px;
+        margin-bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
         margin-right: 12px;
     }
     
@@ -1642,7 +1642,7 @@ body.view-map-locked {
     width: 100% !important;
     height: 100% !important;
     height: 100vh !important; /* Fallback pour navigateurs sans dvh */
-    height: 100dvh !important; /* V304: Dynamic viewport height pour mobile */
+    height: 100svh !important; /* Stable viewport height (évite les sauts UI navigateur) */
     top: 0 !important;
     left: 0 !important;
 }
@@ -1657,14 +1657,14 @@ body.view-map-locked #map-container {
     width: 100% !important;
     height: 100% !important;
     height: 100vh !important; /* Fallback */
-    height: 100dvh !important; /* Dynamic viewport height pour mobile */
+    height: 100svh !important; /* Stable viewport height */
     z-index: 2000; /* Plein écran fiable; les contrôles ont leurs propres z-index */
 }
 
 body.view-map-locked #map-view {
     height: 100% !important;
     min-height: 100vh; /* V304: Fallback */
-    min-height: 100dvh; /* V304: Garantir hauteur minimum */
+    min-height: 100svh; /* Stable viewport height */
 }
 
 body.view-map-locked #map {
@@ -2825,7 +2825,7 @@ body.dark-theme .stats-section .stat-label {
     max-height: 5000px; 
 }
 
-#btn-back-to-hall {
+#btn-back-to-hall:not(.app-back-btn) {
     margin-bottom: 1.5rem;
     background: var(--bg-secondary);
     border-color: var(--border);
@@ -2833,35 +2833,55 @@ body.dark-theme .stats-section .stat-label {
     font-weight: 600;
     padding-left: 0.75rem;
 }
-#btn-back-to-hall:hover {
+#btn-back-to-hall:not(.app-back-btn):hover {
     background: var(--border);
     border-color: var(--secondary);
 }
-#btn-back-to-hall svg {
+#btn-back-to-hall:not(.app-back-btn) svg {
     margin-right: 0.5rem;
     color: var(--text-secondary);
 }
 
-.itinerary-back-btn {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: none !important;
-    color: #1a1a2e !important;
+/* =========================================
+ * BOUTONS RETOUR - STYLE UNIQUE (aligné sur la vue carte)
+ * ========================================= */
+.app-back-btn {
     cursor: pointer;
-    flex-shrink: 0;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1a1a2e !important;
 }
-.itinerary-back-btn:hover {
+
+.app-back-btn svg {
+    color: #22c55e;
+}
+
+.app-back-btn:hover {
     background: rgba(255, 255, 255, 1) !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
-.itinerary-back-btn svg {
-    color: #22c55e;
+
+.app-back-btn:active {
+    transform: translateY(0);
+}
+
+body.dark-theme .app-back-btn {
+    background: rgba(20, 25, 38, 0.95) !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+body.dark-theme .app-back-btn svg {
+    color: #4ade80;
 }
 
 /* Force back button to be on top and clickable on desktop */
 #btn-back-to-hall,
 #btn-back-to-dashboard-from-map,
-#btn-back-to-dashboard-from-results {
+#btn-back-to-dashboard-from-results,
+#btn-back-to-hall-tarifs,
+#btn-back-to-results {
     pointer-events: auto !important;
     position: relative;
     z-index: 3000 !important;
@@ -3874,8 +3894,8 @@ details[open] .accordion-content {
     .map-fab-button {
         position: fixed !important;
         /* Aligné sur les contrôles Leaflet (locate) et au-dessus du bottom nav */
-        bottom: calc(var(--bottom-nav-height) + 34px + env(safe-area-inset-bottom));
-        right: 12px !important;
+        bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
+        right: 68px !important; /* à gauche du bouton localisation (évite la superposition) */
         left: auto !important;
         width: 44px;
         height: 44px;
