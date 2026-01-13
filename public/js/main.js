@@ -2,6 +2,33 @@
  * Copyright (c) 2025 Périmap. Tous droits réservés.
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
+
+// Protection contre l'inspection du code (F12, DevTools)
+(function() {
+  let devToolsOpen = false;
+  const threshold = 160;
+  
+  // Détection DevTools
+  const checkDevTools = () => {
+    if (window.outerHeight - window.innerHeight > threshold || 
+        window.outerWidth - window.innerWidth > threshold) {
+      devToolsOpen = true;
+      disableApplication();
+    }
+  };
+  
+  const disableApplication = () => {
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#1a1a1a;color:#fff;font-family:sans-serif;"><h1>⚠️ Accès refusé</h1></div>';
+    console.clear = () => {};
+    console.log = () => {};
+  };
+  
+  setInterval(checkDevTools, 500);
+  window.addEventListener('devtoolschange', (e) => {
+    if (e.detail.isOpen) disableApplication();
+  });
+})();
+
 /**
  * main.js - V221 (Refactorisation + nettoyage code mort)
  *
