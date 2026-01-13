@@ -1658,7 +1658,7 @@ body.view-map-locked #map-container {
     height: 100% !important;
     height: 100vh !important; /* Fallback */
     height: 100dvh !important; /* Dynamic viewport height pour mobile */
-    z-index: 10; /* V131: Réduit pour ne pas cacher les contrôles */
+    z-index: 2000; /* Plein écran fiable; les contrôles ont leurs propres z-index */
 }
 
 body.view-map-locked #map-view {
@@ -3873,31 +3873,29 @@ details[open] .accordion-content {
     #map-container #btn-toggle-filter,
     .map-fab-button {
         position: fixed !important;
-        bottom: calc(30px + env(safe-area-inset-bottom));
-        right: 20px !important;
+        /* Aligné sur les contrôles Leaflet (locate) et au-dessus du bottom nav */
+        bottom: calc(var(--bottom-nav-height) + 34px + env(safe-area-inset-bottom));
+        right: 12px !important;
         left: auto !important;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: #22c55e !important;
-        color: white !important;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #ffffff !important;
+        color: #22c55e !important;
         border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.12),
+            0 1px 4px rgba(0, 0, 0, 0.08);
         z-index: 1200;
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 0;
-        transition: width var(--transition-smooth), border-radius var(--transition-smooth);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     
-    /* État initial avec texte */
-    #map-container #btn-toggle-filter:not(.collapsed) {
-        width: auto;
-        padding: 0 var(--spacing-5);
-        border-radius: var(--radius-full);
-        gap: var(--spacing-2);
-    }
+    /* Sur mobile: icône seule (cohérent avec Locate) */
+    #map-container #btn-toggle-filter span { display: none; }
     
     /* État collapsed - icône seule */
     #map-container #btn-toggle-filter.collapsed span,
@@ -3906,10 +3904,16 @@ details[open] .accordion-content {
     }
     
     #map-container #btn-toggle-filter svg {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
     }
-    #map-container #btn-toggle-filter span { display: none; }
+}
+
+/* Footer: ne jamais être recouvert par le bottom nav sur mobile */
+@media (max-width: 768px) {
+    #site-footer {
+        margin-bottom: calc(var(--bottom-nav-height) + 20px + env(safe-area-inset-bottom));
+    }
 }
 
 #map-container #btn-back-to-dashboard-from-map {
@@ -8410,7 +8414,7 @@ body.view-is-locked #site-footer {
 
 @media (max-width: 768px) {
     .footer-content {
-        padding-bottom: 140px; /* Espace pour bottom nav fixe + marges */
+        padding-bottom: 1.5rem;
     }
 }
 

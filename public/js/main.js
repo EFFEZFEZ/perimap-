@@ -348,6 +348,9 @@ const DETAIL_SHEET_TRANSITION_MS = 380; // Doit être >= à la transition CSS (3
 // UI transitions (short & functional)
 const SCREEN_TRANSITION_MS = 180;
 
+let __pmScreenSwapToken = 0;
+let __pmScreenSwapTimeoutId = null;
+
 function prefersReducedMotion() {
     try {
         return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -363,10 +366,27 @@ function getVisibleAppScreen() {
 }
 
 function animateScreenSwap(fromEl, toEl) {
+    __pmScreenSwapToken += 1;
+    const swapToken = __pmScreenSwapToken;
+    if (__pmScreenSwapTimeoutId) {
+        clearTimeout(__pmScreenSwapTimeoutId);
+        __pmScreenSwapTimeoutId = null;
+    }
+
     if (!toEl || fromEl === toEl) {
         if (toEl) toEl.classList.remove('hidden');
         return;
     }
+
+    // Always reset transient transition classes (prevents "stuck" screens)
+    const transitionClasses = [
+        'page-transition-enter',
+        'page-transition-enter-active',
+        'page-transition-exit',
+        'page-transition-exit-active'
+    ];
+    if (fromEl) fromEl.classList.remove(...transitionClasses);
+    toEl.classList.remove(...transitionClasses);
 
     // Reduced motion: instant
     if (prefersReducedMotion()) {
@@ -377,6 +397,13 @@ function animateScreenSwap(fromEl, toEl) {
 
     // Ensure target is visible before animating
     toEl.classList.remove('hidden');
+
+    // UX: reset scroll on every top-level screen swap
+    try {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    } catch (_) {
+        window.scrollTo(0, 0);
+    }
 
     // ENTER
     toEl.classList.add('page-transition-enter');
@@ -393,12 +420,14 @@ function animateScreenSwap(fromEl, toEl) {
         });
     }
 
-    setTimeout(() => {
+    __pmScreenSwapTimeoutId = setTimeout(() => {
+        if (swapToken !== __pmScreenSwapToken) return;
         toEl.classList.remove('page-transition-enter-active');
         if (fromEl) {
             fromEl.classList.remove('page-transition-exit', 'page-transition-exit-active');
             fromEl.classList.add('hidden');
         }
+        __pmScreenSwapTimeoutId = null;
     }, SCREEN_TRANSITION_MS);
 }
 
@@ -4595,6 +4624,10 @@ function showMapView() {
     document.body.classList.remove('itinerary-view-active');
     document.body.classList.add('view-map-locked'); 
     setBottomNavActive('carte');
+
+    // Fermer le panneau filtre si ouvert (évite overlay persistant)
+    const routeFilterPanel = document.getElementById('route-filter-panel');
+    if (routeFilterPanel) routeFilterPanel.classList.add('hidden');
     
     // V305: Optimiser invalidateSize pour réduire le lag au chargement carte
     if (mapRenderer && mapRenderer.map) {
@@ -4632,6 +4665,8 @@ function showResultsView() {
     animateScreenSwap(fromScreen, itineraryResultsContainer);
     resetDetailViewState();
     // V67: Cacher header/footer Perimap sur la vue itinéraire
+    // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
+    document.body.classList.remove('view-map-locked', 'view-is-locked');
     document.body.classList.add('itinerary-view-active');
     // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
