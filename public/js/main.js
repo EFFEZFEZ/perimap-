@@ -2653,6 +2653,17 @@ function renderSuggestions(suggestions, container, onSelect) {
     };
 
     const inputElement = resolveInputElement();
+    // Move the suggestions container to document.body so it escapes any stacking/transform context
+    // (resolveInputElement ran before moving, so we still have a reference to the input)
+    try {
+        if (container && container.parentElement !== document.body) {
+            document.body.appendChild(container);
+            container.style.zIndex = '20000';
+            container.style.pointerEvents = 'auto';
+        }
+    } catch (e) {
+        // ignore failures to move
+    }
     // Ensure container is positioned relative to the input (use fixed to escape stacking contexts)
     const positionSuggestionsOverInput = () => {
         if (!inputElement || !container) return;
