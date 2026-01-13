@@ -4808,7 +4808,11 @@ function showMapView() {
 
 function showDashboardHall() {
     const fromScreen = getVisibleAppScreen();
-    animateScreenSwap(fromScreen, dashboardContainer);
+    
+    // V349: Transitionner vers le dashboard seulement si on n'y est pas déjà
+    if (fromScreen !== dashboardContainer) {
+        animateScreenSwap(fromScreen, dashboardContainer);
+    }
 
     // V348: Scroll doux vers le haut
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5005,6 +5009,16 @@ function resetDetailPanelScroll() {
 
 
 function showDashboardView(viewName) {
+    // V349: D'ABORD transitionner vers le dashboard si on n'y est pas
+    const fromScreen = getVisibleAppScreen();
+    if (fromScreen !== dashboardContainer) {
+        // On vient d'une autre vue (carte, itinéraire) - transitionner d'abord
+        animateScreenSwap(fromScreen, dashboardContainer);
+    }
+    
+    // S'assurer que le dashboard est visible
+    if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+    
     // V348: Scroll en haut AVANT le changement pour éviter le saut brutal
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -5043,12 +5057,12 @@ function showDashboardView(viewName) {
             renderInfoTraficCard();
         }
         
-        // V348: Petit délai pour laisser le DOM se stabiliser puis afficher
-        requestAnimationFrame(() => {
+        // V349: Affichage après que la transition screen soit terminée
+        setTimeout(() => {
             activeCard.classList.add('view-active');
             // Reset scroll de la carte elle-même
             activeCard.scrollTop = 0;
-        });
+        }, fromScreen !== dashboardContainer ? SCREEN_TRANSITION_MS + 20 : 10);
     }
 }
 
