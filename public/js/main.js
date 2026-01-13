@@ -5345,14 +5345,28 @@ function updateData() {
                                 ? lineStatuses[routeId].status 
                                 : 'normal';
             
-            // CORRECTION V307: Utiliser le flag hasRealtime calculé précisément par busPositionCalculator
-            // Cela confirme que CE bus spécifique a été matché avec un horaire en direct
-            if (bus.hasRealtime === true) {
-                bus.isRealtime = true;
-            } else {
-                // Fallback: si le calculateur n'a pas confirmé, rester prudent (false par défaut)
-                bus.isRealtime = false;
+            // V308: FORCING VISUEL TEMPS RÉEL
+            // 1. Le calculateur confirme-t-il le temps réel (position ajustée) ?
+            const calcConfirmed = bus.hasRealtime === true;
+            
+            // 2. A-t-on des données brutes pour le prochain arrêt ? (Même si la position est interpolée)
+            let rawDataAvailable = false;
+            if (bus.segment?.toStopInfo?.stop_id && realtimeManager) {
+                try {
+                    rawDataAvailable = realtimeManager.hasRealtimeDataForStop(
+                        bus.segment.toStopInfo.stop_id,
+                        bus.segment.toStopInfo.stop_code
+                    );
+                } catch (e) {
+                    rawDataAvailable = false;
+                }
             }
+
+            // Si l'un des deux est vrai, on affiche le bus en VERT (Temps Réel)
+            bus.isRealtime = Boolean(calcConfirmed || rawDataAvailable);
+            
+            // Debug (désactivé par défaut) : comprendre pourquoi ça clignote
+            // if (bus.isRealtime && !calcConfirmed) console.debug(`[Bus ${bus.tripId}] RT Visuel forcé (données brutes disponibles)`);
         }
     });
     

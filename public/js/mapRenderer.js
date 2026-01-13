@@ -415,30 +415,35 @@ export class MapRenderer {
                     }
                 }
 
-                // Mettre à jour l'icône si nécessaire (changement route ou changement statut RT)
+                // V308: Mise à jour agressive de l'icône
                 try {
                     const currentIcon = markerData.marker.getIcon && markerData.marker.getIcon();
                     const route = bus.route || {};
                     const routeShortName = route.route_short_name || route.route_id || '?';
-                    const isRealtime = bus.isRealtime || bus.hasRealtime;
                     
-                    // On vérifie si l'état RT a changé pour forcer la regénération de l'icône
-                    const wasRealtime = currentIcon && typeof currentIcon.options?.className === 'string' 
-                        ? currentIcon.options.className.includes('is-realtime-active') 
+                    // On vérifie le statut RT actuel
+                    const isRealtime = bus.isRealtime === true; // Strict boolean check
+                    const wasRealtime = currentIcon && currentIcon.options && typeof currentIcon.options.className === 'string'
+                        ? currentIcon.options.className.includes('is-realtime-active')
                         : false;
                     
-                    // Si le HTML ou l'état RT change, on recrée l'icône
-                    if (!currentIcon || wasRealtime !== isRealtime) {
-                        // On réutilise createBusMarker pour avoir la nouvelle icône correcte
+                    // On vérifie si le texte a changé (changement de ligne/route)
+                    const routeColor = route.route_color ? `#${route.route_color}` : null;
+                    const textColor = route.route_text_color ? `#${route.route_text_color}` : null;
+                    const expectedHtmlContent = `${routeShortName}`; // Simplifié pour check rapide
+
+                    // Si l'état RT change OU si le HTML change, on recrée
+                    // On force aussi la update si on n'a pas d'icône
+                    if (!currentIcon || wasRealtime !== isRealtime || !currentIcon.options.html.includes(expectedHtmlContent)) {
                         const tempData = this.createBusMarker(bus, tripScheduler, busId);
                         try {
                             markerData.marker.setIcon(tempData.marker.getIcon());
                         } catch (e) {
-                            // fallback: ignore
+                            console.warn('[MapRenderer] failed to set updated icon for', busId, e);
                         }
                     }
                 } catch (e) {
-                    // Ne pas bloquer la boucle
+                    console.warn('[MapRenderer] Erreur update icône', e);
                 }
 
             } else {
