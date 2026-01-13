@@ -247,7 +247,50 @@ export class RealtimeManager {
             }
 
             const data = await response.json();
-            
+
+            // Normalisation légère: s'assurer que le format contient à la fois
+            // - `departures` (utilisé par BusPositionCalculator)
+            // - `schedules` (utilisé par la popup et mergeWithStatic)
+            try {
+                const raw = data && (data.departures || data.schedules) ? (data.departures || data.schedules) : [];
+
+                const schedules = Array.isArray(raw) ? raw.map((d, idx) => {
+                    const ligne = d.ligne || d.line || d.routeShortName || '';
+                    const destination = d.destination || d.dest || d.to || '';
+                    const temps = d.temps || d.time || d.realtimeText || '';
+                    const quai = d.quai || d.quay || d.platform || '';
+                    const realtime = (d.realtime === undefined) ? true : (d.realtime !== false && String(d.realtime) !== 'false');
+                    const theoretical = d.theoretical || false;
+                    return {
+                        // Champs utilisés par `mergeWithStatic` / popups
+                        ligne: String(ligne).toUpperCase(),
+                        destination: String(destination || '').trim(),
+                        temps: String(temps || '').trim(),
+                        quai: String(quai || '').trim(),
+                        realtime,
+                        theoretical,
+                        _index: idx
+                    };
+                }) : [];
+
+                const departures = schedules.map(s => ({
+                    // Champs utilisés par `BusPositionCalculator` and other consumers
+                    line: s.ligne,
+                    destination: s.destination,
+                    time: s.temps,
+                    quay: s.quai,
+                    realtime: s.realtime,
+                    theoretical: s.theoretical
+                }));
+
+                // Recomposer l'objet retourné sans supprimer les métadonnées existantes
+                data.schedules = schedules;
+                data.departures = departures;
+                data.count = departures.length;
+            } catch (normErr) {
+                console.warn('[Realtime] Normalisation RT échouée:', normErr?.message || normErr);
+            }
+
             // Mettre en cache
             this.cache.set(cacheKey, {
                 data,
