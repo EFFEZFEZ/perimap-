@@ -300,11 +300,11 @@ body.dark-theme .map-btn-locate.has-error {
     
     /* Système d'élévation (ombres) */
     --elevation-0: none;
-    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-    --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
-    --elevation-3: 0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
-    --elevation-4: 0 12px 24px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.08);
-    --elevation-5: 0 24px 48px rgba(0, 0, 0, 0.16), 0 12px 24px rgba(0, 0, 0, 0.08);
+    --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --elevation-3: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --elevation-4: 0 8px 16px rgba(0, 0, 0, 0.12);
+    --elevation-5: 0 12px 24px rgba(0, 0, 0, 0.15);
     
     /* Transitions unifiées */
     --transition-quick: 150ms ease-out;
@@ -1613,6 +1613,9 @@ body.detail-view-open #legal-strip {
     overflow-y: visible; /* V59: Permettre le scroll */
     -webkit-overflow-scrolling: touch;
     padding-bottom: 0; /* Supprimé: le nouveau footer gère son propre espacement */
+    will-change: scroll-position;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 /* *** CORRECTION IDFM-STYLE *** */
@@ -8379,7 +8382,7 @@ body.dark-theme .stat-item {
     margin-top: auto;
     padding: 0;
     position: relative;
-    z-index: 10;
+    z-index: 999;
 }
 
 /* Cache le footer sur les vues plein écran */
