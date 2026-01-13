@@ -52,6 +52,21 @@ export class RealtimeManager {
 
         this.isPreloading = false;
         this.autoRefreshTimer = null; // V3: Timer pour auto-refresh
+
+        // Sleep mode: permet de couper l'auto-refresh (économie API) jusqu'à une date donnée
+        this.sleepUntilMs = 0;
+    }
+
+    isSleeping() {
+        return !!(this.sleepUntilMs && Date.now() < this.sleepUntilMs);
+    }
+
+    setSleepUntil(timestampMs) {
+        const ts = Number(timestampMs) || 0;
+        this.sleepUntilMs = ts;
+        if (this.isSleeping()) {
+            this.stopAutoRefresh();
+        }
     }
 
     /**
@@ -80,6 +95,9 @@ export class RealtimeManager {
      * - Auto-refresh toutes les 45s pour maintenir les données fraîches
      */
     async preloadPriorityStops() {
+        if (this.isSleeping()) {
+            return;
+        }
         if (this.isPreloading) {
             console.warn('[Realtime] Préchargement déjà en cours');
             return;
@@ -142,6 +160,12 @@ export class RealtimeManager {
      */
     async fetchRealtimeByHawkKey(hawkKey) {
         const cacheKey = `hawk_${hawkKey}`;
+
+        // Sleep mode: ne pas faire d'appels réseau, renvoyer le cache best-effort
+        if (this.isSleeping()) {
+            const cached = this.cache.get(cacheKey);
+            return cached ? cached.data : null;
+        }
         
         // Vérifier le cache (sauf si refresh forcé)
         const cached = this.cache.get(cacheKey);
@@ -186,6 +210,9 @@ export class RealtimeManager {
      * Rafraîchit les données toutes les 45 secondes
      */
     startAutoRefresh() {
+        if (this.isSleeping()) {
+            return;
+        }
         if (this.autoRefreshTimer) {
             clearInterval(this.autoRefreshTimer);
         }

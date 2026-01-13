@@ -1096,7 +1096,7 @@ body.dark-theme .leaflet-control-attribution a,
     box-sizing: border-box;
 }
 
-/* *** CORRECTION V28 + V59 SCROLL MOBILE *** */
+/* *** CORRECTION V28 + V59 + V347 SCROLL MOBILE *** */
 html, body {
     height: auto; /* V59: Permettre au contenu de définir la hauteur */
     min-height: 100%;
@@ -1107,6 +1107,8 @@ html, body {
     color: var(--text-primary);
     background-color: var(--bg-light); 
     overscroll-behavior-y: none;
+    /* V347: Empêcher les sauts lors du scroll mobile (barre adresse) */
+    overflow-anchor: none;
 }
 
 /* Le body est le conteneur flex principal */

@@ -353,6 +353,143 @@ let __pmScreenSwapTimeoutId = null;
 let __pmIsScreenSwapping = false;
 let __pmPendingNavAction = null;
 
+// Realtime auto-refresh sleep (économie API quand aucun bus)
+let __pmRealtimeSleepUntilMs = 0;
+let __pmRealtimeSleepTimerId = null;
+let __pmRealtimeSleepLastCheckMs = 0;
+const __PM_REALTIME_SLEEP_MIN_GAP_MS = 45 * 60 * 1000; // 45 min sans bus -> sleep
+const __PM_REALTIME_SLEEP_WAKE_WARMUP_MS = 2 * 60 * 1000; // réveil 2 min avant le premier départ
+const __pmNextDepartureCache = new Map();
+
+function __pmLocalIsoDate(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function __pmStartOfLocalDay(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+}
+
+function __pmAddDaysLocal(date, days) {
+    const d = date instanceof Date ? date : new Date(date);
+    const out = new Date(d);
+    out.setDate(out.getDate() + (days || 0));
+    return out;
+}
+
+function __pmFindNextDepartureSecondsForDate(dateObj, afterSeconds) {
+    if (!dataManager || !dataManager.isLoaded) return null;
+    const iso = __pmLocalIsoDate(dateObj);
+    const bucket = Math.max(0, Math.floor((Number(afterSeconds) || 0) / 300)); // bucket 5 min
+    const cacheKey = `${iso}|${bucket}`;
+    if (__pmNextDepartureCache.has(cacheKey)) {
+        return __pmNextDepartureCache.get(cacheKey);
+    }
+
+    const serviceIdSet = dataManager.getServiceIds(dateObj);
+    if (!serviceIdSet || serviceIdSet.size === 0) {
+        __pmNextDepartureCache.set(cacheKey, null);
+        return null;
+    }
+
+    let best = null;
+    const after = Number(afterSeconds) || 0;
+    for (const trip of (dataManager.trips || [])) {
+        if (!trip) continue;
+
+        // service active?
+        let isServiceActive = false;
+        for (const activeServiceId of serviceIdSet) {
+            if (dataManager.serviceIdsMatch(trip.service_id, activeServiceId)) {
+                isServiceActive = true;
+                break;
+            }
+        }
+        if (!isServiceActive) continue;
+
+        const stopTimes = dataManager.stopTimesByTrip?.[trip.trip_id];
+        if (!stopTimes || stopTimes.length === 0) continue;
+
+        const first = dataManager.timeToSeconds(stopTimes[0].departure_time);
+        if (!Number.isFinite(first)) continue;
+        if (first < after) continue;
+        if (best === null || first < best) {
+            best = first;
+            // Early exit if it's basically now
+            if (best <= after + 60) break;
+        }
+    }
+
+    __pmNextDepartureCache.set(cacheKey, best);
+    return best;
+}
+
+function __pmComputeNextDepartureTimestampMs(currentDateObj, currentSeconds) {
+    const todayNext = __pmFindNextDepartureSecondsForDate(currentDateObj, (Number(currentSeconds) || 0) + 1);
+    if (todayNext !== null) {
+        return __pmStartOfLocalDay(currentDateObj).getTime() + (todayNext * 1000);
+    }
+
+    const tomorrow = __pmAddDaysLocal(currentDateObj, 1);
+    const tomorrowFirst = __pmFindNextDepartureSecondsForDate(tomorrow, 0);
+    if (tomorrowFirst === null) return null;
+    return __pmStartOfLocalDay(tomorrow).getTime() + (tomorrowFirst * 1000);
+}
+
+function __pmMaybeSleepRealtimeAutoRefresh(visibleBusCount, currentSeconds, currentDateObj) {
+    if (!realtimeManager || !dataManager) return;
+
+    // Wake immediately when service resumes
+    if ((visibleBusCount || 0) > 0) {
+        if (__pmRealtimeSleepTimerId) {
+            clearTimeout(__pmRealtimeSleepTimerId);
+            __pmRealtimeSleepTimerId = null;
+        }
+        if (__pmRealtimeSleepUntilMs) {
+            __pmRealtimeSleepUntilMs = 0;
+            try { realtimeManager.setSleepUntil?.(0); } catch (_) {}
+            try { realtimeManager.startAutoRefresh?.(); } catch (_) {}
+        }
+        return;
+    }
+
+    // Already sleeping? nothing to do
+    if (realtimeManager.isSleeping?.()) return;
+
+    // Check at most once per minute to avoid scanning trips too often
+    const nowMs = Date.now();
+    if (nowMs - __pmRealtimeSleepLastCheckMs < 60 * 1000) return;
+    __pmRealtimeSleepLastCheckMs = nowMs;
+
+    const nextDepartureMs = __pmComputeNextDepartureTimestampMs(currentDateObj, currentSeconds);
+    if (!nextDepartureMs) return;
+
+    const gapMs = nextDepartureMs - nowMs;
+    if (gapMs < __PM_REALTIME_SLEEP_MIN_GAP_MS) return;
+
+    const sleepUntilMs = Math.max(nowMs + 5000, nextDepartureMs - __PM_REALTIME_SLEEP_WAKE_WARMUP_MS);
+    __pmRealtimeSleepUntilMs = sleepUntilMs;
+    try { realtimeManager.setSleepUntil?.(sleepUntilMs); } catch (_) {}
+
+    if (__pmRealtimeSleepTimerId) {
+        clearTimeout(__pmRealtimeSleepTimerId);
+        __pmRealtimeSleepTimerId = null;
+    }
+
+    const delayMs = sleepUntilMs - nowMs;
+    const safeDelayMs = Math.min(delayMs, 2147483000); // setTimeout max (~24.8 jours)
+    __pmRealtimeSleepTimerId = setTimeout(() => {
+        __pmRealtimeSleepTimerId = null;
+        __pmRealtimeSleepUntilMs = 0;
+        try { realtimeManager.setSleepUntil?.(0); } catch (_) {}
+        try { realtimeManager.preloadPriorityStops?.(); } catch (_) {}
+    }, safeDelayMs);
+}
+
 function prefersReducedMotion() {
     try {
         return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4673,14 +4810,19 @@ function showDashboardHall() {
     const fromScreen = getVisibleAppScreen();
     animateScreenSwap(fromScreen, dashboardContainer);
 
-    requestAnimationFrame(() => {
-        if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-
-        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
-        if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
-        if (dashboardHall) dashboardHall.classList.add('view-is-active');
-        document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
-    });
+    // V347: Reset immédiat et complet des états de vue
+    if (dashboardContainer) dashboardContainer.classList.remove('hidden');
+    document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+    
+    // Reset toutes les cartes AVANT de changer l'état
+    document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
+    
+    if (dashboardContentView) dashboardContentView.classList.remove('view-is-active');
+    if (dashboardHall) dashboardHall.classList.add('view-is-active');
+    
+    // V347: Reset scroll immédiat
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (dashboardHall) dashboardHall.scrollTop = 0;
 
     // V265: Différer le nettoyage lourd pour UI instantanée
     setTimeout(() => {
@@ -4861,11 +5003,19 @@ function resetDetailPanelScroll() {
 
 
 function showDashboardView(viewName) {
+    // V347: Reset explicite de TOUTES les vues d'abord
+    document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
+        card.classList.remove('view-active');
+    });
+
     dashboardHall.classList.remove('view-is-active');
     dashboardContentView.classList.add('view-is-active');
 
     // V27/V28 : On scrolle le body, pas le dashboard-main
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Reset scroll du container aussi
+    if (dashboardContentView) dashboardContentView.scrollTop = 0;
+    
     // Correctif: garantir que les classes de verrouillage (utilisées pour les vues plein écran)
     // sont retirées quand on affiche une sous-vue interne (horaires, info-trafic) afin
     // de préserver l'en-tête et le scroll.
@@ -4883,10 +5033,6 @@ function showDashboardView(viewName) {
     else if (viewName === 'info-trafic') setBottomNavActive('info-trafic');
     else setBottomNavActive('hall');
 
-    document.querySelectorAll('#dashboard-content-view .card').forEach(card => {
-        card.classList.remove('view-active');
-    });
-
     const activeCard = document.getElementById(viewName);
     if (activeCard) {
         // V90: Rafraîchir les données trafic si on affiche info-trafic
@@ -4894,9 +5040,10 @@ function showDashboardView(viewName) {
             renderInfoTraficCard();
         }
         
-        setTimeout(() => {
-            activeCard.classList.add('view-active');
-        }, 50);
+        // V347: Affichage IMMEDIAT de la carte active (pas de setTimeout qui cause des bugs)
+        activeCard.classList.add('view-active');
+        // Reset scroll de la carte elle-même
+        activeCard.scrollTop = 0;
     }
 }
 
@@ -5096,6 +5243,9 @@ function updateData() {
     const visibleBuses = allBusesWithPositions
         .filter(bus => bus !== null)
         .filter(bus => bus.route && visibleRoutes.has(bus.route.route_id)); 
+
+    // Économie API GTFS-RT: si aucun bus et prochain départ lointain, couper l'auto-refresh jusqu'au matin
+    __pmMaybeSleepRealtimeAutoRefresh(visibleBuses.length, currentSeconds, currentDate);
     
     mapRenderer.updateBusMarkers(visibleBuses, tripScheduler, currentSeconds);
     updateBusCount(visibleBuses.length, visibleBuses.length);
