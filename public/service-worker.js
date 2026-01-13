@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v370'; // v370: Use trip_headsign for line D directions (Charriéras vs Les Garennes)
+const CACHE_VERSION = 'v371'; // v371: Restore natural scroll on mobile home (no global body lock)
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
