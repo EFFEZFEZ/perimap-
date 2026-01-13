@@ -2090,7 +2090,7 @@ body:not(.dark-theme) .header-logo-img {
 /* Options (Partir maintenant) */
 .planner-options {
     position: relative;
-    z-index: 100;
+    z-index: 16000; /* V363: Assez haut pour que le popover enfant soit au-dessus de bottom-nav */
 }
 
 .btn-when {
@@ -6394,8 +6394,8 @@ body.dark-theme .real-select option {
         border-radius: var(--radius-md);
         box-shadow: var(--elevation-4);
         
-        /* CRUCIAL : Z-Index très haut pour flotter */
-        z-index: var(--z-popover);
+        /* CRUCIAL : Z-Index très haut pour flotter AU DESSUS de la bottom-nav */
+        z-index: 16000;
         
         /* S'assurer qu'il est cliquable */
         pointer-events: auto;
