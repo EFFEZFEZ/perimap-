@@ -22,7 +22,7 @@ export class RealtimeManager {
         
         // Cache des données temps réel par arrêt
         this.cache = new Map();
-        this.cacheMaxAge = 30 * 1000; // 30 secondes
+        this.cacheMaxAge = 60 * 1000; // 60 secondes (éviter re-fetch trop fréquent)
         this.preloadedStops = new Set(); // Arrêts préchargés
         
         // État
@@ -194,6 +194,13 @@ export class RealtimeManager {
                 fetchedAt: Date.now()
             });
 
+            // Marquer comme préchargé pour éviter double-calls
+            try {
+                this.preloadedStops.add(hawkKey);
+            } catch (e) {
+                // ignore
+            }
+
             this.isAvailable = true;
             this.stats.successes++;
             
@@ -312,6 +319,14 @@ export class RealtimeManager {
         const cached = this.cache.get(cacheKey);
         if (cached && Date.now() - cached.fetchedAt < this.cacheMaxAge) {
             return cached.data;
+        }
+
+        // Si l'arrêt est prioritaire et qu'on est en train de précharger, NE PAS
+        // déclencher un nouvel appel: s'appuyer sur la première requête automatique.
+        if (this.isPriorityStop(hawkKey) && this.isPreloading && !cached) {
+            // Retourner null pour indiquer qu'aucune donnée fraîche n'est disponible
+            // et éviter d'appeler hawk deux fois.
+            return null;
         }
 
         this.stats.requests++;

@@ -45,29 +45,6 @@ const LIGHT_TILE_CONFIG = Object.freeze({
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19
     }
-
-    /**
-     * Supprime proprement un marqueur de bus existant
-     */
-    removeBusMarker(busId) {
-        const markerData = this.busMarkers[busId];
-        if (!markerData) return;
-        try {
-            if (this.busLayer) {
-                this.busLayer.removeLayer(markerData.marker);
-            } else if (markerData.marker && this.map.hasLayer && this.map.hasLayer(markerData.marker)) {
-                this.map.removeLayer(markerData.marker);
-            }
-        } catch (e) {
-            console.warn('[MapRenderer] failed to remove marker for', busId, e);
-        }
-        // Close popup if it references this marker
-        if (this.selectedBusId === busId) {
-            try { this.busPopup.close(); } catch (e) {}
-            this.selectedBusId = null;
-        }
-        delete this.busMarkers[busId];
-    }
 });
 
 const DARK_TILE_CONFIG = Object.freeze({
@@ -417,14 +394,6 @@ export class MapRenderer {
             const lon = parseFloat(bus.position?.lon);
             const hasValidCoords = !Number.isNaN(lat) && !Number.isNaN(lon) && isFinite(lat) && isFinite(lon);
 
-            // V310 Guard: don't render markers with invalid coordinates (prevents black empty circles)
-            if (!hasValidCoords) {
-                if (this.busMarkers[busId]) {
-                    console.debug('[MapRenderer] Removing marker for', busId, 'due to invalid coords');
-                    this.removeBusMarker(busId);
-                }
-                return;
-            }
             if (this.busMarkers[busId]) {
                 // Marqueur existant — mettre à jour en place
                 const markerData = this.busMarkers[busId];
@@ -446,35 +415,27 @@ export class MapRenderer {
                     }
                 }
 
-                // V308: Mise à jour agressive de l'icône
+                // Mettre à jour l'icône si nécessaire (route/status changé)
                 try {
                     const currentIcon = markerData.marker.getIcon && markerData.marker.getIcon();
                     const route = bus.route || {};
                     const routeShortName = route.route_short_name || route.route_id || '?';
-                    
-                    // On vérifie le statut RT actuel
-                    const isRealtime = bus.isRealtime === true; // Strict boolean check
-                    const wasRealtime = currentIcon && currentIcon.options && typeof currentIcon.options.className === 'string'
-                        ? currentIcon.options.className.includes('is-realtime-active')
-                        : false;
-                    
-                    // On vérifie si le texte a changé (changement de ligne/route)
                     const routeColor = route.route_color ? `#${route.route_color}` : null;
                     const textColor = route.route_text_color ? `#${route.route_text_color}` : null;
-                    const expectedHtmlContent = `${routeShortName}`; // Simplifié pour check rapide
-
-                    // Si l'état RT change OU si le HTML change, on recrée
-                    // On force aussi la update si on n'a pas d'icône
-                    if (!currentIcon || wasRealtime !== isRealtime || !currentIcon.options.html.includes(expectedHtmlContent)) {
-                        const tempData = this.createBusMarker(bus, tripScheduler, busId);
-                        try {
-                            markerData.marker.setIcon(tempData.marker.getIcon());
-                        } catch (e) {
-                            console.warn('[MapRenderer] failed to set updated icon for', busId, e);
-                        }
+                    const newHtml = `<div style="background-color: ${routeColor || '#FFC107'}; color: ${textColor || '#ffffff'};">${routeShortName}</div>`;
+                    // Simple heuristic: si html diffère, recréer l'icône
+                    if (!currentIcon || currentIcon.options?.html !== newHtml) {
+                        const newIcon = L.divIcon({
+                            className: currentIcon ? currentIcon.options.className : 'bus-icon-rect',
+                            html: newHtml,
+                            iconSize: currentIcon ? currentIcon.options.iconSize : [32, 32],
+                            iconAnchor: currentIcon ? currentIcon.options.iconAnchor : [16, 16],
+                            popupAnchor: currentIcon ? currentIcon.options.popupAnchor : [0, -16]
+                        });
+                        markerData.marker.setIcon(newIcon);
                     }
                 } catch (e) {
-                    console.warn('[MapRenderer] Erreur update icône', e);
+                    // Ne pas bloquer la boucle pour des erreurs d'icône
                 }
 
             } else {
@@ -483,65 +444,14 @@ export class MapRenderer {
                     console.warn('[MapRenderer] skipping createBusMarker due to invalid coords for', busId);
                     return;
                 }
-
-                // Tentative V308+: éviter les doublons causés par IDs instables
-                // Chercher un marqueur existant très proche (<=25m) et réutiliser si trouvé
-                let adopted = false;
-                try {
-                    const proximityMeters = 50; // seuil de proximité pour considérer le même bus (increase to reduce duplicates)
-                    for (const existingId of Object.keys(this.busMarkers)) {
-                        const existing = this.busMarkers[existingId];
-                        if (!existing || !existing.lastLatLng) continue;
-                        const [prevLat, prevLon] = existing.lastLatLng;
-                        // Utiliser dataManager pour Haversine
-                        const dist = this.dataManager ? this.dataManager.calculateDistance(prevLat, prevLon, lat, lon) : null;
-                        if (dist !== null && dist <= proximityMeters) {
-                            // Adopter ce marqueur pour le nouveau busId
-                            console.debug('[MapRenderer] Adopting nearby marker', existingId, 'for', busId, 'dist_m=', dist);
-                            // Supprimer l'ancienne clé pour éviter collision
-                            delete this.busMarkers[existingId];
-                            existing.bus = bus;
-                            existing.lastSeen = nowSeconds;
-                            existing.lastLatLng = [lat, lon];
-                            this.busMarkers[busId] = existing;
-                            // Mettre à jour l'icône si nécessaire
-                            try {
-                                const temp = this.createBusMarker(bus, tripScheduler, busId);
-                                existing.marker.setIcon(temp.marker.getIcon());
-                            } catch (e) { /* ignore */ }
-                            adopted = true;
-                            break;
-                        }
-                    }
-                } catch (e) {
-                    // ignore proximity adoption errors
-                }
-
-                if (!adopted) {
-                    const markerData = this.createBusMarker(bus, tripScheduler, busId);
-                    markerData.lastSeen = nowSeconds;
-                    markerData.lastLatLng = [lat, lon];
-                    this.busMarkers[busId] = markerData;
-                    if (this.busLayer) {
-                        this.busLayer.addLayer(markerData.marker);
-                    } else {
-                        markerData.marker.addTo(this.map);
-                    }
-
-                    // Debug: inspect DOM of the created marker to detect empty/ghost elements
-                    try {
-                        const el = markerData.marker.getElement && markerData.marker.getElement();
-                        if (el) {
-                            const contentEl = el.querySelector && el.querySelector('.bus-icon-content');
-                            const contentText = contentEl ? (contentEl.textContent || '').trim() : null;
-                            console.debug('[MapRenderer] created marker DOM for', busId, 'html=', el.outerHTML.slice(0, 300));
-                            if (!contentText) {
-                                console.warn('[MapRenderer] created marker has empty .bus-icon-content for', busId, '— this may create an empty black circle');
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('[MapRenderer] debug inspect marker failed', e);
-                    }
+                const markerData = this.createBusMarker(bus, tripScheduler, busId);
+                markerData.lastSeen = nowSeconds;
+                markerData.lastLatLng = [lat, lon];
+                this.busMarkers[busId] = markerData;
+                if (this.busLayer) {
+                    this.busLayer.addLayer(markerData.marker);
+                } else {
+                    markerData.marker.addTo(this.map);
                 }
             }
         });
@@ -666,12 +576,25 @@ export class MapRenderer {
                 }
             }
             
-            // V305: Badge temps réel vs estimé - plus précis
+            // V305: Badge temps réel vs estimé - plus précis incluant confidence
             if (footerBadge) {
+                const posConf = bus.positionConfidence || bus.position?.confidence || null;
                 if (hasRTTime) {
                     footerBadge.classList.remove('theoretical');
                     footerBadge.classList.add('realtime');
                     footerBadge.innerHTML = '<span class="badge-dot"></span>Temps réel';
+                } else if (posConf === 'realtime-pivot') {
+                    footerBadge.classList.remove('theoretical');
+                    footerBadge.classList.add('realtime');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Temps réel (pivots)';
+                } else if (posConf === 'realtime-pivot-smoothed' || posConf === 'realtime-pivot-smoothed') {
+                    footerBadge.classList.remove('theoretical');
+                    footerBadge.classList.add('realtime');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Temps réel (lissé)';
+                } else if (posConf === 'estimated' || bus.isEstimated) {
+                    footerBadge.classList.remove('realtime');
+                    footerBadge.classList.add('theoretical');
+                    footerBadge.innerHTML = '<span class="badge-dot"></span>Position estimée';
                 } else if (bus.isRealtime) {
                     footerBadge.classList.remove('theoretical');
                     footerBadge.classList.add('realtime');
@@ -734,7 +657,6 @@ export class MapRenderer {
 
     /**
      * V24 - Crée un marqueur et lui attache un 'click' event
-     * V307 - Ajout du style visuel Temps Réel (Bordure verte / Icône)
      */
     createBusMarker(bus, tripScheduler, busId) {
         const { lat, lon } = bus.position;
@@ -743,32 +665,14 @@ export class MapRenderer {
         const routeColor = route?.route_color ? `#${route.route_color}` : '#FFC107';
         const textColor = route?.route_text_color ? `#${route.route_text_color}` : '#ffffff';
 
-        // V307: Détection du mode Temps Réel
-        const isRealtime = bus.isRealtime || bus.hasRealtime;
-        
-        // Classes de base
-        let iconClassName = 'bus-icon-rect bus-appear';
-        if (isRealtime) {
-            iconClassName += ' is-realtime-active'; // Classe CSS pour l'effet vert/pulse
-        }
-
+        const iconClassName = 'bus-icon-rect bus-appear';
         const statusClass = bus.currentStatus ? `bus-status-${bus.currentStatus}` : 'bus-status-normal';
-        
-        // V307: Ajout d'un indicateur visuel (point vert ou icône wifi) si temps réel
-        const rtIndicator = isRealtime 
-            ? `<div class="bus-rt-badge"></div>` 
-            : '';
 
         const icon = L.divIcon({
             className: `${iconClassName} ${statusClass}`,
-            html: `
-                <div class="bus-icon-content" style="background-color: ${routeColor}; color: ${textColor};">
-                    ${routeShortName}
-                </div>
-                ${rtIndicator}
-            `,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
+            html: `<div style="background-color: ${routeColor}; color: ${textColor};">${routeShortName}</div>`,
+            iconSize: [32, 32],    // Dimensions carrées pour cercle parfait
+            iconAnchor: [16, 16],  // Centre du cercle
             popupAnchor: [0, -16]
         });
 
@@ -780,9 +684,12 @@ export class MapRenderer {
         if (this.busPaneName) markerOptions.pane = this.busPaneName;
         const marker = L.marker([lat, lon], markerOptions);
         
-        // Attacher un simple 'click'
+        // *** V24 - NE PAS UTILISER bindPopup ***
+        // marker.bindPopup(...);
+        
+        // Attacher un simple 'click' avec log pour debug
         marker.on('click', (e) => {
-            console.log('[MapRenderer] 🚌 Bus clicked:', busId, 'RT:', isRealtime);
+            console.log('[MapRenderer] 🚌 Bus clicked:', busId);
             L.DomEvent.stopPropagation(e);
             
             this.selectedBusId = busId;
@@ -793,42 +700,21 @@ export class MapRenderer {
                 return;
             }
             
+            // Mettre à jour le contenu AVANT de l'ouvrir
             this.updateBusPopupContent(this.busPopupDomElement, markerData.bus, tripScheduler);
             
+            // Ouvrir le popup global
             this.busPopup
                 .setLatLng(marker.getLatLng())
                 .setContent(this.busPopupDomElement)
                 .openOn(this.map);
         });
         
+        // Créer l'objet markerData (sans popupDomElement, car il est global)
         const markerData = {
             marker: marker,
             bus: bus
         };
-
-        // Runtime sanity check: if the marker element renders with an empty
-        // `.bus-icon-content` (which can appear as a black/empty circle),
-        // remove it immediately and log for diagnostics.
-        setTimeout(() => {
-            try {
-                const el = marker.getElement && marker.getElement();
-                if (el) {
-                    const contentEl = el.querySelector && el.querySelector('.bus-icon-content');
-                    const contentText = contentEl ? (contentEl.textContent || '').trim() : null;
-                    // If there's no text and no RT badge, it's likely an empty ghost
-                    const hasRtBadge = !!(el.querySelector && el.querySelector('.bus-rt-badge'));
-                    if (!contentText && !hasRtBadge) {
-                        console.warn('[MapRenderer] Removing newly created empty marker for', busId);
-                        try {
-                            if (this.busLayer) this.busLayer.removeLayer(marker);
-                            else this.map.removeLayer(marker);
-                        } catch (e) { /* ignore */ }
-                    }
-                }
-            } catch (e) {
-                // Never let this break rendering
-            }
-        }, 50);
 
         return markerData;
     }
@@ -1029,7 +915,6 @@ export class MapRenderer {
             
             if (realtimeData && realtimeData.departures && realtimeData.departures.length > 0) {
                 console.log(`📡 Données temps réel reçues pour ${masterStop.stop_name}:`, realtimeData.departures.length, 'passages');
-                console.debug('[fetchAndUpdateRealtime] realtimeData sample:', JSON.parse(JSON.stringify(realtimeData)).departures?.slice(0,3));
                 
                 // Convertir au format attendu par createStopPopupContent
                 const realtimeForPopup = {
@@ -1053,7 +938,6 @@ export class MapRenderer {
                         firstDepartureTime,
                         realtimeForPopup
                     );
-                    console.debug('[fetchAndUpdateRealtime] updating popup content for', masterStop.stop_id, 'with', (realtimeForPopup.schedules || []).length, 'rt entries');
                     popup.setContent(newContent);
                     
                     // Ré-attacher les listeners
@@ -1248,9 +1132,6 @@ export class MapRenderer {
                                 }
                                 if (matchedBusETA) {
                                     displayTime = matchedBusETA.formatted;
-                                    console.debug('[createStopPopupContent] using computed ETA from active bus for', routeShort, '->', displayTime, 'matchedBus:', matchedBusETA);
-                                } else {
-                                    console.debug('[createStopPopupContent] no active-bus ETA found for', routeShort, 'falling back to RT feed value:', rt.temps);
                                 }
                             } catch (e) {
                                 // ignore

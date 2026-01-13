@@ -5345,28 +5345,16 @@ function updateData() {
                                 ? lineStatuses[routeId].status 
                                 : 'normal';
             
-            // V308: FORCING VISUEL TEMPS RÉEL
-            // 1. Le calculateur confirme-t-il le temps réel (position ajustée) ?
-            const calcConfirmed = bus.hasRealtime === true;
-            
-            // 2. A-t-on des données brutes pour le prochain arrêt ? (Même si la position est interpolée)
-            let rawDataAvailable = false;
+            // V303: Définir isRealtime basé sur les données temps réel disponibles
+            // Un bus est "temps réel" si on a des données récentes dans le cache
             if (bus.segment?.toStopInfo?.stop_id && realtimeManager) {
-                try {
-                    rawDataAvailable = realtimeManager.hasRealtimeDataForStop(
-                        bus.segment.toStopInfo.stop_id,
-                        bus.segment.toStopInfo.stop_code
-                    );
-                } catch (e) {
-                    rawDataAvailable = false;
-                }
+                const stopId = bus.segment.toStopInfo.stop_id;
+                const stopCode = bus.segment.toStopInfo.stop_code;
+                // Vérifier si le realtimeManager a préchargé des données pour cet arrêt
+                bus.isRealtime = realtimeManager.hasRealtimeDataForStop?.(stopId, stopCode) ?? false;
+            } else {
+                bus.isRealtime = false;
             }
-
-            // Si l'un des deux est vrai, on affiche le bus en VERT (Temps Réel)
-            bus.isRealtime = Boolean(calcConfirmed || rawDataAvailable);
-            
-            // Debug (désactivé par défaut) : comprendre pourquoi ça clignote
-            // if (bus.isRealtime && !calcConfirmed) console.debug(`[Bus ${bus.tripId}] RT Visuel forcé (données brutes disponibles)`);
         }
     });
     
