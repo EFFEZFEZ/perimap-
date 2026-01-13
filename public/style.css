@@ -6372,6 +6372,7 @@ body.dark-theme .real-select option {
 }
 
 .autocomplete-suggestions {
+    /* default fallback; JS will set to fixed to escape stacking contexts */
     position: absolute;
     top: 100%;
     left: 0;

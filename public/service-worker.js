@@ -13,7 +13,7 @@
  * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
  */
 
-const CACHE_VERSION = 'v378'; // v378: Autocomplete opacity/pointer-events fix, itinerary padding
+const CACHE_VERSION = 'v379'; // v379: Autocomplete fixed positioning to avoid stacking issues
 const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
 const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
 const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;

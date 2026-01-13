@@ -2653,6 +2653,20 @@ function renderSuggestions(suggestions, container, onSelect) {
     };
 
     const inputElement = resolveInputElement();
+    // Ensure container is positioned relative to the input (use fixed to escape stacking contexts)
+    const positionSuggestionsOverInput = () => {
+        if (!inputElement || !container) return;
+        try {
+            const rect = inputElement.getBoundingClientRect();
+            container.style.position = 'fixed';
+            container.style.left = `${rect.left}px`;
+            container.style.top = `${rect.bottom}px`;
+            container.style.width = `${rect.width}px`;
+            container.style.right = 'auto';
+        } catch (e) {
+            // ignore positioning errors
+        }
+    };
 
     suggestions.forEach(suggestion => {
         const item = document.createElement('div');
@@ -2676,10 +2690,26 @@ function renderSuggestions(suggestions, container, onSelect) {
             onSelect(selectionValue); 
             container.innerHTML = '';
             container.style.display = 'none';
+            // run cleanup if any
+            try { if (container._suggestionsCleanup) container._suggestionsCleanup(); } catch (e) {}
         });
         container.appendChild(item);
     });
+    // Position and show
+    positionSuggestionsOverInput();
+    // Reposition on viewport resize/scroll while visible
+    const onWindowChange = () => positionSuggestionsOverInput();
+    window.addEventListener('resize', onWindowChange);
+    window.addEventListener('scroll', onWindowChange, true);
     container.style.display = 'block';
+
+    // Cleanup listeners when suggestions are hidden by other logic
+    const cleanup = () => {
+        window.removeEventListener('resize', onWindowChange);
+        window.removeEventListener('scroll', onWindowChange, true);
+    };
+    // attach cleanup to container dataset so other code can call it if needed
+    container._suggestionsCleanup = cleanup;
 }
 
 function processGoogleRoutesResponse(data) {
