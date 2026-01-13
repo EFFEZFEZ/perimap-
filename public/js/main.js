@@ -1619,9 +1619,14 @@ async function handleNavigationAction(action) {
     const needsDashboard = ['itineraire', 'horaires', 'info-trafic', 'carte'].includes(action);
     
     if (needsDashboard) {
-        await ensureDashboardLoaded();
+        const wasReloaded = await ensureDashboardLoaded();
         // Réinitialiser les références DOM après rechargement potentiel
         initializeDomElements();
+        
+        // V91: Si on a rechargé, attendre un peu que le DOM se stabilise
+        if (wasReloaded) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
     }
     
     switch(action) {
@@ -4591,17 +4596,11 @@ function showMapView() {
     document.body.classList.add('view-map-locked'); 
     setBottomNavActive('carte');
     
-    // V304: Appeler invalidateSize avec un délai pour laisser le CSS s'appliquer
+    // V305: Optimiser invalidateSize pour réduire le lag au chargement carte
     if (mapRenderer && mapRenderer.map) {
-        // Premier appel immédiat
-        mapRenderer.map.invalidateSize();
-        // Deuxième appel après que les styles soient complètement appliqués
+        // Appeler une seule fois après que les styles se stabilisent
         requestAnimationFrame(() => {
             mapRenderer.map.invalidateSize();
-            // Troisième appel pour les transitions CSS lentes
-            setTimeout(() => {
-                mapRenderer.map.invalidateSize();
-            }, 100);
         });
     }
 }
