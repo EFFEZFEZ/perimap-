@@ -1,291 +1,97 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
- */
-/**
- * Service Worker - Stratégie optimisée pour performance
+ * Service Worker v401 - Version ultra-légère SANS blocage
  * 
- * STRATÉGIES:
- * - Cache-First pour assets statiques (CSS, JS, images)
- * - Stale-While-Revalidate pour données GTFS
- * - Network-First pour APIs externes
- * 
- * IMPORTANT: Incrémentez CACHE_VERSION à chaque déploiement !
+ * AUCUNE restriction, AUCUN nettoyage agressif
+ * Network-first pour tout, cache en fallback
  */
 
-const CACHE_VERSION = 'v400'; // v400: Itinerary UI redesign - modern Périmap style
-const CACHE_NAME = `peribus-cache-${CACHE_VERSION}`;
-const STATIC_CACHE = `peribus-static-${CACHE_VERSION}`;
-const DATA_CACHE = `peribus-data-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v401';
+const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
-// Assets critiques à pré-cacher (chargés immédiatement)
-// NOTE: En production avec Vite, les fichiers sont bundlés dans /assets/ avec hash
-// Ces chemins sont pour le développement local uniquement
-const CRITICAL_ASSETS = [
+// Assets à pré-cacher (minimum vital)
+const PRECACHE = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/js/csp-init.js',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/shortcut-route.png',
-  '/icons/shortcut-schedule.png',
-  '/icons/shortcut-map.png',
-  '/icons/shortcut-alert.png',
-  '/icons/perimap-logo.webp'
+  '/manifest.json'
 ];
-
-// Assets secondaires: pages HTML statiques et views
-// Les JS/CSS sont gérés dynamiquement par Stale-While-Revalidate
-const SECONDARY_ASSETS = [
-  '/horaires.html',
-  '/horaires-ligne-a.html',
-  '/horaires-ligne-b.html',
-  '/horaires-ligne-c.html',
-  '/horaires-ligne-d.html',
-  '/itineraire.html',
-  '/trafic.html',
-  '/carte.html',
-  '/about.html',
-  '/mentions-legales.html',
-  '/views/hall.html',
-  '/views/horaires.html',
-  '/views/carte.html',
-  '/views/itineraire.html',
-  '/views/trafic.html',
-  '/views/tarifs-achat.html',
-  '/views/tarifs-amendes.html',
-  '/views/tarifs-billettique.html',
-  '/views/tarifs-grille.html'
-];
-
-// Patterns pour Network-Only
-const NETWORK_ONLY = ['/api/', 'google', 'googleapis', 'line-status.json'];
-
-// Patterns pour données GTFS (cache long terme)
-const GTFS_PATTERNS = ['/data/gtfs/', '.json', '.txt'];
-
-// Ajout robuste en cache: ignore les ressources manquantes pour ne pas casser l'installation
-async function cacheUrlsSafely(cacheName, urls, label) {
-  const cache = await caches.open(cacheName);
-  for (const url of urls) {
-    try {
-      await cache.add(url);
-    } catch (err) {
-      console.warn(`[SW] ⚠️ ${label} non mis en cache (ignoré):`, url, err?.message || err);
-    }
-  }
-}
 
 /**
- * Installation: Pré-cache les assets critiques, puis secondaires
+ * Installation: Simple, non-bloquante
  */
 self.addEventListener('install', (event) => {
-  console.log('[SW] 📦 Installation version', CACHE_VERSION);
+  console.log('[SW] 📦 Installation', CACHE_VERSION);
   event.waitUntil(
-    (async () => {
-      try {
-        // Cache critique en priorité (tolérant aux 404)
-        await cacheUrlsSafely(STATIC_CACHE, CRITICAL_ASSETS, 'Asset critique');
-        console.log('[SW] ✅ Assets critiques cachés (best effort)');
-        
-        // Cache secondaire en arrière-plan (non-bloquant, tolérant aux 404)
-        cacheUrlsSafely(STATIC_CACHE, SECONDARY_ASSETS, 'Asset secondaire').catch(err => {
-          console.warn('[SW] ⚠️ Cache secondaire partiel:', err);
-        });
-        
-        // Force la nouvelle version
-        await self.skipWaiting();
-        console.log('[SW] ✅ Service Worker activé immédiatement');
-      } catch (err) {
-        console.error('[SW] Erreur installation:', err);
-      }
-    })()
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(PRECACHE).catch(() => {}))
+      .then(() => self.skipWaiting())
+      .catch(() => self.skipWaiting())
   );
 });
 
 /**
- * Activation: Nettoie TOUS les anciens caches + anciens stores
+ * Activation: Nettoie SEULEMENT les anciens caches SW
+ * NE TOUCHE PAS à IndexedDB ni localStorage
  */
 self.addEventListener('activate', (event) => {
-  console.log('[SW] 🚀 Activation version', CACHE_VERSION, '- Nettoyage agressif');
+  console.log('[SW] 🚀 Activation', CACHE_VERSION);
   event.waitUntil(
-    (async () => {
-      try {
-        // 1. Supprimer TOUS les anciens caches
-        const keys = await caches.keys();
-        const deletePromises = keys.map(key => {
-          if (!key.includes(CACHE_VERSION)) {
-            console.log('[SW] ❌ Suppression cache obsolète:', key);
-            return caches.delete(key);
-          }
-        });
-        await Promise.all(deletePromises);
-        console.log('[SW] ✅ Caches nettoyés');
-
-        // 2. Nettoyer les IndexedDB et LocalStorage obsolètes
-        try {
-          const dbs = await indexedDB.databases();
-          dbs.forEach(db => {
-            console.log('[SW] 🗑️ Vidage IndexedDB:', db.name);
-            indexedDB.deleteDatabase(db.name);
-          });
-        } catch (err) {
-          console.warn('[SW] Erreur nettoyage IndexedDB:', err);
-        }
-
-        // 3. Réclamer tous les clients
-        await self.clients.claim();
-        console.log('[SW] ✅ Tous les clients réclamés');
-        
-        // 4. Notifier tous les clients et forcer un reload sécurisé
-        const allClients = await self.clients.matchAll({ type: 'window' });
-        for (const client of allClients) {
-          try {
-            client.postMessage({
-              type: 'CACHE_UPDATED',
-              version: CACHE_VERSION,
-              message: 'Nouvelle version Périmap disponible - rechargement en cours'
-            });
-            // Tenter de naviguer le client vers lui-même pour forcer le reload
-            if (client.url) {
-              const clientOrigin = new URL(client.url).origin;
-              if (clientOrigin === self.location.origin) {
-                await client.navigate(client.url);
-              }
-            }
-          } catch (e) {
-            console.warn('[SW] Impossible de forcer reload du client:', e?.message || e);
-          }
-        }
-
-      } catch (err) {
-        console.error('[SW] Erreur activation:', err);
-      }
-    })()
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => !k.includes(CACHE_VERSION)).map(k => {
+          console.log('[SW] Suppression ancien cache:', k);
+          return caches.delete(k);
+        })
+      ))
+      .then(() => self.clients.claim())
+      .catch(() => self.clients.claim())
   );
 });
 
 /**
- * Fetch: Stratégies différenciées selon le type de ressource
+ * Fetch: Network-first SIMPLE
+ * Ne bloque JAMAIS - laisse passer tout
  */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignorer les schémas non supportés (ex: chrome-extension:)
+  // Laisser passer sans interception:
+  // - Autres protocoles
+  // - Non-GET
+  // - Cross-origin
+  // - APIs
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return;
-  
-  // Ignorer non-GET
   if (request.method !== 'GET') return;
-
-  // Ne pas intercepter les requêtes cross-origin (tiles, images, scripts CDN, etc.)
-  // Cela évite les erreurs CSP connect-src côté SW et les problèmes de cache opaque.
   if (url.origin !== self.location.origin) return;
-  
-  // Network-only pour APIs externes
-  if (NETWORK_ONLY.some(p => request.url.includes(p))) {
-    event.respondWith(fetch(request).catch(() => new Response('', { status: 503 })));
-    return;
-  }
-  
-  // Stale-While-Revalidate pour assets statiques (JS, CSS, HTML)
-  // Objectif: éviter un site "figé" entre deux versions.
-  if (url.origin === self.location.origin &&
-      (request.url.endsWith('.js') || request.url.endsWith('.css') || request.url.endsWith('.html'))) {
-    event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
-    return;
-  }
-  
-  // Stale-While-Revalidate pour données GTFS
-  if (GTFS_PATTERNS.some(p => request.url.includes(p))) {
-    event.respondWith(staleWhileRevalidate(request, DATA_CACHE));
-    return;
-  }
-  
-  // Par défaut: Stale-While-Revalidate
-  event.respondWith(staleWhileRevalidate(request, CACHE_NAME));
+  if (url.pathname.startsWith('/api/')) return;
+
+  // Network-first avec fallback cache
+  event.respondWith(
+    fetch(request)
+      .then(response => {
+        if (response && response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, clone).catch(() => {});
+          }).catch(() => {});
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request)
+          .then(cached => cached || caches.match('/index.html'))
+          .catch(() => new Response('Offline', { status: 503 }));
+      })
+  );
 });
 
 /**
- * Cache-First: Retourne le cache, sinon réseau
- */
-async function cacheFirst(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      try {
-        await cache.put(request, response.clone());
-      } catch (e) {
-        // ignore cache put errors (quota, opaque, etc.)
-      }
-    }
-    return response;
-  } catch {
-    return caches.match('/index.html');
-  }
-}
-
-/**
- * Stale-While-Revalidate: Retourne le cache, met à jour en arrière-plan
- */
-async function staleWhileRevalidate(request, cacheName) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-  
-  // Revalidation en arrière-plan
-  const networkPromise = fetch(request)
-    .then(async (response) => {
-      if (response && response.ok) {
-        try {
-          await cache.put(request, response.clone());
-        } catch (e) {
-          // ignore cache put errors
-        }
-      }
-      return response;
-    })
-    .catch(() => null);
-
-  if (cached) {
-    // Laisser le refresh se faire en arrière-plan, sans casser la réponse.
-    networkPromise.catch(() => null);
-    return cached;
-  }
-
-  const networkResponse = await networkPromise;
-  if (networkResponse) return networkResponse;
-
-  const fallback = await caches.match('/index.html');
-  return fallback || new Response('', { status: 504 });
-}
-
-/**
- * Message: Permet de forcer une mise à jour depuis l'app
+ * Messages
  */
 self.addEventListener('message', (event) => {
-  console.log('[SW] Message reçu:', event.data);
-  
-  if (event.data === 'skipWaiting') {
-    console.log('[SW] 🔄 Activation immédiate demandée');
-    self.skipWaiting();
-  }
-  
-  if (event.data === 'clearCache') {
-    console.log('[SW] 🗑️ Suppression de tous les caches');
-    caches.keys().then(keys => {
-      keys.forEach(k => {
-        console.log('[SW] Suppression:', k);
-        caches.delete(k);
-      });
-    });
-  }
-
-  if (event.data === 'getVersion') {
+  if (event.data === 'skipWaiting') self.skipWaiting();
+  if (event.data === 'getVersion' && event.ports && event.ports[0]) {
     event.ports[0].postMessage({ version: CACHE_VERSION });
   }
 });
