@@ -2342,6 +2342,16 @@ body.dark-theme .btn-geolocate:hover:not(:disabled) {
     z-index: 1;
 }
 
+/* V360: Cacher les quick actions sur mobile (remplacées par bottom-nav) */
+.quick-actions-section.desktop-only {
+    display: grid;
+}
+@media (max-width: 768px) {
+    .quick-actions-section.desktop-only {
+        display: none;
+    }
+}
+
 .quick-action-card {
     display: flex;
     flex-direction: column;
