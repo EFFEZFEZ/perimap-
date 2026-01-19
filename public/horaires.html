@@ -197,7 +197,6 @@
       <nav class="header-nav-main"></nav>
 
       <nav class="header-nav-right">
-        <a class="btn btn-primary header-cta" href="/#horaires">Ouvrir dans l’app</a>
         <button id="theme-toggle-btn" class="btn-icon-round" data-theme-toggle="true" aria-label="Basculer thème sombre" title="Thème sombre" aria-pressed="false">
           <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
         </button>
@@ -223,10 +222,10 @@
   <main class="horaires-page">
     <section class="horaires-hero">
       <h1>Horaires Péribus</h1>
-      <p>Choisissez votre ligne. Chaque bouton mène à une page dédiée puis vous redirige vers l’application PériMap pour le temps réel.</p>
+      <p>Choisissez une ligne pour voir les prochains départs par arrêt (maintenant ou à l’heure choisie).</p>
       <div class="horaires-actions">
         <a class="btn btn-primary" href="/#horaires" style="text-decoration:none;">Ouvrir dans PériMap</a>
-        <a class="btn" href="/" style="text-decoration:none;">Accueil</a>
+        <a class="btn" href="/" style="text-decoration:none;">Retour</a>
       </div>
     </section>
 
@@ -399,7 +398,7 @@
     // Redirection seulement pour les vrais utilisateurs (pas les bots Google)
     const isBot = /bot|crawl|spider|googlebot|bingbot|yandex|baidu|duckduck/i.test(navigator.userAgent);
     if (!isBot) {
-      const redirectBtn = document.querySelector('.header-cta');
+      const redirectBtn = document.querySelector('.horaires-actions .btn-primary');
       if (redirectBtn) {
         redirectBtn.addEventListener('click', (e) => {
           e.preventDefault();
