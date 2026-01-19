@@ -124,7 +124,7 @@
     .horaires-page {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 10px 18px 30px;
+      padding: 18px 18px 30px;
     }
 
     .horaires-hero {
@@ -171,6 +171,14 @@
       gap: 12px;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       margin: 16px 0 8px;
+      padding-top: 8px;
+    }
+
+    @media (max-width: 767px) {
+      .horaires-grid {
+        padding-top: 0;
+        margin-top: 8px;
+      }
     }
 
     a.service-card {
