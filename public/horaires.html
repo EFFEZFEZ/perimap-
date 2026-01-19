@@ -89,8 +89,23 @@
       font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .horaires-back-btn {
-      text-decoration: none;
+    .horaires-top-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 18px;
+      background: var(--bg-main);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+
+    .horaires-top-bar h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      flex: 1;
     }
 
     .horaires-page {
@@ -168,6 +183,14 @@
   </style>
 </head>
 <body>
+  <div class="horaires-top-bar">
+    <a class="topbar-pill app-back-btn" href="/" aria-label="Retour">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span>Retour</span>
+    </a>
+    <h2>Horaires</h2>
+  </div>
+
   <header id="main-header">
     <div class="header-content">
       <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu">
@@ -175,11 +198,6 @@
         <span></span>
         <span></span>
       </button>
-
-      <a class="topbar-pill app-back-btn horaires-back-btn" href="/" aria-label="Retour">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        <span>Retour</span>
-      </a>
 
       <a href="/" class="logo">
         <img src="/icons/perimap-logo.webp" alt="Logo PériMap" class="header-logo-img">
