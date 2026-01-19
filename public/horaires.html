@@ -92,20 +92,32 @@
     .horaires-top-bar {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 8px 18px;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
       background: var(--bg-main);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 900;
+      z-index: 100;
+    }
+
+    .horaires-top-bar .app-back-btn {
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .horaires-top-bar .app-back-btn svg {
+      width: 16px;
+      height: 16px;
     }
 
     .horaires-top-bar h2 {
+      font-size: 1rem;
+      font-weight: 700;
       margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      flex: 1;
+      color: var(--text-primary);
     }
 
     .horaires-page {
@@ -184,10 +196,10 @@
 </head>
 <body>
   <div class="horaires-top-bar">
-    <a class="topbar-pill app-back-btn" href="/" aria-label="Retour">
+    <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       <span>Retour</span>
-    </a>
+    </button>
     <h2>Horaires</h2>
   </div>
 
