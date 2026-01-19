@@ -89,19 +89,8 @@
       font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    .header-cta {
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      border-radius: 9999px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 640px) {
-      .header-cta {
-        padding: 7px 12px;
-        font-size: 0.8rem;
-      }
+    .horaires-back-btn {
+      text-decoration: none;
     }
 
     .horaires-page {
@@ -187,6 +176,11 @@
         <span></span>
       </button>
 
+      <a class="topbar-pill app-back-btn horaires-back-btn" href="/" aria-label="Retour">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Retour</span>
+      </a>
+
       <a href="/" class="logo">
         <img src="/icons/perimap-logo.webp" alt="Logo PériMap" class="header-logo-img">
         <div class="header-title-group">
@@ -222,11 +216,7 @@
   <main class="horaires-page">
     <section class="horaires-hero">
       <h1>Horaires Péribus</h1>
-      <p>Choisissez une ligne pour voir les prochains départs par arrêt (maintenant ou à l’heure choisie).</p>
-      <div class="horaires-actions">
-        <a class="btn btn-primary" href="/#horaires" style="text-decoration:none;">Ouvrir dans PériMap</a>
-        <a class="btn" href="/" style="text-decoration:none;">Retour</a>
-      </div>
+      <p>Choisissez une ligne pour voir les prochains départs par arrêt, maintenant ou à l’heure choisie.</p>
     </section>
 
     <section aria-label="Liste des lignes">
@@ -398,13 +388,7 @@
     // Redirection seulement pour les vrais utilisateurs (pas les bots Google)
     const isBot = /bot|crawl|spider|googlebot|bingbot|yandex|baidu|duckduck/i.test(navigator.userAgent);
     if (!isBot) {
-      const redirectBtn = document.querySelector('.horaires-actions .btn-primary');
-      if (redirectBtn) {
-        redirectBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          window.location.href = '/#horaires';
-        });
-      }
+      // Pas de CTA ici (déjà dans l'application)
     }
   </script>
 </body>
