@@ -1118,7 +1118,7 @@ html, body {
     -webkit-font-smoothing: antialiased;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
-    background-color: var(--bg-light); 
+    background-color: var(--bg-page); 
     overscroll-behavior-y: none;
     /* V347: Empêcher les sauts lors du scroll mobile (barre adresse) */
     overflow-anchor: none;
