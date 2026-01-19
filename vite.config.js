@@ -10,7 +10,7 @@
 
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-import { cpSync, existsSync, copyFileSync } from 'fs';
+import { cpSync, existsSync, copyFileSync, readdirSync } from 'fs';
 
 // Plugin pour copier les dossiers et fichiers statiques après le build
 function copyStaticFolders() {
@@ -79,15 +79,19 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'public/index.html'),
         horaires: resolve(__dirname, 'public/horaires.html'),
-        horaireA: resolve(__dirname, 'public/horaires-ligne-a.html'),
-        horaireB: resolve(__dirname, 'public/horaires-ligne-b.html'),
-        horaireC: resolve(__dirname, 'public/horaires-ligne-c.html'),
-        horaireD: resolve(__dirname, 'public/horaires-ligne-d.html'),
         carte: resolve(__dirname, 'public/carte.html'),
         itineraire: resolve(__dirname, 'public/itineraire.html'),
         trafic: resolve(__dirname, 'public/trafic.html'),
         about: resolve(__dirname, 'public/about.html'),
-        mentions: resolve(__dirname, 'public/mentions-legales.html')
+        mentions: resolve(__dirname, 'public/mentions-legales.html'),
+        ...Object.fromEntries(
+          readdirSync(resolve(__dirname, 'public'))
+            .filter((name) => name.startsWith('horaires-ligne-') && name.endsWith('.html'))
+            .map((name) => [
+              name.replace(/\.html$/i, ''),
+              resolve(__dirname, 'public', name)
+            ])
+        )
       },
       output: {
         // Nommage avec hash pour cache busting

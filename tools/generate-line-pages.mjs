@@ -5,6 +5,10 @@ const workspaceRoot = process.cwd();
 const publicDir = path.join(workspaceRoot, 'public');
 const pdfDir = path.join(publicDir, 'data', 'fichehoraire');
 const templatePath = path.join(publicDir, 'horaires-ligne-a.html');
+const gtfsDir = path.join(publicDir, 'data', 'gtfs');
+const routesPath = path.join(gtfsDir, 'routes.txt');
+const tripsPath = path.join(gtfsDir, 'trips.txt');
+const horairesHubPath = path.join(publicDir, 'horaires.html');
 
 function exists(p) {
   try {
@@ -35,6 +39,85 @@ function colorFor(code) {
   if (/^r/i.test(c)) return '#e74c3c';
   return '#22c55e';
 }
+
+function parseCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (ch === ',' && !inQuotes) {
+      out.push(cur);
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+function loadRouteIdToShortName() {
+  if (!exists(routesPath)) return new Map();
+  const lines = fs.readFileSync(routesPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxRouteId = header.indexOf('route_id');
+  const idxShort = header.indexOf('route_short_name');
+  if (idxRouteId === -1 || idxShort === -1) return new Map();
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const routeId = row[idxRouteId];
+    const shortName = row[idxShort];
+    if (!routeId || !shortName) continue;
+    map.set(routeId, String(shortName).trim());
+  }
+  return map;
+}
+
+function normalizeHeadsign(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function loadHeadsignsByLine() {
+  if (!exists(tripsPath)) return new Map();
+  const routeIdToShort = loadRouteIdToShortName();
+  if (routeIdToShort.size === 0) return new Map();
+
+  const lines = fs.readFileSync(tripsPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxRouteId = header.indexOf('route_id');
+  const idxHeadsign = header.indexOf('trip_headsign');
+  if (idxRouteId === -1 || idxHeadsign === -1) return new Map();
+
+  const countsByLine = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const routeId = row[idxRouteId];
+    const headsignRaw = row[idxHeadsign];
+    if (!routeId) continue;
+    const short = routeIdToShort.get(routeId);
+    if (!short) continue;
+    const lineCode = normalizeLineCode(short).toUpperCase();
+    const headsign = normalizeHeadsign(headsignRaw);
+    if (!headsign) continue;
+    if (!countsByLine.has(lineCode)) countsByLine.set(lineCode, new Map());
+    const lineMap = countsByLine.get(lineCode);
+    lineMap.set(headsign, (lineMap.get(headsign) || 0) + 1);
+  }
+  return countsByLine;
+}
+
+const headsignsByLine = loadHeadsignsByLine();
 
 function textColorFor(bgHex) {
   const hex = bgHex.replace('#', '');
@@ -83,9 +166,18 @@ function extractLineCodesFromPdf(filename) {
 }
 
 function inferRouteText(_code, _pdfFilename) {
-  // The PDFs in this folder do not reliably contain endpoints in the filename.
-  // Use a keyword-rich fallback for local SEO.
-  return 'Périgueux ↔ Trélissac ↔ Boulazac';
+  const lineCode = normalizeLineCode(_code).toUpperCase();
+  const headsigns = headsignsByLine.get(lineCode);
+  if (headsigns && headsigns.size > 0) {
+    const ordered = [...headsigns.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => name);
+    if (ordered.length >= 2) {
+      return `${ordered[0]} ↔ ${ordered[1]}`;
+    }
+    return ordered[0];
+  }
+  return 'Consultez la fiche horaire PDF pour les terminus.';
 }
 
 function replaceOnce(haystack, needle, replacement) {
@@ -258,7 +350,7 @@ function generatePage({ template, lineCode, pdfFilename }) {
         <details class="faq-item">
           <summary>Pourquoi certains horaires ne s'affichent pas ici ?</summary>
           <div class="faq-answer">
-            Cette page est une <strong>fiche SEO statique</strong>. Pour les horaires temps réel et la sélection d'arrêt, utilisez l'application PériMap.
+            Cette page est une <strong>fiche statique</strong>. Pour les horaires temps réel et la sélection d'arrêt, utilisez l'application PériMap.
           </div>
         </details>
       </div>
@@ -267,6 +359,36 @@ function generatePage({ template, lineCode, pdfFilename }) {
     html = html.replace(/\n\s*<div class="faq-card">[\s\S]*?<\/div>\s*\n\s*<div class="actions">/m, `${faqHtml}\n\n        <div class="actions">`);
 
   return html;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function updateHorairesHubDescriptions(lineCodes) {
+  if (!exists(horairesHubPath)) return;
+  let html = fs.readFileSync(horairesHubPath, 'utf8');
+  let updated = false;
+
+  for (const lineCode of lineCodes) {
+    const routeText = inferRouteText(lineCode);
+    const safeRouteText = escapeHtml(routeText);
+    const escapedCode = lineCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(<h3>\\s*Horaires ligne ${escapedCode}\\s*<\\/h3>\\s*<p>)([\\s\\S]*?)(<\\/p>)`, 'i');
+    if (regex.test(html)) {
+      html = html.replace(regex, `$1${safeRouteText}$3`);
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    fs.writeFileSync(horairesHubPath, html, 'utf8');
+  }
 }
 
 function main() {
@@ -283,12 +405,14 @@ function main() {
   const pdfFiles = fs.readdirSync(pdfDir).filter((f) => f.toLowerCase().endsWith('.pdf'));
 
   const plannedByOutFile = new Map();
+  const detectedCodes = new Set();
 
   for (const pdfFilename of pdfFiles) {
     const codes = extractLineCodesFromPdf(pdfFilename);
     for (const code of codes) {
       const normalized = normalizeLineCode(code);
       const display = normalized.toUpperCase();
+      detectedCodes.add(display);
       const slug = slugFor(display);
       const outFile = path.join(publicDir, `horaires-ligne-${slug}.html`);
 
@@ -312,8 +436,10 @@ function main() {
     console.log(`- ${path.relative(workspaceRoot, p.outFile)}  (PDF: ${p.pdfFilename})`);
   }
 
+  updateHorairesHubDescriptions(detectedCodes);
+
   // Print a normalized list of all line codes detected for downstream sitemap/hub updates.
-  const allCodes = [...new Set(planned.map((p) => p.lineCode))].sort((a, b) => a.localeCompare(b, 'fr'));
+  const allCodes = [...detectedCodes].sort((a, b) => a.localeCompare(b, 'fr'));
   console.log(`\nDetected line codes (${allCodes.length}): ${allCodes.join(', ')}`);
 }
 

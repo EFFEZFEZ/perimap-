@@ -89,71 +89,19 @@
       font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    /* En-tête (aligné sur les pages statiques type about.html) */
-    .static-nav {
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 64px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      z-index: var(--z-fixed);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 var(--spacing-6);
-    }
-
-    body.dark-theme .static-nav {
-      background: rgba(15, 23, 42, 0.95);
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .nav-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-3);
-      text-decoration: none;
-      color: var(--text-primary);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .nav-logo img {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-md);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-3);
-    }
-
-    .btn-back-to-app {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-2);
-      padding: 10px 14px;
-      background: var(--pm-green);
-      color: #ffffff;
-      text-decoration: none;
+    .header-cta {
+      padding: 8px 14px;
+      font-size: 0.85rem;
       border-radius: 9999px;
       font-weight: 700;
-      font-size: 0.9rem;
-      box-shadow: var(--elevation-1);
-      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
       white-space: nowrap;
     }
 
-    .btn-back-to-app:hover {
-      background: var(--pm-green-hover);
-      box-shadow: var(--elevation-2);
-      transform: translateY(-1px);
+    @media (max-width: 640px) {
+      .header-cta {
+        padding: 7px 12px;
+        font-size: 0.8rem;
+      }
     }
 
     .horaires-page {
@@ -231,23 +179,51 @@
   </style>
 </head>
 <body>
-  <header class="static-nav" role="banner">
-    <a class="nav-logo" href="/" aria-label="Retour à l'accueil">
-      <img src="/icons/perimap-logo.webp" alt="PériMap" width="40" height="40">
-      <span>Horaires</span>
-    </a>
-    <div class="nav-actions">
-      <a class="btn-back-to-app" href="/#horaires">Ouvrir dans l’app</a>
-      <button class="btn-icon-round" data-theme-toggle="true" aria-label="Changer de thème" title="Changer de thème" type="button">
-        <span class="theme-toggle-icon" aria-hidden="true">🌓</span>
+  <header id="main-header">
+    <div class="header-content">
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
+
+      <a href="/" class="logo">
+        <img src="/icons/perimap-logo.webp" alt="Logo PériMap" class="header-logo-img">
+        <div class="header-title-group">
+          <span class="brand-name">PériMap</span>
+        </div>
+      </a>
+
+      <nav class="header-nav-main"></nav>
+
+      <nav class="header-nav-right">
+        <a class="btn btn-primary header-cta" href="/#horaires">Ouvrir dans l’app</a>
+        <button id="theme-toggle-btn" class="btn-icon-round" data-theme-toggle="true" aria-label="Basculer thème sombre" title="Thème sombre" aria-pressed="false">
+          <span class="theme-toggle-icon" id="theme-toggle-icon">🌙</span>
+        </button>
+      </nav>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu hidden">
+      <div class="mobile-menu-section">
+        <button class="mobile-menu-category" aria-expanded="false">
+          <span>Navigation</span>
+          <svg class="mobile-menu-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="mobile-menu-items">
+          <a href="/" class="mobile-menu-item">Accueil</a>
+          <a href="/horaires.html" class="mobile-menu-item">Horaires des lignes</a>
+          <a href="/about.html" class="mobile-menu-item">À propos</a>
+          <a href="/mentions-legales.html" class="mobile-menu-item">Mentions légales</a>
+        </div>
+      </div>
     </div>
   </header>
 
   <main class="horaires-page">
     <section class="horaires-hero">
       <h1>Horaires Péribus</h1>
-      <p>Choisissez votre ligne. Chaque bouton mène à une page dédiée (SEO) puis vous redirige vers l’application PériMap pour le temps réel.</p>
+      <p>Choisissez votre ligne. Chaque bouton mène à une page dédiée puis vous redirige vers l’application PériMap pour le temps réel.</p>
       <div class="horaires-actions">
         <a class="btn btn-primary" href="/#horaires" style="text-decoration:none;">Ouvrir dans PériMap</a>
         <a class="btn" href="/" style="text-decoration:none;">Accueil</a>
@@ -260,7 +236,7 @@
           <div class="service-card-icon line-a">A</div>
           <div class="service-card-content">
             <h3>Horaires ligne A</h3>
-            <p>ZAE Marsac ↔ Centre Hospitalier. Gare, Hôtel de Ville, Francheville</p>
+            <p>ZAE Marsac ↔ Centre Hospitalier</p>
           </div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
@@ -268,7 +244,7 @@
           <div class="service-card-icon line-b">B</div>
           <div class="service-card-content">
             <h3>Horaires ligne B</h3>
-            <p>Boulazac ↔ Chamiers. Libération, Tourny, Cours Saint-Georges</p>
+            <p>Gare SNCF ↔ Les Tournesols</p>
           </div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
@@ -276,7 +252,7 @@
           <div class="service-card-icon line-c">C</div>
           <div class="service-card-content">
             <h3>Horaires ligne C</h3>
-            <p>Trélissac ↔ Notre-Dame. Maréchal Leclerc, République</p>
+            <p>ZAE Marsac ↔ P+r Aquacap</p>
           </div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
@@ -284,70 +260,70 @@
           <div class="service-card-icon line-d">D</div>
           <div class="service-card-content">
             <h3>Horaires ligne D</h3>
-            <p>Cité ↔ Chancelade. Arènes, Périgueux Gare</p>
+            <p>Tourny ↔ P+r Charriéras</p>
           </div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
 
         <a class="service-card" href="/horaires-ligne-e1.html">
           <div class="service-card-icon line-e">E1</div>
-          <div class="service-card-content"><h3>Horaires ligne E1</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E1</h3><p>P+r Aquacap ↔ ZAE Marsac</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
         <a class="service-card" href="/horaires-ligne-e2.html">
           <div class="service-card-icon line-e">E2</div>
-          <div class="service-card-content"><h3>Horaires ligne E2</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E2</h3><p>Talleyrand Périgord ↔ Fromarsac</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
         <a class="service-card" href="/horaires-ligne-e4.html">
           <div class="service-card-icon line-e">E4</div>
-          <div class="service-card-content"><h3>Horaires ligne E4</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E4</h3><p>Tourny ↔ La Feuilleraie</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
         <a class="service-card" href="/horaires-ligne-e5.html">
           <div class="service-card-icon line-e">E5</div>
-          <div class="service-card-content"><h3>Horaires ligne E5</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E5</h3><p>Le Suchet ↔ PEM</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
         <a class="service-card" href="/horaires-ligne-e6.html">
           <div class="service-card-icon line-e">E6</div>
-          <div class="service-card-content"><h3>Horaires ligne E6</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E6</h3><p>Créavallée ↔ Trésorerie Municipale</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
         <a class="service-card" href="/horaires-ligne-e7.html">
           <div class="service-card-icon line-e">E7</div>
-          <div class="service-card-content"><h3>Horaires ligne E7</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div>
+          <div class="service-card-content"><h3>Horaires ligne E7</h3><p>Notre-Dame de Sanilhac Poste ↔ Les Lilas Hôpital</p></div>
           <div class="service-card-arrow" aria-hidden="true">→</div>
         </a>
 
-        <a class="service-card" href="/horaires-ligne-k1a.html"><div class="service-card-icon line-k">K1A</div><div class="service-card-content"><h3>Horaires ligne K1A</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k1b.html"><div class="service-card-icon line-k">K1B</div><div class="service-card-content"><h3>Horaires ligne K1B</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k2.html"><div class="service-card-icon line-k">K2</div><div class="service-card-content"><h3>Horaires ligne K2</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k3a.html"><div class="service-card-icon line-k">K3A</div><div class="service-card-content"><h3>Horaires ligne K3A</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k3b.html"><div class="service-card-icon line-k">K3B</div><div class="service-card-content"><h3>Horaires ligne K3B</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k4a.html"><div class="service-card-icon line-k">K4A</div><div class="service-card-content"><h3>Horaires ligne K4A</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k4b.html"><div class="service-card-icon line-k">K4B</div><div class="service-card-content"><h3>Horaires ligne K4B</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k5.html"><div class="service-card-icon line-k">K5</div><div class="service-card-content"><h3>Horaires ligne K5</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-k6.html"><div class="service-card-icon line-k">K6</div><div class="service-card-content"><h3>Horaires ligne K6</h3><p>Dessert Périgueux, Trélissac, Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k1a.html"><div class="service-card-icon line-k">K1A</div><div class="service-card-content"><h3>Horaires ligne K1A</h3><p>Tourny ↔ Maison Rouge</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k1b.html"><div class="service-card-icon line-k">K1B</div><div class="service-card-content"><h3>Horaires ligne K1B</h3><p>Tourny ↔ Pôle Universitaire Grenadière</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k2.html"><div class="service-card-icon line-k">K2</div><div class="service-card-content"><h3>Horaires ligne K2</h3><p>Tourny ↔ Champcevinel Bourg</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k3a.html"><div class="service-card-icon line-k">K3A</div><div class="service-card-content"><h3>Horaires ligne K3A</h3><p>Pl. du 8 mai ↔ La Feuilleraie</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k3b.html"><div class="service-card-icon line-k">K3B</div><div class="service-card-content"><h3>Horaires ligne K3B</h3><p>Pl. du 8 mai ↔ Pépinière</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k4a.html"><div class="service-card-icon line-k">K4A</div><div class="service-card-content"><h3>Horaires ligne K4A</h3><p>Tourny ↔ Dojo Départemental</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k4b.html"><div class="service-card-icon line-k">K4B</div><div class="service-card-content"><h3>Horaires ligne K4B</h3><p>Coulounieix Bourg ↔ Tourny</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k5.html"><div class="service-card-icon line-k">K5</div><div class="service-card-content"><h3>Horaires ligne K5</h3><p>La Feuilleraie ↔ Halte ferroviaire Boulazac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-k6.html"><div class="service-card-icon line-k">K6</div><div class="service-card-content"><h3>Horaires ligne K6</h3><p>Halte ferroviaire Marsac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
 
-        <a class="service-card" href="/horaires-ligne-n.html"><div class="service-card-icon line-n">N</div><div class="service-card-content"><h3>Horaires ligne N</h3><p>Dessert Périgueux centre (service nocturne)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-n1.html"><div class="service-card-icon line-n">N1</div><div class="service-card-content"><h3>Horaires ligne N1</h3><p>Dessert Périgueux centre (service nocturne)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-n.html"><div class="service-card-icon line-n">N</div><div class="service-card-content"><h3>Horaires ligne N</h3><p>Tourny ↔ PEM</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-n1.html"><div class="service-card-icon line-n">N1</div><div class="service-card-content"><h3>Horaires ligne N1</h3><p>Gare SNCF</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
 
-        <a class="service-card" href="/horaires-ligne-r1.html"><div class="service-card-icon line-r">R1</div><div class="service-card-content"><h3>Horaires ligne R1</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r2.html"><div class="service-card-icon line-r">R2</div><div class="service-card-content"><h3>Horaires ligne R2</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r3.html"><div class="service-card-icon line-r">R3</div><div class="service-card-content"><h3>Horaires ligne R3</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r4.html"><div class="service-card-icon line-r">R4</div><div class="service-card-content"><h3>Horaires ligne R4</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r5.html"><div class="service-card-icon line-r">R5</div><div class="service-card-content"><h3>Horaires ligne R5</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r6.html"><div class="service-card-icon line-r">R6</div><div class="service-card-content"><h3>Horaires ligne R6</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r7.html"><div class="service-card-icon line-r">R7</div><div class="service-card-content"><h3>Horaires ligne R7</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r8.html"><div class="service-card-icon line-r">R8</div><div class="service-card-content"><h3>Horaires ligne R8</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r9.html"><div class="service-card-icon line-r">R9</div><div class="service-card-content"><h3>Horaires ligne R9</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r10.html"><div class="service-card-icon line-r">R10</div><div class="service-card-content"><h3>Horaires ligne R10</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r11.html"><div class="service-card-icon line-r">R11</div><div class="service-card-content"><h3>Horaires ligne R11</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r12.html"><div class="service-card-icon line-r">R12</div><div class="service-card-content"><h3>Horaires ligne R12</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r13.html"><div class="service-card-icon line-r">R13</div><div class="service-card-content"><h3>Horaires ligne R13</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r14.html"><div class="service-card-icon line-r">R14</div><div class="service-card-content"><h3>Horaires ligne R14</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
-        <a class="service-card" href="/horaires-ligne-r15.html"><div class="service-card-icon line-r">R15</div><div class="service-card-content"><h3>Horaires ligne R15</h3><p>Dessert le Grand Périgueux (ligne périurbaine)</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r1.html"><div class="service-card-icon line-r">R1</div><div class="service-card-content"><h3>Horaires ligne R1</h3><p>ESAT OSEA ↔ La Feuilleraie</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r2.html"><div class="service-card-icon line-r">R2</div><div class="service-card-content"><h3>Horaires ligne R2</h3><p>Les Gourdoux ↔ Trélissac Les Garennes</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r3.html"><div class="service-card-icon line-r">R3</div><div class="service-card-content"><h3>Horaires ligne R3</h3><p>Les Pinots ↔ P+r Aquacap</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r4.html"><div class="service-card-icon line-r">R4</div><div class="service-card-content"><h3>Horaires ligne R4</h3><p>Les Mondines ↔ Halte ferroviaire Marsac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r5.html"><div class="service-card-icon line-r">R5</div><div class="service-card-content"><h3>Horaires ligne R5</h3><p>Clément Laval ↔ ZAE Marsac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r6.html"><div class="service-card-icon line-r">R6</div><div class="service-card-content"><h3>Horaires ligne R6</h3><p>Maison des Compagnons ↔ Gour de l&#39;Arche Poste</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r7.html"><div class="service-card-icon line-r">R7</div><div class="service-card-content"><h3>Horaires ligne R7</h3><p>Le Charpré ↔ Gour de l&#39;Arche Poste</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r8.html"><div class="service-card-icon line-r">R8</div><div class="service-card-content"><h3>Horaires ligne R8</h3><p>Boulazac Centre commercial ↔ Jaunour</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r9.html"><div class="service-card-icon line-r">R9</div><div class="service-card-content"><h3>Horaires ligne R9</h3><p>Stèle de Lesparat ↔ Pl. du 8 mai</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r10.html"><div class="service-card-icon line-r">R10</div><div class="service-card-content"><h3>Horaires ligne R10</h3><p>Notre-Dame de Sanilhac Poste ↔ Centre de la Communication</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r11.html"><div class="service-card-icon line-r">R11</div><div class="service-card-content"><h3>Horaires ligne R11</h3><p>Héliodore ↔ Pl. du 8 mai</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r12.html"><div class="service-card-icon line-r">R12</div><div class="service-card-content"><h3>Horaires ligne R12</h3><p>Boulazac Centre commercial ↔ Pl. Eugène Le Roy</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r13.html"><div class="service-card-icon line-r">R13</div><div class="service-card-content"><h3>Horaires ligne R13</h3><p>Les Meynichoux ↔ Halte Razac</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r14.html"><div class="service-card-icon line-r">R14</div><div class="service-card-content"><h3>Horaires ligne R14</h3><p>Halte Razac ↔ La Chapelle Gonaguet - Bourg</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
+        <a class="service-card" href="/horaires-ligne-r15.html"><div class="service-card-icon line-r">R15</div><div class="service-card-content"><h3>Horaires ligne R15</h3><p>Halte Niversac ↔ ZA Grand Font</p></div><div class="service-card-arrow" aria-hidden="true">→</div></a>
       </div>
 
       <noscript>
@@ -357,42 +333,73 @@
   </main>
 
   <script>
-    // Thème (standalone) - compatible avec la clé localStorage 'ui-theme' de l'app
-    (function initThemeStandalone() {
-      const body = document.body;
-      const saved = (function(){ try { return localStorage.getItem('ui-theme'); } catch (e) { return null; } })();
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const body = document.body;
 
-      let useDark;
-      if (saved === 'light') useDark = false;
-      else if (saved === 'dark') useDark = true;
-      else if (saved === 'auto') useDark = prefersDark;
-      else useDark = true; // défaut: sombre (cohérent avec l'app)
-
+    function applyThemeState(useDark) {
       body.classList.toggle('dark-theme', !!useDark);
-
-      Array.from(document.querySelectorAll('[data-theme-toggle]')).forEach(btn => {
-        btn.addEventListener('click', () => {
-          const currentSaved = (() => { try { return localStorage.getItem('ui-theme'); } catch(e) { return null; } })();
-          let nextMode;
-          if (currentSaved === 'light') nextMode = 'dark';
-          else if (currentSaved === 'dark') nextMode = 'auto';
-          else nextMode = 'light';
-
-          const nextIsDark = nextMode === 'auto'
-            ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
-            : (nextMode === 'dark');
-
-          body.classList.toggle('dark-theme', !!nextIsDark);
-          try { localStorage.setItem('ui-theme', nextMode); } catch (e) { /* ignore */ }
-        }, { passive: true });
+      const toggleButtons = Array.from(document.querySelectorAll('[data-theme-toggle]'));
+      toggleButtons.forEach(btn => {
+        btn.setAttribute('aria-pressed', useDark ? 'true' : 'false');
+        btn.title = useDark ? 'Thème clair' : 'Thème sombre';
       });
+      const icons = Array.from(document.querySelectorAll('.theme-toggle-icon'));
+      icons.forEach(icon => { icon.textContent = useDark ? '☀️' : '🌙'; });
+    }
+
+    (function initThemeStandalone() {
+      try {
+        const saved = localStorage.getItem('ui-theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const useDark = saved ? (saved === 'dark') : prefersDark;
+        applyThemeState(useDark);
+      } catch (e) {
+        // ignore
+      }
     })();
+
+    Array.from(document.querySelectorAll('[data-theme-toggle]')).forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nextIsDark = !body.classList.contains('dark-theme');
+        applyThemeState(nextIsDark);
+        try { localStorage.setItem('ui-theme', nextIsDark ? 'dark' : 'light'); } catch (e) { /* ignore */ }
+      }, { passive: true });
+    });
+
+    // Mobile menu
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenuToggle && mobileMenu) {
+      mobileMenuToggle.addEventListener('click', () => {
+        const isOpening = mobileMenu.classList.contains('hidden');
+        mobileMenuToggle.classList.toggle('is-active');
+        mobileMenu.classList.toggle('hidden');
+        body.classList.toggle('mobile-menu-open', isOpening);
+      });
+
+      mobileMenu.querySelectorAll('.mobile-menu-category').forEach(category => {
+        category.addEventListener('click', () => {
+          const isExpanded = category.getAttribute('aria-expanded') === 'true';
+          const itemsContainer = category.nextElementSibling;
+          category.setAttribute('aria-expanded', (!isExpanded).toString());
+          if (itemsContainer) itemsContainer.classList.toggle('is-expanded', !isExpanded);
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!mobileMenu.classList.contains('hidden')) {
+          if (!e.target.closest('#mobile-menu') && !e.target.closest('#mobile-menu-toggle')) {
+            mobileMenuToggle.classList.remove('is-active');
+            mobileMenu.classList.add('hidden');
+            body.classList.remove('mobile-menu-open');
+          }
+        }
+      });
+    }
 
     // Redirection seulement pour les vrais utilisateurs (pas les bots Google)
     const isBot = /bot|crawl|spider|googlebot|bingbot|yandex|baidu|duckduck/i.test(navigator.userAgent);
     if (!isBot) {
-      const redirectBtn = document.querySelector('.btn-primary');
+      const redirectBtn = document.querySelector('.header-cta');
       if (redirectBtn) {
         redirectBtn.addEventListener('click', (e) => {
           e.preventDefault();
