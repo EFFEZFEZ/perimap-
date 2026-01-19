@@ -410,7 +410,7 @@ body.dark-theme {
 
 /* Small visual adjustments in dark mode */
 body.dark-theme #main-header {
-    background: rgba(6,10,14,0.85);
+    background: var(--bg-page);
     border-bottom-color: rgba(255,255,255,0.06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1738,7 +1738,7 @@ body.view-map-locked #map {
  * NOUVELLE EN-TÊTE (Effet "Liquid Glass")
  * ========================================= */
 #main-header {
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--bg-page);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px); 
     border-bottom: 1px solid var(--border);
@@ -1753,7 +1753,7 @@ body.view-map-locked #map {
     .hero-section .planner-block,
     .instruction-content,
     #main-header {
-        background: rgba(255, 255, 255, 0.95);
+        background: var(--bg-page);
     }
 }
 
