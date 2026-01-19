@@ -111,6 +111,9 @@
         .nav-line-btn.line-b { background: #1e91ff; color: #000; }
         .nav-line-btn.line-c { background: #dd1b75; color: #fff; }
         .nav-line-btn.line-d { background: #41ae18; color: #fff; }
+        .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: transparent; border: 1px solid var(--border); border-radius: 20px; color: var(--text-primary); text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s ease; white-space: nowrap; }
+        .back-btn:hover { background: var(--bg-elevated); border-color: var(--pm-green); }
+        .back-btn svg { width: 14px; height: 14px; }
         
         main { padding: 16px; max-width: 600px; margin: 0 auto; }
         .line-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
@@ -162,6 +165,10 @@
 </head>
 <body>
     <header class="page-header">
+        <a href="/horaires.html" class="back-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <span>Retour</span>
+        </a>
         <a href="/" class="logo-link">
             <img src="/icons/perimap-logo.webp" alt="Périmap">
             <span>Périmap</span>
