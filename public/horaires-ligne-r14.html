@@ -112,13 +112,7 @@
         .nav-line-btn.line-b { background: #1e91ff; color: #000; }
         .nav-line-btn.line-c { background: #dd1b75; color: #fff; }
         .nav-line-btn.line-d { background: #41ae18; color: #fff; }
-        .back-to-menu { padding: 6px 10px; border-radius: 9999px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); text-decoration: none; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
-        .back-to-menu:hover { border-color: var(--pm-green); color: #ffffff; }
 
-        @media (max-width: 520px) {
-            .back-to-menu { padding: 6px 8px; font-size: 0.75rem; }
-        }
-        
         main { padding: 16px; max-width: 600px; margin: 0 auto; }
         .line-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
         .line-badge { width: 52px; height: 52px; border-radius: 12px; background: var(--line-color); color: var(--line-text); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; flex-shrink: 0; }
@@ -168,6 +162,14 @@
     </style>
 </head>
 <body>
+    <div class="horaires-top-bar">
+      <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/horaires.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Retour</span>
+      </button>
+      <h2>Ligne A</h2>
+    </div>
+
     <header class="page-header">
         <a href="/" class="logo-link">
             <img src="/icons/perimap-logo.webp" alt="Périmap">
@@ -180,7 +182,6 @@
                 <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
                 <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
             </nav>
-            <a class="back-to-menu" href="/horaires.html">Retour menu</a>
         </div>
     </header>
 
