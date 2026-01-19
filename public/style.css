@@ -250,6 +250,9 @@ body.dark-theme .map-btn-locate.has-error {
     --bg-main: #ffffff;
     --bg-secondary: #f1f5f9;
     --bg-tertiary: #e2e8f0;
+    --bg-page: #ffffff;
+    --bg-card: #f1f5f9;
+    --bg-elevated: #e2e8f0;
     --text-primary: #0f172a;
     --text-secondary: #475569;           /* Amélioré de #64748b pour contraste */
     --text-muted: #64748b;
@@ -394,6 +397,9 @@ button.tab {
 
 /* Dark theme - Aligné sur charte Périmap */
 body.dark-theme {
+    --bg-page: #0b1220;
+    --bg-card: #0f1724;
+    --bg-elevated: #151d2b;
     --bg-main: #0b1220;
     --bg-secondary: #0f1724;
     --bg-tertiary: #1a2332;
