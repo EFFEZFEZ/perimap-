@@ -83,10 +83,30 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      background: var(--bg-main);
+    :root {
+      --bg-page: #0b1220;
+      --bg-main: #0b1220;
+      --bg-card: #0f1724;
+      --text-primary: #e6eef8;
+      --text-secondary: #9fb3c9;
+      --border: rgba(255,255,255,0.08);
+      --pm-green: #22c55e;
+      --pm-cyan: #00c8ff;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-page);
       color: var(--text-primary);
       font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overscroll-behavior-y: none;
+      overflow-anchor: none;
+    }
+
+    body {
+      min-height: 100vh;
+      -webkit-overflow-scrolling: touch;
     }
 
     .horaires-top-bar {

@@ -96,8 +96,8 @@
             --radius-sm: 8px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
-        body { font-family: var(--font); background: var(--bg-page); color: var(--text-primary); min-height: 100vh; line-height: 1.5; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; overscroll-behavior-y: none; overflow-anchor: none; background: var(--bg-page); }
+        body { font-family: var(--font); background: var(--bg-page); color: var(--text-primary); min-height: 100vh; line-height: 1.5; overscroll-behavior-y: none; -webkit-overflow-scrolling: touch; }
         
         /* Header principal - identique à horaires.html */
         #main-header {
