@@ -131,6 +131,13 @@
       max-width: 760px;
       margin: 0 auto 14px;
       text-align: center;
+      display: none; /* Masqué sur mobile - la top-bar affiche déjà "Horaires" */
+    }
+
+    @media (min-width: 768px) {
+      .horaires-hero {
+        display: block;
+      }
     }
 
     .horaires-hero h1 {
