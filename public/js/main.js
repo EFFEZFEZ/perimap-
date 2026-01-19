@@ -314,6 +314,45 @@ function wireThemeToggles() {
     });
 }
 
+async function hydrateHallExpressChips() {
+    const container = document.querySelector('.hall-express-chips');
+    if (!container) return;
+
+    const fallbackLines = ['E1', 'E2', 'K5', 'K6', 'N', 'N1', 'R1', 'R12'];
+
+    const normalizeLine = (value) => String(value || '').trim().toUpperCase();
+    const lineToSlug = (line) => normalizeLine(line).toLowerCase();
+
+    let lines = fallbackLines;
+    try {
+        const res = await fetch('/data/express-lines.json', { cache: 'no-store' });
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                const parsed = data
+                    .map(normalizeLine)
+                    .filter(Boolean);
+                if (parsed.length) lines = parsed;
+            }
+        }
+    } catch (e) {
+        // ignore: keep fallback
+    }
+
+    const frag = document.createDocumentFragment();
+    lines.forEach((line) => {
+        const a = document.createElement('a');
+        a.className = 'express-chip';
+        a.href = `/horaires-ligne-${lineToSlug(line)}.html`;
+        a.textContent = line;
+        a.setAttribute('aria-label', `Horaires ligne ${line}`);
+        frag.appendChild(a);
+    });
+
+    container.innerHTML = '';
+    container.appendChild(frag);
+}
+
 // Service Worker est enregistré dans app.js
 
 // PDF_FILENAME_MAP et ROUTE_LONG_NAME_MAP sont maintenant importées depuis config/routes.js
@@ -837,6 +876,9 @@ async function initializeApp() {
         // Wire theme toggles now that fragments sont chargés, puis applique le thème initial
         wireThemeToggles();
         initTheme();
+
+        // Hydrate the "Horaires express" list from config (popular lines)
+        try { await hydrateHallExpressChips(); } catch (e) { /* ignore */ }
         
         // Initialiser le delayManager
         delayManager.init(dataManager, realtimeManager);

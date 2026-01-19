@@ -2557,7 +2557,9 @@ body.dark-theme .quick-action-card span {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 1;
+    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    pointer-events: auto;
+    width: 100%;
 }
 
 body.dark-theme .hall-line-shortcuts {
@@ -2607,7 +2609,9 @@ body.dark-theme .hall-line-shortcuts {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 1;
+    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    pointer-events: auto;
+    width: 100%;
 }
 
 body.dark-theme .hall-express {
@@ -2681,10 +2685,11 @@ body.dark-theme .express-chip {
     transform: translateY(-1px);
 }
 
-/* Desktop: on garde discret (utile surtout mobile) */
+/* Desktop: harmoniser la largeur des 2 bandeaux */
 @media (min-width: 1024px) {
+    .hall-line-shortcuts,
     .hall-express {
-        max-width: 520px;
+        max-width: 640px;
         margin-left: auto;
         margin-right: auto;
     }
