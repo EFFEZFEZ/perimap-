@@ -99,11 +99,151 @@
         html { font-size: 16px; -webkit-font-smoothing: antialiased; }
         body { font-family: var(--font); background: var(--bg-page); color: var(--text-primary); min-height: 100vh; line-height: 1.5; }
         
-        .page-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-page); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
-        .logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); }
-        .logo-link img { width: 32px; height: 32px; }
-        .logo-link span { font-weight: 700; font-size: 1.1rem; background: var(--pm-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .header-right { display: flex; align-items: center; gap: 10px; }
+        /* Header principal - identique à horaires.html */
+        #main-header {
+            background: var(--bg-page);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1050;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 52px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .mobile-menu-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 44px;
+            height: 44px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .mobile-menu-toggle span {
+            display: block;
+            height: 2px;
+            width: 20px;
+            background: var(--text-primary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .header-logo-img {
+            width: 32px;
+            height: 32px;
+        }
+        .brand-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: var(--pm-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-nav-lines { display: flex; gap: 6px; }
+        .btn-icon-round {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .mobile-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-page);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+        }
+        .mobile-menu.hidden { display: none; }
+        .mobile-menu-section { margin-bottom: 8px; }
+        .mobile-menu-category {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .mobile-menu-items { padding-left: 12px; display: none; }
+        .mobile-menu-category[aria-expanded="true"] + .mobile-menu-items { display: block; }
+        .mobile-menu-item {
+            display: block;
+            padding: 10px 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .mobile-menu-item:hover { color: var(--pm-green); }
+
+        /* Barre secondaire avec retour */
+        .horaires-top-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-page);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 52px;
+            z-index: 999;
+        }
+        .topbar-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .topbar-pill:hover {
+            background: var(--bg-elevated);
+            border-color: var(--pm-green);
+        }
+        .topbar-pill svg {
+            width: 16px;
+            height: 16px;
+        }
+        .horaires-top-bar h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Navigation lignes */
         .nav-lines { display: flex; gap: 6px; }
         .nav-line-btn { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; text-decoration: none; transition: transform 0.15s ease; }
         .nav-line-btn:hover { transform: scale(1.08); }
@@ -112,9 +252,6 @@
         .nav-line-btn.line-b { background: #1e91ff; color: #000; }
         .nav-line-btn.line-c { background: #dd1b75; color: #fff; }
         .nav-line-btn.line-d { background: #41ae18; color: #fff; }
-        .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: transparent; border: 1px solid var(--border); border-radius: 20px; color: var(--text-primary); text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s ease; white-space: nowrap; }
-        .back-btn:hover { background: var(--bg-elevated); border-color: var(--pm-green); }
-        .back-btn svg { width: 14px; height: 14px; }
 
         main { padding: 16px; max-width: 600px; margin: 0 auto; }
         .line-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
@@ -165,22 +302,55 @@
     </style>
 </head>
 <body>
-    <header class="page-header">
-        <a href="/horaires.html" class="back-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-            <span>Retour</span>
-        </a>
-        <a href="/" class="logo-link">
-            <img src="/icons/perimap-logo.webp" alt="Périmap">
-            <span>Périmap</span>
-        </a>
-        <nav class="nav-lines">
-            <a href="/horaires-ligne-a.html" class="nav-line-btn line-a" title="Ligne A">A</a>
-            <a href="/horaires-ligne-b.html" class="nav-line-btn line-b" title="Ligne B">B</a>
-            <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
-            <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
-        </nav>
+    <header id="main-header">
+        <div class="header-content">
+            <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <a href="/" class="logo">
+                <img src="/icons/perimap-logo.webp" alt="Logo PériMap" class="header-logo-img">
+                <span class="brand-name">PériMap</span>
+            </a>
+
+            <nav class="header-nav-lines">
+                <a href="/horaires-ligne-a.html" class="nav-line-btn line-a" title="Ligne A">A</a>
+                <a href="/horaires-ligne-b.html" class="nav-line-btn line-b" title="Ligne B">B</a>
+                <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
+                <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
+            </nav>
+
+            <nav class="header-nav-right">
+                <button id="theme-toggle-btn" class="btn-icon-round" aria-label="Basculer thème">
+                    <span id="theme-toggle-icon">🌙</span>
+                </button>
+            </nav>
+        </div>
+
+        <div id="mobile-menu" class="mobile-menu hidden">
+            <div class="mobile-menu-section">
+                <button class="mobile-menu-category" aria-expanded="false">
+                    <span>Navigation</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="mobile-menu-items">
+                    <a href="/" class="mobile-menu-item">Accueil</a>
+                    <a href="/horaires.html" class="mobile-menu-item">Horaires des lignes</a>
+                    <a href="/about.html" class="mobile-menu-item">À propos</a>
+                </div>
+            </div>
+        </div>
     </header>
+
+    <div class="horaires-top-bar">
+        <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/horaires.html'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <span>Retour</span>
+        </button>
+        <h2>Horaires</h2>
+    </div>
 
     <main>
         <div class="line-header">
@@ -511,6 +681,40 @@
         });
 
         document.addEventListener('DOMContentLoaded', initMap);
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Menu category expand
+        document.querySelectorAll('.mobile-menu-category').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', !expanded);
+            });
+        });
+
+        // Theme toggle
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = document.getElementById('theme-toggle-icon');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                const isDark = document.body.classList.contains('dark-theme');
+                themeIcon.textContent = isDark ? '☀️' : '🌙';
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+            // Restore theme
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.remove('dark-theme');
+                themeIcon.textContent = '🌙';
+            }
+        }
     </script>
 </body>
 </html>
