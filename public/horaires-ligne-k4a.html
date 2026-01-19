@@ -108,8 +108,8 @@
           background: var(--bg-main);
           border-bottom: 1px solid var(--border);
           position: sticky;
-          top: 0;
-          z-index: 100;
+          top: 52px;
+          z-index: 99;
         }
 
         .horaires-top-bar .app-back-btn {
@@ -138,8 +138,8 @@
           background: var(--bg-main);
           border-bottom: 1px solid var(--border);
           position: sticky;
-          top: 36px;
-          z-index: 99;
+          top: 0;
+          z-index: 100;
         }
 
         .header-content {
@@ -381,14 +381,6 @@
     </style>
 </head>
 <body>
-    <div class="horaires-top-bar">
-      <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/horaires.html'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        <span>Retour</span>
-      </button>
-      <h2>Horaires</h2>
-    </div>
-
     <header id="main-header">
       <div class="header-content">
         <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu">
@@ -433,6 +425,14 @@
         </div>
       </div>
     </header>
+
+    <div class="horaires-top-bar">
+      <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/horaires.html'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span>Retour</span>
+      </button>
+      <h2>Horaires</h2>
+    </div>
 
     <main>
         <div class="line-header">
