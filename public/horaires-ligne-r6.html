@@ -103,6 +103,7 @@
         .logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); }
         .logo-link img { width: 32px; height: 32px; }
         .logo-link span { font-weight: 700; font-size: 1.1rem; background: var(--pm-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header-actions { display: flex; align-items: center; gap: 10px; }
         .nav-lines { display: flex; gap: 6px; }
         .nav-line-btn { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; text-decoration: none; transition: transform 0.15s ease; }
         .nav-line-btn:hover { transform: scale(1.08); }
@@ -111,6 +112,12 @@
         .nav-line-btn.line-b { background: #1e91ff; color: #000; }
         .nav-line-btn.line-c { background: #dd1b75; color: #fff; }
         .nav-line-btn.line-d { background: #41ae18; color: #fff; }
+        .back-to-menu { padding: 6px 10px; border-radius: 9999px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text-primary); text-decoration: none; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+        .back-to-menu:hover { border-color: var(--pm-green); color: #ffffff; }
+
+        @media (max-width: 520px) {
+            .back-to-menu { padding: 6px 8px; font-size: 0.75rem; }
+        }
         
         main { padding: 16px; max-width: 600px; margin: 0 auto; }
         .line-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
@@ -166,12 +173,15 @@
             <img src="/icons/perimap-logo.webp" alt="Périmap">
             <span>Périmap</span>
         </a>
-        <nav class="nav-lines">
-            <a href="/horaires-ligne-a.html" class="nav-line-btn line-a" title="Ligne A">A</a>
-            <a href="/horaires-ligne-b.html" class="nav-line-btn line-b" title="Ligne B">B</a>
-            <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
-            <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
-        </nav>
+        <div class="header-actions">
+            <nav class="nav-lines">
+                <a href="/horaires-ligne-a.html" class="nav-line-btn line-a" title="Ligne A">A</a>
+                <a href="/horaires-ligne-b.html" class="nav-line-btn line-b" title="Ligne B">B</a>
+                <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
+                <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
+            </nav>
+            <a class="back-to-menu" href="/horaires.html">Retour menu</a>
+        </div>
     </header>
 
     <main>
