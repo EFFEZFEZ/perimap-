@@ -7,12 +7,14 @@
     <!-- SEO Principal - Ligne B -->
     <title>Ligne B Péribus — Gare SNCF ↔ Boulazac Les Tournesols | Périmap</title>
     <meta name="description" content="Horaires ligne B Péribus : Gare SNCF ↔ Boulazac Les Tournesols. Consultez les prochains passages en temps réel et tous les arrêts de la ligne B.">
-    <meta name="keywords" content="ligne B péribus, horaires ligne B, bus ligne B périgueux, arrêts ligne B péribus, péribus B, boulazac, horaires péribus 2025">
+    <meta name="keywords" content="ligne B péribus, horaires ligne B péribus, bus ligne B Périgueux, péribus ligne B, horaires bus B Périgueux, prochain bus ligne B, arrêts ligne B, Gare SNCF Boulazac Les Tournesols bus, péribus Périgueux, Boulazac Isle Manoire, transport Grand Périgueux, horaires péribus 2025, bus Périgueux temps réel">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="https://www.xn--primap-bva.fr/horaires-ligne-b.html">
 
     <meta name="geo.region" content="FR-NAQ">
     <meta name="geo.placename" content="Périgueux, Dordogne, France">
+    <meta name="geo.position" content="45.1846;0.7214">
+    <meta name="ICBM" content="45.1846, 0.7214">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Périmap">
@@ -41,26 +43,60 @@
                 "@type": "WebPage",
                 "@id": "https://www.xn--primap-bva.fr/horaires-ligne-b.html",
                 "url": "https://www.xn--primap-bva.fr/horaires-ligne-b.html",
-                "name": "Ligne B Péribus — Gare SNCF ↔ Boulazac Les Tournesols",
-                "description": "Horaires ligne B Péribus : Gare SNCF ↔ Boulazac Les Tournesols.",
+                "name": "Ligne B Péribus — Horaires Bus Périgueux",
+                "description": "Horaires ligne B Péribus : Gare SNCF ↔ Boulazac Les Tournesols. Prochains passages en temps réel.",
                 "inLanguage": "fr-FR",
+                "isPartOf": { "@id": "https://www.xn--primap-bva.fr/#website" },
+                "about": { "@id": "https://www.xn--primap-bva.fr/horaires-ligne-b.html#busroute" },
                 "breadcrumb": {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.xn--primap-bva.fr/" },
-                        { "@type": "ListItem", "position": 2, "name": "Horaires", "item": "https://www.xn--primap-bva.fr/horaires.html" },
+                        { "@type": "ListItem", "position": 2, "name": "Horaires Péribus", "item": "https://www.xn--primap-bva.fr/horaires.html" },
                         { "@type": "ListItem", "position": 3, "name": "Ligne B" }
                     ]
                 }
             },
             {
-                "@type": "BusTrip",
-                "name": "Péribus Ligne B",
-                "description": "Ligne B : Gare SNCF ↔ Boulazac Les Tournesols via Cité Bel-Air",
-                "provider": { "@type": "Organization", "name": "Péribus" },
-                "busName": "Ligne B",
-                "departureStation": { "@type": "BusStation", "name": "Gare SNCF" },
-                "arrivalStation": { "@type": "BusStation", "name": "Boulazac Les Tournesols" }
+                "@type": "BusRoute",
+                "@id": "https://www.xn--primap-bva.fr/horaires-ligne-b.html#busroute",
+                "name": "Ligne B Péribus",
+                "description": "Ligne B du réseau Péribus : Gare SNCF ↔ Boulazac Les Tournesols via Cité Bel-Air",
+                "url": "https://www.xn--primap-bva.fr/horaires-ligne-b.html",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Péribus",
+                    "url": "https://www.grandperigueux.fr/Annuaire-des-transports/Peribus"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Périgueux",
+                    "containedInPlace": {
+                        "@type": "AdministrativeArea",
+                        "name": "Dordogne, Nouvelle-Aquitaine, France"
+                    }
+                }
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Quels sont les horaires de la ligne B Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne B Péribus circule de Gare SNCF à Boulazac Les Tournesols via Cité Bel-Air. Consultez les horaires en temps réel sur PériMap."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quels arrêts dessert la ligne B Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne B dessert notamment : Gare SNCF Périgueux, Cité Bel-Air, Boulazac Isle Manoire et Les Tournesols."
+                        }
+                    }
+                ]
             }
         ]
     }
@@ -68,9 +104,9 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 
-    <meta name="theme-color" content="#22c55e">
+    <meta name="theme-color" content="#1e91ff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Périmap">
+    <meta name="apple-mobile-web-app-title" content="Ligne B Péribus">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">

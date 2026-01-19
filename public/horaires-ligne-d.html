@@ -7,12 +7,14 @@
     <!-- SEO Principal - Ligne D -->
     <title>Ligne D Péribus — Tourny ↔ Trélissac Les Garennes | Périmap</title>
     <meta name="description" content="Horaires ligne D Péribus : Tourny ↔ Trélissac Les Garennes. Consultez les prochains passages en temps réel et tous les arrêts de la ligne D.">
-    <meta name="keywords" content="ligne D péribus, horaires ligne D, bus ligne D périgueux, arrêts ligne D péribus, péribus D, trélissac, tourny, horaires péribus 2025">
+    <meta name="keywords" content="ligne D péribus, horaires ligne D péribus, bus ligne D Périgueux, péribus ligne D, horaires bus D Périgueux, prochain bus ligne D, arrêts ligne D, Tourny Trélissac Les Garennes bus, péribus Périgueux, Trélissac, transport Grand Périgueux, horaires péribus 2025, bus Périgueux temps réel">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="https://www.xn--primap-bva.fr/horaires-ligne-d.html">
 
     <meta name="geo.region" content="FR-NAQ">
     <meta name="geo.placename" content="Périgueux, Dordogne, France">
+    <meta name="geo.position" content="45.1846;0.7214">
+    <meta name="ICBM" content="45.1846, 0.7214">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Périmap">
@@ -42,35 +44,69 @@
                 "@type": "WebPage",
                 "@id": "https://www.xn--primap-bva.fr/horaires-ligne-d.html",
                 "url": "https://www.xn--primap-bva.fr/horaires-ligne-d.html",
-                "name": "Ligne D Péribus — Tourny ↔ Trélissac Les Garennes",
-                "description": "Horaires ligne D Péribus : Tourny ↔ Trélissac Les Garennes.",
+                "name": "Ligne D Péribus — Horaires Bus Périgueux",
+                "description": "Horaires ligne D Péribus : Tourny ↔ Trélissac Les Garennes. Prochains passages en temps réel.",
                 "inLanguage": "fr-FR",
+                "isPartOf": { "@id": "https://www.xn--primap-bva.fr/#website" },
+                "about": { "@id": "https://www.xn--primap-bva.fr/horaires-ligne-d.html#busroute" },
                 "breadcrumb": {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.xn--primap-bva.fr/" },
-                        { "@type": "ListItem", "position": 2, "name": "Horaires", "item": "https://www.xn--primap-bva.fr/horaires.html" },
+                        { "@type": "ListItem", "position": 2, "name": "Horaires Péribus", "item": "https://www.xn--primap-bva.fr/horaires.html" },
                         { "@type": "ListItem", "position": 3, "name": "Ligne D" }
                     ]
                 }
             },
             {
-                "@type": "BusTrip",
-                "name": "Péribus Ligne D",
-                "description": "Ligne D : Tourny ↔ Trélissac Les Garennes via Cité Bel-Air",
-                "provider": { "@type": "Organization", "name": "Péribus" },
-                "busName": "Ligne D",
-                "departureStation": { "@type": "BusStation", "name": "Tourny" },
-                "arrivalStation": { "@type": "BusStation", "name": "Trélissac Les Garennes" }
+                "@type": "BusRoute",
+                "@id": "https://www.xn--primap-bva.fr/horaires-ligne-d.html#busroute",
+                "name": "Ligne D Péribus",
+                "description": "Ligne D du réseau Péribus : Tourny ↔ Trélissac Les Garennes via Cité Bel-Air",
+                "url": "https://www.xn--primap-bva.fr/horaires-ligne-d.html",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Péribus",
+                    "url": "https://www.grandperigueux.fr/Annuaire-des-transports/Peribus"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Périgueux",
+                    "containedInPlace": {
+                        "@type": "AdministrativeArea",
+                        "name": "Dordogne, Nouvelle-Aquitaine, France"
+                    }
+                }
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Quels sont les horaires de la ligne D Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne D Péribus circule de Tourny à Trélissac Les Garennes via Cité Bel-Air. Consultez les horaires en temps réel sur PériMap."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quels arrêts dessert la ligne D Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne D dessert notamment : Tourny, Cité Bel-Air, Trélissac et Les Garennes."
+                        }
+                    }
+                ]
             }
         ]
     }
     </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
-    <meta name="theme-color" content="#22c55e">
+    <meta name="theme-color" content="#41ae18">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Périmap">
+    <meta name="apple-mobile-web-app-title" content="Ligne D Péribus">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -7,12 +7,14 @@
     <!-- SEO Principal - Ligne C -->
     <title>Ligne C Péribus — ZAE Marsac ↔ P+R Aquacap | Périmap</title>
     <meta name="description" content="Horaires ligne C Péribus : ZAE Marsac ↔ P+R Aquacap via Chamiers. Consultez les prochains passages en temps réel et tous les arrêts de la ligne C.">
-    <meta name="keywords" content="ligne C péribus, horaires ligne C, bus ligne C périgueux, arrêts ligne C péribus, péribus C, chamiers, trélissac, horaires péribus 2025">
+    <meta name="keywords" content="ligne C péribus, horaires ligne C péribus, bus ligne C Périgueux, péribus ligne C, horaires bus C Périgueux, prochain bus ligne C, arrêts ligne C, ZAE Marsac P+R Aquacap bus, péribus Marsac-sur-l'Isle, Périgueux, Coulounieix-Chamiers, transport Grand Périgueux, horaires péribus 2025, bus Périgueux temps réel">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="https://www.xn--primap-bva.fr/horaires-ligne-c.html">
 
     <meta name="geo.region" content="FR-NAQ">
     <meta name="geo.placename" content="Périgueux, Dordogne, France">
+    <meta name="geo.position" content="45.1846;0.7214">
+    <meta name="ICBM" content="45.1846, 0.7214">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Périmap">
@@ -41,26 +43,60 @@
                 "@type": "WebPage",
                 "@id": "https://www.xn--primap-bva.fr/horaires-ligne-c.html",
                 "url": "https://www.xn--primap-bva.fr/horaires-ligne-c.html",
-                "name": "Ligne C Péribus — ZAE Marsac ↔ P+R Aquacap",
-                "description": "Horaires ligne C Péribus : ZAE Marsac ↔ P+R Aquacap via Chamiers.",
+                "name": "Ligne C Péribus — Horaires Bus Périgueux",
+                "description": "Horaires ligne C Péribus : ZAE Marsac ↔ P+R Aquacap via Chamiers. Prochains passages en temps réel.",
                 "inLanguage": "fr-FR",
+                "isPartOf": { "@id": "https://www.xn--primap-bva.fr/#website" },
+                "about": { "@id": "https://www.xn--primap-bva.fr/horaires-ligne-c.html#busroute" },
                 "breadcrumb": {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.xn--primap-bva.fr/" },
-                        { "@type": "ListItem", "position": 2, "name": "Horaires", "item": "https://www.xn--primap-bva.fr/horaires.html" },
+                        { "@type": "ListItem", "position": 2, "name": "Horaires Péribus", "item": "https://www.xn--primap-bva.fr/horaires.html" },
                         { "@type": "ListItem", "position": 3, "name": "Ligne C" }
                     ]
                 }
             },
             {
-                "@type": "BusTrip",
-                "name": "Péribus Ligne C",
-                "description": "Ligne C : ZAE Marsac ↔ P+R Aquacap via Chamiers et Trélissac",
-                "provider": { "@type": "Organization", "name": "Péribus" },
-                "busName": "Ligne C",
-                "departureStation": { "@type": "BusStation", "name": "ZAE Marsac" },
-                "arrivalStation": { "@type": "BusStation", "name": "P+R Aquacap" }
+                "@type": "BusRoute",
+                "@id": "https://www.xn--primap-bva.fr/horaires-ligne-c.html#busroute",
+                "name": "Ligne C Péribus",
+                "description": "Ligne C du réseau Péribus : ZAE Marsac ↔ P+R Aquacap via Chamiers et Trélissac",
+                "url": "https://www.xn--primap-bva.fr/horaires-ligne-c.html",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Péribus",
+                    "url": "https://www.grandperigueux.fr/Annuaire-des-transports/Peribus"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Périgueux",
+                    "containedInPlace": {
+                        "@type": "AdministrativeArea",
+                        "name": "Dordogne, Nouvelle-Aquitaine, France"
+                    }
+                }
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Quels sont les horaires de la ligne C Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne C Péribus circule de ZAE Marsac à P+R Aquacap via Chamiers et Trélissac. Consultez les horaires en temps réel sur PériMap."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quels arrêts dessert la ligne C Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "La ligne C dessert notamment : ZAE Marsac, Coulounieix-Chamiers, Trélissac et P+R Aquacap."
+                        }
+                    }
+                ]
             }
         ]
     }
@@ -68,9 +104,9 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 
-    <meta name="theme-color" content="#22c55e">
+    <meta name="theme-color" content="#dd1b75">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Périmap">
+    <meta name="apple-mobile-web-app-title" content="Ligne C Péribus">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
