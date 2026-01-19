@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #e74c3c;
+            --line-color: #107f73;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #ffffff;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-r6">R6</div>
+            <div class="line-badge">R6</div>
             <div class="line-info">
                 <h1>Ligne R6</h1>
                 <div class="line-direction">Maison des Compagnons ↔ Gour de l'Arche Poste</div>
@@ -195,7 +195,21 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Maison des Compagnons">Maison des Compagnons</option>
+                <option value="Al. des Sports">Al. des Sports</option>
+                <option value="Chercuzac">Chercuzac</option>
+                <option value="Chancelade Lespinasse">Chancelade Lespinasse</option>
+                <option value="Lespinasse Haute">Lespinasse Haute</option>
+                <option value="Chem. de Lespinasse">Chem. de Lespinasse</option>
+                <option value="Lespinasse Basse">Lespinasse Basse</option>
+                <option value="Les Garennes">Les Garennes</option>
+                <option value="Majourdin">Majourdin</option>
+                <option value="Terrassonnie Village">Terrassonnie Village</option>
+                <option value="Chem. de Terrassonnie">Chem. de Terrassonnie</option>
+                <option value="Curille">Curille</option>
+                <option value="Al. des Bois">Al. des Bois</option>
+                <option value="Gour de l&#39;Arche Poste">Gour de l&#39;Arche Poste</option>
             </select>
         </div>
 
@@ -242,23 +256,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne R6 ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Maison des Compagnons</strong> et <strong>Gour de l'Arche Poste</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne R6 ?</summary>
+          <div class="faq-answer">
+            Maison des Compagnons, Les Garennes, Gour de l'Arche Poste
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne R6 ?</summary>
+          <div class="faq-answer">
+            Environ <strong>14</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne R6 ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne R6 circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +306,85 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données R6)
+        const ROUTE_SHAPE = [[45.190594,0.646895],[45.19088,0.64721],[45.19112,0.64747],[45.19141,0.64781],[45.19162,0.648],[45.1918,0.64811],[45.19261,0.64862],[45.193,0.64889],[45.19306,0.64891],[45.19313,0.64887],[45.19319,0.64883],[45.19312,0.64871],[45.19297,0.6484],[45.19272,0.64769],[45.192703,0.647526],[45.192703,0.647526],[45.19253,0.64708],[45.1923,0.64621],[45.19221,0.6458],[45.19219,0.64565],[45.1922,0.64563],[45.19223,0.64559],[45.19225,0.64553],[45.19223,0.64542],[45.1922,0.64538],[45.19218,0.64536],[45.1922,0.64528],[45.19224,0.64488],[45.19224,0.64468],[45.19218,0.64408],[45.19217,0.64375],[45.1922,0.64347],[45.19228,0.64297],[45.19235,0.642643],[45.19235,0.642643],[45.19246,0.64192],[45.19252,0.6417],[45.19274,0.6414],[45.19306,0.64096],[45.19338,0.64047],[45.19384,0.63972],[45.19404,0.63931],[45.19411,0.63919],[45.19419,0.63913],[45.19427,0.63912],[45.19444,0.63918],[45.1949,0.6394],[45.1952,0.63951],[45.19541,0.63954],[45.19554,0.63958],[45.19582,0.638155],[45.19587,0.63767],[45.19592,0.63748],[45.19602,0.63748],[45.1962,0.63743],[45.19626,0.63742],[45.19632,0.63744],[45.19649,0.63756],[45.19682,0.63772],[45.19692,0.6378],[45.19702,0.63794],[45.19716,0.63815],[45.19737,0.63846],[45.1974,0.63858],[45.19741,0.63878],[45.19736,0.63895],[45.19734,0.63916],[45.19735,0.63936],[45.19739,0.63953],[45.1974,0.64],[45.197403,0.640034],[45.19744,0.64018],[45.19744,0.64052],[45.19744,0.64082],[45.19739,0.64115],[45.19733,0.64147],[45.19719,0.64198],[45.19695,0.64267],[45.19676,0.64323],[45.19672,0.64352],[45.196697,0.643859],[45.19664,0.64468],[45.19661,0.64491],[45.19654,0.64512],[45.19627,0.64565],[45.19613,0.64607],[45.19602,0.64649],[45.195915,0.646796],[45.195915,0.646796],[45.19589,0.64701],[45.19583,0.64716],[45.19576,0.64726],[45.19569,0.64731],[45.19574,0.64766],[45.19585,0.64847],[45.19598,0.6494],[45.19612,0.650267],[45.19612,0.650267],[45.19626,0.65136],[45.19644,0.65224],[45.19652,0.65261],[45.1965,0.65266],[45.19651,0.65282],[45.19657,0.65292],[45.19666,0.65295],[45.19672,0.65294],[45.19677,0.6529],[45.19682,0.65278],[45.19682,0.65264],[45.1969,0.65234],[45.19728,0.6515],[45.19753,0.65102],[45.1978,0.65066],[45.19803,0.65043],[45.19835,0.65017],[45.19835,0.65017],[45.19876,0.64978],[45.19907,0.64952],[45.19942,0.64916],[45.1998,0.64873],[45.20017,0.64825],[45.20039,0.64791],[45.2007,0.64735],[45.20106,0.64682],[45.20151,0.64622],[45.20182,0.64582],[45.20191,0.64566],[45.20201,0.64544],[45.20205,0.64521],[45.20209,0.64481],[45.20216,0.64447],[45.20221,0.64435],[45.20228,0.64428],[45.20246,0.64421],[45.20263,0.64417],[45.20295,0.64419],[45.20322,0.64417],[45.20334,0.6441],[45.20345,0.64401],[45.20351,0.64391],[45.20367,0.6435],[45.20382,0.6432],[45.20397,0.64299],[45.20408,0.64292],[45.20414,0.6429],[45.20417,0.64309],[45.2042,0.64343],[45.20419,0.64384],[45.204166,0.644177],[45.204166,0.644177],[45.20411,0.6447],[45.20407,0.64496],[45.20423,0.64519],[45.2043,0.64521],[45.20433,0.64539],[45.20456,0.64587],[45.20464,0.64612],[45.20469,0.64635],[45.20473,0.64666],[45.20474,0.64691],[45.20471,0.64755],[45.2047,0.64812],[45.20473,0.64873],[45.20475,0.64898],[45.2048,0.64925],[45.20493,0.6499],[45.20498,0.65009],[45.20508,0.65019],[45.20523,0.6503],[45.20542,0.65039],[45.205452,0.650407],[45.205452,0.650407],[45.2056,0.65043],[45.20568,0.65044],[45.20578,0.65041],[45.20596,0.65038],[45.20615,0.65043],[45.2065,0.65071],[45.20661,0.65111],[45.20669,0.65135],[45.20673,0.65156],[45.2067,0.65175],[45.20663,0.65194],[45.20594,0.65286],[45.20565,0.65325],[45.20554,0.65344],[45.2055,0.65363],[45.20551,0.65383],[45.20557,0.65407],[45.20578,0.65464],[45.20639,0.65625],[45.20664,0.65685],[45.20696,0.65771],[45.20716,0.65828],[45.20721,0.65854],[45.20722,0.65886],[45.20719,0.65933],[45.20712,0.65988],[45.20701,0.66046],[45.20691,0.6609],[45.20685,0.66111],[45.20679,0.661188],[45.20679,0.661188],[45.20662,0.66166],[45.20649,0.66202],[45.20636,0.66305],[45.20622,0.66413],[45.20614,0.66462],[45.20605,0.66506],[45.20591,0.66564],[45.20577,0.666006],[45.20577,0.666006],[45.20563,0.66669],[45.20558,0.66681],[45.2055,0.66688],[45.20528,0.66698],[45.20499,0.66707],[45.20464,0.66718],[45.20452,0.6672],[45.20403,0.66748],[45.20335,0.66785],[45.20289,0.66807],[45.20247,0.6683],[45.20204,0.66872],[45.20173,0.66911],[45.20148,0.66947],[45.20111,0.67006],[45.20086,0.67036],[45.20069,0.67045],[45.20061,0.67048],[45.20046,0.67053],[45.20045,0.67051],[45.20043,0.67048],[45.20041,0.67046],[45.20035,0.67042],[45.20026,0.6704],[45.20018,0.67044],[45.20012,0.67052],[45.20008,0.6706],[45.20006,0.67072],[45.20008,0.67084],[45.2001,0.6709],[45.20014,0.67098],[45.20015,0.67131],[45.20013,0.67173],[45.20006,0.67226],[45.20003,0.67251],[45.20003,0.67272],[45.20012,0.67342],[45.20013,0.67383],[45.20008,0.67415],[45.20005,0.67423],[45.19995,0.6745],[45.19991,0.67451],[45.19985,0.67455],[45.19976,0.67468],[45.19973,0.67476],[45.19959,0.67498],[45.1995,0.67514],[45.19948,0.67532],[45.19955,0.67621],[45.19958,0.6765],[45.19956,0.67663],[45.19952,0.6767],[45.19944,0.67675],[45.1993,0.67677],[45.19888,0.67683],[45.19826,0.67693],[45.197,0.67718],[45.19675,0.67724],[45.19679,0.67741],[45.19682,0.67777]];
+        
         // Tous les arrêts GTFS de la ligne R6
         const LINE_CONFIG = {
             id: 'R6',
-            color: '#e74c3c',
-            stops: []
+            color: '#107f73',
+            stops: [
+  {
+    "name": "Maison des Compagnons",
+    "lat": 45.190594,
+    "lon": 0.646895
+  },
+  {
+    "name": "Al. des Sports",
+    "lat": 45.192703,
+    "lon": 0.647526
+  },
+  {
+    "name": "Chercuzac",
+    "lat": 45.192348,
+    "lon": 0.642643
+  },
+  {
+    "name": "Chancelade Lespinasse",
+    "lat": 45.19582,
+    "lon": 0.638155
+  },
+  {
+    "name": "Lespinasse Haute",
+    "lat": 45.197403,
+    "lon": 0.640034
+  },
+  {
+    "name": "Chem. de Lespinasse",
+    "lat": 45.196697,
+    "lon": 0.643859
+  },
+  {
+    "name": "Lespinasse Basse",
+    "lat": 45.195915,
+    "lon": 0.646796
+  },
+  {
+    "name": "Les Garennes",
+    "lat": 45.196121,
+    "lon": 0.650267
+  },
+  {
+    "name": "Majourdin",
+    "lat": 45.198349,
+    "lon": 0.65017
+  },
+  {
+    "name": "Terrassonnie Village",
+    "lat": 45.204166,
+    "lon": 0.644177
+  },
+  {
+    "name": "Chem. de Terrassonnie",
+    "lat": 45.205452,
+    "lon": 0.650407
+  },
+  {
+    "name": "Curille",
+    "lat": 45.206791,
+    "lon": 0.661188
+  },
+  {
+    "name": "Al. des Bois",
+    "lat": 45.205769,
+    "lon": 0.666006
+  },
+  {
+    "name": "Gour de l'Arche Poste",
+    "lat": 45.196751,
+    "lon": 0.677537
+  }
+]
         };
 
         let map;
@@ -353,7 +444,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e74c3c', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#107f73', radius: 10 });
             }
             
             // Afficher les prochains départs

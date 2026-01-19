@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #e74c3c;
+            --line-color: #107f73;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #ffffff;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-r11">R11</div>
+            <div class="line-badge">R11</div>
             <div class="line-info">
                 <h1>Ligne R11</h1>
                 <div class="line-direction">Héliodore ↔ Pl. du 8 mai</div>
@@ -195,7 +195,22 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Héliodore">Héliodore</option>
+                <option value="Atur Bourg">Atur Bourg</option>
+                <option value="F. René Chateaubriand">F. René Chateaubriand</option>
+                <option value="Guillaume Apollinaire">Guillaume Apollinaire</option>
+                <option value="Puycorbeau">Puycorbeau</option>
+                <option value="Le Lac Blanc">Le Lac Blanc</option>
+                <option value="Pommier">Pommier</option>
+                <option value="Duverger">Duverger</option>
+                <option value="Les Hauts de Pommier">Les Hauts de Pommier</option>
+                <option value="Chantelot">Chantelot</option>
+                <option value="La Turcade">La Turcade</option>
+                <option value="Les Pins">Les Pins</option>
+                <option value="Centre de la Communication">Centre de la Communication</option>
+                <option value="Hoche">Hoche</option>
+                <option value="Pl. du 8 mai">Pl. du 8 mai</option>
             </select>
         </div>
 
@@ -242,23 +257,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne R11 ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Héliodore</strong> et <strong>Pl. du 8 mai</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne R11 ?</summary>
+          <div class="faq-answer">
+            Héliodore, Duverger, Pl. du 8 mai
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne R11 ?</summary>
+          <div class="faq-answer">
+            Environ <strong>15</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne R11 ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne R11 circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +307,90 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données R11)
+        const ROUTE_SHAPE = [[45.14535,0.74619],[45.14529,0.74635],[45.14471,0.74614],[45.14399,0.74591],[45.14372,0.74587],[45.1435,0.74588],[45.14338,0.74594],[45.14328,0.74603],[45.14311,0.74631],[45.14297,0.74673],[45.14285,0.74723],[45.14278,0.74773],[45.14277,0.74825],[45.14257,0.74824],[45.14247,0.74817],[45.14225,0.74802],[45.14213,0.748],[45.14138,0.74787],[45.14124,0.74788],[45.14113,0.74792],[45.14102,0.74799],[45.14088,0.74803],[45.14069,0.74805],[45.14042,0.7481],[45.1404,0.74809],[45.14021,0.74792],[45.14027,0.74784],[45.14061,0.74685],[45.14083,0.74629],[45.14091,0.74614],[45.14102,0.74614],[45.14113,0.74617],[45.14127,0.74606],[45.1414,0.74587],[45.14149,0.7457],[45.14161,0.74533],[45.14177,0.74471],[45.14183,0.74433],[45.1418,0.74409],[45.14177,0.74393],[45.14179,0.74371],[45.14187,0.74312],[45.14194,0.7424],[45.14209,0.74177],[45.1422,0.74143],[45.14279,0.74064],[45.14309,0.74018],[45.14337,0.73947],[45.14351,0.73904],[45.14359,0.73873],[45.14361,0.7384],[45.14345,0.73698],[45.14344,0.73647],[45.1435,0.73619],[45.14353,0.73589],[45.14356,0.73574],[45.14366,0.73552],[45.14394,0.73512],[45.1442,0.73469],[45.1445,0.73405],[45.1446,0.73365],[45.1447,0.73334],[45.14483,0.73307],[45.14502,0.73265],[45.14542,0.73154],[45.14562,0.73111],[45.14599,0.73052],[45.14659,0.72969],[45.14667,0.72941],[45.14682,0.72924],[45.14703,0.72902],[45.14716,0.72887],[45.14736,0.72852],[45.14764,0.72795],[45.14785,0.72734],[45.14814,0.72624],[45.14824,0.72578],[45.14866,0.72606],[45.14902,0.72632],[45.14928,0.72646],[45.14984,0.72663],[45.15031,0.72674],[45.1506,0.72684],[45.15117,0.7272],[45.15152,0.7274],[45.15185,0.72764],[45.15199,0.72772],[45.15214,0.72781],[45.15228,0.72785],[45.15243,0.72787],[45.15245,0.72789],[45.15271,0.72782],[45.15305,0.72772],[45.15323,0.72769],[45.1534,0.72771],[45.15389,0.72788],[45.15476,0.72823],[45.15528,0.72842],[45.15573,0.72862],[45.15621,0.72885],[45.15658,0.72905],[45.15674,0.7292],[45.15674,0.7292],[45.15698,0.7293],[45.15718,0.72938],[45.15739,0.72944],[45.15755,0.72954],[45.15766,0.7296],[45.15778,0.7297],[45.15797,0.72994],[45.15857,0.73076],[45.15857,0.73076],[45.15882,0.73103],[45.15911,0.7313],[45.15962,0.7316],[45.15974,0.73171],[45.15987,0.73186],[45.1601,0.73219],[45.16037,0.73252],[45.16075,0.73288],[45.16103,0.7331],[45.16128,0.73327],[45.16163,0.73342],[45.16188,0.73351],[45.16208,0.73369],[45.16232,0.73395],[45.16264,0.73431],[45.16296,0.73466],[45.16308,0.73475],[45.1632,0.73479],[45.16318,0.73481],[45.1632,0.73479],[45.16328,0.7348],[45.16367,0.7348],[45.16436,0.73478],[45.16505,0.73475],[45.16548,0.73465],[45.166,0.73448],[45.16601,0.7344891],[45.16601,0.73449],[45.16632,0.73431],[45.16658,0.73407],[45.1667,0.73396],[45.16683,0.73389],[45.16719,0.73373],[45.1673,0.73369],[45.16743,0.73367],[45.1676,0.73369],[45.16772,0.73373],[45.16799,0.73385],[45.16818,0.73389],[45.16835,0.73389],[45.16892,0.73375],[45.16954,0.73362],[45.16959,0.73363],[45.16959,0.73363],[45.16997,0.73349],[45.17025,0.73338],[45.17072,0.7332],[45.17119,0.73306],[45.17164,0.73293],[45.17189,0.73282],[45.17203,0.73272],[45.17215,0.73269],[45.17215,0.73269],[45.17239,0.73246],[45.17259,0.73237],[45.17296,0.73234],[45.17319,0.7323],[45.1734,0.73219],[45.17361,0.73206],[45.17399,0.73199],[45.17442,0.73193],[45.17494,0.7319],[45.17532,0.73187],[45.17559,0.73193],[45.17571,0.7319],[45.1759,0.73179],[45.17616,0.73161],[45.17632,0.7315],[45.17652,0.73154],[45.17684,0.73157],[45.177,0.73157],[45.17706,0.73164],[45.17706,0.73166],[45.17706,0.73171],[45.17711,0.73179],[45.17717,0.73182],[45.17724,0.73179],[45.17729,0.73173],[45.17729,0.73158],[45.17727,0.73152],[45.17722,0.73148],[45.1772,0.73133],[45.17723,0.7312],[45.17728,0.73102],[45.1774,0.7307],[45.17748,0.73024],[45.17757,0.72978],[45.17769,0.72939],[45.17775,0.72923],[45.17787,0.72902],[45.17873,0.72729],[45.17874,0.72729],[45.17876,0.72728],[45.17878,0.72725],[45.1788,0.72721],[45.1788,0.72717],[45.17911,0.72651],[45.18005,0.72457],[45.18005,0.72457],[45.18009,0.72445],[45.18012,0.72431],[45.18036,0.7238],[45.18084,0.72279],[45.18114,0.72226],[45.18156,0.72129],[45.1816,0.72121],[45.18154,0.72121],[45.18134,0.72119],[45.17952,0.721],[45.17915,0.720919]];
+        
         // Tous les arrêts GTFS de la ligne R11
         const LINE_CONFIG = {
             id: 'R11',
-            color: '#e74c3c',
-            stops: []
+            color: '#107f73',
+            stops: [
+  {
+    "name": "Héliodore",
+    "lat": 45.145351,
+    "lon": 0.74619
+  },
+  {
+    "name": "Atur Bourg",
+    "lat": 45.14027,
+    "lon": 0.74784
+  },
+  {
+    "name": "F. René Chateaubriand",
+    "lat": 45.14183,
+    "lon": 0.74433
+  },
+  {
+    "name": "Guillaume Apollinaire",
+    "lat": 45.143501,
+    "lon": 0.73619
+  },
+  {
+    "name": "Puycorbeau",
+    "lat": 45.146591,
+    "lon": 0.72969
+  },
+  {
+    "name": "Le Lac Blanc",
+    "lat": 45.152451,
+    "lon": 0.72789
+  },
+  {
+    "name": "Pommier",
+    "lat": 45.156738,
+    "lon": 0.7292
+  },
+  {
+    "name": "Duverger",
+    "lat": 45.158569,
+    "lon": 0.73076
+  },
+  {
+    "name": "Les Hauts de Pommier",
+    "lat": 45.163181,
+    "lon": 0.73481
+  },
+  {
+    "name": "Chantelot",
+    "lat": 45.166012,
+    "lon": 0.73449
+  },
+  {
+    "name": "La Turcade",
+    "lat": 45.16959,
+    "lon": 0.73363
+  },
+  {
+    "name": "Les Pins",
+    "lat": 45.17215,
+    "lon": 0.73269
+  },
+  {
+    "name": "Centre de la Communication",
+    "lat": 45.18005,
+    "lon": 0.72457
+  },
+  {
+    "name": "Hoche",
+    "lat": 45.181141,
+    "lon": 0.72226
+  },
+  {
+    "name": "Pl. du 8 mai",
+    "lat": 45.17915,
+    "lon": 0.720919
+  }
+]
         };
 
         let map;
@@ -353,7 +450,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e74c3c', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#107f73', radius: 10 });
             }
             
             // Afficher les prochains départs

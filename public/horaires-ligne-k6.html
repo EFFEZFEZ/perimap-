@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #9b59b6;
+            --line-color: #e04f07;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #000000;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-k6">K6</div>
+            <div class="line-badge">K6</div>
             <div class="line-info">
                 <h1>Ligne K6</h1>
                 <div class="line-direction">Halte ferroviaire Marsac</div>
@@ -195,7 +195,15 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Halte ferroviaire Marsac">Halte ferroviaire Marsac</option>
+                <option value="ZAE Marsac">ZAE Marsac</option>
+                <option value="Av. du Château">Av. du Château</option>
+                <option value="Bd de Saltgourde">Bd de Saltgourde</option>
+                <option value="P+r Chancelade">P+r Chancelade</option>
+                <option value="Rte de Ribérac">Rte de Ribérac</option>
+                <option value="ZAE Marsac">ZAE Marsac</option>
+                <option value="Halte ferroviaire Marsac">Halte ferroviaire Marsac</option>
             </select>
         </div>
 
@@ -242,23 +250,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne K6 ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Halte ferroviaire Marsac</strong> et <strong>Halte ferroviaire Marsac</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne K6 ?</summary>
+          <div class="faq-answer">
+            Halte ferroviaire Marsac, P+r Chancelade
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne K6 ?</summary>
+          <div class="faq-answer">
+            Environ <strong>8</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne K6 ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K6_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne K6 circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +300,55 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données K6)
+        const ROUTE_SHAPE = [[45.186497,0.663689],[45.1866,0.66309],[45.1872,0.66281],[45.18746,0.66271],[45.18755,0.66266],[45.18758,0.6626],[45.18759,0.66252],[45.18758,0.6622],[45.18759,0.66191],[45.18763,0.66169],[45.18763,0.66118],[45.18767,0.66081],[45.18768,0.6608],[45.18787,0.66083],[45.1882,0.66097],[45.18887,0.66135],[45.18958,0.66174],[45.18975,0.6618],[45.18989,0.66182],[45.19017,0.66185],[45.1907,0.66171],[45.19078,0.66169],[45.19094,0.66171],[45.19096,0.66174],[45.19099,0.66176],[45.19106,0.66177],[45.19112,0.66173],[45.19116,0.66166],[45.19117,0.66162],[45.19117,0.6616],[45.19126,0.66152],[45.19145,0.66143],[45.1918,0.66133],[45.19233,0.66123],[45.19256,0.66124],[45.19256,0.66124],[45.19287,0.66119],[45.19333,0.66113],[45.19357,0.6611],[45.19378,0.66115],[45.19381,0.66118],[45.19384,0.66121],[45.19386,0.66121],[45.19392,0.66135],[45.19409,0.66229],[45.19423,0.66303],[45.19432,0.66355],[45.19428,0.66358],[45.19427,0.66366],[45.1943,0.66372],[45.19437,0.66374],[45.19448,0.66438],[45.19471,0.66573],[45.19476,0.66605],[45.19507,0.6678],[45.1953,0.66908],[45.1954,0.66956],[45.19543,0.66964],[45.19551,0.66969],[45.1956,0.6697],[45.19594,0.66955],[45.19601,0.66952],[45.19614,0.6695],[45.19645,0.66956],[45.19656,0.66955],[45.1967,0.66947],[45.19683,0.66928],[45.19696,0.66901],[45.19704,0.66882],[45.1971,0.66885],[45.19718,0.66885],[45.19725,0.6688],[45.19729,0.66873],[45.19731,0.66875],[45.19746,0.66889],[45.19754,0.6691],[45.19762,0.66942],[45.19765,0.66948],[45.197918,0.669917],[45.1986,0.6709],[45.19869,0.67103],[45.19882,0.67116],[45.199,0.67125],[45.1991,0.67127],[45.19919,0.67126],[45.19942,0.67112],[45.19951,0.67103],[45.19972,0.67082],[45.19981,0.67077],[45.19992,0.67079],[45.2001,0.6709],[45.20014,0.67098],[45.20017,0.671],[45.20022,0.67103],[45.20026,0.67104],[45.20035,0.67104],[45.20043,0.67098],[45.20048,0.67088],[45.2005,0.6707],[45.20048,0.67058],[45.2004,0.67045],[45.20037,0.67043],[45.20028,0.67021],[45.20022,0.66991],[45.20015,0.66884],[45.20006,0.66804],[45.19999,0.66749],[45.19986,0.66683],[45.19972,0.66628],[45.19985,0.6662],[45.19983,0.66613],[45.19982,0.66607],[45.19971,0.6658],[45.199047,0.664115],[45.199047,0.664115],[45.19875,0.66329],[45.19878,0.66313],[45.19899,0.66248],[45.19911,0.66226],[45.19915,0.66213],[45.19897,0.66206],[45.19877,0.66198],[45.19847,0.66187],[45.1983,0.66177],[45.19817,0.66166],[45.19816,0.6615],[45.19816,0.66121],[45.19815,0.66099],[45.19809,0.66065],[45.19777,0.65916],[45.19736,0.65724],[45.19727,0.65684],[45.19717,0.6562],[45.19708,0.65564],[45.19701,0.6552],[45.196796,0.653659],[45.196796,0.653659],[45.19671,0.65327],[45.19674,0.65307],[45.19677,0.65294],[45.19679,0.65292],[45.19682,0.65288],[45.19684,0.65282],[45.19684,0.6527],[45.19678,0.65257],[45.19673,0.65253],[45.19668,0.65252],[45.19662,0.65253],[45.19657,0.65257],[45.19651,0.65268],[45.19651,0.65274],[45.19646,0.65277],[45.19637,0.65284],[45.19632,0.65291],[45.19599,0.65314],[45.19576,0.65326],[45.19549,0.6534],[45.19539,0.65349],[45.19535,0.65354],[45.19532,0.65364],[45.19526,0.65435],[45.1952,0.65511],[45.19512,0.65559],[45.19509,0.65566],[45.19503,0.65571],[45.19471,0.65578],[45.19456,0.65585],[45.19445,0.65596],[45.1943,0.65611],[45.19408,0.65625],[45.19395,0.65627],[45.1938,0.65633],[45.19366,0.65641],[45.1935,0.65656],[45.19336,0.65669],[45.19315,0.65678],[45.19314,0.65678],[45.19313,0.65676],[45.19311,0.65675],[45.19308,0.65674],[45.19303,0.65677],[45.19301,0.65683],[45.19301,0.6569],[45.19303,0.65696],[45.19308,0.65698],[45.19311,0.65698],[45.19312,0.65697],[45.19335,0.65704],[45.19371,0.65721],[45.19386,0.65732],[45.194,0.65747],[45.19409,0.65765],[45.19415,0.65784],[45.19418,0.65806],[45.19421,0.65845],[45.19429,0.65977],[45.1943,0.66006],[45.19429,0.66018],[45.19426,0.66026],[45.1942,0.66038],[45.19399,0.66059],[45.19392,0.66081],[45.1939,0.66081],[45.19386,0.66081],[45.19382,0.66083],[45.19377,0.66089],[45.19366,0.661],[45.19334,0.66105],[45.19332,0.661],[45.19332,0.661],[45.1924,0.66117],[45.19186,0.66126],[45.19134,0.6614],[45.19113,0.66145],[45.19112,0.66143],[45.1911,0.66141],[45.19103,0.66139],[45.19097,0.66141],[45.19093,0.66147],[45.19091,0.6615],[45.19091,0.66152],[45.19047,0.6617],[45.19021,0.66178],[45.19003,0.66183],[45.18984,0.66182],[45.18966,0.66178],[45.18949,0.6617],[45.18857,0.66118],[45.18794,0.66084],[45.18782,0.66071],[45.18773,0.66059],[45.18771,0.66054],[45.18767,0.66049],[45.18761,0.66048],[45.18756,0.6605],[45.18753,0.66053],[45.18751,0.66059],[45.1875,0.66066],[45.18751,0.66072],[45.18758,0.66092],[45.18763,0.66125],[45.18762,0.66174],[45.18759,0.66192],[45.18759,0.66236],[45.18758,0.6626],[45.18755,0.66266],[45.18747,0.66271],[45.18735,0.66275],[45.18692,0.66295],[45.18667,0.66306],[45.1866,0.66309],[45.18661,0.66321],[45.18669,0.66358],[45.186497,0.663689]];
+        
         // Tous les arrêts GTFS de la ligne K6
         const LINE_CONFIG = {
             id: 'K6',
-            color: '#9b59b6',
-            stops: []
+            color: '#e04f07',
+            stops: [
+  {
+    "name": "Halte ferroviaire Marsac",
+    "lat": 45.186722,
+    "lon": 0.663696
+  },
+  {
+    "name": "ZAE Marsac",
+    "lat": 45.192574,
+    "lon": 0.661588
+  },
+  {
+    "name": "Av. du Château",
+    "lat": 45.194759,
+    "lon": 0.66605
+  },
+  {
+    "name": "Bd de Saltgourde",
+    "lat": 45.197918,
+    "lon": 0.669917
+  },
+  {
+    "name": "P+r Chancelade",
+    "lat": 45.199284,
+    "lon": 0.664713
+  },
+  {
+    "name": "Rte de Ribérac",
+    "lat": 45.196796,
+    "lon": 0.653659
+  },
+  {
+    "name": "ZAE Marsac",
+    "lat": 45.193268,
+    "lon": 0.660671
+  },
+  {
+    "name": "Halte ferroviaire Marsac",
+    "lat": 45.186722,
+    "lon": 0.663696
+  }
+]
         };
 
         let map;
@@ -353,7 +408,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9b59b6', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e04f07', radius: 10 });
             }
             
             // Afficher les prochains départs

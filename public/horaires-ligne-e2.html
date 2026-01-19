@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #e67e22;
+            --line-color: #ff7601;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #ffffff;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-e2">E2</div>
+            <div class="line-badge">E2</div>
             <div class="line-info">
                 <h1>Ligne E2</h1>
                 <div class="line-direction">Talleyrand Périgord ↔ Fromarsac</div>
@@ -195,7 +195,17 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Talleyrand Périgord">Talleyrand Périgord</option>
+                <option value="Faidherbe">Faidherbe</option>
+                <option value="Hoche">Hoche</option>
+                <option value="Taillefer">Taillefer</option>
+                <option value="Eglise de la Cité">Eglise de la Cité</option>
+                <option value="PEM">PEM</option>
+                <option value="Les Izards">Les Izards</option>
+                <option value="Mériller">Mériller</option>
+                <option value="Marival">Marival</option>
+                <option value="Fromarsac">Fromarsac</option>
             </select>
         </div>
 
@@ -242,23 +252,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne E2 ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Talleyrand Périgord</strong> et <strong>Fromarsac</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne E2 ?</summary>
+          <div class="faq-answer">
+            Talleyrand Périgord, PEM, Fromarsac
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne E2 ?</summary>
+          <div class="faq-answer">
+            Environ <strong>10</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne E2 ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e2_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne E2 circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +302,65 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données E2)
+        const ROUTE_SHAPE = [[45.183933,0.732993],[45.18413,0.73131],[45.18414,0.73101],[45.18408,0.73073],[45.18388,0.73016],[45.18336,0.72868],[45.18282,0.72712],[45.18278,0.7269],[45.18277,0.72676],[45.18263,0.72685],[45.18256,0.72681],[45.18251,0.7267],[45.18251,0.7267],[45.18211,0.7266],[45.18093,0.72601],[45.18032,0.72573],[45.17964,0.72539],[45.17979,0.72508],[45.1801,0.72444],[45.18012,0.72431],[45.18036,0.7238],[45.18084,0.72279],[45.18114,0.72226],[45.18117,0.7221],[45.18123,0.72198],[45.1815,0.72143],[45.18191,0.72057],[45.18249,0.71936],[45.18256,0.7192],[45.1827,0.71894],[45.18275,0.71887],[45.18315,0.71884],[45.18354,0.71883],[45.18362,0.71836],[45.18365,0.71837],[45.18365,0.71837],[45.18187,0.713973],[45.18181,0.71412],[45.18177,0.7139],[45.18178,0.71303],[45.1818,0.71292],[45.18188,0.71279],[45.18266,0.71212],[45.18317,0.71171],[45.18361,0.71142],[45.18395,0.71118],[45.18402,0.71116],[45.18417,0.71105],[45.1843,0.71089],[45.18446,0.71062],[45.18451,0.71061],[45.18457,0.71059],[45.18468,0.71052],[45.18475,0.71044],[45.18477,0.71029],[45.18475,0.71019],[45.18473,0.71015],[45.18471,0.71011],[45.18478,0.70982],[45.18479,0.70975],[45.18479,0.70967],[45.18478,0.70964],[45.18472,0.70945],[45.18466,0.70922],[45.1847,0.70893],[45.18475,0.70881],[45.18515,0.7083],[45.18571,0.70756],[45.18598,0.70724],[45.18643,0.70687],[45.186558,0.707036],[45.18659,0.70667],[45.18667,0.70648],[45.18669,0.70627],[45.18664,0.70595],[45.18565,0.70176],[45.18531,0.7004],[45.18521,0.69996],[45.1852,0.69962],[45.18521,0.69961],[45.18524,0.69958],[45.18525,0.69955],[45.18544,0.69951],[45.18546,0.69949],[45.18553,0.69944],[45.18577,0.69936],[45.18594,0.6993],[45.18709,0.69887],[45.18778,0.6986],[45.1884,0.69835],[45.18867,0.6982],[45.1888,0.69809],[45.18892,0.69793],[45.18903,0.69776],[45.18925,0.69762],[45.18929,0.69762],[45.18933,0.69759],[45.18935,0.69755],[45.18938,0.69745],[45.18937,0.69739],[45.18936,0.69736],[45.18935,0.69735],[45.18937,0.6971],[45.18953,0.69669],[45.18953,0.69669],[45.18969,0.69606],[45.18992,0.69521],[45.19058,0.69286],[45.19143,0.68982],[45.19181,0.68846],[45.19188,0.68828],[45.19205,0.68773],[45.1924,0.68647],[45.1926,0.68569],[45.1927,0.68532],[45.19288,0.6847],[45.19293,0.6846],[45.19298,0.68453],[45.19303,0.68451],[45.19314,0.68462],[45.19312,0.68439],[45.19313,0.68425],[45.19308,0.68412],[45.19303,0.68408],[45.19301,0.68407],[45.1929,0.68395],[45.19249,0.68332],[45.19214,0.68274],[45.19121,0.68122],[45.19085,0.68051],[45.19068,0.68008],[45.1904,0.67934],[45.19024,0.6788],[45.19005,0.67797],[45.18992,0.67737],[45.18977,0.6767],[45.18961,0.67617],[45.18933,0.67537],[45.18841,0.67276],[45.18813,0.67188],[45.18789,0.67106],[45.18746,0.66966],[45.18727,0.66907],[45.18718,0.66887],[45.18701,0.66833],[45.18665,0.66715],[45.18642,0.66646],[45.18605,0.66528],[45.18605,0.6652],[45.18594,0.664808],[45.18594,0.664808],[45.18591,0.6646],[45.18592,0.66457],[45.18593,0.6645],[45.18591,0.66443],[45.18588,0.66438],[45.18583,0.66435],[45.1858,0.6643],[45.18569,0.66408],[45.1856,0.66385],[45.18553,0.66368],[45.1854,0.66327],[45.18527,0.66274],[45.18518,0.66212],[45.18508,0.66155],[45.18505,0.66128],[45.18507,0.66123],[45.18508,0.66112],[45.18504,0.66103],[45.18499,0.66097],[45.18496,0.66096],[45.18483,0.66046],[45.18472,0.66003],[45.18454,0.6592],[45.18421,0.65762],[45.18404,0.65678],[45.18397,0.65633],[45.18381,0.65559],[45.18371,0.65517],[45.18358,0.65453],[45.18355,0.65427],[45.18349,0.65388],[45.1833,0.65296],[45.18321,0.65241],[45.18317,0.65213],[45.18319,0.65189],[45.18331,0.65036],[45.1835,0.64782],[45.18369,0.64538],[45.18391,0.64378],[45.18398,0.64331],[45.18426,0.64156],[45.18433,0.64101],[45.18435,0.6404],[45.18432,0.64002],[45.18425,0.639],[45.184,0.63533],[45.18363,0.6304],[45.18355,0.62927],[45.1835,0.62856],[45.18352,0.62844],[45.1835,0.62797],[45.18349,0.6277],[45.18348,0.6276],[45.18359,0.62758],[45.18378,0.62752],[45.18384,0.6275],[45.18404,0.62744],[45.18408,0.62758],[45.18412,0.62764]];
+        
         // Tous les arrêts GTFS de la ligne E2
         const LINE_CONFIG = {
             id: 'E2',
-            color: '#e67e22',
-            stops: []
+            color: '#ff7601',
+            stops: [
+  {
+    "name": "Talleyrand Périgord",
+    "lat": 45.183933,
+    "lon": 0.732993
+  },
+  {
+    "name": "Faidherbe",
+    "lat": 45.182568,
+    "lon": 0.726682
+  },
+  {
+    "name": "Hoche",
+    "lat": 45.181141,
+    "lon": 0.72226
+  },
+  {
+    "name": "Taillefer",
+    "lat": 45.183651,
+    "lon": 0.71837
+  },
+  {
+    "name": "Eglise de la Cité",
+    "lat": 45.18187,
+    "lon": 0.713973
+  },
+  {
+    "name": "PEM",
+    "lat": 45.186558,
+    "lon": 0.707036
+  },
+  {
+    "name": "Les Izards",
+    "lat": 45.189484,
+    "lon": 0.696899
+  },
+  {
+    "name": "Mériller",
+    "lat": 45.192947,
+    "lon": 0.684543
+  },
+  {
+    "name": "Marival",
+    "lat": 45.18594,
+    "lon": 0.664808
+  },
+  {
+    "name": "Fromarsac",
+    "lat": 45.18417,
+    "lon": 0.6274
+  }
+]
         };
 
         let map;
@@ -353,7 +420,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e67e22', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#ff7601', radius: 10 });
             }
             
             // Afficher les prochains départs

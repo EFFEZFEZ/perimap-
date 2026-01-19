@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #e67e22;
+            --line-color: #ff7601;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #ffffff;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-e4">E4</div>
+            <div class="line-badge">E4</div>
             <div class="line-info">
                 <h1>Ligne E4</h1>
                 <div class="line-direction">Tourny ↔ La Feuilleraie</div>
@@ -195,7 +195,16 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="P+r Charriéras">P+r Charriéras</option>
+                <option value="Trélissac Les Garennes">Trélissac Les Garennes</option>
+                <option value="La Feuilleraie">La Feuilleraie</option>
+                <option value="La Borie">La Borie</option>
+                <option value="Trélissac Barberousse">Trélissac Barberousse</option>
+                <option value="P+r Trélissac les Romains">P+r Trélissac les Romains</option>
+                <option value="Les Lilas Hôpital">Les Lilas Hôpital</option>
+                <option value="Médiathèque">Médiathèque</option>
+                <option value="Tourny">Tourny</option>
             </select>
         </div>
 
@@ -242,23 +251,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne E4 ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>P+r Charriéras</strong> et <strong>Tourny</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne E4 ?</summary>
+          <div class="faq-answer">
+            P+r Charriéras, Trélissac Barberousse, Tourny
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne E4 ?</summary>
+          <div class="faq-answer">
+            Environ <strong>9</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne E4 ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e4_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne E4 circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +301,60 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données E4)
+        const ROUTE_SHAPE = [[45.204098,0.802789],[45.20376,0.80291],[45.20373,0.8029],[45.20365,0.80278],[45.20356,0.80258],[45.20352,0.80251],[45.20337,0.8021],[45.20292,0.80103],[45.20246,0.8],[45.20208,0.79936],[45.20065,0.79727],[45.20037,0.79681],[45.20025,0.79657],[45.2,0.796],[45.19985,0.79556],[45.19979,0.79524],[45.19977,0.79504],[45.19981,0.79489],[45.19984,0.79478],[45.19983,0.79466],[45.19977,0.79457],[45.1997,0.79454],[45.19966,0.79455],[45.19963,0.79456],[45.19947,0.79444],[45.1994,0.79433],[45.19927,0.7941],[45.19919,0.79391],[45.19865,0.79253],[45.19838,0.79175],[45.19806,0.79061],[45.1975,0.78854],[45.19734,0.7878],[45.19736,0.78777],[45.19738,0.78774],[45.19738,0.78766],[45.19735,0.7876],[45.1973,0.78757],[45.19728,0.78757],[45.19726,0.78758],[45.19695,0.78645],[45.19661,0.7852],[45.1961,0.78349],[45.195614,0.782843],[45.19584,0.78267],[45.19541,0.78166],[45.19525,0.78123],[45.19515,0.78083],[45.19493,0.77984],[45.19491,0.77981],[45.19484,0.7795],[45.19421,0.77654],[45.19404,0.77578],[45.19395,0.77555],[45.19381,0.7753],[45.19311,0.77435],[45.19172,0.77252],[45.19127,0.77192],[45.19099,0.77151],[45.19067,0.77092],[45.1901,0.7694],[45.18983,0.76835],[45.18949,0.76691],[45.18927,0.76605],[45.18915,0.76567],[45.18915,0.76558],[45.18914,0.76552],[45.189,0.76503],[45.18902,0.76475],[45.18908,0.76471],[45.18913,0.76464],[45.18923,0.76469],[45.18932,0.76471],[45.18938,0.7647],[45.18964,0.76483],[45.189922,0.765169],[45.18946,0.76473],[45.18938,0.7647],[45.18936,0.76465],[45.18927,0.76458],[45.18918,0.76448],[45.18919,0.76446],[45.18919,0.76442],[45.18919,0.76437],[45.18918,0.76427],[45.18914,0.76414],[45.18907,0.76405],[45.18902,0.764],[45.18899,0.76399],[45.18893,0.76382],[45.18886,0.76337],[45.18874,0.76211],[45.18852,0.75976],[45.18851,0.75908],[45.18858,0.75835],[45.18874,0.75706],[45.18887,0.75584],[45.18891,0.75574],[45.18898,0.75566],[45.18901,0.75565],[45.18904,0.75564],[45.18908,0.75558],[45.1891,0.7555],[45.18909,0.75541],[45.18906,0.75534],[45.18901,0.7553],[45.18897,0.75524],[45.18894,0.75513],[45.18894,0.75481],[45.18924,0.7521],[45.18926,0.7518],[45.18929,0.75173],[45.18944,0.75048],[45.18949,0.750282],[45.18959,0.74971],[45.18962,0.7497],[45.18967,0.74966],[45.1897,0.74959],[45.1897,0.74952],[45.1897,0.7495],[45.18985,0.74934],[45.18986,0.74929],[45.18989,0.74926],[45.18996,0.74923],[45.19003,0.74921],[45.19023,0.74923],[45.19041,0.74924],[45.19051,0.7493],[45.19058,0.74938],[45.19063,0.74952],[45.19069,0.74972],[45.19077,0.74984],[45.19083,0.74988],[45.1909,0.74988],[45.191,0.74986],[45.19163,0.74969],[45.19181,0.7497],[45.19195,0.74976],[45.19205,0.74984],[45.19223,0.75005],[45.19233,0.75018],[45.19259,0.75045],[45.19278,0.75058],[45.19298,0.75062],[45.19315,0.75061],[45.19332,0.75056],[45.19345,0.75049],[45.19366,0.75032],[45.19386,0.75016],[45.19406,0.74996],[45.19414,0.74987],[45.19431,0.74961],[45.19453,0.74914],[45.19466,0.74879],[45.19476,0.74843],[45.1948,0.74822],[45.19484,0.74789],[45.19486,0.74679],[45.1949,0.74634],[45.19496,0.74615],[45.1951,0.74582],[45.19528,0.74547],[45.19555,0.74501],[45.19573,0.74475],[45.19587,0.74458],[45.19616,0.74428],[45.19651,0.74397],[45.19686,0.74371],[45.1973,0.74342],[45.19748,0.74334],[45.1976,0.74332],[45.19778,0.74333],[45.19797,0.74331],[45.19807,0.74326],[45.1982,0.74314],[45.19831,0.74297],[45.19847,0.74251],[45.19852,0.74227],[45.19854,0.7421],[45.19857,0.74176],[45.19859,0.74176],[45.19863,0.74174],[45.19866,0.7417],[45.19868,0.7416],[45.19867,0.74154],[45.19865,0.74152],[45.19873,0.7412],[45.19877,0.7412],[45.19881,0.74119],[45.19886,0.74111],[45.19885,0.741],[45.1988,0.74092],[45.19872,0.74092],[45.19843,0.74067],[45.19795,0.740035],[45.19749,0.73958],[45.19725,0.73924],[45.1971,0.73895],[45.19697,0.73859],[45.19678,0.738],[45.19654,0.73707],[45.19649,0.736793],[45.19649,0.736793],[45.19632,0.73626],[45.1962,0.73581],[45.19608,0.73546],[45.19579,0.73457],[45.19545,0.73362],[45.19477,0.73168],[45.19392,0.72929],[45.19374,0.72877],[45.19359,0.72843],[45.19359,0.7284],[45.19358,0.72834],[45.19356,0.7283],[45.19354,0.72828],[45.1935,0.72807],[45.1934,0.72771],[45.1933,0.72758],[45.193012,0.727258],[45.193012,0.727258],[45.19104,0.72534],[45.18927,0.72353],[45.18885,0.72312],[45.188744,0.722987],[45.18824,0.72249],[45.18785,0.7221],[45.1875,0.72174],[45.18726,0.72159],[45.18725,0.72154],[45.18719,0.72145],[45.18716,0.72143],[45.18712,0.72142],[45.18705,0.72146],[45.187,0.72154],[45.18699,0.72163],[45.18702,0.72175],[45.18706,0.72178],[45.18709,0.7218],[45.18715,0.72192],[45.18718,0.72208],[45.18718,0.72221],[45.187096,0.722511]];
+        
         // Tous les arrêts GTFS de la ligne E4
         const LINE_CONFIG = {
             id: 'E4',
-            color: '#e67e22',
-            stops: []
+            color: '#ff7601',
+            stops: [
+  {
+    "name": "P+r Charriéras",
+    "lat": 45.20409,
+    "lon": 0.802876
+  },
+  {
+    "name": "Trélissac Les Garennes",
+    "lat": 45.195683,
+    "lon": 0.78307
+  },
+  {
+    "name": "La Feuilleraie",
+    "lat": 45.189922,
+    "lon": 0.765169
+  },
+  {
+    "name": "La Borie",
+    "lat": 45.189491,
+    "lon": 0.750282
+  },
+  {
+    "name": "Trélissac Barberousse",
+    "lat": 45.197948,
+    "lon": 0.740035
+  },
+  {
+    "name": "P+r Trélissac les Romains",
+    "lat": 45.196491,
+    "lon": 0.736793
+  },
+  {
+    "name": "Les Lilas Hôpital",
+    "lat": 45.193012,
+    "lon": 0.727258
+  },
+  {
+    "name": "Médiathèque",
+    "lat": 45.188744,
+    "lon": 0.722987
+  },
+  {
+    "name": "Tourny",
+    "lat": 45.187096,
+    "lon": 0.722511
+  }
+]
         };
 
         let map;
@@ -353,7 +414,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e67e22', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#ff7601', radius: 10 });
             }
             
             // Afficher les prochains départs

@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #9b59b6;
+            --line-color: #9461ba;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #000000;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-k3b">K3B</div>
+            <div class="line-badge">K3B</div>
             <div class="line-info">
                 <h1>Ligne K3B</h1>
                 <div class="line-direction">Pl. du 8 mai ↔ Pépinière</div>
@@ -195,7 +195,21 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Pépinière">Pépinière</option>
+                <option value="Parmentier">Parmentier</option>
+                <option value="Le Gué de Barnabé">Le Gué de Barnabé</option>
+                <option value="Albert Martin">Albert Martin</option>
+                <option value="Charnay Frachet">Charnay Frachet</option>
+                <option value="Les Prés">Les Prés</option>
+                <option value="Les Mondoux">Les Mondoux</option>
+                <option value="Gabriel Lacueille">Gabriel Lacueille</option>
+                <option value="Talleyrand Périgord">Talleyrand Périgord</option>
+                <option value="Jean Clédat">Jean Clédat</option>
+                <option value="Eglise St-Georges">Eglise St-Georges</option>
+                <option value="Centre de la Communication">Centre de la Communication</option>
+                <option value="Hoche">Hoche</option>
+                <option value="Pl. du 8 mai">Pl. du 8 mai</option>
             </select>
         </div>
 
@@ -242,23 +256,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne K3B ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Pépinière</strong> et <strong>Pl. du 8 mai</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne K3B ?</summary>
+          <div class="faq-answer">
+            Pépinière, Gabriel Lacueille, Pl. du 8 mai
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne K3B ?</summary>
+          <div class="faq-answer">
+            Environ <strong>14</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne K3B ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K3B_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne K3B circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +306,85 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données K3B)
+        const ROUTE_SHAPE = [[45.183285,0.737107],[45.1832,0.7379],[45.18321,0.73801],[45.18316,0.73836],[45.18306,0.739],[45.1842,0.73881],[45.18479,0.7387],[45.18545,0.738573],[45.18545,0.738573],[45.18626,0.73845],[45.186226,0.738052],[45.186226,0.738052],[45.18598,0.73659],[45.185802,0.735471],[45.185802,0.735471],[45.18576,0.73535],[45.18621,0.7352],[45.18658,0.73506],[45.18786,0.73464],[45.18812,0.73454],[45.18825,0.73454],[45.18829,0.73418],[45.188213,0.733742],[45.18824,0.73284],[45.18814,0.73206],[45.18804,0.73149],[45.18798,0.73117],[45.18791,0.73099],[45.187378,0.73017],[45.187378,0.73017],[45.18671,0.72897],[45.18622,0.72817],[45.18594,0.72931],[45.1857,0.72975],[45.185444,0.730094],[45.185444,0.730094],[45.18499,0.73089],[45.18473,0.73053],[45.18449,0.73026],[45.18435,0.73014],[45.183968,0.729776],[45.183968,0.729776],[45.18371,0.72966],[45.18396,0.73038],[45.18412,0.7309],[45.18414,0.73108],[45.18412,0.73135],[45.18395,0.7326],[45.183872,0.732999],[45.18387,0.7332],[45.18381,0.73338],[45.18377,0.73359],[45.18374,0.73358],[45.18369,0.73355],[45.18361,0.73345],[45.18332,0.73294],[45.18305,0.73256],[45.18289,0.73232],[45.18259,0.731835],[45.18259,0.731835],[45.1817,0.73083],[45.18124,0.73024],[45.18089,0.72985],[45.18009,0.72896],[45.17987,0.72871],[45.17969,0.72846],[45.179665,0.728365],[45.17915,0.72773],[45.17888,0.72738],[45.1788,0.72719],[45.1788,0.72718],[45.1788,0.72717],[45.17879,0.72716],[45.17979,0.72508],[45.18005,0.72457],[45.18005,0.72457],[45.18009,0.72445],[45.18012,0.72431],[45.18036,0.7238],[45.18084,0.72279],[45.18114,0.72226],[45.18156,0.72129],[45.1816,0.72121],[45.18154,0.72121],[45.18134,0.72119],[45.17952,0.721],[45.17915,0.720919]];
+        
         // Tous les arrêts GTFS de la ligne K3B
         const LINE_CONFIG = {
             id: 'K3B',
-            color: '#9b59b6',
-            stops: []
+            color: '#9461ba',
+            stops: [
+  {
+    "name": "Pépinière",
+    "lat": 45.183285,
+    "lon": 0.737107
+  },
+  {
+    "name": "Parmentier",
+    "lat": 45.185452,
+    "lon": 0.738573
+  },
+  {
+    "name": "Le Gué de Barnabé",
+    "lat": 45.186226,
+    "lon": 0.738052
+  },
+  {
+    "name": "Albert Martin",
+    "lat": 45.185802,
+    "lon": 0.735471
+  },
+  {
+    "name": "Charnay Frachet",
+    "lat": 45.188213,
+    "lon": 0.733742
+  },
+  {
+    "name": "Les Prés",
+    "lat": 45.187378,
+    "lon": 0.73017
+  },
+  {
+    "name": "Les Mondoux",
+    "lat": 45.185444,
+    "lon": 0.730094
+  },
+  {
+    "name": "Gabriel Lacueille",
+    "lat": 45.183968,
+    "lon": 0.729776
+  },
+  {
+    "name": "Talleyrand Périgord",
+    "lat": 45.183872,
+    "lon": 0.732999
+  },
+  {
+    "name": "Jean Clédat",
+    "lat": 45.18259,
+    "lon": 0.731835
+  },
+  {
+    "name": "Eglise St-Georges",
+    "lat": 45.179665,
+    "lon": 0.728365
+  },
+  {
+    "name": "Centre de la Communication",
+    "lat": 45.18005,
+    "lon": 0.72457
+  },
+  {
+    "name": "Hoche",
+    "lat": 45.181141,
+    "lon": 0.72226
+  },
+  {
+    "name": "Pl. du 8 mai",
+    "lat": 45.17915,
+    "lon": 0.720919
+  }
+]
         };
 
         let map;
@@ -353,7 +444,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9b59b6', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9461ba', radius: 10 });
             }
             
             // Afficher les prochains départs

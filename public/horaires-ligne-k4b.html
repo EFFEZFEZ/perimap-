@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #9b59b6;
+            --line-color: #a2a6a6;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #000000;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-k4b">K4B</div>
+            <div class="line-badge">K4B</div>
             <div class="line-info">
                 <h1>Ligne K4B</h1>
                 <div class="line-direction">Coulounieix Bourg ↔ Tourny</div>
@@ -195,7 +195,28 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Coulounieix Bourg">Coulounieix Bourg</option>
+                <option value="Les Vergers">Les Vergers</option>
+                <option value="Les Clairières">Les Clairières</option>
+                <option value="Plancheix">Plancheix</option>
+                <option value="Les 4 Routes">Les 4 Routes</option>
+                <option value="Dojo Départemental">Dojo Départemental</option>
+                <option value="Stade Pareau">Stade Pareau</option>
+                <option value="Pagot">Pagot</option>
+                <option value="Maréchal Lyautey">Maréchal Lyautey</option>
+                <option value="Les Frères Marty">Les Frères Marty</option>
+                <option value="Paul Doumer">Paul Doumer</option>
+                <option value="Jean Labutie">Jean Labutie</option>
+                <option value="Jules Védrines">Jules Védrines</option>
+                <option value="Chamiers Mairie">Chamiers Mairie</option>
+                <option value="Jules Verne">Jules Verne</option>
+                <option value="Les Izards">Les Izards</option>
+                <option value="Pont de la Cité">Pont de la Cité</option>
+                <option value="PEM">PEM</option>
+                <option value="Maréchal Juin">Maréchal Juin</option>
+                <option value="Sainte Cécile">Sainte Cécile</option>
+                <option value="Tourny">Tourny</option>
             </select>
         </div>
 
@@ -242,23 +263,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne K4B ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Coulounieix Bourg</strong> et <strong>Tourny</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne K4B ?</summary>
+          <div class="faq-answer">
+            Coulounieix Bourg, Paul Doumer, Tourny
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne K4B ?</summary>
+          <div class="faq-answer">
+            Environ <strong>21</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne K4B ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K4B_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne K4B circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +313,120 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données K4B)
+        const ROUTE_SHAPE = [[45.157585,0.68833],[45.15755,0.68821],[45.15764,0.68803],[45.15772,0.68799],[45.15774,0.68794],[45.15772,0.68781],[45.15761,0.68772],[45.15751,0.68753],[45.15739,0.68721],[45.15712,0.68645],[45.157,0.68619],[45.15694,0.68609],[45.15683,0.68597],[45.1565,0.68566],[45.15613,0.68535],[45.1563,0.684949],[45.1563,0.684949],[45.15661,0.68405],[45.15676,0.68373],[45.15694,0.6834],[45.15709,0.6832],[45.15725,0.6831],[45.15742,0.68308],[45.15757,0.68309],[45.15781,0.68315],[45.15802,0.68327],[45.15813,0.68336],[45.15829,0.68354],[45.15843,0.6838],[45.15851,0.68407],[45.158543,0.684224],[45.1586,0.68445],[45.1587,0.68468],[45.15886,0.68495],[45.15902,0.68513],[45.15923,0.6853],[45.15944,0.68538],[45.15964,0.68543],[45.15982,0.68541],[45.15994,0.68538],[45.16002,0.68533],[45.16021,0.68511],[45.16034,0.68478],[45.16044,0.68437],[45.16048,0.68423],[45.16055,0.68415],[45.16062,0.6841],[45.16069,0.68409],[45.16076,0.68411],[45.16074,0.6844],[45.16068,0.6852],[45.16062,0.68603],[45.16062,0.68645],[45.160927,0.6865],[45.16102,0.6864],[45.1613,0.68627],[45.16164,0.68608],[45.16196,0.68593],[45.1622,0.68589],[45.16254,0.68593],[45.1629,0.68606],[45.16314,0.6861],[45.163254,0.686118],[45.163254,0.686118],[45.16341,0.68598],[45.16354,0.68587],[45.16368,0.68572],[45.1637,0.68575],[45.16377,0.68574],[45.16381,0.6857],[45.16392,0.68583],[45.16435,0.68637],[45.16468,0.68677],[45.16489,0.68694],[45.16503,0.68701],[45.16556,0.68722],[45.16729,0.68787],[45.16828,0.68823],[45.16863,0.68836],[45.16898,0.68852],[45.1696,0.68874],[45.17001,0.68889],[45.170444,0.689055],[45.17054,0.68902],[45.17054,0.68903],[45.17055,0.68906],[45.17057,0.68909],[45.17063,0.68911],[45.17067,0.68905],[45.17067,0.68897],[45.17066,0.68896],[45.17082,0.68881],[45.17095,0.68873],[45.17095,0.68874],[45.17096,0.68875],[45.17098,0.68876],[45.17099,0.68877],[45.17102,0.68876],[45.17103,0.68873],[45.17104,0.68869],[45.17103,0.68867],[45.17121,0.68864],[45.17187,0.68918],[45.17218,0.68951],[45.17238,0.68969],[45.17253,0.6898],[45.1731,0.69013],[45.17353,0.69039],[45.17369,0.69043],[45.1741,0.69038],[45.17459,0.69034],[45.17517,0.69038],[45.1754,0.69038],[45.175446,0.690504],[45.1754,0.69038],[45.17548,0.69038],[45.17558,0.69037],[45.17578,0.69031],[45.1763,0.68998],[45.17664,0.69055],[45.17668,0.69061],[45.17685,0.69082],[45.17703,0.69094],[45.17714,0.69105],[45.17728,0.69133],[45.17742,0.69164],[45.17773,0.69233],[45.17787,0.692719],[45.17794,0.69276],[45.17803,0.69273],[45.17811,0.69271],[45.17833,0.69265],[45.17864,0.69255],[45.17887,0.69247],[45.17897,0.69239],[45.17928,0.69213],[45.17944,0.692],[45.17958,0.69187],[45.17962,0.69174],[45.17965,0.69162],[45.17968,0.69159],[45.17976,0.69161],[45.17978,0.69198],[45.17981,0.69214],[45.17988,0.69239],[45.17998,0.69257],[45.1801,0.6927],[45.1802,0.69279],[45.18031,0.69283],[45.18047,0.69283],[45.18061,0.6928],[45.18088,0.69279],[45.18105,0.69285],[45.1812,0.69297],[45.18147,0.69333],[45.1818,0.694002],[45.1818,0.694002],[45.18203,0.69439],[45.18226,0.69486],[45.18234,0.69505],[45.18246,0.69522],[45.18262,0.6954],[45.18296,0.69564],[45.18331,0.69594],[45.18368,0.69632],[45.18378,0.69639],[45.18409,0.69651],[45.18427,0.69657],[45.18444,0.69667],[45.18454,0.69673],[45.18483,0.69693],[45.185,0.69702],[45.18509,0.69706],[45.18506,0.69686],[45.18504,0.69662],[45.185074,0.696591],[45.18509,0.69706],[45.18504,0.69662],[45.18504,0.69634],[45.18512,0.6959],[45.18515,0.69571],[45.18527,0.69536],[45.18545,0.69483],[45.18554,0.69456],[45.18561,0.69444],[45.18583,0.69453],[45.18606,0.69458],[45.18628,0.69463],[45.18662,0.69471],[45.18663,0.694751],[45.18662,0.69471],[45.18669,0.69473],[45.18708,0.69481],[45.18738,0.69489],[45.18756,0.69503],[45.18762,0.69472],[45.18764,0.69436],[45.18762,0.69364],[45.18763,0.69335],[45.18767,0.69306],[45.18771,0.692958],[45.18771,0.692958],[45.1878,0.69202],[45.18789,0.69111],[45.18792,0.69091],[45.18812,0.69092],[45.188618,0.690911],[45.188618,0.690911],[45.18973,0.69077],[45.19061,0.69068],[45.19097,0.69064],[45.19106,0.69065],[45.1912,0.69065],[45.19107,0.69098],[45.19107,0.69098],[45.19021,0.69406],[45.18969,0.69606],[45.18943,0.696769],[45.18937,0.6971],[45.18924,0.69728],[45.18923,0.69729],[45.1892,0.6973],[45.18915,0.69734],[45.18912,0.69746],[45.18912,0.69749],[45.18903,0.69776],[45.18892,0.69793],[45.1888,0.69809],[45.18867,0.6982],[45.1884,0.69835],[45.18778,0.6986],[45.18594,0.6993],[45.18577,0.69936],[45.18553,0.69944],[45.18545,0.69944],[45.18537,0.69943],[45.18525,0.69938],[45.18524,0.69936],[45.18522,0.69934],[45.18517,0.69931],[45.18509,0.69933],[45.18505,0.69938],[45.18503,0.69945],[45.18497,0.69945],[45.18503,0.69949],[45.18504,0.69951],[45.18504,0.69954],[45.18508,0.6996],[45.1851,0.69962],[45.18515,0.69987],[45.18521,0.69996],[45.18521,0.7],[45.1853,0.70034],[45.18543,0.70089],[45.18583,0.70253],[45.18642,0.7051],[45.18667,0.70611],[45.18667,0.70615],[45.18684,0.70607],[45.18695,0.70634],[45.187,0.70649],[45.18701,0.70655],[45.18699,0.70658],[45.18673,0.70681],[45.18651,0.70698],[45.1864,0.70695],[45.1864,0.70695],[45.18519,0.711709],[45.18528,0.71225],[45.18538,0.71254],[45.18543,0.71263],[45.18542,0.71266],[45.18541,0.71269],[45.1854,0.71276],[45.18547,0.71289],[45.18537,0.71309],[45.18481,0.71456],[45.18465,0.71502],[45.18459,0.71514],[45.18451,0.71539],[45.18448,0.71562],[45.18426,0.71627],[45.18418,0.71651],[45.18409,0.71667],[45.18391,0.71735],[45.18374,0.71793],[45.1837,0.71808],[45.18355,0.71889],[45.18364,0.71893],[45.18389,0.71896],[45.18399,0.71894],[45.18441,0.71898],[45.18455,0.71908],[45.18501,0.71957],[45.18549,0.71999],[45.1857,0.72015],[45.18613,0.72058],[45.1868,0.72128],[45.18698,0.72155],[45.18696,0.7216],[45.18696,0.72169],[45.187,0.72181],[45.18703,0.72184],[45.18712,0.72195],[45.18717,0.7221],[45.18718,0.72221],[45.187096,0.722511]];
+        
         // Tous les arrêts GTFS de la ligne K4B
         const LINE_CONFIG = {
             id: 'K4B',
-            color: '#9b59b6',
-            stops: []
+            color: '#a2a6a6',
+            stops: [
+  {
+    "name": "Coulounieix Bourg",
+    "lat": 45.157585,
+    "lon": 0.68833
+  },
+  {
+    "name": "Les Vergers",
+    "lat": 45.1563,
+    "lon": 0.684949
+  },
+  {
+    "name": "Les Clairières",
+    "lat": 45.158543,
+    "lon": 0.684224
+  },
+  {
+    "name": "Plancheix",
+    "lat": 45.160927,
+    "lon": 0.6865
+  },
+  {
+    "name": "Les 4 Routes",
+    "lat": 45.163254,
+    "lon": 0.686118
+  },
+  {
+    "name": "Dojo Départemental",
+    "lat": 45.170444,
+    "lon": 0.689055
+  },
+  {
+    "name": "Stade Pareau",
+    "lat": 45.175446,
+    "lon": 0.690504
+  },
+  {
+    "name": "Pagot",
+    "lat": 45.17783,
+    "lon": 0.69258
+  },
+  {
+    "name": "Maréchal Lyautey",
+    "lat": 45.182652,
+    "lon": 0.695653
+  },
+  {
+    "name": "Les Frères Marty",
+    "lat": 45.185074,
+    "lon": 0.696591
+  },
+  {
+    "name": "Paul Doumer",
+    "lat": 45.18663,
+    "lon": 0.694751
+  },
+  {
+    "name": "Jean Labutie",
+    "lat": 45.18771,
+    "lon": 0.692958
+  },
+  {
+    "name": "Jules Védrines",
+    "lat": 45.188618,
+    "lon": 0.690911
+  },
+  {
+    "name": "Chamiers Mairie",
+    "lat": 45.190987,
+    "lon": 0.690962
+  },
+  {
+    "name": "Jules Verne",
+    "lat": 45.19014,
+    "lon": 0.694026
+  },
+  {
+    "name": "Les Izards",
+    "lat": 45.18943,
+    "lon": 0.696769
+  },
+  {
+    "name": "Pont de la Cité",
+    "lat": 45.184902,
+    "lon": 0.699493
+  },
+  {
+    "name": "PEM",
+    "lat": 45.186497,
+    "lon": 0.706945
+  },
+  {
+    "name": "Maréchal Juin",
+    "lat": 45.185188,
+    "lon": 0.711709
+  },
+  {
+    "name": "Sainte Cécile",
+    "lat": 45.18399,
+    "lon": 0.71894
+  },
+  {
+    "name": "Tourny",
+    "lat": 45.187096,
+    "lon": 0.722511
+  }
+]
         };
 
         let map;
@@ -353,7 +486,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9b59b6', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#a2a6a6', radius: 10 });
             }
             
             // Afficher les prochains départs

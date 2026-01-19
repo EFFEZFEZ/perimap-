@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #9b59b6;
+            --line-color: #01631e;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #ffffff;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-k1b">K1B</div>
+            <div class="line-badge">K1B</div>
             <div class="line-info">
                 <h1>Ligne K1B</h1>
                 <div class="line-direction">Tourny ↔ Pôle Universitaire Grenadière</div>
@@ -195,7 +195,19 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="Le Lac">Le Lac</option>
+                <option value="Majoral Fournier">Majoral Fournier</option>
+                <option value="Longueville">Longueville</option>
+                <option value="Barbe">Barbe</option>
+                <option value="Boisset">Boisset</option>
+                <option value="Pôle Universitaire Grenadière">Pôle Universitaire Grenadière</option>
+                <option value="Blaise Pascal">Blaise Pascal</option>
+                <option value="Ampère">Ampère</option>
+                <option value="Beaulieu">Beaulieu</option>
+                <option value="Victor Hugo">Victor Hugo</option>
+                <option value="Tourny">Tourny</option>
+                <option value="Taillefer">Taillefer</option>
             </select>
         </div>
 
@@ -242,23 +254,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne K1B ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>Le Lac</strong> et <strong>Taillefer</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne K1B ?</summary>
+          <div class="faq-answer">
+            Le Lac, Blaise Pascal, Taillefer
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne K1B ?</summary>
+          <div class="faq-answer">
+            Environ <strong>12</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne K1B ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_k1B_12_janvier.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne K1B circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +304,75 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données K1B)
+        const ROUTE_SHAPE = [[45.21726,0.728762],[45.21704,0.72917],[45.21673,0.72895],[45.21646,0.7288],[45.21596,0.72863],[45.21567,0.72845],[45.21554,0.72835],[45.21538,0.72825],[45.21509,0.72809],[45.21491,0.728],[45.21478,0.727898],[45.2146,0.7279],[45.21433,0.72779],[45.21392,0.72758],[45.21348,0.72736],[45.21335,0.72728],[45.21307,0.72721],[45.21283,0.72715],[45.21258,0.72704],[45.21239,0.72688],[45.21228,0.72674],[45.21222,0.72666],[45.21207,0.72665],[45.21174,0.72661],[45.2112,0.72652],[45.21076,0.72648],[45.21025,0.72648],[45.20972,0.72646],[45.20895,0.72639],[45.208702,0.726394],[45.208702,0.726394],[45.20803,0.72635],[45.20771,0.72637],[45.20748,0.72645],[45.20716,0.72663],[45.20699,0.72671],[45.20683,0.72674],[45.2065,0.72675],[45.20616,0.72674],[45.2055,0.72671],[45.20515,0.72669],[45.2048,0.72662],[45.20432,0.72649],[45.20384,0.72631],[45.2032,0.72602],[45.20293,0.72581],[45.20261,0.72553],[45.20223,0.72523],[45.20205,0.72517],[45.20193,0.72506],[45.20185,0.72497],[45.2018,0.72488],[45.20172,0.72465],[45.20169,0.7245],[45.20165,0.72414],[45.20155,0.72359],[45.20147,0.72327],[45.20134,0.72295],[45.20124,0.72278],[45.20113,0.72265],[45.20093,0.72247],[45.20069,0.72219],[45.20016,0.72152],[45.19952,0.72087],[45.19925,0.7207],[45.19897,0.72059],[45.19864,0.72055],[45.198395,0.72054],[45.198395,0.72054],[45.19799,0.72064],[45.19787,0.72065],[45.19777,0.7206],[45.19766,0.72052],[45.19759,0.72048],[45.19749,0.72045],[45.19724,0.72046],[45.197,0.7205],[45.1967,0.72056],[45.19645,0.72059],[45.19615,0.72056],[45.19595,0.72049],[45.19565,0.72044],[45.19534,0.72042],[45.19499,0.7204],[45.19488,0.72037],[45.19478,0.7203],[45.19469,0.72024],[45.19464,0.72016],[45.19457,0.72016],[45.194477,0.720215],[45.194477,0.720215],[45.19439,0.72037],[45.19417,0.72033],[45.19397,0.7202],[45.19381,0.71993],[45.19366,0.71961],[45.19351,0.71954],[45.19337,0.71956],[45.19333,0.71958],[45.19329,0.71951],[45.19322,0.71943],[45.19314,0.71937],[45.19294,0.7193],[45.1923,0.71909],[45.192245,0.719033],[45.192245,0.719033],[45.19209,0.71891],[45.19191,0.71861],[45.19182,0.71842],[45.19179,0.71821],[45.19184,0.71786],[45.19205,0.7171],[45.19238,0.71593],[45.19271,0.71472],[45.19276,0.71454],[45.19278,0.71435],[45.19276,0.71425],[45.19269,0.71437],[45.192585,0.714469],[45.19206,0.71532],[45.19137,0.71623],[45.19082,0.71695],[45.19063,0.71713],[45.19063,0.71713],[45.19048,0.71745],[45.19025,0.71758],[45.19012,0.71761],[45.19001,0.71758],[45.18986,0.71743],[45.18972,0.71725],[45.18964,0.71707],[45.18939,0.71665],[45.18907,0.71708],[45.188564,0.717673],[45.18814,0.71833],[45.18808,0.71838],[45.18799,0.71842],[45.18795,0.71857],[45.18779,0.71915],[45.18724,0.7212],[45.18714,0.72149],[45.18712,0.72148],[45.18711,0.72148],[45.18704,0.72148],[45.18699,0.72154],[45.18696,0.72163],[45.18696,0.72168],[45.18699,0.7218],[45.18705,0.72185],[45.18716,0.72203],[45.18717,0.7221],[45.18718,0.72221],[45.187096,0.722511],[45.183575,0.718487]];
+        
         // Tous les arrêts GTFS de la ligne K1B
         const LINE_CONFIG = {
             id: 'K1B',
-            color: '#9b59b6',
-            stops: []
+            color: '#01631e',
+            stops: [
+  {
+    "name": "Le Lac",
+    "lat": 45.217293,
+    "lon": 0.729036
+  },
+  {
+    "name": "Majoral Fournier",
+    "lat": 45.214779,
+    "lon": 0.727898
+  },
+  {
+    "name": "Longueville",
+    "lat": 45.208702,
+    "lon": 0.726394
+  },
+  {
+    "name": "Barbe",
+    "lat": 45.202229,
+    "lon": 0.72523
+  },
+  {
+    "name": "Boisset",
+    "lat": 45.198395,
+    "lon": 0.72054
+  },
+  {
+    "name": "Pôle Universitaire Grenadière",
+    "lat": 45.194477,
+    "lon": 0.720215
+  },
+  {
+    "name": "Blaise Pascal",
+    "lat": 45.192245,
+    "lon": 0.719033
+  },
+  {
+    "name": "Ampère",
+    "lat": 45.192585,
+    "lon": 0.714469
+  },
+  {
+    "name": "Beaulieu",
+    "lat": 45.190472,
+    "lon": 0.717355
+  },
+  {
+    "name": "Victor Hugo",
+    "lat": 45.188564,
+    "lon": 0.717673
+  },
+  {
+    "name": "Tourny",
+    "lat": 45.187096,
+    "lon": 0.722511
+  },
+  {
+    "name": "Taillefer",
+    "lat": 45.183575,
+    "lon": 0.718487
+  }
+]
         };
 
         let map;
@@ -353,7 +432,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9b59b6', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#01631e', radius: 10 });
             }
             
             // Afficher les prochains départs

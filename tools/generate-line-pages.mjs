@@ -8,6 +8,9 @@ const templatePath = path.join(publicDir, 'horaires-ligne-a.html');
 const gtfsDir = path.join(publicDir, 'data', 'gtfs');
 const routesPath = path.join(gtfsDir, 'routes.txt');
 const tripsPath = path.join(gtfsDir, 'trips.txt');
+const stopsPath = path.join(gtfsDir, 'stops.txt');
+const stopTimesPath = path.join(gtfsDir, 'stop_times.txt');
+const shapesPath = path.join(gtfsDir, 'shapes.txt');
 const horairesHubPath = path.join(publicDir, 'horaires.html');
 
 function exists(p) {
@@ -28,15 +31,17 @@ function slugFor(code) {
 }
 
 function colorFor(code) {
-  const c = normalizeLineCode(code);
+  const c = normalizeLineCode(code).toUpperCase();
+  const gtfsColor = routeMetaByLine.get(c)?.color;
+  if (gtfsColor) return gtfsColor;
   if (c === 'A') return '#fdd003';
   if (c === 'B') return '#1e91ff';
   if (c === 'C') return '#dd1b75';
   if (c === 'D') return '#41ae18';
-  if (/^e\d+/i.test(c)) return '#e67e22';
-  if (/^k/i.test(c)) return '#9b59b6';
-  if (/^n/i.test(c)) return '#2c3e50';
-  if (/^r/i.test(c)) return '#e74c3c';
+  if (/^E\d+/i.test(c)) return '#e67e22';
+  if (/^K/i.test(c)) return '#9b59b6';
+  if (/^N/i.test(c)) return '#2c3e50';
+  if (/^R/i.test(c)) return '#e74c3c';
   return '#22c55e';
 }
 
@@ -65,6 +70,131 @@ function parseCsvLine(line) {
   out.push(cur);
   return out;
 }
+
+function loadRouteMetaByLine() {
+  if (!exists(routesPath)) return new Map();
+  const lines = fs.readFileSync(routesPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxRouteId = header.indexOf('route_id');
+  const idxShort = header.indexOf('route_short_name');
+  const idxColor = header.indexOf('route_color');
+  const idxText = header.indexOf('route_text_color');
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const routeId = row[idxRouteId];
+    const shortNameRaw = row[idxShort];
+    if (!routeId || !shortNameRaw) continue;
+    const shortName = normalizeLineCode(shortNameRaw).toUpperCase();
+    const color = row[idxColor] ? `#${row[idxColor].trim()}` : '';
+    const textColor = row[idxText] ? `#${row[idxText].trim()}` : '';
+    map.set(shortName, { routeId, color, textColor });
+  }
+  return map;
+}
+
+function loadTripsByRoute() {
+  if (!exists(tripsPath)) return new Map();
+  const lines = fs.readFileSync(tripsPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxRouteId = header.indexOf('route_id');
+  const idxTripId = header.indexOf('trip_id');
+  const idxHeadsign = header.indexOf('trip_headsign');
+  const idxDirection = header.indexOf('direction_id');
+  const idxShape = header.indexOf('shape_id');
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const routeId = row[idxRouteId];
+    const tripId = row[idxTripId];
+    if (!routeId || !tripId) continue;
+    const trip = {
+      tripId,
+      headsign: normalizeHeadsign(row[idxHeadsign]),
+      directionId: row[idxDirection] === '' ? null : Number(row[idxDirection]),
+      shapeId: row[idxShape]
+    };
+    if (!map.has(routeId)) map.set(routeId, []);
+    map.get(routeId).push(trip);
+  }
+  return map;
+}
+
+function loadStopsById() {
+  if (!exists(stopsPath)) return new Map();
+  const lines = fs.readFileSync(stopsPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxId = header.indexOf('stop_id');
+  const idxName = header.indexOf('stop_name');
+  const idxLat = header.indexOf('stop_lat');
+  const idxLon = header.indexOf('stop_lon');
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const stopId = row[idxId];
+    if (!stopId) continue;
+    const name = row[idxName];
+    const lat = parseFloat(row[idxLat]);
+    const lon = parseFloat(row[idxLon]);
+    if (!name || Number.isNaN(lat) || Number.isNaN(lon)) continue;
+    map.set(stopId, { name, lat, lon });
+  }
+  return map;
+}
+
+function loadStopTimesByTrip() {
+  if (!exists(stopTimesPath)) return new Map();
+  const lines = fs.readFileSync(stopTimesPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxTrip = header.indexOf('trip_id');
+  const idxStop = header.indexOf('stop_id');
+  const idxSeq = header.indexOf('stop_sequence');
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const tripId = row[idxTrip];
+    const stopId = row[idxStop];
+    const seq = Number(row[idxSeq]);
+    if (!tripId || !stopId || Number.isNaN(seq)) continue;
+    if (!map.has(tripId)) map.set(tripId, []);
+    map.get(tripId).push({ stopId, seq });
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => a.seq - b.seq);
+  }
+  return map;
+}
+
+function loadShapesById() {
+  if (!exists(shapesPath)) return new Map();
+  const lines = fs.readFileSync(shapesPath, 'utf8').split(/\r?\n/).filter(Boolean);
+  const header = parseCsvLine(lines[0]);
+  const idxId = header.indexOf('shape_id');
+  const idxLat = header.indexOf('shape_pt_lat');
+  const idxLon = header.indexOf('shape_pt_lon');
+  const idxSeq = header.indexOf('shape_pt_sequence');
+  const map = new Map();
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+    const shapeId = row[idxId];
+    const lat = parseFloat(row[idxLat]);
+    const lon = parseFloat(row[idxLon]);
+    const seq = Number(row[idxSeq]);
+    if (!shapeId || Number.isNaN(lat) || Number.isNaN(lon) || Number.isNaN(seq)) continue;
+    if (!map.has(shapeId)) map.set(shapeId, []);
+    map.get(shapeId).push({ lat, lon, seq });
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => a.seq - b.seq);
+  }
+  return map;
+}
+
+const routeMetaByLine = loadRouteMetaByLine();
+const tripsByRoute = loadTripsByRoute();
+const stopsById = loadStopsById();
+const stopTimesByTrip = loadStopTimesByTrip();
+const shapesById = loadShapesById();
 
 function loadRouteIdToShortName() {
   if (!exists(routesPath)) return new Map();
@@ -180,6 +310,67 @@ function inferRouteText(_code, _pdfFilename) {
   return 'Consultez la fiche horaire PDF pour les terminus.';
 }
 
+function getLineData(lineCode) {
+  const code = normalizeLineCode(lineCode).toUpperCase();
+  const routeMeta = routeMetaByLine.get(code);
+  const routeId = routeMeta?.routeId;
+  if (!routeId) return null;
+
+  const trips = tripsByRoute.get(routeId) || [];
+  if (trips.length === 0) return null;
+
+  const pickTrip = (directionId) => {
+    const candidates = trips.filter(t => t.directionId === directionId);
+    const list = candidates.length ? candidates : trips;
+    let best = null;
+    let bestCount = -1;
+    for (const t of list) {
+      const stops = stopTimesByTrip.get(t.tripId) || [];
+      if (stops.length > bestCount) {
+        bestCount = stops.length;
+        best = t;
+      }
+    }
+    return best;
+  };
+
+  const trip = pickTrip(0) || pickTrip(1) || trips[0];
+  const stopTimes = stopTimesByTrip.get(trip.tripId) || [];
+  const stops = stopTimes
+    .map(entry => stopsById.get(entry.stopId))
+    .filter(Boolean)
+    .map(stop => ({ name: stop.name, lat: stop.lat, lon: stop.lon }));
+
+  const terminusA = stops[0]?.name || '';
+  const terminusB = stops[stops.length - 1]?.name || '';
+
+  let shape = [];
+  if (trip.shapeId && shapesById.has(trip.shapeId)) {
+    shape = shapesById.get(trip.shapeId).map(pt => [pt.lat, pt.lon]);
+  }
+  if (shape.length === 0 && stops.length > 1) {
+    shape = stops.map(stop => [stop.lat, stop.lon]);
+  }
+
+  const mainStops = [];
+  if (stops.length > 0) {
+    mainStops.push(stops[0].name);
+    if (stops.length > 2) mainStops.push(stops[Math.floor(stops.length / 2)].name);
+    if (stops.length > 1) mainStops.push(stops[stops.length - 1].name);
+  }
+
+  return {
+    routeId,
+    color: routeMeta?.color,
+    textColor: routeMeta?.textColor,
+    stops,
+    shape,
+    terminusA,
+    terminusB,
+    mainStops: [...new Set(mainStops)].filter(Boolean)
+  };
+}
+
 function replaceOnce(haystack, needle, replacement) {
   const idx = haystack.indexOf(needle);
   if (idx === -1) return haystack;
@@ -198,8 +389,9 @@ function updateBetweenTags(html, tagOpenRegex, tagClose, newInner) {
 function generatePage({ template, lineCode, pdfFilename }) {
   const slug = slugFor(lineCode);
   const display = normalizeLineCode(lineCode).toUpperCase();
+  const lineData = getLineData(display);
   const color = colorFor(display);
-  const textColor = textColorFor(color);
+  const textColor = lineData?.textColor || textColorFor(color);
   const title = `PériMap — Horaires ligne ${display} Péribus Grand Périgueux`;
   const description = `Consultez les horaires et l'itinéraire de la ligne ${display} du réseau Péribus. Accédez aux prochains passages en temps réel et téléchargez la fiche horaire PDF.`;
   const routeText = inferRouteText(display, pdfFilename);
@@ -213,7 +405,8 @@ function generatePage({ template, lineCode, pdfFilename }) {
 
   // Cosmetic: avoid leaving "ligne A" in comments on generated pages
   html = html.replace(/SEO Principal - Ligne A/gi, `SEO Principal - Ligne ${display}`);
-  html = html.replace(/Tracé GTFS réel de la ligne A\s*\([^)]*\)/gi, `Tracé GTFS (désactivé sur cette page SEO)`);
+  html = html.replace(/Tracé GTFS réel de la ligne A\s*\([^)]*\)/gi, `Tracé GTFS (données ${display})`);
+  html = html.replace(/Tous les arrêts GTFS de la ligne A/gi, `Tous les arrêts GTFS de la ligne ${display}`);
 
   // <title>
   html = html.replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`);
@@ -258,7 +451,7 @@ function generatePage({ template, lineCode, pdfFilename }) {
   // badge
   html = html.replace(
     /<div class="line-badge">\s*[^<]*\s*<\/div>/i,
-    `<div class="line-badge line-${slug}">${display}</div>`
+    `<div class="line-badge">${display}</div>`
   );
 
   // Update CSS theme color variables
@@ -280,24 +473,31 @@ function generatePage({ template, lineCode, pdfFilename }) {
   html = html.replace(/class="nav-line-btn line-c active"/g, 'class="nav-line-btn line-c"');
   html = html.replace(/class="nav-line-btn line-d active"/g, 'class="nav-line-btn line-d"');
 
-  // JS: make the GTFS bits generic to avoid showing the line A path/stops for other lines
-  // ROUTE_SHAPE huge array -> empty
-  html = html.replace(/const ROUTE_SHAPE\s*=\s*\[[\s\S]*?\];\s*\n\s*\n\s*\/\/ Tous les arrêts GTFS de la ligne A/,
-    `const ROUTE_SHAPE = [];\n\n        // Config générique de la ligne (données détaillées visibles dans l'app)\n        // Tous les arrêts GTFS de la ligne ${display}`);
+  // JS: inject GTFS shape + stops for the line
+  if (lineData) {
+    const shapeJson = JSON.stringify(lineData.shape);
+    const stopsJson = JSON.stringify(lineData.stops, null, 2);
+    html = html.replace(/const ROUTE_SHAPE\s*=\s*\[[\s\S]*?\];/m, `const ROUTE_SHAPE = ${shapeJson};`);
+    html = html.replace(/stops:\s*\[[\s\S]*?\]\s*\n\s*\}/m, `stops: ${stopsJson}\n        }`);
+  }
 
   // LINE_CONFIG id
   html = html.replace(/id:\s*'A'/g, `id: '${display}'`);
   // LINE_CONFIG color
   html = html.replace(/color:\s*'#[0-9a-fA-F]{6}'/g, `color: '${color}'`);
-  // stops list -> empty
-  html = html.replace(/stops:\s*\[[\s\S]*?\]\s*\n\s*\}\s*;\s*\n\s*\n\s*let map;/,
-    `stops: []\n        };\n\n        let map;`);
+  // Ensure LINE_CONFIG closes correctly when stops injected above
+  html = html.replace(/\}\s*;\s*\n\s*\n\s*let map;/m, `};\n\n        let map;`);
 
-  // stop select options -> minimal placeholder
-  html = html.replace(
-    /<select class="stop-select" id="stop-select">[\s\S]*?<\/select>/i,
-    `<select class="stop-select" id="stop-select">\n                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>\n            </select>`
-  );
+  // stop select options -> per-line stops
+  if (lineData && lineData.stops.length) {
+    const optionsHtml = lineData.stops
+      .map(stop => `                <option value="${escapeHtml(stop.name)}">${escapeHtml(stop.name)}</option>`)
+      .join('\n');
+    html = html.replace(
+      /<select class="stop-select" id="stop-select">[\s\S]*?<\/select>/i,
+      `<select class="stop-select" id="stop-select">\n                <option value="">— Sélectionnez un arrêt —</option>\n${optionsHtml}\n            </select>`
+    );
+  }
 
   // Schema.org bits: keep structure, but ensure the page/name references current line
   html = html.replace(/"@id": "https:\/\/www\.xn--primap-bva\.fr\/horaires-ligne-a\.html"/g, `"@id": "${canonical}"`);
@@ -318,6 +518,8 @@ function generatePage({ template, lineCode, pdfFilename }) {
   html = html.replace(/\{ "@type": "ListItem", "position": 3, "name": "Ligne A" \}/g, `{ "@type": "ListItem", "position": 3, "name": "Ligne ${display}" }`);
 
     // FAQ: replace the A-specific copy with a generic, line-specific FAQ
+    const stopCount = lineData?.stops?.length || 0;
+    const mainStops = lineData?.mainStops?.length ? lineData.mainStops.join(', ') : 'Consultez la fiche PDF.';
     const faqHtml = `
 
       <div class="faq-card">
@@ -327,23 +529,30 @@ function generatePage({ template, lineCode, pdfFilename }) {
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne ${display} ?</summary>
+          <div class="faq-answer">
+            ${lineData?.terminusA && lineData?.terminusB ? `Terminus : <strong>${lineData.terminusA}</strong> et <strong>${lineData.terminusB}</strong>.` : `Consultez la fiche horaire PDF pour les terminus.`}
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne ${display} ?</summary>
+          <div class="faq-answer">
+            ${mainStops}
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne ${display} ?</summary>
+          <div class="faq-answer">
+            ${stopCount ? `Environ <strong>${stopCount}</strong> arrêts sur le parcours (selon le sens).` : `Consultez la fiche PDF pour le nombre d'arrêts.`}
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne ${display} ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/${pdfFilename}" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne ${display} circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -378,10 +587,19 @@ function updateHorairesHubDescriptions(lineCodes) {
   for (const lineCode of lineCodes) {
     const routeText = inferRouteText(lineCode);
     const safeRouteText = escapeHtml(routeText);
+    const meta = routeMetaByLine.get(lineCode.toUpperCase());
+    const bg = meta?.color || colorFor(lineCode);
+    const fg = meta?.textColor || textColorFor(bg);
     const escapedCode = lineCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(<h3>\\s*Horaires ligne ${escapedCode}\\s*<\\/h3>\\s*<p>)([\\s\\S]*?)(<\\/p>)`, 'i');
     if (regex.test(html)) {
       html = html.replace(regex, `$1${safeRouteText}$3`);
+      updated = true;
+    }
+
+    const iconRegex = new RegExp(`(<div class="service-card-icon[^\"]*">)${escapedCode}(<\\/div>)`, 'i');
+    if (iconRegex.test(html)) {
+      html = html.replace(iconRegex, `<div class="service-card-icon" style="background:${bg};color:${fg};">${lineCode}</div>`);
       updated = true;
     }
   }

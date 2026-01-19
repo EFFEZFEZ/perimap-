@@ -81,9 +81,9 @@
             --pm-green-hover: #16a34a;
             --pm-cyan: #00c8ff;
             --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
-            --line-color: #9b59b6;
+            --line-color: #a8cddb;
             --line-color-glow: rgba(253, 208, 3, 0.3);
-            --line-text: #fff;
+            --line-text: #000000;
             --bg-page: #0b1220;
             --bg-card: #0f1724;
             --bg-elevated: #151d2b;
@@ -176,7 +176,7 @@
 
     <main>
         <div class="line-header">
-            <div class="line-badge line-k4a">K4A</div>
+            <div class="line-badge">K4A</div>
             <div class="line-info">
                 <h1>Ligne K4A</h1>
                 <div class="line-direction">Tourny ↔ Dojo Départemental</div>
@@ -195,7 +195,18 @@
                 </button>
             </div>
             <select class="stop-select" id="stop-select">
-                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+                <option value="">— Sélectionnez un arrêt —</option>
+                <option value="St-Augutre">St-Augutre</option>
+                <option value="Jules Vallès">Jules Vallès</option>
+                <option value="Barbette">Barbette</option>
+                <option value="Stade Pareau">Stade Pareau</option>
+                <option value="Dojo Départemental">Dojo Départemental</option>
+                <option value="Lycée Agricole">Lycée Agricole</option>
+                <option value="Pont de la Cité">Pont de la Cité</option>
+                <option value="PEM">PEM</option>
+                <option value="Maréchal Juin">Maréchal Juin</option>
+                <option value="Sainte Cécile">Sainte Cécile</option>
+                <option value="Tourny">Tourny</option>
             </select>
         </div>
 
@@ -242,23 +253,30 @@
         </h2>
 
         <details class="faq-item">
+          <summary>Quels sont les terminus de la ligne K4A ?</summary>
+          <div class="faq-answer">
+            Terminus : <strong>St-Augutre</strong> et <strong>Tourny</strong>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts de la ligne K4A ?</summary>
+          <div class="faq-answer">
+            St-Augutre, Lycée Agricole, Tourny
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Combien d'arrêts desservit la ligne K4A ?</summary>
+          <div class="faq-answer">
+            Environ <strong>11</strong> arrêts sur le parcours (selon le sens).
+          </div>
+        </details>
+
+        <details class="faq-item">
           <summary>Où trouver les horaires de la ligne K4A ?</summary>
           <div class="faq-answer">
             Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K4A_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>La ligne K4A circule-t-elle le dimanche et les jours fériés ?</summary>
-          <div class="faq-answer">
-            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
-          </div>
-        </details>
-
-        <details class="faq-item">
-          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
-          <div class="faq-answer">
-            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
           </div>
         </details>
 
@@ -285,15 +303,70 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script>
-        // Tracé GTFS (désactivé sur cette page SEO)
-        const ROUTE_SHAPE = [];
-
-        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tracé GTFS (données K4A)
+        const ROUTE_SHAPE = [[45.18322,0.680283],[45.181595,0.682136],[45.18155,0.68238],[45.18133,0.68267],[45.1811,0.68295],[45.18089,0.68316],[45.18068,0.68335],[45.18049,0.68349],[45.18033,0.68366],[45.18001,0.68395],[45.17979,0.68415],[45.17962,0.68432],[45.17948,0.68451],[45.1792,0.68496],[45.17905,0.68519],[45.1788,0.68559],[45.17852,0.6858],[45.17852,0.6858],[45.17816,0.68643],[45.17799,0.68682],[45.17782,0.68722],[45.17757,0.68771],[45.17754,0.68778],[45.17743,0.68811],[45.17734,0.68856],[45.17728,0.68877],[45.17721,0.68893],[45.17709,0.68911],[45.17678,0.68948],[45.17652,0.68978],[45.1763,0.68998],[45.17578,0.69031],[45.17558,0.69037],[45.17524,0.69038],[45.17522,0.690299],[45.17524,0.69038],[45.17517,0.69038],[45.17479,0.69035],[45.17437,0.69035],[45.17398,0.6904],[45.17373,0.69043],[45.17361,0.69043],[45.17286,0.68999],[45.17247,0.68976],[45.17218,0.68951],[45.17187,0.68918],[45.17121,0.68864],[45.17103,0.68867],[45.17102,0.68866],[45.17101,0.68865],[45.17097,0.68866],[45.17095,0.68869],[45.17095,0.68872],[45.170788,0.688775],[45.170788,0.688775],[45.17066,0.68895],[45.17065,0.68894],[45.17064,0.68893],[45.17061,0.68892],[45.17055,0.68897],[45.17055,0.68905],[45.17059,0.68911],[45.17063,0.68911],[45.17064,0.6891],[45.17065,0.6891],[45.17108,0.68991],[45.17195,0.69153],[45.17291,0.6933],[45.17451,0.69623],[45.17484,0.69688],[45.17487,0.697026],[45.17487,0.697026],[45.17507,0.69726],[45.17513,0.69733],[45.17525,0.69744],[45.17537,0.69754],[45.17553,0.69771],[45.17561,0.6979],[45.17565,0.6981],[45.17573,0.69859],[45.17578,0.69875],[45.17593,0.69896],[45.176,0.69901],[45.17613,0.69906],[45.17633,0.69904],[45.17642,0.699],[45.17657,0.69889],[45.17681,0.69871],[45.17703,0.69857],[45.17726,0.6985],[45.17759,0.69849],[45.17849,0.69858],[45.1796,0.69871],[45.17988,0.69877],[45.18013,0.69885],[45.18076,0.69907],[45.18171,0.69939],[45.18188,0.69938],[45.18202,0.69934],[45.18243,0.69919],[45.18278,0.6991],[45.18319,0.69902],[45.18361,0.69887],[45.18377,0.69883],[45.18407,0.69882],[45.18416,0.69884],[45.18427,0.69881],[45.18451,0.69869],[45.18463,0.69864],[45.18469,0.69864],[45.18488,0.69868],[45.18497,0.69874],[45.1851,0.69891],[45.18513,0.69898],[45.1851,0.69933],[45.18508,0.69934],[45.18506,0.69936],[45.18504,0.69943],[45.18497,0.69945],[45.18503,0.69949],[45.18504,0.69951],[45.18504,0.69954],[45.18508,0.6996],[45.1851,0.69962],[45.18515,0.69987],[45.18521,0.69996],[45.18521,0.7],[45.1853,0.70034],[45.18543,0.70089],[45.18583,0.70253],[45.18642,0.7051],[45.18667,0.70611],[45.18667,0.70615],[45.18684,0.70607],[45.18695,0.70634],[45.187,0.70649],[45.18701,0.70655],[45.18699,0.70658],[45.18673,0.70681],[45.18651,0.70698],[45.1864,0.70695],[45.1864,0.70695],[45.18519,0.711709],[45.18528,0.71225],[45.18538,0.71254],[45.18543,0.71263],[45.18542,0.71266],[45.18541,0.71269],[45.1854,0.71276],[45.18547,0.71289],[45.18537,0.71309],[45.18481,0.71456],[45.18465,0.71502],[45.18459,0.71514],[45.18451,0.71539],[45.18448,0.71562],[45.18426,0.71627],[45.18418,0.71651],[45.18409,0.71667],[45.18391,0.71735],[45.18374,0.71793],[45.1837,0.71808],[45.18355,0.71889],[45.18364,0.71893],[45.18389,0.71896],[45.18399,0.71894],[45.18441,0.71898],[45.18455,0.71908],[45.18501,0.71957],[45.18549,0.71999],[45.1857,0.72015],[45.18613,0.72058],[45.1868,0.72128],[45.18698,0.72155],[45.18696,0.7216],[45.18696,0.72169],[45.187,0.72181],[45.18703,0.72184],[45.18712,0.72195],[45.18717,0.7221],[45.18718,0.72221],[45.187096,0.722511]];
+        
         // Tous les arrêts GTFS de la ligne K4A
         const LINE_CONFIG = {
             id: 'K4A',
-            color: '#9b59b6',
-            stops: []
+            color: '#a8cddb',
+            stops: [
+  {
+    "name": "St-Augutre",
+    "lat": 45.18322,
+    "lon": 0.680283
+  },
+  {
+    "name": "Jules Vallès",
+    "lat": 45.181591,
+    "lon": 0.682292
+  },
+  {
+    "name": "Barbette",
+    "lat": 45.178822,
+    "lon": 0.685508
+  },
+  {
+    "name": "Stade Pareau",
+    "lat": 45.17522,
+    "lon": 0.69039
+  },
+  {
+    "name": "Dojo Départemental",
+    "lat": 45.170788,
+    "lon": 0.688775
+  },
+  {
+    "name": "Lycée Agricole",
+    "lat": 45.17487,
+    "lon": 0.697026
+  },
+  {
+    "name": "Pont de la Cité",
+    "lat": 45.184902,
+    "lon": 0.699493
+  },
+  {
+    "name": "PEM",
+    "lat": 45.186497,
+    "lon": 0.706945
+  },
+  {
+    "name": "Maréchal Juin",
+    "lat": 45.185188,
+    "lon": 0.711709
+  },
+  {
+    "name": "Sainte Cécile",
+    "lat": 45.18399,
+    "lon": 0.71894
+  },
+  {
+    "name": "Tourny",
+    "lat": 45.187096,
+    "lon": 0.722511
+  }
+]
         };
 
         let map;
@@ -353,7 +426,7 @@
             // Highlight le marker sélectionné
             if (stopMarkers[stopName]) {
                 selectedMarker = stopMarkers[stopName];
-                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#9b59b6', radius: 10 });
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#a8cddb', radius: 10 });
             }
             
             // Afficher les prochains départs
