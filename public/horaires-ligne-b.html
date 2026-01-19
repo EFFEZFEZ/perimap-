@@ -116,12 +116,16 @@
             inset: 0;
         }
         .page-wrapper {
-            min-height: 100%;
+            height: 100%;
+            padding-top: 104px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: none;
         }
         
-        #main-header { background: var(--bg-page); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 0 1rem; position: sticky; top: 0; z-index: 1050; }
+        #main-header { background: var(--bg-page); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 0 1rem; position: fixed;
+            left: 0;
+            right: 0; top: 0; z-index: 1050; }
         .header-content { display: flex; align-items: center; justify-content: space-between; height: 52px; max-width: 1200px; margin: 0 auto; }
         .mobile-menu-toggle { display: flex; flex-direction: column; justify-content: center; gap: 5px; width: 44px; height: 44px; background: transparent; border: none; cursor: pointer; padding: 10px; }
         .mobile-menu-toggle span { display: block; height: 2px; width: 20px; background: var(--text-primary); border-radius: 2px; }
@@ -135,7 +139,9 @@
         .mobile-menu-items { padding-left: 12px; display: none; }
         .mobile-menu-category[aria-expanded="true"] + .mobile-menu-items { display: block; }
         .mobile-menu-item { display: block; padding: 10px 0; color: var(--text-secondary); text-decoration: none; }
-        .horaires-top-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--bg-page); border-bottom: 1px solid var(--border); position: sticky; top: 52px; z-index: 999; }
+        .horaires-top-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--bg-page); border-bottom: 1px solid var(--border); position: fixed;
+            left: 0;
+            right: 0; top: 52px; z-index: 999; }
         .topbar-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: transparent; border: 1px solid var(--border); border-radius: 20px; color: var(--text-primary); font-size: 13px; font-weight: 600; cursor: pointer; }
         .topbar-pill:hover { background: var(--bg-elevated); border-color: var(--pm-green); }
         .topbar-pill svg { width: 16px; height: 16px; }
@@ -198,7 +204,6 @@
     </style>
 </head>
 <body>
-    <div class="page-wrapper">
     <header id="main-header">
         <div class="header-content">
             <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -221,6 +226,8 @@
         <button class="topbar-pill app-back-btn" aria-label="Retour" onclick="window.location.href='/horaires.html'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>Retour</span></button>
         <h2>Horaires</h2>
     </div>
+
+    <div class="page-wrapper">
     <main>
         <div class="line-header">
             <div class="line-badge">B</div>

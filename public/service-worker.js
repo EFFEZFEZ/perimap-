@@ -1,12 +1,12 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v407 - Version ultra-légère SANS blocage
+ * Service Worker v408 - Version ultra-légère SANS blocage
  * 
  * AUCUNE restriction, AUCUN nettoyage agressif
  * Network-first pour tout, cache en fallback
  */
 
-const CACHE_VERSION = 'v407';
+const CACHE_VERSION = 'v408';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher (minimum vital)
