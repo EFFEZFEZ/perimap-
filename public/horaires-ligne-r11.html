@@ -7,7 +7,7 @@
     <!-- SEO Principal - Ligne R11 -->
     <title>PériMap — Horaires ligne R11 Péribus Grand Périgueux</title>
     <meta name="description" content="Consultez les horaires et l'itinéraire de la ligne R11 du réseau Péribus. Accédez aux prochains passages en temps réel et téléchargez la fiche horaire PDF.">
-    <meta name="keywords" content="ligne R11 péribus, horaires ligne R11, bus ligne R11 périgueux, arrêts ligne R11, péribus R11, grand périgueux, horaires péribus">
+        <meta name="keywords" content="ligne R11 péribus, horaires ligne R11 péribus, bus ligne R11 Périgueux, arrêts ligne R11, péribus R11, transport Grand Périgueux, horaires péribus 2026, bus Périgueux temps réel">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="canonical" href="https://www.xn--primap-bva.fr/horaires-ligne-r11.html">
 
@@ -33,6 +33,7 @@
     <link rel="icon" href="/icons/perimap-logo.webp" type="image/webp">
     <link rel="apple-touch-icon" href="/icons/icon-192.png" sizes="192x192">
 
+    
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -41,36 +42,71 @@
                 "@type": "WebPage",
                 "@id": "https://www.xn--primap-bva.fr/horaires-ligne-r11.html",
                 "url": "https://www.xn--primap-bva.fr/horaires-ligne-r11.html",
-                "name": "Ligne R11 Péribus — Horaires",
-                "description": "Horaires ligne R11 Péribus (Grand Périgueux).",
+                "name": "Ligne R11 Péribus — Horaires Bus Périgueux",
+                "description": "Horaires ligne R11 Péribus : prochains passages en temps réel et fiche PDF.",
                 "inLanguage": "fr-FR",
+                "isPartOf": { "@id": "https://www.xn--primap-bva.fr/#website" },
+                "about": { "@id": "https://www.xn--primap-bva.fr/horaires-ligne-r11.html#busroute" },
                 "breadcrumb": {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.xn--primap-bva.fr/" },
-                        { "@type": "ListItem", "position": 2, "name": "Horaires", "item": "https://www.xn--primap-bva.fr/horaires.html" },
+                        { "@type": "ListItem", "position": 2, "name": "Horaires Péribus", "item": "https://www.xn--primap-bva.fr/horaires.html" },
                         { "@type": "ListItem", "position": 3, "name": "Ligne R11" }
                     ]
                 }
             },
             {
-                "@type": "BusTrip",
-                "name": "Péribus Ligne R11",
-                "description": "Horaires et itinéraire de la ligne R11 Péribus (Grand Périgueux).",
-                "provider": { "@type": "Organization", "name": "Péribus" },
-                "busName": "Ligne R11",
-                "departureStation": { "@type": "BusStation", "name": "Grand Périgueux" },
-                "arrivalStation": { "@type": "BusStation", "name": "Grand Périgueux" }
+                "@type": "BusRoute",
+                "@id": "https://www.xn--primap-bva.fr/horaires-ligne-r11.html#busroute",
+                "name": "Ligne R11 Péribus",
+                "description": "Ligne R11 du réseau Péribus dans le Grand Périgueux, horaires et arrêts à jour.",
+                "url": "https://www.xn--primap-bva.fr/horaires-ligne-r11.html",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Péribus",
+                    "url": "https://www.grandperigueux.fr/Annuaire-des-transports/Peribus"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Périgueux",
+                    "containedInPlace": {
+                        "@type": "AdministrativeArea",
+                        "name": "Dordogne, Nouvelle-Aquitaine, France"
+                    }
+                }
+            },
+            {
+                "@type": "FAQPage",
+                "mainEntity": [
+                    {
+                        "@type": "Question",
+                        "name": "Quels sont les horaires de la ligne R11 Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Consultez les horaires en temps réel et la fiche PDF de la ligne R11 Péribus directement sur PériMap."
+                        }
+                    },
+                    {
+                        "@type": "Question",
+                        "name": "Quels arrêts dessert la ligne R11 Péribus ?",
+                        "acceptedAnswer": {
+                            "@type": "Answer",
+                            "text": "Retrouvez la liste des arrêts et l'itinéraire complet de la ligne R11 dans la page horaires et la fiche PDF associée."
+                        }
+                    }
+                ]
             }
         ]
     }
     </script>
+
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 
-    <meta name="theme-color" content="#22c55e">
+        <meta name="theme-color" content="#107f73">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Périmap">
+        <meta name="apple-mobile-web-app-title" content="Ligne R11 Péribus">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
