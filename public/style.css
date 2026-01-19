@@ -170,6 +170,124 @@ body.dark-theme .map-btn-locate.has-error {
 .leaflet-bottom.leaflet-right .map-floating-controls {
     display: none !important;
 }
+
+/* =========================================
+ * HOME - ACCÈS DIRECT (IDFM-style)
+ * ========================================= */
+.quick-access-lines {
+    padding: 12px 16px 4px;
+}
+
+.quick-access-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.quick-access-title {
+    margin: 0 0 10px;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+}
+
+.quick-access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+@media (min-width: 900px) {
+    .quick-access-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.quick-access-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    box-shadow: var(--elevation-1);
+    transition: transform var(--transition-quick), box-shadow var(--transition-quick), border-color var(--transition-quick);
+}
+
+.quick-access-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-2);
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.quick-access-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--elevation-1);
+}
+
+.quick-access-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.quick-access-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.quick-access-name {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.1;
+}
+
+.quick-access-dest {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badges lignes - demande UX (A rouge, B vert, C bleu, D jaune) */
+.quick-access-btn.line-a .quick-access-badge { background: #ef4444; color: #fff; }
+.quick-access-btn.line-b .quick-access-badge { background: #22c55e; color: #0b1220; }
+.quick-access-btn.line-c .quick-access-badge { background: #3b82f6; color: #fff; }
+.quick-access-btn.line-d .quick-access-badge { background: #facc15; color: #0b1220; }
+
+/* =========================================
+ * BANDEAU AVIS (visible + élégant)
+ * ========================================= */
+.rating-banner {
+    max-width: 900px;
+    margin: 18px auto 12px;
+    padding: 14px 16px;
+    text-align: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--elevation-1);
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 600;
+    color: var(--text-primary);
+}
     
     .map-btn-locate svg {
         width: 20px;

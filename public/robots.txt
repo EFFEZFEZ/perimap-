@@ -12,6 +12,7 @@ Allow: /horaires-ligne-a.html
 Allow: /horaires-ligne-b.html
 Allow: /horaires-ligne-c.html
 Allow: /horaires-ligne-d.html
+Allow: /horaires-ligne-
 Allow: /itineraire.html
 Allow: /trafic.html
 Allow: /carte.html

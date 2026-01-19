@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr" prefix="og: https://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+
+    <!-- SEO Principal - Ligne R4 -->
+    <title>PériMap — Horaires ligne R4 Péribus Grand Périgueux</title>
+    <meta name="description" content="Consultez les horaires et l'itinéraire de la ligne R4 du réseau Péribus. Accédez aux prochains passages en temps réel et téléchargez la fiche horaire PDF.">
+    <meta name="keywords" content="ligne R4 péribus, horaires ligne R4, bus ligne R4 périgueux, arrêts ligne R4, péribus R4, grand périgueux, horaires péribus">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="https://www.xn--primap-bva.fr/horaires-ligne-r4.html">
+
+    <meta name="geo.region" content="FR-NAQ">
+    <meta name="geo.placename" content="Périgueux, Dordogne, France">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Périmap">
+    <meta property="og:title" content="PériMap — Horaires ligne R4 Péribus Grand Périgueux">
+    <meta property="og:description" content="Horaires ligne R4 Péribus : prochains passages et fiche PDF. Périgueux ↔ Trélissac ↔ Boulazac (itinéraire indicatif).">
+    <meta property="og:url" content="https://www.xn--primap-bva.fr/horaires-ligne-r4.html">
+    <meta property="og:image" content="https://www.xn--primap-bva.fr/icons/og-image.png">
+    <meta property="og:locale" content="fr_FR">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PériMap — Horaires ligne R4 Péribus Grand Périgueux">
+    <meta name="twitter:description" content="Prochains passages et fiche PDF — ligne R4 Péribus (Grand Périgueux).">
+    <meta name="twitter:image" content="https://www.xn--primap-bva.fr/icons/og-image.png">
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192">
+    <link rel="icon" href="/icons/icon-512.png" type="image/png" sizes="512x512">
+    <link rel="icon" href="/icons/perimap-logo.webp" type="image/webp">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" sizes="192x192">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": "https://www.xn--primap-bva.fr/horaires-ligne-r4.html",
+                "url": "https://www.xn--primap-bva.fr/horaires-ligne-r4.html",
+                "name": "Ligne R4 Péribus — Horaires",
+                "description": "Horaires ligne R4 Péribus (Grand Périgueux).",
+                "inLanguage": "fr-FR",
+                "breadcrumb": {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://www.xn--primap-bva.fr/" },
+                        { "@type": "ListItem", "position": 2, "name": "Horaires", "item": "https://www.xn--primap-bva.fr/horaires.html" },
+                        { "@type": "ListItem", "position": 3, "name": "Ligne R4" }
+                    ]
+                }
+            },
+            {
+                "@type": "BusTrip",
+                "name": "Péribus Ligne R4",
+                "description": "Horaires et itinéraire de la ligne R4 Péribus (Grand Périgueux).",
+                "provider": { "@type": "Organization", "name": "Péribus" },
+                "busName": "Ligne R4",
+                "departureStation": { "@type": "BusStation", "name": "Grand Périgueux" },
+                "arrivalStation": { "@type": "BusStation", "name": "Grand Périgueux" }
+            }
+        ]
+    }
+    </script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+    <meta name="theme-color" content="#22c55e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Périmap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pm-green: #22c55e;
+            --pm-green-hover: #16a34a;
+            --pm-cyan: #00c8ff;
+            --pm-gradient: linear-gradient(135deg, #22c55e 0%, #00c8ff 100%);
+            --line-color: #e74c3c;
+            --line-color-glow: rgba(253, 208, 3, 0.3);
+            --line-text: #fff;
+            --bg-page: #0b1220;
+            --bg-card: #0f1724;
+            --bg-elevated: #151d2b;
+            --text-primary: #e6eef8;
+            --text-secondary: #9fb3c9;
+            --text-muted: #6b7d93;
+            --border: rgba(255,255,255,0.08);
+            --font: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font); background: var(--bg-page); color: var(--text-primary); min-height: 100vh; line-height: 1.5; }
+        
+        .page-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        .logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-primary); }
+        .logo-link img { width: 32px; height: 32px; }
+        .logo-link span { font-weight: 700; font-size: 1.1rem; background: var(--pm-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-lines { display: flex; gap: 6px; }
+        .nav-line-btn { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; text-decoration: none; transition: transform 0.15s ease; }
+        .nav-line-btn:hover { transform: scale(1.08); }
+        .nav-line-btn.active { box-shadow: 0 0 0 3px rgba(255,255,255,0.25); transform: scale(1.08); }
+        .nav-line-btn.line-a { background: #fdd003; color: #000; }
+        .nav-line-btn.line-b { background: #1e91ff; color: #000; }
+        .nav-line-btn.line-c { background: #dd1b75; color: #fff; }
+        .nav-line-btn.line-d { background: #41ae18; color: #fff; }
+        
+        main { padding: 16px; max-width: 600px; margin: 0 auto; }
+        .line-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+        .line-badge { width: 52px; height: 52px; border-radius: 12px; background: var(--line-color); color: var(--line-text); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; flex-shrink: 0; }
+        .line-info h1 { font-size: 1.25rem; font-weight: 700; margin-bottom: 2px; }
+        .line-direction { color: var(--text-secondary); font-size: 0.85rem; }
+        
+        .map-container { position: relative; z-index: 0; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px; }
+        #line-map { width: 100%; height: 280px; }
+        
+        .stop-selector { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
+        .stop-selector-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .stop-selector-header h2 { font-size: 0.95rem; font-weight: 600; flex: 1; }
+        .locate-btn { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .locate-btn:hover { background: var(--pm-green); color: #000; border-color: var(--pm-green); }
+        .locate-btn.loading { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .stop-select { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); font-family: var(--font); font-size: 0.95rem; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239fb3c9' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+        .stop-select:focus { outline: none; border-color: var(--pm-green); }
+        .stop-select option { background: var(--bg-card); color: var(--text-primary); }
+        
+        .departures { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
+        .departures-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .departures-header h2 { font-size: 0.95rem; font-weight: 600; }
+        .realtime-badge { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--pm-green); font-weight: 500; }
+        .departures-placeholder { text-align: center; padding: 24px 0; color: var(--text-muted); font-size: 0.9rem; }
+        
+        .faq-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; }
+        .faq-card h2 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .faq-card h2 svg { width: 18px; height: 18px; color: var(--line-color); }
+        .faq-item { border-bottom: 1px solid var(--border); }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-item summary { padding: 12px 0; cursor: pointer; font-weight: 500; font-size: 0.9rem; color: var(--text-primary); list-style: none; display: flex; align-items: center; justify-content: space-between; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '+'; font-size: 1.2rem; color: var(--line-color); font-weight: 300; }
+        .faq-item[open] summary::after { content: '−'; }
+        .faq-answer { padding: 0 0 12px 0; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+        
+        .actions { display: grid; gap: 10px; }
+        .action-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); text-decoration: none; color: var(--text-primary); transition: all 0.2s ease; }
+        .action-btn:hover { background: var(--bg-elevated); border-color: var(--pm-green); }
+        .action-btn svg { width: 20px; height: 20px; color: var(--pm-green); }
+        .action-btn span { font-size: 0.95rem; font-weight: 500; }
+        
+        .leaflet-container { background: var(--bg-card); }
+        .leaflet-control-attribution { background: rgba(11, 18, 32, 0.8) !important; color: var(--text-muted) !important; font-size: 10px; }
+        .leaflet-control-attribution a { color: var(--text-secondary) !important; }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <a href="/" class="logo-link">
+            <img src="/icons/perimap-logo.webp" alt="Périmap">
+            <span>Périmap</span>
+        </a>
+        <nav class="nav-lines">
+            <a href="/horaires-ligne-a.html" class="nav-line-btn line-a" title="Ligne A">A</a>
+            <a href="/horaires-ligne-b.html" class="nav-line-btn line-b" title="Ligne B">B</a>
+            <a href="/horaires-ligne-c.html" class="nav-line-btn line-c" title="Ligne C">C</a>
+            <a href="/horaires-ligne-d.html" class="nav-line-btn line-d" title="Ligne D">D</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="line-header">
+            <div class="line-badge line-r4">R4</div>
+            <div class="line-info">
+                <h1>Ligne R4</h1>
+                <div class="line-direction">Périgueux ↔ Trélissac ↔ Boulazac</div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="line-map"></div>
+        </div>
+
+        <div class="stop-selector">
+            <div class="stop-selector-header">
+                <h2>Choisir un arrêt</h2>
+                <button class="locate-btn" id="locate-btn" title="Me localiser">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/></svg>
+                </button>
+            </div>
+            <select class="stop-select" id="stop-select">
+                <option value="">— Ouvrez PériMap pour choisir un arrêt —</option>
+            </select>
+        </div>
+
+        <div class="departures">
+            <div class="departures-header">
+                <h2>Prochains passages</h2>
+                <span class="realtime-badge" id="realtime-badge" style="display: none;">
+                    <svg width="12" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="5" y="5" width="3" height="7" rx="0.5"/><rect x="10" y="1" width="3" height="11" rx="0.5"/></svg>
+                    Temps réel
+                </span>
+            </div>
+            <div id="departures-content">
+                <div class="departures-placeholder">Sélectionnez un arrêt pour afficher les prochains passages</div>
+            </div>
+        </div>
+        
+        <style>
+            .direction-block { margin-bottom: 16px; }
+            .direction-header { 
+                display: flex; align-items: center; gap: 8px; 
+                padding: 10px 14px; background: var(--bg-elevated); 
+                border-radius: var(--radius-sm); margin-bottom: 8px;
+                font-weight: 600; font-size: 0.9rem; color: var(--text-primary);
+            }
+            .direction-header .arrow { color: var(--line-color); font-size: 1.2rem; }
+            .direction-times { 
+                display: flex; gap: 10px; flex-wrap: wrap; 
+                padding: 0 8px;
+            }
+            .time-badge { 
+                background: var(--bg-elevated); padding: 8px 16px; 
+                border-radius: var(--radius-sm); font-weight: 600; 
+                font-size: 1.1rem; color: var(--text-primary);
+                border: 1px solid var(--border);
+            }
+            .time-badge.realtime { border-color: var(--pm-green); color: var(--pm-green); }
+            .no-departures { color: var(--text-muted); font-style: italic; padding: 8px; }
+        </style>
+
+      <div class="faq-card">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Questions fréquentes
+        </h2>
+
+        <details class="faq-item">
+          <summary>Où trouver les horaires de la ligne R4 ?</summary>
+          <div class="faq-answer">
+            Consultez les <strong>prochains passages</strong> dans l'app PériMap et téléchargez la <strong>fiche horaire PDF</strong> (périodes, vacances, jours fériés) : <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf" target="_blank" rel="noopener">ouvrir la fiche</a>.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>La ligne R4 circule-t-elle le dimanche et les jours fériés ?</summary>
+          <div class="faq-answer">
+            Cela dépend de la période et du calendrier du réseau. Référez-vous à la <strong>fiche PDF</strong> et aux informations affichées dans l'app.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Quels sont les principaux arrêts et correspondances ?</summary>
+          <div class="faq-answer">
+            Les arrêts et correspondances peuvent varier selon le sens et la période. Consultez la <strong>carte interactive</strong> et la fiche PDF pour le détail.
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>Pourquoi certains horaires ne s'affichent pas ici ?</summary>
+          <div class="faq-answer">
+            Cette page est une <strong>fiche SEO statique</strong>. Pour les horaires temps réel et la sélection d'arrêt, utilisez l'application PériMap.
+          </div>
+        </details>
+      </div>
+  
+
+        <div class="actions">
+            <a href="/#carte?ligne=R4" class="action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>Voir la ligne sur la carte interactive</span>
+            </a>
+            <a href="/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf" class="action-btn" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Télécharger la fiche horaires PDF</span>
+            </a>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        // Tracé GTFS (désactivé sur cette page SEO)
+        const ROUTE_SHAPE = [];
+
+        // Config générique de la ligne (données détaillées visibles dans l'app)
+        // Tous les arrêts GTFS de la ligne R4
+        const LINE_CONFIG = {
+            id: 'R4',
+            color: '#e74c3c',
+            stops: []
+        };
+
+        let map;
+        let stopMarkers = {};
+        let selectedMarker = null;
+        
+        function initMap() {
+            map = L.map('line-map', { 
+                center: [45.195, 0.695], 
+                zoom: 13, 
+                zoomControl: false, 
+                attributionControl: true,
+                dragging: false,
+                touchZoom: false,
+                scrollWheelZoom: false,
+                doubleClickZoom: false,
+                boxZoom: false,
+                keyboard: false
+            });
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>',
+                maxZoom: 19
+            }).addTo(map);
+
+            const routeLayer = L.polyline(ROUTE_SHAPE, { color: LINE_CONFIG.color, weight: 4, opacity: 0.9 }).addTo(map);
+
+            LINE_CONFIG.stops.forEach((stop, index) => {
+                const isTerminus = index === 0 || index === LINE_CONFIG.stops.length - 1;
+                const marker = L.circleMarker([stop.lat, stop.lon], {
+                    radius: isTerminus ? 8 : 5,
+                    fillColor: '#ffffff',
+                    color: LINE_CONFIG.color,
+                    weight: 2,
+                    fillOpacity: 1
+                }).addTo(map);
+                stopMarkers[stop.name] = marker;
+            });
+
+            map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+            setTimeout(() => map.invalidateSize(), 100);
+        }
+        
+        function highlightStop(stopName) {
+            // Reset tous les markers
+            LINE_CONFIG.stops.forEach((stop, index) => {
+                const isTerminus = index === 0 || index === LINE_CONFIG.stops.length - 1;
+                if (stopMarkers[stop.name]) {
+                    stopMarkers[stop.name].setStyle({ 
+                        fillColor: '#ffffff', 
+                        color: LINE_CONFIG.color, 
+                        radius: isTerminus ? 8 : 5 
+                    });
+                }
+            });
+            
+            // Highlight le marker sélectionné
+            if (stopMarkers[stopName]) {
+                selectedMarker = stopMarkers[stopName];
+                selectedMarker.setStyle({ fillColor: LINE_CONFIG.color, color: '#e74c3c', radius: 10 });
+            }
+            
+            // Afficher les prochains départs
+            showDepartures(stopName);
+        }
+        
+        // Horaires théoriques simulés par direction (à remplacer par API réelle)
+        function getTheoreticalDepartures(stopName) {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            // Générer des horaires réalistes basés sur l'heure actuelle
+            const departures = { dirA: [], dirB: [] };
+            
+            // Fréquence moyenne ~20-30 min
+            for (let i = 0; i < 6; i++) {
+                const offsetA = Math.floor(Math.random() * 10) + i * 25 + 5;
+                const offsetB = Math.floor(Math.random() * 10) + i * 25 + 12;
+                
+                const timeA = currentMinutes + offsetA;
+                const timeB = currentMinutes + offsetB;
+                
+                if (timeA < 1200) { // Avant 20h
+                    departures.dirA.push({
+                        time: `${String(Math.floor(timeA / 60)).padStart(2, '0')}:${String(timeA % 60).padStart(2, '0')}`,
+                        realtime: false
+                    });
+                }
+                if (timeB < 1200) {
+                    departures.dirB.push({
+                        time: `${String(Math.floor(timeB / 60)).padStart(2, '0')}:${String(timeB % 60).padStart(2, '0')}`,
+                        realtime: false
+                    });
+                }
+            }
+            
+            return {
+                dirA: departures.dirA.slice(0, 3),
+                dirB: departures.dirB.slice(0, 3)
+            };
+        }
+        
+        function showDepartures(stopName) {
+            const content = document.getElementById('departures-content');
+            const departures = getTheoreticalDepartures(stopName);
+            
+            const terminus1 = LINE_CONFIG.stops[0].name;
+            const terminus2 = LINE_CONFIG.stops[LINE_CONFIG.stops.length - 1].name;
+            
+            let html = `
+                <div class="direction-block">
+                    <div class="direction-header">
+                        <span class="arrow">→</span>
+                        Direction ${terminus2}
+                    </div>
+                    <div class="direction-times">
+                        ${departures.dirA.length > 0 
+                            ? departures.dirA.map(d => `<span class="time-badge ${d.realtime ? 'realtime' : ''}">${d.time}</span>`).join('')
+                            : '<span class="no-departures">Aucun départ prévu</span>'
+                        }
+                    </div>
+                </div>
+                <div class="direction-block">
+                    <div class="direction-header">
+                        <span class="arrow">→</span>
+                        Direction ${terminus1}
+                    </div>
+                    <div class="direction-times">
+                        ${departures.dirB.length > 0 
+                            ? departures.dirB.map(d => `<span class="time-badge ${d.realtime ? 'realtime' : ''}">${d.time}</span>`).join('')
+                            : '<span class="no-departures">Aucun départ prévu</span>'
+                        }
+                    </div>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        document.getElementById('stop-select').addEventListener('change', function() {
+            if (this.value) highlightStop(this.value);
+        });
+
+        document.getElementById('locate-btn').addEventListener('click', function() {
+            const btn = this;
+            btn.classList.add('loading');
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        btn.classList.remove('loading');
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+                        let closest = null, minDist = Infinity;
+                        LINE_CONFIG.stops.forEach(stop => {
+                            const dist = Math.sqrt(Math.pow(stop.lat - userLat, 2) + Math.pow(stop.lon - userLon, 2));
+                            if (dist < minDist) { minDist = dist; closest = stop; }
+                        });
+                        if (closest) {
+                            document.getElementById('stop-select').value = closest.name;
+                            highlightStop(closest.name);
+                        }
+                    },
+                    () => { btn.classList.remove('loading'); alert('Impossible d\'obtenir votre position.'); },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                btn.classList.remove('loading');
+                alert('Géolocalisation non disponible.');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+</html>

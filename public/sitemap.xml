@@ -75,6 +75,241 @@
         <mobile:mobile/>
     </url>
 
+    <!-- ===== PAGES PAR LIGNE - LIGNES SECONDAIRES (granularité totale) ===== -->
+    <!-- Une page par ligne pour capturer la longue traîne locale -->
+
+    <!-- Lignes E -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e1.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e2.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e4.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e5.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e6.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-e7.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+
+    <!-- Lignes K -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k1a.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k1b.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k2.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k3a.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k3b.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k4a.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k4b.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k5.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-k6.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+
+    <!-- Lignes N -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-n.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.75</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-n1.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.75</priority>
+        <mobile:mobile/>
+    </url>
+
+    <!-- Lignes R -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r1.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r2.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r3.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r4.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r5.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r6.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r7.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r8.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r9.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r10.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r11.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r12.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r13.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r14.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/horaires-ligne-r15.html</loc>
+        <lastmod>2026-01-19</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+        <mobile:mobile/>
+    </url>
+
     <!-- ===== INFORMATIONS VOYAGEURS ===== -->
     
     <!-- Info trafic temps réel -->
@@ -105,11 +340,204 @@
         <mobile:mobile/>
     </url>
     
-    <!-- ===== RESSOURCES PDF ===== -->
+    <!-- ===== RESSOURCES PDF - FICHES HORAIRES ===== -->
     
+    <!-- Plan global du réseau -->
     <url>
         <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_peribus_plan_reseau_bus_.pdf</loc>
         <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+    
+    <!-- Fiches horaires - Lignes principales (A, B, C, D) -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_A_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_B_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_C_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_D_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- Fiches horaires - Lignes E (Express) -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e1_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e2_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e4_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e5_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e6_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_e7_12_janvier.pdf</loc>
+        <lastmod>2026-01-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- Fiches horaires - Lignes K (Urbaines secondaires) -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_k1B_12_janvier.pdf</loc>
+        <lastmod>2026-01-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_k2_12_janvier.pdf</loc>
+        <lastmod>2026-01-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K3A_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K3B_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K4A_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K4B_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K5_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_K6_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_K1A_12_janv_26.pdf</loc>
+        <lastmod>2026-01-12</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- Fiches horaires - Lignes N (Nuit) -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_N1_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_N_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- Fiches horaires - Lignes R (Périurbaines/Régionales) -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R1_R2_R3_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R4_R5_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R6_R7_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R8_R9_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R10_R11_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R12_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R13_R14_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_fiche_horaires_ligne_R15_sept_2025.pdf</loc>
+        <lastmod>2025-09-01</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- Documents complémentaires -->
+    <url>
+        <loc>https://www.xn--primap-bva.fr/data/fichehoraire/grandperigueux_peribus_depliant_tarifs_bus_2025.pdf</loc>
+        <lastmod>2025-01-01</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
