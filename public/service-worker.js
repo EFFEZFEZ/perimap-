@@ -6,7 +6,7 @@
  * Network-first pour tout, cache en fallback
  */
 
-const CACHE_VERSION = 'v402';
+const CACHE_VERSION = 'v403';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher (minimum vital)
