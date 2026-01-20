@@ -59,11 +59,22 @@
         }
     </script>
     <meta name="peribus-api-base" content="https://www.xn--primap-bva.fr">
+    <meta name="peribus-neon-rest" content="https://ep-fragrant-silence-abgl9bv2.apirest.eu-west-2.aws.neon.tech/neondb/rest/v1">
+    <!-- Clé Neon injectée par Vercel: __NEON_API_KEY__ sera remplacé au build -->
+    <meta name="peribus-neon-key" content="__NEON_API_KEY__">
     <script>
         (function () {
             const meta = document.querySelector('meta[name="peribus-api-base"]');
             const base = (meta?.getAttribute('content') || '').replace(/\/+$/, '');
             window.PERIBUS_API_BASE_URL = base;
+            const neonMeta = document.querySelector('meta[name="peribus-neon-rest"]');
+            const neonBase = (neonMeta?.getAttribute('content') || '').replace(/\/+$/, '');
+            window.PERIBUS_NEON_REST_URL = neonBase;
+            const neonKeyMeta = document.querySelector('meta[name="peribus-neon-key"]');
+            let neonKey = neonKeyMeta?.getAttribute('content') || '';
+            // Si le placeholder n'a pas été remplacé, ignorer
+            if (neonKey.startsWith('__') && neonKey.endsWith('__')) neonKey = '';
+            window.PERIBUS_NEON_REST_KEY = neonKey;
         })();
     </script>
     
@@ -79,6 +90,7 @@
     <link rel="preload" href="js/app.js" as="script" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://ep-fragrant-silence-abgl9bv2.apirest.eu-west-2.aws.neon.tech">
     <link rel="preconnect" href="https://unpkg.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://maps.googleapis.com">

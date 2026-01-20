@@ -148,6 +148,7 @@ export default defineConfig({
   // Variables d'environnement
   define: {
     __APP_VERSION__: JSON.stringify('2.1.0'),
-    __BUILD_DATE__: JSON.stringify(new Date().toISOString())
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __NEON_API_KEY__: JSON.stringify(process.env.NEON_API_KEY || '')
   }
 });

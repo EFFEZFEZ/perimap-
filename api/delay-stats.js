@@ -7,7 +7,7 @@ import { neon } from '@neondatabase/serverless';
  * GET /api/delay-stats : Récupérer les statistiques agrégées
  * GET /api/delay-stats?line=A : Filtrer par ligne
  * GET /api/delay-stats?days=7 : Derniers X jours
- * GET /api/delay-stats?hour=8 : Filtrer par heure
+ * GET /api/delay-stats?detailed=true : Rapport détaillé (24h)
  */
 export default async function handler(req, res) {
   // CORS headers
@@ -36,14 +36,13 @@ export default async function handler(req, res) {
   const sql = neon(connectionString);
 
   try {
-    const { line, days = 30, hour, detailed } = req.query;
+    const { line, days = 30, detailed } = req.query;
     const daysInt = parseInt(days) || 30;
 
     // Construire les clauses WHERE dynamiques
     const lineFilter = line ? `AND line_code = '${line}'` : '';
-    const hourFilter = hour ? `AND hour_of_day = ${parseInt(hour)}` : '';
 
-    // Statistiques globales par ligne
+    // Statistiques par ligne (ponctualité)
     const lineStats = await sql(`
       SELECT 
         line_code,
@@ -52,7 +51,14 @@ export default async function handler(req, res) {
         MAX(delay_minutes) as max_delay,
         MIN(delay_minutes) as min_delay,
         COUNT(CASE WHEN delay_minutes >= 5 THEN 1 END) as major_delays,
-        COUNT(CASE WHEN delay_minutes < 0 THEN 1 END) as early_arrivals
+        COUNT(CASE WHEN delay_minutes < -1 THEN 1 END) as early_arrivals,
+        COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) as on_time_reports,
+        COUNT(CASE WHEN delay_minutes > 1 THEN 1 END) as late_reports,
+        ROUND(
+          (COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) * 100.0) 
+          / NULLIF(COUNT(*), 0),
+          1
+        ) as on_time_rate
       FROM delay_reports
       WHERE recorded_at >= NOW() - INTERVAL '${daysInt} days'
       ${lineFilter}
@@ -60,19 +66,55 @@ export default async function handler(req, res) {
       ORDER BY total_reports DESC
     `);
 
-    // Statistiques par heure de la journée
-    const hourlyStats = await sql(`
+    // Statistiques par arrêt (ponctualité)
+    const stopStats = await sql(`
       SELECT 
-        hour_of_day,
+        stop_name,
+        stop_id,
         COUNT(*) as total_reports,
         ROUND(AVG(delay_minutes)::numeric, 1) as avg_delay,
-        MAX(delay_minutes) as max_delay
+        MAX(delay_minutes) as max_delay,
+        MIN(delay_minutes) as min_delay,
+        COUNT(CASE WHEN delay_minutes < -1 THEN 1 END) as early_arrivals,
+        COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) as on_time_reports,
+        COUNT(CASE WHEN delay_minutes > 1 THEN 1 END) as late_reports,
+        ROUND(
+          (COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) * 100.0) 
+          / NULLIF(COUNT(*), 0),
+          1
+        ) as on_time_rate
       FROM delay_reports
       WHERE recorded_at >= NOW() - INTERVAL '${daysInt} days'
+        AND stop_name IS NOT NULL
       ${lineFilter}
-      ${hourFilter}
-      GROUP BY hour_of_day
-      ORDER BY hour_of_day
+      GROUP BY stop_name, stop_id
+      ORDER BY total_reports DESC
+    `);
+
+    // Statistiques par arrêt + ligne
+    const stopLineStats = await sql(`
+      SELECT 
+        stop_name,
+        stop_id,
+        line_code,
+        COUNT(*) as total_reports,
+        ROUND(AVG(delay_minutes)::numeric, 1) as avg_delay,
+        MAX(delay_minutes) as max_delay,
+        MIN(delay_minutes) as min_delay,
+        COUNT(CASE WHEN delay_minutes < -1 THEN 1 END) as early_arrivals,
+        COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) as on_time_reports,
+        COUNT(CASE WHEN delay_minutes > 1 THEN 1 END) as late_reports,
+        ROUND(
+          (COUNT(CASE WHEN delay_minutes BETWEEN -1 AND 1 THEN 1 END) * 100.0) 
+          / NULLIF(COUNT(*), 0),
+          1
+        ) as on_time_rate
+      FROM delay_reports
+      WHERE recorded_at >= NOW() - INTERVAL '${daysInt} days'
+        AND stop_name IS NOT NULL
+      ${lineFilter}
+      GROUP BY stop_name, stop_id, line_code
+      ORDER BY total_reports DESC
     `);
 
     // Statistiques par jour de la semaine
@@ -166,7 +208,8 @@ export default async function handler(req, res) {
       filter: line ? `Ligne ${line}` : 'Toutes les lignes',
       global: globalStats[0] || {},
       byLine: lineStats,
-      byHour: hourlyStats,
+      byStop: stopStats,
+      byStopLine: stopLineStats,
       byDayOfWeek: dayOfWeekFormatted,
       worstStops: worstStops,
       dailyTrend: dailyTrend,
@@ -183,7 +226,8 @@ export default async function handler(req, res) {
         message: 'Aucune donnée disponible - la collecte vient de commencer',
         global: { total_reports: 0, avg_delay: 0 },
         byLine: [],
-        byHour: [],
+        byStop: [],
+        byStopLine: [],
         byDayOfWeek: [],
         worstStops: [],
         dailyTrend: [],

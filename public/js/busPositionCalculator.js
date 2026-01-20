@@ -26,17 +26,17 @@ export class BusPositionCalculator {
         // V419: Cache des dernières positions connues pour lissage
         this.lastKnownPositions = new Map(); // tripId -> { lat, lon, timestamp, progress }
         
-        // Seuils de validation - V420: Améliorés pour meilleur positionnement sur les routes
+        // Seuils de validation
         this.validationThresholds = {
-            maxProgressJump: 0.35,       // V420: Réduit pour transitions plus douces
-            maxRtDeviation: 0.25,        // V420: Réduit pour meilleure précision RT
+            maxProgressJump: 0.5,
+            maxRtDeviation: 0.3,
             minSegmentDuration: 30,
             rtFreshnessLimit: 60000,
-            // V420: Seuils optimisés pour éviter les bus sur les bâtiments
-            maxSpeedKmh: 50,             // V420: Réduit - un bus urbain dépasse rarement 50km/h
-            smoothingFactor: 0.45,       // V420: Augmenté pour mouvements plus fluides
-            snapToRouteThreshold: 50,    // V420: Distance max (m) pour snap sur la route
-            minProgressStep: 0.02        // V420: Pas minimum pour éviter positions statiques
+            // V419: Nouveaux seuils
+            maxSpeedKmh: 60,           // Vitesse max réaliste pour un bus urbain
+            smoothingFactor: 0.3,      // Facteur de lissage (0 = pas de lissage, 1 = tout lissé)
+            maxSnapDistanceMeters: 350, // Distance max pour recaler sur la ligne
+            minSnapDistanceMeters: 12   // Recalage seulement si l'écart est visible
         };
 
         // Lignes avec RT
@@ -48,7 +48,7 @@ export class BusPositionCalculator {
             D: ['Tourny', 'Taillefer', 'Sainte Cécile', 'Médiathèque', 'Feuilleraie', 'Charrieras']
         };
         this.DELAI_MAX_ESTIMATION = 7 * 60; // 7 minutes en secondes
-        this.SEUIL_TELEPORT = 150; // V420: Réduit de 300 à 150m pour éviter les téléportations sur bâtiments
+        this.SEUIL_TELEPORT = 300; // mètres
 
         this.PIVOT_STOP_IDS = {};
         this._pivotStopIndex = null;
@@ -216,38 +216,23 @@ export class BusPositionCalculator {
         // Calculer le bearing
         const bearing = this.calculateLinearBearing(fromLat, fromLon, toLat, toLon);
         
-        // V420: Anti-téléportation amélioré avec contrainte de route
+        // V419: Anti-téléportation avec lissage intelligent
         const positionKey = tripId || `${lineCode}_${fromStop.stop_id}`;
         const lastPos = this.lastKnownPositions.get(positionKey);
         let smoothed = false;
         
-        if (lastPos && Date.now() - lastPos.timestamp < 90000) { // V420: Réduit à 90s pour positions plus fraîches
+        if (lastPos && Date.now() - lastPos.timestamp < 120000) { // Position valide depuis < 2 min
             const dist = this.dataManager.calculateDistance(lastPos.lat, lastPos.lon, lat, lon);
-            const timeDeltaSec = Math.max(1, (Date.now() - lastPos.timestamp) / 1000);
+            const timeDeltaSec = (Date.now() - lastPos.timestamp) / 1000;
             const speedKmh = (dist / 1000) / (timeDeltaSec / 3600);
             
-            // V420: Logique de lissage multi-niveaux
-            if (dist > this.SEUIL_TELEPORT) {
-                // Téléportation détectée - lissage très agressif
-                const blend = 0.15; // Très lent
-                lat = lastPos.lat + (lat - lastPos.lat) * blend;
-                lon = lastPos.lon + (lon - lastPos.lon) * blend;
-                smoothed = true;
-                confidence += '-smoothed-teleport';
-            } else if (speedKmh > this.validationThresholds.maxSpeedKmh) {
-                // Vitesse irréaliste - lissage modéré
+            // Si la "vitesse" est trop élevée, lisser la position
+            if (speedKmh > this.validationThresholds.maxSpeedKmh || dist > this.SEUIL_TELEPORT) {
                 const blend = this.validationThresholds.smoothingFactor;
                 lat = lastPos.lat + (lat - lastPos.lat) * blend;
                 lon = lastPos.lon + (lon - lastPos.lon) * blend;
                 smoothed = true;
-                confidence += '-smoothed-speed';
-            } else if (dist > this.validationThresholds.snapToRouteThreshold) {
-                // Bus potentiellement hors route - lissage léger
-                const blend = 0.6;
-                lat = lastPos.lat + (lat - lastPos.lat) * blend;
-                lon = lastPos.lon + (lon - lastPos.lon) * blend;
-                smoothed = true;
-                confidence += '-smoothed-drift';
+                confidence += '-smoothed';
             }
         }
         
@@ -310,6 +295,21 @@ export class BusPositionCalculator {
             return null;
         }
 
+        const routeGeometry = routeId ? this.dataManager.getRouteGeometry(routeId) : null;
+        const routeCoordinates = this.extractRouteCoordinates(routeGeometry);
+        const segmentData = (routeId && routeCoordinates && segment?.fromStopInfo?.stop_id && segment?.toStopInfo?.stop_id)
+            ? this.getSegmentData(
+                routeId,
+                segment.fromStopInfo.stop_id,
+                segment.toStopInfo.stop_id,
+                routeCoordinates,
+                fromLat,
+                fromLon,
+                toLat,
+                toLon
+            )
+            : null;
+
         // Tentative: stratégie pivot (GTFS-RT partiel) — interpolation entre pivots
         try {
             const pivotPos = this.pivotBasedEstimate(segment, tripId, routeShortName, bus);
@@ -319,7 +319,10 @@ export class BusPositionCalculator {
                 pivotPos.confidence = pivotPos.confidence || 'realtime-pivot';
                 pivotPos.hasRealtime = pivotPos.hasRealtime || false;
                 pivotPos.isEstimated = pivotPos.isEstimated !== false;
-                return pivotPos;
+                return this.snapPositionToRoute(
+                    pivotPos,
+                    segmentData?.path || routeCoordinates
+                );
             }
         } catch (e) {
             // Ne pas faire échouer la position en cas d'erreur pivot
@@ -380,27 +383,23 @@ export class BusPositionCalculator {
         }
 
         // Tenter d'utiliser le tracé GeoJSON précis si disponible
-        if (routeId) {
-            const routeGeometry = this.dataManager.getRouteGeometry(routeId);
-            const routeCoordinates = this.extractRouteCoordinates(routeGeometry);
-            if (routeCoordinates && routeCoordinates.length > 0) {
-                const position = this.interpolateAlongRouteCached(
-                    routeId,
-                    segment.fromStopInfo.stop_id,
-                    segment.toStopInfo.stop_id,
-                    routeCoordinates, 
-                    fromLat, fromLon, 
-                    toLat, toLon, 
-                    finalProgress
-                );
-                if (position) {
-                    // V306: Ajouter les infos enrichies à la position
-                    position.rtInfo = rtInfo;
-                    position.confidence = positionConfidence;
-                    position.hasRealtime = rtInfo?.isRealtime === true;
-                    position.isEstimated = positionConfidence !== 'realtime';
-                    return position;
-                }
+        if (routeCoordinates && routeCoordinates.length > 0) {
+            const position = this.interpolateAlongRouteCached(
+                routeId,
+                segment.fromStopInfo.stop_id,
+                segment.toStopInfo.stop_id,
+                routeCoordinates, 
+                fromLat, fromLon, 
+                toLat, toLon, 
+                finalProgress
+            );
+            if (position) {
+                // V306: Ajouter les infos enrichies à la position
+                position.rtInfo = rtInfo;
+                position.confidence = positionConfidence;
+                position.hasRealtime = rtInfo?.isRealtime === true;
+                position.isEstimated = positionConfidence !== 'realtime';
+                return position;
             }
         }
 
@@ -409,7 +408,7 @@ export class BusPositionCalculator {
         const lat = fromLat + (toLat - fromLat) * finalProgress;
         const lon = fromLon + (toLon - fromLon) * finalProgress;
 
-        return {
+        const fallbackPosition = {
             lat,
             lon,
             progress: finalProgress,
@@ -418,6 +417,67 @@ export class BusPositionCalculator {
             confidence: positionConfidence,
             hasRealtime: rtInfo?.isRealtime === true,
             isEstimated: positionConfidence !== 'realtime'
+        };
+
+        return this.snapPositionToRoute(
+            fallbackPosition,
+            segmentData?.path || routeCoordinates
+        );
+    }
+
+    getSegmentData(routeId, fromStopId, toStopId, routeCoordinates, fromLat, fromLon, toLat, toLon) {
+        if (!routeId || !fromStopId || !toStopId || !routeCoordinates) return null;
+        const cacheKey = `${routeId}_${fromStopId}_${toStopId}`;
+
+        let segmentData = this.segmentCache.get(cacheKey);
+        if (segmentData && segmentData.invalid) return null;
+        if (!segmentData) {
+            segmentData = this.computeSegmentGeometry(routeCoordinates, fromLat, fromLon, toLat, toLon);
+            if (segmentData) {
+                this.segmentCache.set(cacheKey, segmentData);
+            } else {
+                this.segmentCache.set(cacheKey, { invalid: true });
+                return null;
+            }
+        }
+        return segmentData;
+    }
+
+    snapPositionToRoute(position, routeCoordinates) {
+        if (!position || !routeCoordinates || routeCoordinates.length === 0) return position;
+
+        const maxSnapDistance = this.validationThresholds.maxSnapDistanceMeters || 300;
+        const minSnapDistance = this.validationThresholds.minSnapDistanceMeters || 0;
+
+        let minDistance = Infinity;
+        let nearestPoint = null;
+
+        for (let i = 0; i < routeCoordinates.length; i++) {
+            const [pointLon, pointLat] = routeCoordinates[i];
+            const distance = this.dataManager.calculateDistance(position.lat, position.lon, pointLat, pointLon);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPoint = { lat: pointLat, lon: pointLon };
+            }
+        }
+
+        if (!nearestPoint || !isFinite(minDistance)) return position;
+
+        const shouldSnap = minDistance >= minSnapDistance && minDistance <= maxSnapDistance;
+        if (shouldSnap) {
+            return {
+                ...position,
+                lat: nearestPoint.lat,
+                lon: nearestPoint.lon,
+                offRouteDistance: Math.round(minDistance),
+                snappedToRoute: true
+            };
+        }
+
+        return {
+            ...position,
+            offRouteDistance: Math.round(minDistance),
+            snappedToRoute: false
         };
     }
     
@@ -553,47 +613,28 @@ export class BusPositionCalculator {
      * Version optimisée avec Mémorisation (Caching)
      */
     interpolateAlongRouteCached(routeId, fromStopId, toStopId, routeCoordinates, fromLat, fromLon, toLat, toLon, progress) {
-        // 1. Générer une clé unique pour ce segment spécifique
-        const cacheKey = `${routeId}_${fromStopId}_${toStopId}`;
+        // 1. Récupérer les données de segment (cache + calcul si besoin)
+        const segmentData = this.getSegmentData(routeId, fromStopId, toStopId, routeCoordinates, fromLat, fromLon, toLat, toLon);
 
-        let segmentData = this.segmentCache.get(cacheKey);
-
-        // 2. Si pas en cache, on fait le calcul LOURD (une seule fois)
-        if (!segmentData) {
-            segmentData = this.computeSegmentGeometry(routeCoordinates, fromLat, fromLon, toLat, toLon);
-            
-            if (segmentData) {
-                this.segmentCache.set(cacheKey, segmentData);
-            } else {
-                // Si échec du calcul (points non trouvés sur la ligne), on marque comme invalide pour ne pas réessayer
-                this.segmentCache.set(cacheKey, { invalid: true });
-                return null;
-            }
-        }
-
-        // 3. Si le segment est marqué invalide, on abandonne
-        if (segmentData.invalid) return null;
+        // 2. Si le segment est invalide, on abandonne
+        if (!segmentData) return null;
 
         // 4. INTERPOLATION RAPIDE (Zéro trigonométrie ici)
         const targetDistance = segmentData.totalDistance * progress;
         const distances = segmentData.distances;
         const path = segmentData.path;
 
-        // V420: Clamper le progress pour éviter les positions hors segment
-        const clampedProgress = Math.max(0, Math.min(1, progress));
-        const clampedTargetDistance = segmentData.totalDistance * clampedProgress;
-
         // Trouver le sous-segment correspondant à la distance cible
         // On cherche i tel que distances[i] <= targetDistance <= distances[i+1]
         for (let i = 0; i < distances.length - 1; i++) {
-            if (clampedTargetDistance >= distances[i] && clampedTargetDistance <= distances[i + 1]) {
+            if (targetDistance >= distances[i] && targetDistance <= distances[i + 1]) {
                 
                 const distStart = distances[i];
                 const distEnd = distances[i + 1];
                 const segmentLen = distEnd - distStart;
 
                 // Progression locale dans ce petit sous-segment
-                const localProgress = segmentLen > 0 ? (clampedTargetDistance - distStart) / segmentLen : 0;
+                const localProgress = segmentLen > 0 ? (targetDistance - distStart) / segmentLen : 0;
 
                 const [lon1, lat1] = path[i];
                 const [lon2, lat2] = path[i + 1];
@@ -601,63 +642,14 @@ export class BusPositionCalculator {
                 // Interpolation linéaire simple sur les coordonnées
                 const lat = lat1 + (lat2 - lat1) * localProgress;
                 const lon = lon1 + (lon2 - lon1) * localProgress;
-                
-                // V420: Calculer le bearing local pour cette portion de route
-                const bearing = this.calculateLinearBearing(lat1, lon1, lat2, lon2);
 
-                return { lat, lon, progress: clampedProgress, bearing, onRoute: true };
+                return { lat, lon, progress };
             }
         }
 
         // Cas limite (fin du trajet)
         const lastPoint = path[path.length - 1];
-        const secondLastPoint = path.length > 1 ? path[path.length - 2] : path[0];
-        const bearing = this.calculateLinearBearing(
-            secondLastPoint[1], secondLastPoint[0],
-            lastPoint[1], lastPoint[0]
-        );
-        return { lat: lastPoint[1], lon: lastPoint[0], progress: 1, bearing, onRoute: true };
-    }
-
-    /**
-     * V420: Snap une position au point le plus proche sur la route
-     * Utilisé en fallback quand l'interpolation échoue
-     */
-    snapToNearestRoutePoint(routeCoordinates, lat, lon) {
-        if (!routeCoordinates || routeCoordinates.length < 2) return null;
-        
-        let minDist = Infinity;
-        let nearestLat = lat;
-        let nearestLon = lon;
-        let nearestIndex = 0;
-        
-        for (let i = 0; i < routeCoordinates.length; i++) {
-            const [ptLon, ptLat] = routeCoordinates[i];
-            const dist = this.dataManager.calculateDistance(lat, lon, ptLat, ptLon);
-            if (dist < minDist) {
-                minDist = dist;
-                nearestLat = ptLat;
-                nearestLon = ptLon;
-                nearestIndex = i;
-            }
-        }
-        
-        // V420: Si trop loin (> 100m), retourner null pour signaler un problème
-        if (minDist > 100) {
-            return null;
-        }
-        
-        // Calculer le bearing basé sur les points adjacents
-        let bearing = 0;
-        if (nearestIndex < routeCoordinates.length - 1) {
-            const [nextLon, nextLat] = routeCoordinates[nearestIndex + 1];
-            bearing = this.calculateLinearBearing(nearestLat, nearestLon, nextLat, nextLon);
-        } else if (nearestIndex > 0) {
-            const [prevLon, prevLat] = routeCoordinates[nearestIndex - 1];
-            bearing = this.calculateLinearBearing(prevLat, prevLon, nearestLat, nearestLon);
-        }
-        
-        return { lat: nearestLat, lon: nearestLon, bearing, snapped: true, distance: minDist };
+        return { lat: lastPoint[1], lon: lastPoint[0], progress };
     }
 
     /**

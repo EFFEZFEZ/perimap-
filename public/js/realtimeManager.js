@@ -760,9 +760,44 @@ export class RealtimeManager {
 
         const payload = { line, stop, scheduled, delay };
 
+        const neonBase = (window.PERIBUS_NEON_REST_URL || '').replace(/\/+$/, '');
+        const neonKey = window.PERIBUS_NEON_REST_KEY || window.PERIBUS_NEON_ANON_KEY || '';
+
         // Délai aléatoire (0.5-3s) pour lisser la charge serveur
         const jitter = 500 + Math.random() * 2500;
         setTimeout(() => {
+            if (neonBase) {
+                const headers = { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
+                if (neonKey) {
+                    headers.apikey = neonKey;
+                    headers.Authorization = `Bearer ${neonKey}`;
+                }
+
+                const now = new Date();
+                const neonPayload = {
+                    line_code: payload.line,
+                    stop_name: payload.stop || null,
+                    scheduled_time: payload.scheduled || null,
+                    delay_minutes: Number(payload.delay),
+                    is_realtime: true,
+                    source: 'hawk',
+                    day_of_week: now.getDay(),
+                    hour_of_day: now.getHours()
+                };
+
+                fetch(`${neonBase}/delay_reports`, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(neonPayload),
+                    keepalive: true
+                }).then(resp => {
+                    if (!resp.ok) {
+                        console.debug('[DelayStat] upload failed (neon)', resp.status);
+                    }
+                }).catch(e => console.debug('[DelayStat] upload error (neon)', e));
+                return;
+            }
+
             const apiBase = (window.PERIBUS_API_BASE_URL || '').replace(/\/+$/, '');
             fetch(`${apiBase}/api/record-delay`, {
                 method: 'POST',

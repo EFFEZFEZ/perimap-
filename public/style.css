@@ -165,11 +165,9 @@ body.dark-theme .map-btn-locate.has-error {
         width: 44px;
         height: 44px;
     }
-    
-    /* V421: Bouton localisation visible sur mobile */
+    /* Hide geolocation control when requested by user */
     .leaflet-bottom.leaflet-right .map-floating-controls {
-        display: flex !important;
-        margin-bottom: calc(var(--bottom-nav-height) + 70px + env(safe-area-inset-bottom));
+        display: none !important;
     }
     
     .map-btn-locate svg {
@@ -328,20 +326,16 @@ body.dark-theme .map-btn-locate.has-error {
 }
 
 /* =========================================
- * V421: OPTIMISATIONS PERFORMANCE AMÉLIORÉES
+ * OPTIMISATIONS PERFORMANCE CSS
  * ========================================= */
 /* GPU acceleration pour les éléments animés */
-.card, .btn, .nav-dropdown-menu, .bottom-sheet, .modal,
-.bus-icon, .bus-marker, .bus-icon-rect {
+.card, .btn, .nav-dropdown-menu, .bottom-sheet, .modal {
     will-change: transform, opacity;
     transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
 }
 
 /* Optimiser le rendu des sections hors écran */
-#map-view, #itinerary-view, #detail-panel, .tarifs-container,
-#dashboard-hall, #results-list {
+#map-view, #itinerary-view, #detail-panel, .tarifs-container {
     content-visibility: auto;
     contain-intrinsic-size: 0 500px;
 }
@@ -349,36 +343,6 @@ body.dark-theme .map-btn-locate.has-error {
 /* Réduire le reflow sur les éléments fixes */
 #main-header {
     contain: layout style;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-/* V421: Optimisation des markers de bus pour fluidité */
-.leaflet-marker-pane {
-    will-change: transform;
-}
-
-.leaflet-marker-icon {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-}
-
-/* V421: Optimisation carte Leaflet */
-.leaflet-container {
-    -webkit-tap-highlight-color: transparent;
-    touch-action: pan-x pan-y;
-}
-
-.leaflet-tile-container {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-/* V421: Réduire les repaints sur les listes */
-.results-list, .route-list, .autocomplete-suggestions {
-    contain: content;
-    will-change: scroll-position;
 }
 
 /* Optimiser le scroll */
@@ -1827,17 +1791,13 @@ body.itinerary-view-active #legal-strip {
     height: 64px;
     max-width: 1300px;
     margin: 0 auto;
-    padding: 0 1.5rem; /* V421: Ajout de padding pour espacement */
-    width: 100%;
 }
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.75rem; /* V421: Réduit pour meilleur alignement */
+    gap: 1rem;
     font-weight: 800;
     color: var(--text-primary);
-    text-decoration: none;
-    flex-shrink: 0;
 }
 .header-logo-img {
     height: 52px;
@@ -1975,12 +1935,11 @@ body:not(.dark-theme) .header-logo-img {
 .hero-backdrop {
     position: fixed;
     top: 0;
-    left: 50%;
-    right: auto;
+    left: 0;
+    right: 0;
     bottom: 0;
     width: 100vw;
     height: 100vh;
-    transform: translateX(-50%);
     background: url('https://www.voyageavecvue.com/wp-content/uploads/2023/11/perigueux.png') center top / cover no-repeat;
     z-index: 0;
     pointer-events: none;
@@ -1989,7 +1948,12 @@ body:not(.dark-theme) .header-logo-img {
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: transparent;
+    background: linear-gradient(to bottom, 
+        rgba(30, 58, 95, 0.3) 0%,
+        rgba(30, 58, 95, 0.35) 30%,
+        rgba(255, 255, 255, 0.75) 60%, 
+        rgba(255, 255, 255, 0.9) 80%,
+        rgba(255, 255, 255, 0.98) 100%);
     pointer-events: none;
 }
 
@@ -2291,7 +2255,12 @@ body.dark-theme .hero-backdrop {
 }
 
 body.dark-theme .hero-overlay {
-    background: transparent;
+    background: linear-gradient(to bottom, 
+        rgba(15, 23, 42, 0.4) 0%, 
+        rgba(15, 23, 42, 0.6) 30%,
+        rgba(15, 23, 42, 0.85) 60%, 
+        rgba(15, 23, 42, 0.95) 80%,
+        #0f172a 100%);
 }
 
 body.dark-theme .planner-block {
@@ -4283,8 +4252,8 @@ body.dark-theme #map-container #btn-toggle-filter svg {
 /* Footer: ne jamais être recouvert par le bottom nav sur mobile */
 @media (max-width: 768px) {
     #site-footer {
-        /* V421: Footer caché sur mobile - voir ligne 9177 display: none */
-        visibility: visible; /* Placeholder pour éviter ruleset vide */
+        /* V365: Ne pas ajouter de margin car il crée un espace vide en bas */
+        /* Le footer est de toute façon caché sur mobile avec display: none sur les vues principales */
     }
 }
 
@@ -9617,43 +9586,18 @@ body:not(.view-is-locked) {
     margin-left: auto;
 }
 
-/* Header nav right - V421: Fix display on desktop */
+/* Header nav right */
 .header-nav-right {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.75rem;
     margin-left: auto;
     height: 100%;
-    flex-shrink: 0;
 }
 
 .header-nav-right .btn-icon-round {
     margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    transition: all 0.2s ease;
-}
-
-.header-nav-right .btn-icon-round:hover {
-    background: var(--bg-tertiary, rgba(0,0,0,0.05));
-    border-color: var(--primary);
-    transform: scale(1.05);
-}
-
-/* V421: Theme toggle icon styling */
-.theme-toggle-icon {
-    font-size: 1.25rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Mobile menu toggle */
@@ -12818,205 +12762,3 @@ body.dark-theme #results-planner-to:focus {
     }
 }
 
-/* =========================================
- * V421: CORRECTIONS PC DESKTOP - LAYOUT HEADER ET CARTE
- * ========================================= */
-@media (min-width: 769px) {
-    /* Header principal desktop - toujours visible */
-    #main-header {
-        display: flex !important;
-        position: sticky;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 64px;
-        z-index: 1200;
-        background: var(--bg-page);
-        border-bottom: 1px solid var(--border);
-        padding: 0;
-    }
-    
-    body.dark-theme #main-header {
-        background: rgba(11, 18, 32, 0.98);
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-    
-    /* Header content - flex avec espacement correct */
-    .header-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        max-width: 1300px;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0 2rem;
-        gap: 1.5rem;
-    }
-    
-    /* Logo visible et bien aligné */
-    .logo {
-        display: flex !important;
-        align-items: center;
-        gap: 0.75rem;
-        flex-shrink: 0;
-    }
-    
-    .header-logo-img {
-        height: 48px;
-        width: auto;
-        object-fit: contain;
-        display: block !important;
-    }
-    
-    /* Titre visible */
-    .header-title-group {
-        display: flex !important;
-        flex-direction: column;
-        line-height: 1.1;
-    }
-    
-    .brand-name {
-        display: block !important;
-        font-size: 1.35rem;
-        font-weight: 800;
-    }
-    
-    /* Navigation principale visible */
-    .header-nav-main {
-        display: flex !important;
-        align-items: center;
-        gap: 0.5rem;
-        margin-left: 2rem;
-    }
-    
-    /* Navigation droite avec toggle thème */
-    .header-nav-right {
-        display: flex !important;
-        align-items: center;
-        gap: 1rem;
-        margin-left: auto;
-    }
-    
-    /* Bouton thème toggle */
-    #theme-toggle-btn {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    #theme-toggle-btn:hover {
-        background: var(--bg-tertiary, rgba(0,0,0,0.08));
-        border-color: var(--primary);
-        transform: scale(1.05);
-    }
-    
-    body.dark-theme #theme-toggle-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-    
-    body.dark-theme #theme-toggle-btn:hover {
-        background: rgba(34, 197, 94, 0.15);
-        border-color: var(--pm-green);
-    }
-    
-    .theme-toggle-icon {
-        font-size: 1.3rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* Bottom nav cachée sur desktop */
-    .bottom-nav {
-        display: none !important;
-    }
-    
-    /* Mobile menu toggle cachée sur desktop */
-    .mobile-menu-toggle {
-        display: none !important;
-    }
-    
-    /* Vue carte - hauteur correcte */
-    #map-container {
-        display: flex;
-        flex-direction: column;
-        min-height: calc(100vh - 64px);
-    }
-    
-    #map-view {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-    }
-    
-    #map {
-        flex: 1;
-        min-height: 500px;
-    }
-    
-    /* Top bar carte visible */
-    #top-bar {
-        display: flex !important;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
-        pointer-events: none;
-    }
-    
-    #top-bar > * {
-        pointer-events: auto;
-    }
-    
-    /* Bouton retour visible */
-    #btn-back-to-dashboard-from-map {
-        display: inline-flex !important;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    /* Horloge visible */
-    #clock {
-        display: inline-flex !important;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    /* Status info visible */
-    #status-info {
-        display: inline-flex !important;
-        align-items: center;
-    }
-    
-    /* Bouton filtrer visible */
-    #btn-toggle-filter {
-        display: inline-flex !important;
-    }
-}
-
-/* V421: Assurer que le footer est visible sur desktop */
-@media (min-width: 769px) {
-    #site-footer {
-        display: block !important;
-        margin-top: auto;
-    }
-    
-    /* Mais caché sur la vue carte plein écran */
-    body.view-map-locked #site-footer {
-        display: none !important;
-    }
-}

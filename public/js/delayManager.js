@@ -44,6 +44,45 @@ export class DelayManager {
         this.majorDelayThreshold = 300; // 5 minutes = "retard majeur"
     }
 
+    getNeonRestConfig() {
+        const base = (window.PERIBUS_NEON_REST_URL || '').replace(/\/+$/, '');
+        if (!base) return null;
+        const key = window.PERIBUS_NEON_REST_KEY || window.PERIBUS_NEON_ANON_KEY || '';
+        return { base, key };
+    }
+
+    async sendDelayToNeonRest(neonConfig, payload) {
+        if (!neonConfig?.base) return null;
+
+        const headers = { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
+        if (neonConfig.key) {
+            headers.apikey = neonConfig.key;
+            headers.Authorization = `Bearer ${neonConfig.key}`;
+        }
+
+        const now = new Date();
+        const neonPayload = {
+            line_code: payload.line,
+            stop_name: payload.stop || null,
+            stop_id: payload.stopId || null,
+            scheduled_time: payload.scheduled || null,
+            actual_time: payload.actual || null,
+            delay_minutes: Number(payload.delay),
+            direction: payload.direction || null,
+            is_realtime: payload.isRealtime !== false,
+            trip_id: payload.tripId || null,
+            source: payload.source || 'hawk',
+            day_of_week: now.getDay(),
+            hour_of_day: now.getHours()
+        };
+
+        return fetch(`${neonConfig.base}/delay_reports`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(neonPayload)
+        });
+    }
+
     /**
      * Initialise le manager avec les références nécessaires
      * @param {DataManager} dataManager - Pour accéder aux données GTFS
@@ -277,6 +316,18 @@ export class DelayManager {
         };
 
         try {
+            const neonConfig = this.getNeonRestConfig();
+            if (neonConfig) {
+                const neonResponse = await this.sendDelayToNeonRest(neonConfig, payload);
+                if (neonResponse?.ok) {
+                    console.log(`[DelayManager] ✅ Retard envoyé à Neon REST: Ligne ${lineCode}, ${payload.delay} min`);
+                    return;
+                }
+                if (neonResponse) {
+                    console.warn(`[DelayManager] ⚠️ Erreur Neon REST: ${neonResponse.status}`);
+                }
+            }
+
             const apiBase = (window.PERIBUS_API_BASE_URL || '').replace(/\/+$/, '');
             const response = await fetch(`${apiBase}/api/record-delay`, {
                 method: 'POST',
