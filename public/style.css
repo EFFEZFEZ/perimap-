@@ -1975,11 +1975,12 @@ body:not(.dark-theme) .header-logo-img {
 .hero-backdrop {
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    right: auto;
     bottom: 0;
     width: 100vw;
     height: 100vh;
+    transform: translateX(-50%);
     background: url('https://www.voyageavecvue.com/wp-content/uploads/2023/11/perigueux.png') center top / cover no-repeat;
     z-index: 0;
     pointer-events: none;
@@ -1988,12 +1989,7 @@ body:not(.dark-theme) .header-logo-img {
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, 
-        rgba(30, 58, 95, 0.3) 0%,
-        rgba(30, 58, 95, 0.35) 30%,
-        rgba(255, 255, 255, 0.75) 60%, 
-        rgba(255, 255, 255, 0.9) 80%,
-        rgba(255, 255, 255, 0.98) 100%);
+    background: transparent;
     pointer-events: none;
 }
 
@@ -2295,12 +2291,7 @@ body.dark-theme .hero-backdrop {
 }
 
 body.dark-theme .hero-overlay {
-    background: linear-gradient(to bottom, 
-        rgba(15, 23, 42, 0.4) 0%, 
-        rgba(15, 23, 42, 0.6) 30%,
-        rgba(15, 23, 42, 0.85) 60%, 
-        rgba(15, 23, 42, 0.95) 80%,
-        #0f172a 100%);
+    background: transparent;
 }
 
 body.dark-theme .planner-block {
@@ -2937,7 +2928,6 @@ body.dark-theme .stats-section .stat-label {
     justify-content: center;
     gap: 0.75rem;
     overflow: hidden;
-    text-align: center;
 }
 .nav-button-condensed::before {
     content: '';
@@ -2964,8 +2954,6 @@ body.dark-theme .stats-section .stat-label {
     width: 28px;
     height: 28px;
     transition: transform var(--transition-normal);
-    display: block;
-    margin: 0 auto;
 }
 .nav-button-condensed:hover svg {
     transform: scale(1.15);
@@ -4523,7 +4511,7 @@ body.dark-theme .map-theme-toggle:hover {
     /* V156: Top-bar desktop - layout horizontal avec pills unifiées */
     #map-view #top-bar {
         position: absolute;
-        top: 64px;
+        top: 0;
         left: 0;
         right: 0;
         padding: 14px 16px;
@@ -9107,39 +9095,6 @@ body.dark-theme .stat-item {
     
     .stat-number {
         font-size: 1.5rem;
-    }
-}
-
-/* =========================================
- * V421: HERO SECTION DESKTOP - REMPLIT TOUTE LA PAGE
- * ========================================= */
-@media (min-width: 769px) {
-    .hero-section {
-        min-height: calc(100vh - 64px);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 1.5rem 2rem 3rem;
-        margin-bottom: 0;
-    }
-    
-    .hero-headline {
-        margin-bottom: 3rem;
-        padding-top: 0;
-    }
-    
-    .hero-headline h1 {
-        font-size: 3.5rem;
-        font-weight: 900;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.35rem;
-    }
-
-    .main-nav-buttons-condensed {
-        margin-top: 1rem;
     }
 }
 
