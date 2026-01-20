@@ -1,3 +1,88 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * PÉRIMAP - CSS PRINCIPAL (v432)
+ * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * TABLE DES MATIÈRES (Ctrl+F pour naviguer)
+ * ──────────────────────────────────────────
+ * 
+ * 1. CONTRÔLES CARTE (ligne ~100)
+ *    - Leaflet controls, bouton localisation, dark theme carte
+ * 
+ * 2. CHARTE GRAPHIQUE (ligne ~280)
+ *    - Variables CSS :root, couleurs, typographie, spacing
+ *    - LARGEURS CONTENEURS (--container-*) ← MODIFIER ICI POUR UNIFORMISER
+ *    - Dark theme variables
+ * 
+ * 3. SYSTÈME HERO UNIFIÉ (ligne ~420)
+ *    - .pm-hero, .horaires-hero, .trafic-hero, .ligne-hero
+ *    - Titres, sous-titres, actions - MÊME LARGEUR PARTOUT
+ * 
+ * 4. OPTIMISATIONS PERFORMANCE (ligne ~520)
+ *    - will-change, content-visibility, contain
+ * 
+ * 5. ACCESSIBILITÉ WCAG (ligne ~550)
+ *    - Focus visible, touch targets, reduced motion
+ * 
+ * 6. MODE HORS LIGNE (ligne ~650)
+ *    - Bannière offline, toast reconnexion
+ * 
+ * 7. ANIMATIONS & KEYFRAMES (ligne ~750)
+ *    - fadeIn, slideUp, pulse, shimmer, etc.
+ * 
+ * 8. BOTTOM NAVIGATION (ligne ~930)
+ *    - Barre de nav mobile 5 items
+ * 
+ * 9. DARK THEME TOP BAR (ligne ~1020)
+ *    - Clock, status info, filtres carte
+ * 
+ * 10. FORMULAIRE PLANNER (ligne ~1120)
+ *     - Inputs départ/arrivée, boutons swap/clear
+ * 
+ * 11. RÉSULTATS ITINÉRAIRES (ligne ~1940)
+ *     - Route cards, badges lignes, durées
+ * 
+ * 12. HEADER & NAVIGATION (ligne ~2120)
+ *     - Logo, menu hamburger, dropdown
+ * 
+ * 13. HERO SECTION ACCUEIL (ligne ~2580)
+ *     - Fond dégradé Périgueux, titre, sous-titre
+ * 
+ * 14. QUICK ACTIONS (ligne ~2750)
+ *     - Cartes raccourcis accueil
+ * 
+ * 15. CARTE / MAP VIEW (ligne ~3020)
+ *     - Conteneur map, filtres, popups
+ * 
+ * 16. POPUPS BUS/ARRÊTS (ligne ~3290)
+ *     - Design moderne popups Leaflet
+ * 
+ * 17. NEWS BANNER (ligne ~3680)
+ *     - Bandeau info trafic défilant
+ * 
+ * 18. BADGE TEMPS RÉEL (ligne ~3780)
+ *     - Indicateurs état lignes
+ * 
+ * 19. DÉTAILS ITINÉRAIRE (ligne ~4270)
+ *     - Panel instructions pas à pas
+ * 
+ * 20. HORAIRES (ligne ~5100)
+ *     - Grilles horaires par ligne
+ * 
+ * 21. COMPOSANTS UI (ligne ~5810)
+ *     - Modals, toasts, dropdowns, cards
+ * 
+ * 22. PAGES SPÉCIFIQUES (ligne ~8690)
+ *     - About, mentions légales, tarifs
+ * 
+ * 23. RESPONSIVE MOBILE (ligne ~11290)
+ *     - Z-index, popups, bottom sheet, safe areas
+ * 
+ * 24. ITINÉRAIRE V93 PREMIUM (ligne ~11900)
+ *     - Redesign moderne transport tabs, cartes glass
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
 /* =========================================
  * V155: CONTRÔLES CARTE - DESIGN PREMIUM
  * Style inspiré Google Maps / Apple Plans
@@ -323,6 +408,118 @@ body.dark-theme .map-btn-locate.has-error {
     --breakpoint-mobile: 640px;
     --breakpoint-tablet: 1024px;
     --breakpoint-desktop: 1025px;
+    
+    /* ═══════════════════════════════════════════════════════════════════════
+       LARGEURS DE CONTENEURS - Système unifié et maintenable
+       Modifier ici pour changer TOUTES les pages d'un coup
+       ═══════════════════════════════════════════════════════════════════════ */
+    --container-sm: 640px;      /* Petits contenus (modals, popups) */
+    --container-md: 800px;      /* Contenus moyens (formulaires) */
+    --container-lg: 1100px;     /* Contenus larges (pages, grilles) */
+    --container-xl: 1200px;     /* Pleine largeur (header) */
+    --container-hero: 1100px;   /* Hero sections - UNIFIÉ sur toutes les pages */
+    --container-content: 1100px;/* Contenu principal des pages */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SYSTÈME DE HERO UNIFIÉ - Toutes les pages utilisent le même style
+   Classes: .pm-hero, .pm-hero-title, .pm-hero-subtitle, .pm-hero-actions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Conteneur Hero unifié */
+.pm-hero,
+.horaires-hero,
+.trafic-hero,
+.ligne-hero {
+    width: 100%;
+    max-width: var(--container-hero);
+    margin: 0 auto;
+    padding: 1.5rem 1rem 1rem;
+    text-align: center;
+}
+
+/* Titre Hero avec gradient Périmap */
+.pm-hero-title,
+.horaires-hero h1,
+.trafic-hero h1,
+.ligne-hero h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    background: var(--pm-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Sous-titre Hero */
+.pm-hero-subtitle,
+.horaires-hero p,
+.trafic-hero p,
+.ligne-hero p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Actions Hero (boutons) */
+.pm-hero-actions,
+.horaires-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Conteneur de page unifié */
+.pm-page,
+.horaires-page,
+.trafic-page,
+.ligne-page {
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+
+/* Grille de cartes unifiée */
+.pm-grid,
+.horaires-grid,
+.trafic-grid,
+.ligne-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* Responsive mobile - Hero toujours visible */
+@media (max-width: 767px) {
+    .pm-hero,
+    .horaires-hero,
+    .trafic-hero,
+    .ligne-hero {
+        padding: 1rem 0.75rem 0.75rem;
+    }
+    
+    .pm-hero-title,
+    .horaires-hero h1,
+    .trafic-hero h1,
+    .ligne-hero h1 {
+        font-size: clamp(1.4rem, 5vw, 1.8rem);
+    }
+    
+    .pm-hero-subtitle,
+    .horaires-hero p,
+    .trafic-hero p,
+    .ligne-hero p {
+        font-size: 0.9rem;
+    }
 }
 
 /* =========================================
