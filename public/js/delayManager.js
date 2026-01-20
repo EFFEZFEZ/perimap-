@@ -277,7 +277,8 @@ export class DelayManager {
         };
 
         try {
-            const response = await fetch('/api/record-delay', {
+            const apiBase = (window.PERIBUS_API_BASE_URL || '').replace(/\/+$/, '');
+            const response = await fetch(`${apiBase}/api/record-delay`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -344,7 +345,8 @@ export class DelayManager {
             const stats = this.getDelayStats();
             
             // Tenter d'envoyer au serveur
-            const response = await fetch('/api/delay-stats', {
+            const apiBase = (window.PERIBUS_API_BASE_URL || '').replace(/\/+$/, '');
+            const response = await fetch(`${apiBase}/api/delay-stats`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

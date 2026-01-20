@@ -58,6 +58,14 @@
             window.__ADMIN_TOKEN = '';
         }
     </script>
+    <meta name="peribus-api-base" content="https://www.xn--primap-bva.fr">
+    <script>
+        (function () {
+            const meta = document.querySelector('meta[name="peribus-api-base"]');
+            const base = (meta?.getAttribute('content') || '').replace(/\/+$/, '');
+            window.PERIBUS_API_BASE_URL = base;
+        })();
+    </script>
     
     <!-- Favicons & Icons -->
     <link rel="manifest" href="/manifest.json">

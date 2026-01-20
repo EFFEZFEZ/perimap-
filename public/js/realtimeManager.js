@@ -4,7 +4,7 @@
  * 
  * V3 - PRÉCHARGEMENT PRIORITAIRE + AUTO-REFRESH:
  * - Précharge les arrêts prioritaires (Taillefer, Gare, PEM, etc.) au démarrage
- * - Auto-refresh des arrêts prioritaires toutes les 45 secondes
+ * - Auto-refresh des arrêts prioritaires toutes les 60 secondes
  * - Cache agressif pour éviter les appels API répétés
  * - Chargement à la demande conservé pour les autres arrêts
  * 
@@ -95,7 +95,7 @@ export class RealtimeManager {
      * - Moins détectable (pattern unique vs multiples requêtes espacées)
      * - Plus économique (1 round-trip HTTP au lieu de 15)
      * - Jitter géré côté serveur pour stealth
-     * - Auto-refresh toutes les 45s pour maintenir les données fraîches
+    * - Auto-refresh toutes les 60s pour maintenir les données fraîches
      */
     async preloadPriorityStops() {
         if (this.isSleeping()) {
@@ -326,7 +326,7 @@ export class RealtimeManager {
 
     /**
      * V3: Démarre l'auto-refresh des arrêts prioritaires
-     * Rafraîchit les données toutes les 45 secondes
+    * Rafraîchit les données toutes les 60 secondes
      */
     /**
      * V421: Auto-refresh optimisé avec BATCH API
@@ -763,7 +763,8 @@ export class RealtimeManager {
         // Délai aléatoire (0.5-3s) pour lisser la charge serveur
         const jitter = 500 + Math.random() * 2500;
         setTimeout(() => {
-            fetch('/api/record-delay', {
+            const apiBase = (window.PERIBUS_API_BASE_URL || '').replace(/\/+$/, '');
+            fetch(`${apiBase}/api/record-delay`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
