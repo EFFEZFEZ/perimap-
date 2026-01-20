@@ -1,6 +1,7 @@
 /**
  * dataExporter.js - Console d'extraction de données analytiques
  * Interface visuelle simple comme Google Search Console
+ * Accessible via Alt+D (raccourci clavier)
  */
 
 export class DataExporterUI {
@@ -8,17 +9,6 @@ export class DataExporterUI {
         this.isOpen = false;
         this.currentTab = 'summary';
         this.panel = null;
-        this.isAdminMode = this.checkAdminMode();
-    }
-
-    /**
-     * Vérifier si on est en mode admin
-     */
-    checkAdminMode() {
-        // Vérifier si admin token existe
-        const adminToken = window.__ADMIN_TOKEN || window.__APP_CONFIG?.adminToken;
-        const hasAdminMeta = document.querySelector('meta[name="peribus-admin-token"]');
-        return !!(adminToken || hasAdminMeta);
     }
 
     /**

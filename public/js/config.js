@@ -57,27 +57,6 @@ export function getGoogleApiKey() {
 }
 
 /**
- * Récupère le token admin pour GitHub API
- * @returns {string} Le token ou chaîne vide
- */
-export function getAdminToken() {
-  // 1. Variable globale injectée (Vercel/index.html)
-  if (window.__ADMIN_TOKEN && window.__ADMIN_TOKEN !== '__VITE_ADMIN_TOKEN__') {
-    return window.__ADMIN_TOKEN;
-  }
-  // 2. Objet config global
-  if (window.__APP_CONFIG && window.__APP_CONFIG.adminToken) {
-    return window.__APP_CONFIG.adminToken;
-  }
-  // 3. Meta tag
-  const meta = document.querySelector('meta[name="peribus-admin-token"]');
-  if (meta && meta.content && meta.content.trim()) {
-    return meta.content.trim();
-  }
-  return '';
-}
-
-/**
  * URLs des proxies API Vercel (Google)
  */
 export const API_ENDPOINTS = {
@@ -101,7 +80,6 @@ export function getApiEndpoints() {
 export function getAppConfig() {
   return {
     googleApiKey: getGoogleApiKey(),
-    adminToken: getAdminToken(),
     useProxy: true,
     useOtp: false,
     backendMode: 'vercel',

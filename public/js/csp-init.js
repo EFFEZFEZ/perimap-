@@ -1,23 +1,14 @@
 /**
  * CSP-Safe Initialization Script
  * Handles:
- * 1. Admin token initialization
- * 2. Font/stylesheet preload onload handlers
- * 3. Event listener attachments
+ * 1. Font/stylesheet preload onload handlers
+ * 2. Event listener attachments for lazy loading
  * 
  * This replaces all inline scripts/handlers to be CSP-compliant
  */
 
 (function() {
     'use strict';
-
-    // Admin Token initialization (was inline <script> before)
-    if (typeof window !== 'undefined') {
-        window.__ADMIN_TOKEN = '__VITE_ADMIN_TOKEN__';
-        if (window.__ADMIN_TOKEN === '__VITE_ADMIN_TOKEN__') {
-            window.__ADMIN_TOKEN = '';
-        }
-    }
 
     // Stylesheet lazy-load handler (replaces onload="this.media='all'")
     // This loads stylesheets asynchronously and switches media from print to all after load
