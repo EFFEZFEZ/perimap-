@@ -126,6 +126,7 @@ function loadStopsById() {
   const header = parseCsvLine(lines[0]);
   const idxId = header.indexOf('stop_id');
   const idxName = header.indexOf('stop_name');
+  const idxCode = header.indexOf('stop_code');
   const idxLat = header.indexOf('stop_lat');
   const idxLon = header.indexOf('stop_lon');
   const map = new Map();
@@ -134,10 +135,11 @@ function loadStopsById() {
     const stopId = row[idxId];
     if (!stopId) continue;
     const name = row[idxName];
+    const stopCode = idxCode === -1 ? '' : row[idxCode];
     const lat = parseFloat(row[idxLat]);
     const lon = parseFloat(row[idxLon]);
     if (!name || Number.isNaN(lat) || Number.isNaN(lon)) continue;
-    map.set(stopId, { name, lat, lon });
+    map.set(stopId, { name, lat, lon, stopId, stop_id: stopId, stopCode, stop_code: stopCode });
   }
   return map;
 }
@@ -339,7 +341,13 @@ function getLineData(lineCode) {
   const stops = stopTimes
     .map(entry => stopsById.get(entry.stopId))
     .filter(Boolean)
-    .map(stop => ({ name: stop.name, lat: stop.lat, lon: stop.lon }));
+    .map(stop => ({
+      name: stop.name,
+      lat: stop.lat,
+      lon: stop.lon,
+      stop_id: stop.stop_id || stop.stopId,
+      stop_code: stop.stop_code || stop.stopCode || ''
+    }));
 
   const terminusA = stops[0]?.name || '';
   const terminusB = stops[stops.length - 1]?.name || '';
@@ -483,6 +491,9 @@ function generatePage({ template, lineCode, pdfFilename }) {
 
   // LINE_CONFIG id
   html = html.replace(/id:\s*'A'/g, `id: '${display}'`);
+  if (lineData?.routeId) {
+    html = html.replace(/routeId:\s*'[^']*'/g, `routeId: '${lineData.routeId}'`);
+  }
   // LINE_CONFIG color
   html = html.replace(/color:\s*'#[0-9a-fA-F]{6}'/g, `color: '${color}'`);
   // Ensure LINE_CONFIG closes correctly when stops injected above
@@ -633,11 +644,6 @@ function main() {
       detectedCodes.add(display);
       const slug = slugFor(display);
       const outFile = path.join(publicDir, `horaires-ligne-${slug}.html`);
-
-      // Keep existing rich pages for A/B/C/D as-is.
-      if (['a', 'b', 'c', 'd'].includes(slug) && exists(outFile)) {
-        continue;
-      }
 
       if (!plannedByOutFile.has(outFile)) {
         plannedByOutFile.set(outFile, { lineCode: display, slug, outFile, pdfFilename });
