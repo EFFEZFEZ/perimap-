@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v434)
+ * PÉRIMAP - CSS PRINCIPAL (v435)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -436,6 +436,7 @@ body.dark-theme .map-btn-locate.has-error {
     margin: 0 auto;
     padding: 1.5rem 1rem 1rem;
     text-align: center;
+    border-radius: var(--radius-lg);
 }
 
 /* Titre Hero avec gradient Périmap */
@@ -3361,7 +3362,7 @@ body.dark-theme .app-back-btn svg {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-6);
     box-shadow: var(--elevation-1);
     transition: box-shadow var(--transition-normal), transform var(--transition-normal);
@@ -3589,7 +3590,7 @@ body.dark-theme .app-back-btn svg {
 
 #fiche-horaire-container {
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     background: var(--bg-main);
     /* V434: Uniformiser la largeur avec le hero */
