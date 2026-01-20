@@ -1,12 +1,12 @@
 ﻿/**
  * busPositionCalculator.js
  * * Calcule les positions géographiques interpolées des bus entre deux arrêts
- * * OPTIMISÉ V416 (Contrainte par Segment RT):
- * * - V416: Nouvelle logique pivotBasedEstimate()
- * *   → Utilise le segment GTFS statique (fromStop → toStop) comme base
- * *   → Cherche les données RT pour le toStop (prochain arrêt)
- * *   → Contraint le bus à être AVANT le toStop si RT > 0
- * *   → Le bus ne peut JAMAIS être après un arrêt où il n'est pas arrivé
+ * * OPTIMISÉ V419 (Positionnement RT Amélioré):
+ * * - V419: Recherche RT directe via realtimeManager.getDirectRtForStop()
+ * *   → Requête synchrone dans le cache RT avec matching précis
+ * *   → Support des formats "X min", "à l'approche", "HH:MM"
+ * *   → Calcul du progress proportionnel au temps restant
+ * * - V416: Contrainte par segment - bus ne dépasse jamais le prochain arrêt
  * * - Anti-téléportation avec lissage pour mouvements fluides
  * * - Indicateur de confiance (hasRealtime, isEstimated)
  */
@@ -14,73 +14,43 @@
 export class BusPositionCalculator {
     constructor(dataManager, realtimeManager = null) {
         this.dataManager = dataManager;
-        this.realtimeManager = realtimeManager; // V305: Référence au manager RT
+        this.realtimeManager = realtimeManager;
         
         // Cache pour stocker les géométries pré-calculées entre deux arrêts
-        // Clé: "routeId_fromStopId_toStopId"
-        // Valeur: { path: [[lon,lat]...], distances: [0, d1, d2...], totalDistance: 1500 }
         this.segmentCache = new Map();
         
-        // V305: Cache des ajustements RT par trip
-        // Clé: tripId, Valeur: { rtMinutes, fetchedAt, adjustedProgress }
+        // Cache des ajustements RT par trip
         this.rtAdjustmentCache = new Map();
         this.rtCacheMaxAge = 30000; // 30 secondes
         
-        // V306: Seuils de validation pour éviter positions aberrantes
+        // V419: Cache des dernières positions connues pour lissage
+        this.lastKnownPositions = new Map(); // tripId -> { lat, lon, timestamp, progress }
+        
+        // Seuils de validation
         this.validationThresholds = {
-            maxProgressJump: 0.5,        // Max 50% de saut de progress en une mise à jour
-            maxRtDeviation: 0.3,         // Max 30% de déviation RT vs théorique avant alerte
-            minSegmentDuration: 30,      // 30 secondes minimum entre 2 arrêts
-            rtFreshnessLimit: 60000      // Données RT valables 60 secondes max
+            maxProgressJump: 0.5,
+            maxRtDeviation: 0.3,
+            minSegmentDuration: 30,
+            rtFreshnessLimit: 60000,
+            // V419: Nouveaux seuils
+            maxSpeedKmh: 60,           // Vitesse max réaliste pour un bus urbain
+            smoothingFactor: 0.3       // Facteur de lissage (0 = pas de lissage, 1 = tout lissé)
         };
 
-        // -------------------------
-        // Partial GTFS-RT (pivot stops) configuration
-        // -------------------------
+        // Lignes avec RT
         this.LIGNES_RT = ['A', 'B', 'C', 'D'];
         this.PIVOT_STOPS = {
-            A: [
-                'Centre Hospitalier',
-                'Médiathèque',
-                'Maurois',
-                'Gare SNCF',
-                'Salle Omnisports',
-                'Pont de la Beauronne',
-                'ZAE Marsac'
-            ],
-            B: [
-                'Gare SNCF',
-                'Taillefer',
-                'Centre de la Communication',
-                'Gabriel Laceuille',
-                'Maison Carrée',
-                'Agora',
-                'Centre Commercial Boulazac'
-            ],
-            C: [
-                'P+R Aquacap',
-                'Médiathèque',
-                'Maurois',
-                'Taillefer',
-                'Mounet Sully',
-                'PEM',
-                'Marival',
-                'ZAE Marsac'
-            ],
-            D: [
-                'Tourny',
-                'Taillefer',
-                'Sainte Cécile',
-                'Médiathèque',
-                'Feuilleraie',
-                'Charrieras'
-            ]
+            A: ['Centre Hospitalier', 'Médiathèque', 'Maurois', 'Gare SNCF', 'Salle Omnisports', 'Pont de la Beauronne', 'ZAE Marsac'],
+            B: ['Gare SNCF', 'Taillefer', 'Centre de la Communication', 'Gabriel Laceuille', 'Maison Carrée', 'Agora', 'Centre Commercial Boulazac'],
+            C: ['P+R Aquacap', 'Médiathèque', 'Maurois', 'Taillefer', 'Mounet Sully', 'PEM', 'Marival', 'ZAE Marsac'],
+            D: ['Tourny', 'Taillefer', 'Sainte Cécile', 'Médiathèque', 'Feuilleraie', 'Charrieras']
         };
-        this.DELAI_MAX_ESTIMATION = 7 * 60; // seconds (7 minutes)
-        this.SEUIL_TELEPORT = 300; // meters
-        // cache pour resolved pivot stops (route -> [{stop, stop_id}])
+        this.DELAI_MAX_ESTIMATION = 7 * 60; // 7 minutes en secondes
+        this.SEUIL_TELEPORT = 300; // mètres
+
+        this.PIVOT_STOP_IDS = {};
         this._pivotStopIndex = null;
-        // build a pivot stop_id index for faster lookup
+        
         try {
             this.buildPivotStopIdIndex();
         } catch (e) {
@@ -88,10 +58,6 @@ export class BusPositionCalculator {
         }
     }
 
-    /**
-     * Resolve pivot stop names to GTFS stop objects and ids, store in `PIVOT_STOP_IDS`.
-     * This improves lookup speed and makes matching robust.
-     */
     buildPivotStopIdIndex() {
         this.PIVOT_STOP_IDS = {};
         Object.keys(this.PIVOT_STOPS).forEach(routeKey => {
@@ -104,13 +70,10 @@ export class BusPositionCalculator {
                     if (stop) {
                         resolved.push({ stop_id: stop.stop_id, stop_code: stop.stop_code || null, stop });
                     }
-                } catch (e) {
-                    // ignore name resolution errors
-                }
+                } catch (e) {}
             });
             this.PIVOT_STOP_IDS[routeKey] = resolved;
         });
-        // also populate _pivotStopIndex for backward-compat
         this._pivotStopIndex = {};
         Object.keys(this.PIVOT_STOP_IDS).forEach(k => {
             this._pivotStopIndex[k] = this.PIVOT_STOP_IDS[k].map(e => e.stop);
@@ -118,66 +81,76 @@ export class BusPositionCalculator {
     }
 
     /**
-     * Pivot-based position estimation for partial GTFS-RT lines.
+     * V419: Recherche directe des données RT pour un arrêt spécifique et une ligne
+     * Beaucoup plus fiable que la recherche par hawkKey
      * 
-     * LOGIQUE V416 (CONTRAINTE PAR LE SEGMENT):
+     * @param {Object} stopInfo - Info de l'arrêt (stop_id, stop_code, stop_name)
+     * @param {string} lineCode - Code de la ligne (A, B, C, D)
+     * @returns {Object|null} { rtMinutes, isRealtime, source }
+     */
+    getDirectRtForStop(stopInfo, lineCode) {
+        if (!this.realtimeManager || !this.realtimeManager.cache) return null;
+        if (!stopInfo) return null;
+        
+        const stopCode = stopInfo.stop_code || '';
+        const stopName = (stopInfo.stop_name || '').toLowerCase().replace(/\s+/g, '');
+        const normalizedLine = String(lineCode).toUpperCase();
+        
+        // Parcourir le cache RT pour trouver une correspondance
+        for (const [cacheKey, cached] of this.realtimeManager.cache.entries()) {
+            if (!cached || !cached.data) continue;
+            
+            // Vérifier si la clé correspond à cet arrêt
+            const keyLower = cacheKey.toLowerCase();
+            const matchesStop = (stopCode && keyLower.includes(stopCode.toLowerCase())) ||
+                               (stopName && keyLower.includes(stopName));
+            
+            if (!matchesStop) continue;
+            
+            // Chercher un départ pour cette ligne
+            const departures = cached.data.departures || cached.data.schedules || [];
+            for (const dep of departures) {
+                const depLine = (dep.line || dep.ligne || '').toUpperCase();
+                if (depLine !== normalizedLine) continue;
+                
+                // Trouvé! Parser le temps
+                const timeStr = dep.time || dep.temps || '';
+                const rtMinutes = this.realtimeManager.parseTemps(timeStr);
+                
+                if (rtMinutes !== null && rtMinutes < 999) {
+                    return {
+                        rtMinutes,
+                        isRealtime: dep.realtime !== false,
+                        destination: dep.destination || dep.dest || '',
+                        source: cacheKey,
+                        rawTime: timeStr
+                    };
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * V419: Position basée sur les données RT avec contraintes de segment
      * 
-     * Le problème: les données RT de Hawk donnent les prochains passages pour TOUS les bus
-     * d'une ligne à un arrêt, pas l'état d'un bus SPÉCIFIQUE.
-     * 
-     * Solution:
-     * 1. On utilise le segment GTFS statique (fromStop -> toStop) comme base
-     * 2. On cherche les données RT pour le toStop (prochain arrêt du segment)
-     * 3. Si RT disponible: on contraint le bus à être AVANT le toStop
-     *    - Si RT dit "0 min" -> le bus est proche du toStop (progress ~0.9)
-     *    - Si RT dit "X min" -> on calcule la position proportionnellement
-     * 4. Le bus ne peut JAMAIS être affiché APRÈS un arrêt où le RT dit qu'il n'est pas arrivé
-     * 
-     * Returns a position object or null.
+     * LOGIQUE AMÉLIORÉE:
+     * 1. On utilise le segment GTFS (fromStop → toStop)
+     * 2. On cherche les RT pour toStop ET fromStop
+     * 3. On calcule le progress en fonction du temps RT restant
+     * 4. On applique un lissage anti-téléportation
+     * 5. Le bus ne peut JAMAIS dépasser un arrêt où le RT dit qu'il n'est pas arrivé
      */
     pivotBasedEstimate(segment, tripId, routeShortName, bus = null) {
         if (!routeShortName) return null;
-        const short = String(routeShortName).toUpperCase();
-        if (!this.LIGNES_RT.includes(short)) return null;
+        const lineCode = String(routeShortName).toUpperCase();
+        if (!this.LIGNES_RT.includes(lineCode)) return null;
         
-        // On DOIT avoir un segment valide avec fromStop et toStop
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) return null;
         
         const fromStop = segment.fromStopInfo;
         const toStop = segment.toStopInfo;
-        
-        // Récupérer les données RT pour le prochain arrêt (toStop)
-        let rtMinutesToNext = null;
-        let hasRealtimeForNextStop = false;
-        
-        if (this.realtimeManager && this.realtimeManager.cache) {
-            // Chercher la clé hawk pour le toStop
-            const toStopCode = toStop.stop_code || '';
-            const toStopName = toStop.stop_name || '';
-            
-            // Chercher dans le cache RT
-            for (const [hawkKey, cachedRT] of this.realtimeManager.cache.entries()) {
-                // Matcher par stop_code ou nom d'arrêt
-                const keyMatches = hawkKey.includes(toStopCode) || 
-                    (toStopName && hawkKey.toLowerCase().includes(toStopName.toLowerCase().replace(/\s+/g, '')));
-                
-                if (keyMatches && cachedRT && cachedRT.data && cachedRT.data.departures) {
-                    // Chercher un départ pour cette ligne
-                    const matchingDep = cachedRT.data.departures.find(d => 
-                        d.line?.toUpperCase() === short
-                    );
-                    
-                    if (matchingDep) {
-                        const parsed = this.realtimeManager.parseTemps(matchingDep.time);
-                        if (parsed !== null && parsed < 999) {
-                            rtMinutesToNext = parsed;
-                            hasRealtimeForNextStop = matchingDep.realtime !== false;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
         
         // Coordonnées de base
         const fromLat = parseFloat(fromStop.stop_lat);
@@ -187,85 +160,92 @@ export class BusPositionCalculator {
         
         if ([fromLat, fromLon, toLat, toLon].some(v => isNaN(v))) return null;
         
-        // Calculer le progress basé sur le temps RT
-        let progress = segment.progress || 0.5; // Par défaut: progress GTFS statique
-        let confidence = 'theoretical';
+        // V419: Chercher les données RT pour le prochain arrêt (toStop)
+        const rtDataNext = this.getDirectRtForStop(toStop, lineCode);
         
-        if (hasRealtimeForNextStop && rtMinutesToNext !== null) {
-            // On a des données temps réel pour le prochain arrêt!
+        // V419: Chercher aussi les données RT pour l'arrêt de départ (fromStop)
+        const rtDataFrom = this.getDirectRtForStop(fromStop, lineCode);
+        
+        // Calculer le progress
+        let progress = segment.progress || 0.5;
+        let confidence = 'theoretical';
+        let rtMinutesToNext = null;
+        let hasRealtimeData = false;
+        
+        // Durée estimée du segment
+        const segmentDurationSec = (segment.arrivalTime || 0) - (segment.departureTime || 0);
+        const segmentDurationMin = Math.max(1, segmentDurationSec / 60); // Min 1 minute
+        
+        if (rtDataNext && rtDataNext.rtMinutes !== null) {
+            // On a des données RT pour le prochain arrêt
+            rtMinutesToNext = rtDataNext.rtMinutes;
+            hasRealtimeData = rtDataNext.isRealtime;
             
-            // Durée estimée du segment (en minutes)
-            const segmentDurationSec = (segment.arrivalTime || 0) - (segment.departureTime || 0);
-            const segmentDurationMin = segmentDurationSec / 60;
-            
-            if (segmentDurationMin > 0) {
-                if (rtMinutesToNext <= 0) {
-                    // Le bus est à l'arrêt ou vient d'arriver -> progress ~95%
-                    progress = 0.95;
-                    confidence = 'realtime-arriving';
-                } else if (rtMinutesToNext >= segmentDurationMin) {
-                    // Le bus n'a pas encore quitté le fromStop -> progress ~5%
-                    progress = 0.05;
-                    confidence = 'realtime-departing';
-                } else {
-                    // Le bus est en route -> calculer proportionnellement
-                    // temps passé = durée segment - temps restant RT
-                    const tempsPasseMin = segmentDurationMin - rtMinutesToNext;
-                    progress = Math.max(0.05, Math.min(0.95, tempsPasseMin / segmentDurationMin));
-                    confidence = 'realtime-moving';
-                }
+            if (rtMinutesToNext <= 0) {
+                // "À l'approche" ou 0 min → le bus est presque arrivé
+                progress = 0.92;
+                confidence = 'realtime-arriving';
+            } else if (rtMinutesToNext >= segmentDurationMin * 1.5) {
+                // Le bus n'a probablement pas encore quitté fromStop
+                progress = 0.08;
+                confidence = 'realtime-waiting';
             } else {
-                // Durée segment non définie, utiliser une estimation simple
-                if (rtMinutesToNext <= 1) {
-                    progress = 0.9;
-                } else if (rtMinutesToNext <= 3) {
-                    progress = 0.6;
-                } else {
-                    progress = 0.3;
-                }
-                confidence = 'realtime-estimated';
+                // En route: progress = temps écoulé / temps total
+                // Si RT dit X min et segment fait Y min total → progress = 1 - (X/Y)
+                const tempsEcouleMin = segmentDurationMin - rtMinutesToNext;
+                progress = tempsEcouleMin / segmentDurationMin;
+                progress = Math.max(0.05, Math.min(0.95, progress));
+                confidence = 'realtime-moving';
             }
+        } else if (rtDataFrom && rtDataFrom.rtMinutes !== null && rtDataFrom.rtMinutes <= 1) {
+            // Le bus est encore au fromStop ou vient de partir
+            progress = 0.1;
+            confidence = 'realtime-departed';
+            hasRealtimeData = rtDataFrom.isRealtime;
         }
         
-        // CONTRAINTE CRITIQUE: Le bus ne peut pas être après le toStop
-        // Si progress > 1, le ramener à 0.95
+        // CONTRAINTE: progress ne doit jamais dépasser 0.95 (le bus n'a pas encore atteint toStop)
         progress = Math.max(0, Math.min(0.95, progress));
         
         // Interpoler les coordonnées
-        const lat = fromLat + (toLat - fromLat) * progress;
-        const lon = fromLon + (toLon - fromLon) * progress;
+        let lat = fromLat + (toLat - fromLat) * progress;
+        let lon = fromLon + (toLon - fromLon) * progress;
         
         // Calculer le bearing
         const bearing = this.calculateLinearBearing(fromLat, fromLon, toLat, toLon);
         
-        // Anti-téléportation: lisser si grande distance avec position précédente
-        if (bus && bus.position && bus.position.lat && bus.position.lon) {
-            try {
-                const dist = this.dataManager.calculateDistance(bus.position.lat, bus.position.lon, lat, lon);
-                if (dist > this.SEUIL_TELEPORT) {
-                    const lastLat = parseFloat(bus.position.lat);
-                    const lastLon = parseFloat(bus.position.lon);
-                    const blendFactor = Math.min(0.4, 150 / dist);
-                    const smoothLat = lastLat + (lat - lastLat) * blendFactor;
-                    const smoothLon = lastLon + (lon - lastLon) * blendFactor;
-                    
-                    return {
-                        lat: smoothLat,
-                        lon: smoothLon,
-                        progress,
-                        bearing,
-                        rtInfo: {
-                            toStop: toStop.stop_name,
-                            rtMinutes: rtMinutesToNext,
-                            smoothed: true
-                        },
-                        confidence: confidence + '-smoothed',
-                        hasRealtime: hasRealtimeForNextStop,
-                        isEstimated: !hasRealtimeForNextStop
-                    };
+        // V419: Anti-téléportation avec lissage intelligent
+        const positionKey = tripId || `${lineCode}_${fromStop.stop_id}`;
+        const lastPos = this.lastKnownPositions.get(positionKey);
+        let smoothed = false;
+        
+        if (lastPos && Date.now() - lastPos.timestamp < 120000) { // Position valide depuis < 2 min
+            const dist = this.dataManager.calculateDistance(lastPos.lat, lastPos.lon, lat, lon);
+            const timeDeltaSec = (Date.now() - lastPos.timestamp) / 1000;
+            const speedKmh = (dist / 1000) / (timeDeltaSec / 3600);
+            
+            // Si la "vitesse" est trop élevée, lisser la position
+            if (speedKmh > this.validationThresholds.maxSpeedKmh || dist > this.SEUIL_TELEPORT) {
+                const blend = this.validationThresholds.smoothingFactor;
+                lat = lastPos.lat + (lat - lastPos.lat) * blend;
+                lon = lastPos.lon + (lon - lastPos.lon) * blend;
+                smoothed = true;
+                confidence += '-smoothed';
+            }
+        }
+        
+        // Sauvegarder cette position pour le prochain cycle
+        this.lastKnownPositions.set(positionKey, {
+            lat, lon, progress, timestamp: Date.now()
+        });
+        
+        // Nettoyer les anciennes positions (> 5 min)
+        if (this.lastKnownPositions.size > 100) {
+            const cutoff = Date.now() - 300000;
+            for (const [key, val] of this.lastKnownPositions.entries()) {
+                if (val.timestamp < cutoff) {
+                    this.lastKnownPositions.delete(key);
                 }
-            } catch (e) {
-                // Ignorer
             }
         }
         
@@ -277,11 +257,13 @@ export class BusPositionCalculator {
             rtInfo: {
                 fromStop: fromStop.stop_name,
                 toStop: toStop.stop_name,
-                rtMinutes: rtMinutesToNext
+                rtMinutes: rtMinutesToNext,
+                smoothed,
+                segmentDuration: segmentDurationMin
             },
             confidence,
-            hasRealtime: hasRealtimeForNextStop,
-            isEstimated: !hasRealtimeForNextStop
+            hasRealtime: hasRealtimeData,
+            isEstimated: !hasRealtimeData
         };
     }
 
