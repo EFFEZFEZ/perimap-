@@ -6993,26 +6993,24 @@ body.dark-theme .real-select option {
     bottom: 0;
     width: 100%;
     height: 100vh;
-    z-index: 100;
-}
-
-/* V359: La vue itinéraire est en position fixed (plein écran),
-   donc on la décale sous l'en-tête PériMap pour éviter le chevauchement. */
-body.itinerary-view-active #itinerary-results-container {
-    top: 64px;
-    height: calc(100svh - 64px);
-    height: calc(100vh - 64px);
-}
-
-@media (max-width: 768px) {
-    body.itinerary-view-active #itinerary-results-container {
-        top: 56px;
-        height: calc(100svh - 56px);
-        height: calc(100vh - 56px);
-    }
-}
-
-/* V433: Panneau latéral - Design minimaliste */
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    cursor: pointer;
+    padding-right: 2.5rem;
+    /* Comportement par défaut, pas de scroll ni overflow ni max-height */
 #results-side-panel {
     width: 380px;
     flex-shrink: 0;
