@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v438)
+ * PÉRIMAP - CSS PRINCIPAL (v439)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -3392,16 +3392,20 @@ body.dark-theme .app-back-btn svg {
     max-height: 2000px; 
     padding: 1.5rem;
     opacity: 1;
-    /* V434: Uniformiser la largeur avec le hero */
-    max-width: var(--container-hero);
+    /* V438: Largeur dynamique comme les héros */
+    width: 100%;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
+    box-sizing: border-box;
 }
 
-/* V434: Styles spécifiques pour chaque card */
+/* V438: Styles spécifiques pour chaque card - largeur dynamique */
 #horaires.view-active,
 #info-trafic.view-active {
-    max-width: var(--container-hero);
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
     margin-left: auto;
     margin-right: auto;
 }
@@ -8088,18 +8092,21 @@ body.dark-theme .route-next-departures {
         display: none;
     }
 
-    /* Le panneau latéral prend tout l'écran */
+    /* V438: Le panneau latéral s'aligne sur la largeur des héros */
     #results-side-panel {
         width: 100%;
         flex: 1;
         border-right: none;
         height: 100%;
-        overflow-y: auto; /* Toute la colonne redevient scrollable */
+        overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
-        min-height: 0; /* Crucial pour permettre le scroll dans un flex column */
+        min-height: 0;
+        /* Aligner sur le design des héros */
+        padding: 0 1rem;
+        box-sizing: border-box;
     }
 
     .results-list-wrapper {
@@ -8119,17 +8126,27 @@ body.dark-theme .route-next-departures {
         margin-right: auto;
     }
     
-    /* V353: Header compact pour mobile */
+    /* V438: Header compact pour mobile - aligné sur héros */
     .itinerary-top-bar {
-        padding: 0.5rem 0.75rem;
+        padding: 0.75rem 0;
+        background: transparent;
+        border-bottom: none;
+        max-width: 100%;
     }
     
     .itinerary-top-bar h2 {
-        font-size: 0.9375rem;
+        font-size: 1rem;
+        font-weight: 700;
     }
     
+    /* V438: Formulaire mobile avec style planner-block */
     #itinerary-edit-panel {
-        padding: 0.75rem;
+        background: var(--bg-main);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-5);
+        border: 2px solid rgba(34, 197, 94, 0.2);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        margin: 0 0 1rem 0;
     }
     
     /* V353: Formulaire Google Maps style mobile */
