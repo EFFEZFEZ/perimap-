@@ -8,7 +8,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v440';
+const CACHE_VERSION = 'v441';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

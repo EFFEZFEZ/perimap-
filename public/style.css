@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v440)
+ * PÉRIMAP - CSS PRINCIPAL (v441)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -1032,15 +1032,15 @@ body.dark-theme .pm-skeleton-card {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         position: fixed;
-        left: 0; /* V366: Collé au bord gauche */
-        right: 0; /* V366: Collé au bord droit */
-        bottom: 0; /* V366: Collé en bas, stable et prévisible */
+        left: 0;
+        right: 0;
+        bottom: 0;
         height: var(--bottom-nav-height);
-        padding-bottom: env(safe-area-inset-bottom); /* V366: Safe area gérée en padding interne */
-        border-radius: 0; /* V366: Pas de coins arrondis, style IDFM/Google Maps */
-        background: rgba(255, 255, 255, 0.98); /* V366: Plus opaque pour stabilité visuelle */
-        border-top: 1px solid rgba(15, 23, 42, 0.12); /* V366: Bordure top uniquement */
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08); /* V366: Shadow vers le haut */
+        padding-bottom: env(safe-area-inset-bottom);
+        border-radius: 0;
+        background: rgba(255, 255, 255, 0.98);
+        border-top: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         z-index: 15000;
@@ -1048,6 +1048,11 @@ body.dark-theme .pm-skeleton-card {
         will-change: transform;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
+        /* V441: Force le collage au bas sans écart */
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+        transform: translateZ(0);
     }
 
     body.dark-theme .bottom-nav {
@@ -8093,8 +8098,8 @@ body.dark-theme .route-next-departures {
     }
 
     /* =========================================
-     * V440: REFONTE GRAPHIQUE VUE ITINÉRAIRE
-     * Design premium aligné avec la DA PériMap
+     * V441: REFONTE STYLE IDFM - ÉPURÉ ET PROFESSIONNEL
+     * Inspiré Île-de-France Mobilités
      * ========================================= */
     
     #results-side-panel {
@@ -8108,10 +8113,9 @@ body.dark-theme .route-next-departures {
         display: flex;
         flex-direction: column;
         min-height: 0;
-        /* Design héro premium */
-        padding: 1.25rem 1.25rem 0;
+        padding: 0;
         box-sizing: border-box;
-        background: transparent;
+        background: var(--bg-main);
     }
 
     .results-list-wrapper {
@@ -8119,181 +8123,234 @@ body.dark-theme .route-next-departures {
         display: block;
         overflow: visible;
         padding-bottom: 0;
-        margin-top: 1.5rem;
+        margin-top: 0;
     }
     
     .results-list {
         flex: none;
         overflow: visible;
         max-height: none;
-        padding: 0 0 calc(2rem + env(safe-area-inset-bottom));
+        padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
         max-width: 100%;
         margin: 0;
     }
     
-    /* V440: Header moderne avec titre gradient */
+    /* V441: Header IDFM - simple et propre */
     .itinerary-top-bar {
-        padding: 0 0 1rem 0;
-        background: transparent;
-        border-bottom: none;
+        padding: 1rem 1.25rem;
+        background: var(--bg-main);
+        border-bottom: 1px solid var(--border);
         max-width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
     }
     
     .itinerary-top-bar .app-back-btn {
-        padding: 0.5rem 0.875rem;
-        background: rgba(34, 197, 94, 0.1);
-        border-radius: 20px;
-        font-size: 0.8125rem;
-        margin-bottom: 0.5rem;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        font-size: 0.875rem;
+        margin-bottom: 0;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .itinerary-top-bar .app-back-btn svg {
+        width: 20px;
+        height: 20px;
     }
     
     .itinerary-top-bar h2 {
-        font-size: 1.5rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: var(--text-primary);
+        background-clip: unset;
+        color: var(--text-primary);
     }
     
-    /* V440: Formulaire premium style planner-block */
+    /* V441: Formulaire IDFM - fond propre, pas de bordure colorée */
     #itinerary-edit-panel {
         background: var(--bg-main);
-        border-radius: 20px;
-        padding: 1.5rem;
-        border: 2px solid rgba(34, 197, 94, 0.25);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(34, 197, 94, 0.08);
+        border-radius: 0;
+        padding: 1.25rem;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        box-shadow: none;
         margin: 0;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
     }
     
-    /* Effet de brillance subtil */
     #itinerary-edit-panel::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.5), transparent);
+        display: none;
     }
     
-    /* V440: Formulaire premium avec indicateurs visuels */
+    /* V441: Conteneur inputs style IDFM - vertical avec labels */
     .route-input-container {
-        gap: 0.75rem;
+        flex-direction: column;
+        gap: 0;
+        align-items: stretch;
+        position: relative;
     }
     
+    /* V441: Cacher les indicateurs visuels (style IDFM) */
     .route-visual-indicators {
-        width: 24px;
-        padding: 0.75rem 0;
+        display: none;
     }
     
-    .indicator-dot {
-        width: 14px;
-        height: 14px;
-        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    /* V441: Stack inputs en vertical avec espace pour le swap */
+    .route-inputs-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        position: relative;
+        padding-right: 52px;
     }
     
-    .indicator-dot.origin {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        border: 3px solid var(--bg-main);
-        box-shadow: 0 0 0 2px var(--primary), 0 4px 12px rgba(34, 197, 94, 0.4);
+    /* V441: Wrapper input avec label IDFM */
+    .route-input-wrapper {
+        position: relative;
     }
     
-    .indicator-dot.destination {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        border: 3px solid var(--bg-main);
-        box-shadow: 0 0 0 2px #ef4444, 0 4px 12px rgba(239, 68, 68, 0.4);
+    .route-input-wrapper::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary);
+        margin-bottom: 0.5rem;
     }
     
-    .indicator-line {
-        width: 3px;
-        background: linear-gradient(to bottom, var(--primary), #ef4444);
-        border-radius: 2px;
-        margin: 6px 0;
+    .route-input-wrapper:first-child::before {
+        content: 'DÉPART';
     }
     
-    /* V440: Inputs premium avec glassmorphism subtil */
+    .route-input-wrapper:last-child::before {
+        content: 'ARRIVÉE';
+    }
+    
+    /* V441: Inputs IDFM - fond clair, bordure subtile */
     .route-input {
-        min-height: 56px;
+        min-height: 52px;
         font-size: 1rem;
-        padding: 1rem 3.25rem 1rem 1.125rem;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1.5px solid rgba(255, 255, 255, 0.1);
-        font-weight: 500;
-        letter-spacing: -0.01em;
+        padding: 0.875rem 3rem 0.875rem 1rem;
+        border-radius: 12px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        font-weight: 400;
+        letter-spacing: 0;
+        width: 100%;
+    }
+    
+    .route-input::placeholder {
+        color: var(--text-tertiary);
     }
     
     .route-input:focus {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--bg-main);
         border-color: var(--primary);
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 8px 24px rgba(34, 197, 94, 0.2);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
     }
     
-    /* V440: Bouton géoloc premium */
+    /* V441: Bouton géoloc discret */
     .btn-geolocate-minimal {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: rgba(34, 197, 94, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: transparent;
+        right: 0.5rem;
     }
     
     .btn-geolocate-minimal svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
     
     .btn-geolocate-minimal:hover:not(:disabled) {
-        background: var(--primary);
-        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+        background: rgba(34, 197, 94, 0.1);
+        box-shadow: none;
+        transform: translateY(-50%);
     }
     
-    /* V440: Bouton swap premium */
+    /* V441: Bouton swap IDFM - à droite du stack, centré verticalement */
     .btn-swap-minimal {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        box-shadow: none;
+        color: var(--text-secondary);
     }
     
     .btn-swap-minimal svg {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
     
     .btn-swap-minimal:hover {
-        transform: rotate(180deg) scale(1.08);
-        box-shadow: 0 6px 24px rgba(34, 197, 94, 0.5);
+        background: var(--bg-light);
+        border-color: var(--primary);
+        color: var(--primary);
+        transform: translateY(-50%);
+        box-shadow: none;
     }
     
-    /* V440: Actions row premium */
+    /* V441: Actions row IDFM - propre et aéré */
     .route-actions {
-        margin-top: 1rem;
-        gap: 0.875rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        margin-top: 1.25rem;
+        gap: 0.75rem;
+        padding-top: 0;
+        border-top: none;
+        flex-direction: column;
     }
     
-    /* V440: Time picker premium */
+    /* V441: Time picker IDFM */
     .btn-time-picker {
         padding: 0.875rem 1rem;
         font-size: 0.9375rem;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        font-weight: 500;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .btn-time-picker::before {
+        content: 'QUAND';
+        position: absolute;
+        top: -1.5rem;
+        left: 0;
+        font-size: 0.6875rem;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-tertiary);
+    }
+    
+    .btn-time-picker {
+        position: relative;
+        margin-top: 1.5rem;
     }
     
     .btn-time-picker:hover {
-        background: rgba(34, 197, 94, 0.1);
-        border-color: rgba(34, 197, 94, 0.3);
+        background: var(--bg-light);
+        border-color: var(--primary);
     }
     
     .btn-time-picker svg:first-child {
@@ -8301,22 +8358,24 @@ body.dark-theme .route-next-departures {
         height: 18px;
     }
     
-    /* V440: Bouton rechercher premium gradient */
+    /* V441: Bouton rechercher IDFM - simple et efficace */
     .btn-search-route {
         padding: 1rem 1.5rem;
         font-size: 1rem;
-        min-height: 56px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
-        text-transform: uppercase;
+        min-height: 52px;
+        border-radius: 12px;
+        background: var(--primary);
+        font-weight: 600;
+        letter-spacing: 0;
+        box-shadow: none;
+        text-transform: none;
+        width: 100%;
     }
     
     .btn-search-route:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.5), 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: #16a34a;
+        transform: none;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
     }
 
     /* --- Styles mobiles pour les détails d'itinéraire (ACCORDÉON PC) --- */
