@@ -786,8 +786,16 @@
         function getStaticDepartures(stopIds) {
             const now = new Date();
             const seconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            const list = dataManager.getUpcomingDepartures(stopIds, seconds, now, 8);
-            return list.map(dep => ({ ...dep, isRealtime: false }));
+            // Récupère les prochains départs (toutes lignes)
+            const allDepartures = dataManager.getUpcomingDepartures(stopIds, seconds, now, 50);
+            // Filtre uniquement les départs de CETTE ligne (LINE_CONFIG.routeId)
+            const lineRouteId = LINE_CONFIG.routeId;
+            const filtered = allDepartures.filter(dep => {
+                const trip = dataManager.tripsByTripId?.[dep.tripId];
+                return trip && trip.route_id === lineRouteId;
+            });
+            // Limite à 8 résultats
+            return filtered.slice(0, 8).map(dep => ({ ...dep, isRealtime: false }));
         }
 
         function splitByDirection(departures) {
@@ -810,7 +818,7 @@
                 (toB.length <= toA.length ? toB : toA).push(dep);
             });
 
-            return { toB: toB.slice(0, 3), toA: toA.slice(0, 3) };
+            return { toB: toB.slice(0, 10), toA: toA.slice(0, 10) };
         }
 
         function formatDisplayTime(dep) {
