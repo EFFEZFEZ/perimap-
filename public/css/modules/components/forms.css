@@ -1,370 +1,312 @@
 /**
- * Formulaires - Périmap
+ * Forms Styles - Périmap v432
  * 
- * Styles pour inputs, selects, et contrôles de formulaire
+ * Styles des formulaires et inputs
+ * Source: style.css
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   INPUT DE BASE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.input {
-    display: block;
-    width: 100%;
-    padding: var(--spacing-2) var(--spacing-3);
-    min-height: 40px;
-    
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    color: var(--text-primary);
-    
-    background: var(--bg-main);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-md);
-    
-    transition: border-color var(--transition-quick), box-shadow var(--transition-quick);
-}
-
-.input::placeholder {
-    color: var(--text-muted);
-}
-
-.input:hover {
-    border-color: var(--text-muted);
-}
-
-.input:focus {
-    outline: none;
-    border-color: var(--pm-green);
-    box-shadow: 0 0 0 3px var(--pm-green-light);
-}
-
-.input:disabled {
-    background: var(--bg-secondary);
-    color: var(--text-muted);
-    cursor: not-allowed;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   VARIANTES D'INPUT
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Tailles */
-.input-sm {
-    padding: var(--spacing-1) var(--spacing-2);
-    min-height: 32px;
-    font-size: var(--font-size-sm);
-}
-
-.input-lg {
-    padding: var(--spacing-3) var(--spacing-4);
-    min-height: 48px;
-    font-size: var(--font-size-lg);
-}
-
-/* États */
-.input-error {
-    border-color: var(--color-error);
-}
-
-.input-error:focus {
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-.input-success {
-    border-color: var(--color-success);
-}
-
-.input-success:focus {
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   INPUT GROUP (avec icône)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.input-group {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-group .input {
-    padding-left: 40px;
-}
-
-.input-group-icon {
-    position: absolute;
-    left: var(--spacing-3);
-    color: var(--text-muted);
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.input-group-icon svg {
-    width: 18px;
-    height: 18px;
-}
-
-.input-group-right .input {
-    padding-left: var(--spacing-3);
-    padding-right: 40px;
-}
-
-.input-group-right .input-group-icon {
-    left: auto;
-    right: var(--spacing-3);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TEXTAREA
-   ═══════════════════════════════════════════════════════════════════════ */
-
-textarea.input {
-    min-height: 100px;
-    resize: vertical;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SELECT
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.select {
-    display: block;
-    width: 100%;
-    padding: var(--spacing-2) var(--spacing-8) var(--spacing-2) var(--spacing-3);
-    min-height: 40px;
-    
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    color: var(--text-primary);
-    
-    background-color: var(--bg-main);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right var(--spacing-3) center;
-    
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-md);
-    
-    appearance: none;
-    cursor: pointer;
-    
-    transition: border-color var(--transition-quick), box-shadow var(--transition-quick);
-}
-
-.select:focus {
-    outline: none;
-    border-color: var(--pm-green);
-    box-shadow: 0 0 0 3px var(--pm-green-light);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CHECKBOX & RADIO
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.checkbox-group,
-.radio-group {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    cursor: pointer;
-}
-
-.checkbox,
-.radio {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    cursor: pointer;
-    accent-color: var(--pm-green);
-}
-
-.checkbox-label,
-.radio-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-primary);
-    user-select: none;
-}
-
-/* Custom checkbox */
-.checkbox-custom {
-    position: relative;
-    width: 20px;
-    height: 20px;
-    background: var(--bg-main);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-quick);
-}
-
-.checkbox-custom.checked {
-    background: var(--pm-green);
-    border-color: var(--pm-green);
-}
-
-.checkbox-custom.checked::after {
-    content: '';
-    position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-/* Custom radio */
-.radio-custom {
-    position: relative;
-    width: 20px;
-    height: 20px;
-    background: var(--bg-main);
-    border: 2px solid var(--border);
-    border-radius: 50%;
-    transition: all var(--transition-quick);
-}
-
-.radio-custom.checked {
-    border-color: var(--pm-green);
-}
-
-.radio-custom.checked::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    background: var(--pm-green);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SWITCH / TOGGLE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-    cursor: pointer;
-}
-
-.switch-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.switch-slider {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--bg-tertiary);
-    border-radius: 24px;
-    transition: all var(--transition-quick);
-}
-
-.switch-slider::before {
-    content: '';
-    position: absolute;
-    left: 2px;
-    bottom: 2px;
-    width: 20px;
-    height: 20px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: var(--elevation-1);
-    transition: transform var(--transition-quick);
-}
-
-.switch-input:checked + .switch-slider {
-    background: var(--pm-green);
-}
-
-.switch-input:checked + .switch-slider::before {
-    transform: translateX(20px);
-}
-
-.switch-input:focus-visible + .switch-slider {
-    box-shadow: 0 0 0 3px var(--pm-green-light);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FORM LAYOUT
+   FORM GROUP DE BASE
    ═══════════════════════════════════════════════════════════════════════ */
 
 .form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUTS TEXT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.form-group input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform 0.15s ease;
+    background: var(--bg-main);
+}
+
+.form-group.has-geolocate input[type="text"] {
+    padding-right: 3.25rem;
+}
+
+.form-group input[type="text"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(37, 99, 235, 0.1);
+    outline: none;
+    transform: scale(1.01);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUTS PLANIFICATEUR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.planner-block .form-group input[type="text"] {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1rem 1rem 2.75rem;
+    font-size: 16px; /* Force 16px pour empêcher le zoom iOS */
+    color: #1e3a5f;
+    width: 100%;
+    transition: all 0.2s ease;
+    min-height: 52px;
+    box-sizing: border-box;
+}
+
+.planner-block .form-group input[type="text"]::placeholder {
+    color: #94a3b8;
+}
+
+.planner-block .form-group input[type="text"]:focus {
+    background: #ffffff;
+    border-color: #1e3a5f;
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+    outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUT WITH ACTION (bouton dans l'input)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.input-with-action {
+    position: relative;
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUT WITH ICON
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.input-with-icon input[type="text"] {
+    padding-left: 2.75rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SEARCH BAR PROÉMINENTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.search-prominent {
+    position: relative;
     margin-bottom: var(--spacing-4);
 }
 
-.form-label {
-    display: block;
-    margin-bottom: var(--spacing-1);
+.search-prominent input {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-4) var(--spacing-12);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+}
+
+.search-prominent input:focus {
+    border-color: var(--pm-green);
+    box-shadow: var(--elevation-2);
+}
+
+.search-prominent svg {
+    position: absolute;
+    left: var(--spacing-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HORAIRES SEARCH BAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#horaires-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+#horaires-search-container svg {
+    position: absolute;
+    left: 14px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    z-index: 1;
+}
+
+#horaires-search-bar {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+}
+
+#horaires-search-bar:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: none;
+}
+
+#horaires-search-results {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-3);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: var(--z-dropdown);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.search-result-item {
+    padding: var(--spacing-3) var(--spacing-4);
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-quick);
 }
 
-.form-label-required::after {
-    content: ' *';
-    color: var(--color-error);
+.search-result-item:last-child {
+    border-bottom: none;
 }
 
-.form-hint {
-    margin-top: var(--spacing-1);
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
+.search-result-item:hover {
+    background: var(--bg-secondary);
 }
 
-.form-error {
-    margin-top: var(--spacing-1);
-    font-size: var(--font-size-xs);
-    color: var(--color-error);
+.search-result-item strong {
+    color: var(--primary);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
    DARK THEME
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.dark-theme .input,
-body.dark-theme .select {
-    background: #1e293b;
-    border-color: #334155;
-    color: #e2e8f0;
+body.dark-theme input[type="text"],
+body.dark-theme input[type="search"],
+body.dark-theme .real-select,
+body.dark-theme textarea {
+    color: #f5f7fb;
+    background-color: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
 }
 
-body.dark-theme .input::placeholder {
-    color: #64748b;
+body.dark-theme input[type="text"]::placeholder,
+body.dark-theme input[type="search"]::placeholder,
+body.dark-theme textarea::placeholder {
+    color: rgba(245,247,251,0.6);
 }
 
-body.dark-theme .input:hover,
-body.dark-theme .select:hover {
-    border-color: #475569;
+/* ═══════════════════════════════════════════════════════════════════════
+   PLANNER FORM STRUCTURE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.planner-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
 }
 
-body.dark-theme .input:disabled {
-    background: #0f172a;
+.planner-inputs-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-body.dark-theme .checkbox-custom,
-body.dark-theme .radio-custom {
-    background: #1e293b;
-    border-color: #334155;
+.planner-inputs-vertical .form-group {
+    margin-bottom: 0;
 }
 
-body.dark-theme .switch-slider {
-    background: #334155;
+/* Swap button row */
+.swap-button-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0;
+    position: relative;
+    z-index: 5;
 }
 
-body.dark-theme .form-label {
-    color: #e2e8f0;
+.swap-line {
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+/* Planner options */
+.planner-options {
+    position: relative;
+    z-index: 16000;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PLANNER INPUTS GRID (legacy pour résultats)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.planner-inputs {
+    --swap-col-width: 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--swap-col-width) minmax(0, 1fr);
+    flex: 1;
+    gap: 1rem;
+    align-items: stretch;
+    padding-left: 0;
+    padding-right: 0;
+    position: relative;
+}
+
+.planner-inputs .form-group {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.planner-inputs .form-group .input-with-action {
+    flex: 1;
+}
+
+.planner-inputs .swap-button-slot {
+    width: var(--swap-col-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.planner-inputs .swap-button-slot .btn-swap-direction {
+    justify-self: center;
+    align-self: center;
 }

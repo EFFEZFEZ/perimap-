@@ -1,11 +1,12 @@
 /**
- * Animations - Périmap
+ * Animations CSS - Périmap v432
  * 
- * Keyframes et classes d'animation réutilisables
+ * Keyframes et classes d'animation
+ * Source: style.css lignes 750-933
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   KEYFRAMES
+   KEYFRAMES PRINCIPAUX
    ═══════════════════════════════════════════════════════════════════════ */
 
 @keyframes fadeIn {
@@ -95,17 +96,6 @@
     }
 }
 
-@keyframes scaleOut {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-}
-
 @keyframes bounceIn {
     0% {
         opacity: 0;
@@ -128,24 +118,10 @@
     50% { transform: scale(1.05); }
 }
 
-@keyframes pulseGlow {
-    0%, 100% {
-        box-shadow: 0 0 0 0 var(--pm-green-glow);
-    }
-    50% {
-        box-shadow: 0 0 20px 10px var(--pm-green-glow);
-    }
-}
-
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
 }
 
 @keyframes ripple {
@@ -156,42 +132,35 @@
 }
 
 @keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
-    }
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
-@keyframes ping {
-    75%, 100% {
-        transform: scale(2);
+@keyframes notificationPop {
+    0% {
+        transform: scale(0);
         opacity: 0;
     }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
-@keyframes bounce {
-    0%, 100% {
-        transform: translateY(-25%);
-        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-    }
-    50% {
-        transform: translateY(0);
-        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-    }
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   CLASSES D'ANIMATION
+   CLASSES UTILITAIRES D'ANIMATION
    ═══════════════════════════════════════════════════════════════════════ */
 
 .animate-fade-in {
     animation: fadeIn var(--transition-normal) ease-out forwards;
-}
-
-.animate-fade-out {
-    animation: fadeOut var(--transition-normal) ease-out forwards;
 }
 
 .animate-fade-in-up {
@@ -210,10 +179,6 @@
     animation: slideInRight var(--transition-normal) ease-out forwards;
 }
 
-.animate-slide-up {
-    animation: slideUp var(--transition-normal) ease-out forwards;
-}
-
 .animate-scale-in {
     animation: scaleIn var(--transition-normal) ease-out forwards;
 }
@@ -222,109 +187,100 @@
     animation: bounceIn var(--transition-bounce) ease-out forwards;
 }
 
-.animate-pulse {
+/* Délais échelonnés pour les listes */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Badge notification */
+.notification-badge {
     animation: pulse 2s ease-in-out infinite;
 }
 
-.animate-spin {
-    animation: spin 1s linear infinite;
+/* Transitions de page */
+.page-transition-enter {
+    opacity: 0;
+    transform: translateY(10px);
 }
 
-.animate-ping {
-    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+.page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
-.animate-bounce {
-    animation: bounce 1s infinite;
+.page-transition-exit {
+    opacity: 1;
+}
+
+.page-transition-exit-active {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   DÉLAIS D'ANIMATION (stagger)
+   MICRO-INTERACTIONS
    ═══════════════════════════════════════════════════════════════════════ */
 
-.delay-75 { animation-delay: 75ms; }
-.delay-100 { animation-delay: 100ms; }
-.delay-150 { animation-delay: 150ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-700 { animation-delay: 700ms; }
-.delay-1000 { animation-delay: 1000ms; }
+.pm-ripple-host {
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
 
-/* Stagger pour listes */
-.stagger-1 { animation-delay: 50ms; }
-.stagger-2 { animation-delay: 100ms; }
-.stagger-3 { animation-delay: 150ms; }
-.stagger-4 { animation-delay: 200ms; }
-.stagger-5 { animation-delay: 250ms; }
-.stagger-6 { animation-delay: 300ms; }
-.stagger-7 { animation-delay: 350ms; }
-.stagger-8 { animation-delay: 400ms; }
+.pm-ripple {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    background: rgba(2, 6, 23, 0.10);
+    transform: scale(0);
+    opacity: 0.9;
+    animation: pm-ripple 480ms ease-out forwards;
+}
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SKELETON LOADING
-   ═══════════════════════════════════════════════════════════════════════ */
+body.dark-theme .pm-ripple {
+    background: rgba(255, 255, 255, 0.14);
+}
 
+@keyframes pm-ripple {
+    to {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Transitions par défaut sur éléments interactifs */
+:where(.btn, .btn-icon-round, .quick-action-card, .nav-dropdown-item, .mobile-menu-item, .bottom-nav-item, .route-option) {
+    transition: transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+:where(.btn, .btn-icon-round, .quick-action-card, .nav-dropdown-item, .mobile-menu-item, .bottom-nav-item, .route-option).pm-is-pressed {
+    transform: translateZ(0) scale(0.985);
+}
+
+/* Skeleton loading */
 .skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--bg-secondary) 25%,
-        var(--bg-light) 50%,
-        var(--bg-secondary) 75%
-    );
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-light) 50%, var(--bg-secondary) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     border-radius: var(--radius-sm);
 }
 
-.skeleton-text {
-    height: 1em;
-    margin-bottom: 0.5em;
+.pm-skeleton-stack {
+    display: grid;
+    gap: 10px;
 }
 
-.skeleton-text:last-child {
-    width: 80%;
+.pm-skeleton-card {
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
-.skeleton-circle {
-    border-radius: 50%;
-}
-
-.skeleton-card {
-    height: 200px;
-    border-radius: var(--radius-md);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TRANSITIONS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.transition-none { transition: none; }
-.transition-all { transition: all var(--transition-normal); }
-.transition-colors { transition: color, background-color, border-color var(--transition-quick); }
-.transition-opacity { transition: opacity var(--transition-quick); }
-.transition-transform { transition: transform var(--transition-quick); }
-.transition-shadow { transition: box-shadow var(--transition-quick); }
-
-/* Hover scale */
-.hover-scale {
-    transition: transform var(--transition-quick);
-}
-
-.hover-scale:hover {
-    transform: scale(1.05);
-}
-
-.hover-scale-sm:hover {
-    transform: scale(1.02);
-}
-
-/* Hover lift */
-.hover-lift {
-    transition: transform var(--transition-quick), box-shadow var(--transition-quick);
-}
-
-.hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--elevation-3);
+body.dark-theme .pm-skeleton-card {
+    border-color: rgba(255, 255, 255, 0.06);
 }

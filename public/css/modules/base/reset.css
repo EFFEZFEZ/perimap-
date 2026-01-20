@@ -1,8 +1,13 @@
 /**
- * CSS Reset - Périmap
+ * Reset CSS - Périmap v432
  * 
- * Reset moderne et minimaliste
+ * Reset moderne + Optimisations performance
+ * Source: style.css lignes 525-550
  */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RESET DE BASE
+   ═══════════════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -16,12 +21,13 @@ html {
     tab-size: 4;
     font-feature-settings: normal;
     font-variation-settings: normal;
+    scroll-behavior: smooth;
 }
 
 body {
-    font-family: var(--font-family);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-normal);
+    font-family: var(--font-family, 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+    font-size: var(--font-size-base, 1rem);
+    line-height: var(--line-height-normal, 1.5);
     color: var(--text-primary);
     background-color: var(--bg-main);
     -webkit-font-smoothing: antialiased;
@@ -38,8 +44,6 @@ a {
 /* Boutons et inputs */
 button, input, optgroup, select, textarea {
     font-family: inherit;
-    font-feature-settings: inherit;
-    font-variation-settings: inherit;
     font-size: 100%;
     font-weight: inherit;
     line-height: inherit;
@@ -57,17 +61,6 @@ button, [type='button'], [type='reset'], [type='submit'] {
     background-color: transparent;
     background-image: none;
     cursor: pointer;
-}
-
-/* Désactiver les spinners sur inputs number */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type='number'] {
-    -moz-appearance: textfield;
 }
 
 /* Media */
@@ -92,51 +85,29 @@ table {
     border-spacing: 0;
 }
 
-/* Éléments interactifs */
-[role="button"], [type="button"] {
-    cursor: pointer;
+/* ═══════════════════════════════════════════════════════════════════════
+   OPTIMISATIONS PERFORMANCE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* GPU acceleration pour les éléments animés */
+.card, .btn, .nav-dropdown-menu, .bottom-sheet, .modal {
+    will-change: transform, opacity;
+    transform: translateZ(0);
 }
 
-:disabled {
-    cursor: not-allowed;
+/* Optimiser le rendu des sections hors écran */
+#map-view, #itinerary-view, #detail-panel, .tarifs-container {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
 }
 
-/* Masquer les éléments avec hidden */
-[hidden] {
-    display: none !important;
+/* Réduire le reflow sur les éléments fixes */
+#main-header {
+    contain: layout style;
 }
 
-/* Focus visible pour accessibilité */
-:focus-visible {
-    outline: 2px solid var(--pm-green);
-    outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-    outline: none;
-}
-
-/* Améliorer le scroll */
-html {
-    scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-    }
-    
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* Safe area pour iOS */
-body {
-    padding-top: env(safe-area-inset-top);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
+/* Optimiser le scroll */
+.results-list, .bottom-sheet-content, .tarifs-card-body {
+    contain: content;
+    overflow-anchor: none;
 }

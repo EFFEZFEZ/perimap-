@@ -1,1364 +1,349 @@
 /**
- * Itinerary page styles - Périmap
+ * Itinerary Page Styles - Périmap v432
  * 
- * V429: REFONTE GRAPHIQUE COMPLÈTE
- * Design moderne premium, glassmorphism, animations fluides
- * Cohérent avec l'identité PériMap
+ * Styles spécifiques à la page itinéraire
+ * Source: style.css
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   VARIABLES LOCALES - DESIGN SYSTEM
+   CONTAINER PRINCIPAL
    ═══════════════════════════════════════════════════════════════════════ */
 
-:root {
-    /* Couleurs itinéraire */
-    --itin-card-bg: rgba(26, 34, 53, 0.85);
-    --itin-card-bg-hover: rgba(34, 197, 94, 0.08);
-    --itin-card-border: rgba(255, 255, 255, 0.06);
-    --itin-card-border-active: rgba(34, 197, 94, 0.4);
-    --itin-glass: rgba(255, 255, 255, 0.03);
-    --itin-glass-hover: rgba(255, 255, 255, 0.06);
-    
-    /* Rayons */
-    --itin-radius-xl: 20px;
-    --itin-radius-lg: 16px;
-    --itin-radius-md: 12px;
-    --itin-radius-sm: 8px;
-    
-    /* Ombres premium */
-    --itin-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-    --itin-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.2);
-    --itin-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
-    --itin-shadow-glow: 0 0 20px rgba(34, 197, 94, 0.15);
-    
-    /* Animations */
-    --itin-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --itin-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+#itinerary-results-container {
+    display: flex;
+    flex-direction: row;
+    background: var(--bg-light);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 100;
+}
+
+body.itinerary-view-active #itinerary-results-container {
+    top: 64px;
+    height: calc(100svh - 64px);
+    height: calc(100vh - 64px);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TOP BAR - HEADER MODERNE
+   PANNEAU LATÉRAL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#results-side-panel {
+    width: 400px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-main);
+    border-right: 1px solid var(--border);
+    z-index: 10;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TOP BAR ITINÉRAIRE
    ═══════════════════════════════════════════════════════════════════════ */
 
 .itinerary-top-bar {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    background: linear-gradient(180deg, var(--bg-main) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border-bottom: 1px solid var(--itin-card-border);
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 
-.itinerary-top-bar h2 {
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin: 0;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-}
-
-/* Bouton retour premium */
 .itinerary-top-bar .app-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    height: 38px;
-    padding: 0 16px;
-    border-radius: var(--itin-radius-xl);
-    font-size: 0.875rem;
-    font-weight: 600;
-    background: var(--itin-glass);
-    border: 1px solid var(--itin-card-border);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: var(--itin-transition);
-}
-
-.itinerary-top-bar .app-back-btn:hover {
-    background: var(--pm-green-light);
-    border-color: var(--pm-green);
-    color: var(--pm-green);
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 20px;
+    font-size: 13px;
 }
 
 .itinerary-top-bar .app-back-btn svg {
     width: 16px;
     height: 16px;
-    transition: transform 0.2s ease;
-}
-
-.itinerary-top-bar .app-back-btn:hover svg {
-    transform: translateX(-2px);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   FORMULAIRE DE RECHERCHE - DESIGN PREMIUM
+   FORMULAIRE COMPACT
    ═══════════════════════════════════════════════════════════════════════ */
 
-#itinerary-edit-panel {
+.results-planner-header {
+    padding: 1rem;
     background: var(--bg-main);
-    padding: 1.25rem;
-    position: relative;
-    z-index: 100;
+    border-bottom: 1px solid var(--border);
 }
 
-.route-input-container {
+.results-planner-row {
     display: flex;
-    align-items: stretch;
-    gap: 1rem;
-    position: relative;
-}
-
-/* Indicateurs visuels (points + ligne) */
-.route-visual-indicators {
-    display: flex;
-    flex-direction: column;
+    gap: 0.75rem;
     align-items: center;
-    padding: 0.875rem 0;
-    flex-shrink: 0;
-    width: 24px;
 }
 
-.indicator-dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    position: relative;
-    transition: var(--itin-transition);
-}
-
-.indicator-dot.origin {
-    background: var(--pm-green);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2), var(--itin-shadow-sm);
-}
-
-.indicator-dot.origin::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    background: white;
-    border-radius: 50%;
-}
-
-.indicator-dot.destination {
-    background: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), var(--itin-shadow-sm);
-}
-
-.indicator-dot.destination::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    background: white;
-    border-radius: 50%;
-}
-
-.indicator-line {
-    flex: 1;
-    width: 3px;
-    background: linear-gradient(180deg, var(--pm-green) 0%, #ef4444 100%);
-    margin: 6px 0;
-    border-radius: 2px;
-    min-height: 24px;
-    opacity: 0.6;
-}
-
-/* Stack des inputs */
-.route-inputs-stack {
+.results-planner-inputs {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
-    min-width: 0;
+    gap: 0.5rem;
 }
 
-.route-input-wrapper {
-    position: relative;
+.results-input-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    min-height: 40px;
 }
 
-/* Input style glassmorphism */
-.route-input {
-    width: 100%;
-    padding: 0.875rem 3rem 0.875rem 1rem;
-    background: var(--itin-glass);
-    border: 1.5px solid var(--itin-card-border);
-    border-radius: var(--itin-radius-md);
-    font-size: 0.9375rem;
-    font-weight: 500;
+.results-input-field svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.results-input-field input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
     color: var(--text-primary);
-    min-height: 48px;
-    box-sizing: border-box;
-    transition: var(--itin-transition);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-.route-input::placeholder {
-    color: var(--text-tertiary);
-    font-weight: 400;
-}
-
-.route-input:hover {
-    background: var(--itin-glass-hover);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
-.route-input:focus {
-    background: rgba(34, 197, 94, 0.05);
-    border-color: var(--pm-green);
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1), var(--itin-shadow-glow);
     outline: none;
 }
 
-/* Bouton géolocalisation */
-.btn-geolocate-minimal {
-    position: absolute;
-    right: 0.625rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 36px;
-    height: 36px;
-    border-radius: var(--itin-radius-sm);
-    background: transparent;
-    color: var(--text-secondary);
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    cursor: pointer;
-    transition: var(--itin-transition);
-}
-
-.btn-geolocate-minimal:hover:not(:disabled) {
-    background: var(--pm-green);
-    color: white;
-    transform: translateY(-50%) scale(1.05);
-}
-
-.btn-geolocate-minimal:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-/* Bouton inverser */
-.btn-swap-minimal {
-    align-self: center;
-    width: 42px;
-    height: 42px;
-    border-radius: var(--itin-radius-md);
-    background: var(--itin-glass);
-    border: 1.5px solid var(--itin-card-border);
-    color: var(--text-secondary);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--itin-transition);
-    flex-shrink: 0;
-}
-
-.btn-swap-minimal:hover {
-    background: var(--pm-green);
-    border-color: var(--pm-green);
-    color: white;
-    transform: rotate(180deg);
-    box-shadow: var(--itin-shadow-glow);
-}
-
-/* Actions row */
-.route-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    position: relative;
-    z-index: 10;
-}
-
-/* Bouton time picker premium */
-.btn-time-picker {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.75rem 1rem;
-    background: var(--itin-glass);
-    border: 1.5px solid var(--itin-card-border);
-    border-radius: var(--itin-radius-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: var(--itin-transition);
-    white-space: nowrap;
-}
-
-.btn-time-picker svg {
-    color: var(--pm-green);
-    flex-shrink: 0;
-}
-
-.btn-time-picker .chevron {
-    color: var(--text-tertiary);
-    margin-left: 0.25rem;
-    transition: transform 0.2s ease;
-}
-
-.btn-time-picker:hover {
-    background: var(--itin-glass-hover);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.btn-time-picker:hover .chevron {
-    transform: translateY(2px);
-}
-
-/* Bouton rechercher premium */
-.btn-search-route {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.9375rem;
-    font-weight: 700;
-    border-radius: var(--itin-radius-md);
-    min-height: 46px;
-    background: linear-gradient(135deg, var(--pm-green) 0%, #16a34a 100%);
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: var(--itin-transition);
-    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
-}
-
-.btn-search-route:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
-}
-
-.btn-search-route:active {
-    transform: translateY(0);
-}
-
 /* ═══════════════════════════════════════════════════════════════════════
-   ONGLETS DE MODE - DESIGN MODERNE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-#results-mode-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-light) 100%);
-    padding: 1rem 1.25rem;
-    flex-shrink: 0;
-    border-bottom: 1px solid var(--itin-card-border);
-}
-
-.mode-tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 1.25rem;
-    border: none;
-    background: var(--itin-card-bg);
-    border-radius: var(--itin-radius-lg);
-    cursor: pointer;
-    flex: 1;
-    max-width: 110px;
-    border: 1.5px solid var(--itin-card-border);
-    transition: var(--itin-transition);
-    position: relative;
-    overflow: hidden;
-}
-
-/* Effet de brillance au survol */
-.mode-tab::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.mode-tab:hover::before {
-    left: 100%;
-}
-
-.mode-tab:hover {
-    background: var(--itin-card-bg-hover);
-    border-color: rgba(34, 197, 94, 0.25);
-    transform: translateY(-2px);
-}
-
-.mode-tab.active {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.08) 100%);
-    border-color: var(--pm-green);
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
-}
-
-.mode-tab.hidden {
-    display: none;
-}
-
-.mode-tab svg {
-    width: 26px;
-    height: 26px;
-    color: var(--text-secondary);
-    transition: var(--itin-transition);
-}
-
-.mode-tab:hover svg {
-    color: var(--text-primary);
-}
-
-.mode-tab.active svg {
-    color: var(--pm-green);
-    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4));
-}
-
-.mode-tab-duration {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-}
-
-.mode-tab.active .mode-tab-duration {
-    color: var(--pm-green);
-}
-
-.mode-tab-duration.empty {
-    color: var(--text-tertiary);
-    font-weight: 500;
-    font-size: 0.8125rem;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LISTE DES RÉSULTATS - WRAPPER
+   LISTE DES RÉSULTATS
    ═══════════════════════════════════════════════════════════════════════ */
 
 .results-list-wrapper {
     flex: 1;
     overflow-y: auto;
-    background: linear-gradient(180deg, var(--bg-light) 0%, rgba(15, 23, 42, 0.98) 100%);
-    padding: 1rem 0 calc(var(--bottom-nav-height, 64px) + 24px) 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
-}
-
-.results-list-wrapper::-webkit-scrollbar {
-    width: 6px;
-}
-
-.results-list-wrapper::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.results-list-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(34, 197, 94, 0.3);
-    border-radius: 3px;
-}
-
-.results-list-wrapper::-webkit-scrollbar-thumb:hover {
-    background: rgba(34, 197, 94, 0.5);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .results-list {
-    padding: 0.5rem 1rem 1rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    padding: 0;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TITRES DE SECTION
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.route-option-wrapper {
-    margin-bottom: 0.5rem;
-}
-
-.route-option-title {
-    font-size: 0.6875rem;
-    font-weight: 800;
-    color: var(--pm-green);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 0.75rem;
-    padding-left: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-}
-
-.route-option-title::before {
-    content: '';
-    width: 4px;
-    height: 16px;
-    background: linear-gradient(180deg, var(--pm-green) 0%, rgba(34, 197, 94, 0.4) 100%);
-    border-radius: 2px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CARTES D'ITINÉRAIRES - DESIGN PREMIUM
-   ═══════════════════════════════════════════════════════════════════════ */
 
 .route-option {
     display: flex;
-    flex-direction: column;
-    background: var(--itin-card-bg);
-    border-radius: var(--itin-radius-lg);
-    padding: 1.25rem;
-    border: 1.5px solid var(--itin-card-border);
-    cursor: pointer;
-    transition: var(--itin-transition);
     gap: 1rem;
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-/* Bordure lumineuse animée */
-.route-option::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--pm-green), #10b981, var(--pm-green));
-    background-size: 200% 100%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-/* Effet de brillance diagonal */
-.route-option::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.03) 50%,
-        transparent 100%
-    );
-    transition: left 0.6s ease;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s ease;
 }
 
 .route-option:hover {
-    border-color: var(--itin-card-border-active);
-    background: rgba(34, 197, 94, 0.06);
-    transform: translateY(-3px) scale(1.01);
-    box-shadow: var(--itin-shadow-lg), var(--itin-shadow-glow);
+    background: var(--bg-secondary);
 }
 
-.route-option:hover::before {
-    opacity: 1;
-    animation: shimmer 2s infinite linear;
-}
-
-.route-option:hover::after {
-    left: 150%;
-}
-
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-.route-option.is-active {
-    border-color: var(--pm-green);
-    background: rgba(34, 197, 94, 0.1);
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
-}
-
-.route-option.is-active::before {
-    opacity: 1;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LIGNE DE RÉSUMÉ (BADGES DE LIGNES)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.route-summary-line {
-    display: flex;
-    align-items: center;
-    column-gap: 0.5rem;
-    row-gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-/* Badges de lignes de bus - Design premium */
-.route-line-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.9375rem;
-    border-radius: var(--itin-radius-sm);
-    min-width: 40px;
-    height: 32px;
-    padding: 0 12px;
-    text-align: center;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    letter-spacing: 0.02em;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    transition: var(--itin-transition);
-}
-
-.route-option:hover .route-line-badge {
-    transform: scale(1.05);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-/* Point séparateur */
-.route-summary-dot {
-    color: var(--text-tertiary);
-    font-weight: 700;
-    font-size: 0.625rem;
-    opacity: 0.5;
-}
-
-/* Icône bus/vélo/marche */
-.route-summary-bus-icon,
-.route-summary-bike-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--itin-radius-sm);
-    background: var(--itin-glass);
-    border: 1px solid var(--itin-card-border);
-    color: var(--text-secondary);
-    transition: var(--itin-transition);
-}
-
-.route-summary-bus-icon svg,
-.route-summary-bike-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.route-option:hover .route-summary-bus-icon,
-.route-option:hover .route-summary-bike-icon {
-    background: rgba(34, 197, 94, 0.1);
-    border-color: rgba(34, 197, 94, 0.3);
-    color: var(--pm-green);
-}
-
-/* Icône marche */
-.route-summary-walk-icon,
-.route-summary-walk-only-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    opacity: 0.7;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--itin-radius-sm);
-    background: var(--itin-glass);
-    transition: var(--itin-transition);
-}
-
-.route-summary-walk-icon svg,
-.route-summary-walk-only-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.route-option:hover .route-summary-walk-icon {
-    opacity: 1;
-    color: var(--pm-green);
-}
-
-/* Labels vélo/marche */
-.route-type-label {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-left: 0.625rem;
-}
-
-.route-type-distance {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin-left: auto;
-    background: var(--itin-glass);
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--itin-radius-sm);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FOOTER DES CARTES (HORAIRES + DURÉE)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.route-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+.route-option.selected {
+    background: rgba(34, 197, 94, 0.08);
+    border-left: 3px solid var(--pm-green);
 }
 
 .route-time {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-}
-
-.route-duration {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-/* Badge éco premium */
-.route-duration-eco {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--pm-green);
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.08) 100%);
-    padding: 0.5rem 1rem;
-    border-radius: var(--itin-radius-xl);
-    font-weight: 700;
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
-}
-
-.route-duration-eco svg {
-    width: 18px;
-    height: 18px;
-    filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.5));
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   PROCHAINS DÉPARTS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.route-next-departures {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding-top: 0.875rem;
-    margin-top: 0.875rem;
-    border-top: 1px dashed rgba(255, 255, 255, 0.08);
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    flex-wrap: wrap;
-}
-
-.next-departures-label {
-    font-weight: 700;
-    color: var(--pm-green);
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-}
-
-.next-departures-label::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--pm-green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
-}
-
-.next-departures-more {
-    color: var(--text-tertiary);
-    font-style: italic;
-    opacity: 0.8;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   BOUTON "GÉNÉRER + DE TRAJETS"
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.btn-load-more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.625rem;
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: transparent;
-    border: 2px dashed rgba(34, 197, 94, 0.3);
-    border-radius: var(--itin-radius-lg);
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.9375rem;
-    cursor: pointer;
-    transition: var(--itin-transition);
-    margin-top: 0.75rem;
-}
-
-.btn-load-more:hover {
-    border-color: var(--pm-green);
-    color: var(--pm-green);
-    background: rgba(34, 197, 94, 0.08);
-    transform: translateY(-2px);
-}
-
-.btn-load-more svg {
-    width: 20px;
-    height: 20px;
-    transition: transform 0.3s var(--itin-bounce);
-}
-
-.btn-load-more:hover svg {
-    transform: rotate(90deg);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   MESSAGE VIDE / ERREUR
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.results-message {
-    padding: 3rem 1.5rem;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.results-message.error {
-    color: #ef4444;
-    font-weight: 600;
-    background: rgba(239, 68, 68, 0.08);
-    border-radius: var(--itin-radius-lg);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    margin: 1rem;
-}
-
-.itinerary-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 3rem 2rem;
-    text-align: center;
+    min-width: 60px;
 }
 
-.itinerary-empty svg {
-    width: 80px;
-    height: 80px;
-    color: var(--text-tertiary);
-    margin-bottom: 1.5rem;
-    opacity: 0.4;
-}
-
-.itinerary-empty-title {
-    font-size: 1.25rem;
+.route-time-departure {
+    font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
 }
 
-.itinerary-empty-text {
-    font-size: 1rem;
+.route-time-arrival {
+    font-size: 0.875rem;
     color: var(--text-secondary);
-    max-width: 300px;
-    line-height: 1.6;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DÉTAILS DE L'ITINÉRAIRE (ACCORDÉON)
-   ═══════════════════════════════════════════════════════════════════════ */
+.route-duration {
+    font-size: 0.75rem;
+    color: var(--pm-green);
+    font-weight: 600;
+    margin-top: 4px;
+}
 
 .route-details {
-    padding: 1.25rem;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--itin-card-border);
-    border-top: none;
-    border-radius: 0 0 var(--itin-radius-lg) var(--itin-radius-lg);
-    margin-top: -0.5rem;
-    animation: slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    flex: 1;
 }
 
-.route-details.hidden {
-    display: none;
-}
-
-@keyframes slideDown {
-    from { 
-        opacity: 0; 
-        transform: translateY(-10px);
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0);
-    }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SKELETON LOADERS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.skeleton-wrapper {
-    animation: skeletonPulse 1.5s infinite ease-in-out;
-}
-
-.skeleton-route {
+.route-legs {
     display: flex;
-    gap: 1rem;
-    padding: 1.25rem;
-    background: var(--itin-card-bg);
-    border-radius: var(--itin-radius-lg);
-    border: 1.5px solid var(--itin-card-border);
-}
-
-.skeleton {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 100%);
-    background-size: 200% 100%;
-    animation: skeletonShimmer 1.5s infinite;
-    border-radius: var(--itin-radius-sm);
-}
-
-@keyframes skeletonPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-@keyframes skeletonShimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   AUTOCOMPLÉTION
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.autocomplete-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: 0.5rem;
-    background: var(--itin-card-bg);
-    border-radius: var(--itin-radius-md);
-    box-shadow: var(--itin-shadow-lg);
-    max-height: 320px;
-    overflow-y: auto;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-8px);
-    transition: var(--itin-transition);
-    border: 1px solid var(--itin-card-border);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-}
-
-.autocomplete-suggestions.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.autocomplete-item {
-    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     align-items: center;
-    gap: 0.875rem;
-    padding: 0.875rem 1rem;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.autocomplete-item:last-child {
-    border-bottom: none;
+.route-leg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-.autocomplete-item:hover,
-.autocomplete-item.is-selected {
-    background: rgba(34, 197, 94, 0.1);
-}
-
-.autocomplete-item-icon {
-    display: flex;
+.route-leg-badge {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--itin-radius-sm);
-    background: var(--pm-green-light);
-    flex-shrink: 0;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 8px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    color: #fff;
 }
 
-.autocomplete-item-icon svg {
+.route-leg-walk {
     width: 20px;
     height: 20px;
-    color: var(--pm-green);
+    color: var(--text-secondary);
 }
 
-.autocomplete-item-content {
+.route-leg-arrow {
+    width: 12px;
+    height: 12px;
+    color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE ITINÉRAIRE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#results-map-container {
     flex: 1;
+    position: relative;
     min-width: 0;
 }
 
-.autocomplete-item-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+#results-map {
+    width: 100%;
+    height: 100%;
 }
 
-.autocomplete-item-type {
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin-top: 2px;
+body.dark-theme #results-map {
+    background: #050c15;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   POPOVER TEMPS
+   VUE DÉTAIL
    ═══════════════════════════════════════════════════════════════════════ */
 
-#results-planner-options-popover {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    margin-top: 0.5rem;
-    background: var(--itin-card-bg);
-    border-radius: var(--itin-radius-lg);
-    box-shadow: var(--itin-shadow-lg);
+#detail-map-container {
+    position: fixed;
+    inset: 0;
     z-index: 200;
-    border: 1px solid var(--itin-card-border);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    animation: slideDown 0.25s ease;
-}
-
-.popover-tabs {
     display: flex;
-    border-bottom: 1px solid var(--itin-card-border);
+    flex-direction: column;
+    background: var(--bg-light);
 }
 
-.popover-tab {
+#detail-map-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+}
+
+#detail-map {
     flex: 1;
-    padding: 1rem;
-    background: transparent;
-    border: none;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: var(--itin-transition);
-    position: relative;
+    min-height: 0;
 }
 
-.popover-tab::after {
-    content: '';
+body.dark-theme #detail-map {
+    background: #050c15;
+}
+
+#detail-map-summary {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: var(--pm-green);
-    transform: scaleX(0);
-    transition: transform 0.2s ease;
+    background: var(--bg-main);
+    border-top: 1px solid var(--border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    max-height: 60vh;
+    overflow-y: auto;
+    z-index: 10;
 }
 
-.popover-tab:hover {
+body.dark-theme #detail-map-summary {
+    background: rgba(6, 12, 20, 0.9);
     color: var(--text-primary);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.55);
 }
 
-.popover-tab.active {
-    color: var(--pm-green);
-}
-
-.popover-tab.active::after {
-    transform: scaleX(1);
-}
-
-.popover-content {
-    padding: 1.25rem;
-}
-
-.popover-time-inputs {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.75rem;
-}
-
-.popover-time-inputs .form-group {
-    flex: 1;
-}
-
-.btn-popover-submit {
-    width: 100%;
-    margin-top: 1rem;
+body.dark-theme #detail-map-header #btn-back-to-results {
+    background: rgba(15, 23, 42, 0.95) !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   RESPONSIVE - MOBILE
+   RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    :root {
-        --itin-radius-xl: 16px;
-        --itin-radius-lg: 14px;
-        --itin-radius-md: 10px;
-        --itin-radius-sm: 6px;
+    body.itinerary-view-active #itinerary-results-container {
+        top: 56px;
+        height: calc(100svh - 56px);
+        height: calc(100vh - 56px);
     }
-    
-    .itinerary-top-bar {
-        padding: 0.875rem 1rem;
-    }
-    
-    .itinerary-top-bar h2 {
-        font-size: 1rem;
-    }
-    
-    #itinerary-edit-panel {
-        padding: 1rem;
-    }
-    
-    .route-input-container {
-        gap: 0.75rem;
-    }
-    
-    .route-visual-indicators {
-        width: 20px;
-    }
-    
-    .indicator-dot {
-        width: 12px;
-        height: 12px;
-    }
-    
-    .indicator-line {
-        width: 2px;
-    }
-    
-    .route-input {
-        padding: 0.75rem 2.75rem 0.75rem 0.875rem;
-        font-size: 0.875rem;
-        min-height: 44px;
-    }
-    
-    .btn-swap-minimal {
-        width: 38px;
-        height: 38px;
-    }
-    
-    .route-actions {
+
+    #itinerary-results-container {
         flex-direction: column;
-        gap: 0.625rem;
     }
-    
-    .btn-time-picker {
+
+    #results-side-panel {
         width: 100%;
-        justify-content: center;
+        height: auto;
+        max-height: 50vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
     }
-    
-    .btn-search-route {
-        min-height: 44px;
+
+    #results-map-container {
+        flex: 1;
     }
-    
-    #results-mode-tabs {
-        gap: 0.375rem;
-        padding: 0.75rem 1rem;
+
+    .results-list-wrapper {
+        padding-bottom: calc(120px + env(safe-area-inset-bottom));
     }
-    
-    .mode-tab {
-        padding: 0.75rem;
-        border-radius: var(--itin-radius-md);
-        max-width: 90px;
-    }
-    
-    .mode-tab svg {
-        width: 24px;
-        height: 24px;
-    }
-    
-    .mode-tab-duration {
-        font-size: 0.8125rem;
-    }
-    
+
     .results-list {
-        padding: 0.5rem 0.875rem 1rem;
-        gap: 0.625rem;
+        padding-bottom: 2rem;
     }
-    
-    .route-option {
-        padding: 1rem;
-        gap: 0.875rem;
+
+    .load-more-wrapper {
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0 1.5rem;
     }
-    
-    .route-line-badge {
-        min-width: 36px;
-        height: 28px;
-        font-size: 0.875rem;
+
+    .load-more-wrapper .btn {
+        min-width: 160px;
     }
-    
-    .route-time {
-        font-size: 1rem;
-    }
-    
-    .route-footer {
-        padding-top: 0.875rem;
-    }
-    
-    .route-duration-eco {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-    }
-    
-    .btn-load-more {
-        padding: 0.875rem 1.25rem;
-        font-size: 0.875rem;
-    }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   RESPONSIVE - TRÈS PETIT ÉCRAN
-   ═══════════════════════════════════════════════════════════════════════ */
-
-@media (max-width: 380px) {
-    .mode-tab {
-        padding: 0.625rem 0.5rem;
-        max-width: 75px;
-    }
-    
-    .mode-tab svg {
-        width: 22px;
-        height: 22px;
-    }
-    
-    .mode-tab-duration {
-        font-size: 0.75rem;
-    }
-    
-    .route-line-badge {
-        min-width: 32px;
-        height: 26px;
-        font-size: 0.8125rem;
-        padding: 0 8px;
-    }
-    
-    .route-time {
-        font-size: 0.9375rem;
-    }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LIGHT THEME OVERRIDES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body:not(.dark-theme) {
-    --itin-card-bg: rgba(255, 255, 255, 0.9);
-    --itin-card-border: rgba(0, 0, 0, 0.08);
-    --itin-card-border-active: rgba(34, 197, 94, 0.5);
-    --itin-glass: rgba(0, 0, 0, 0.02);
-    --itin-glass-hover: rgba(0, 0, 0, 0.04);
-}
-
-body:not(.dark-theme) .itinerary-top-bar {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-}
-
-body:not(.dark-theme) .route-option {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-body:not(.dark-theme) .route-option:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 0 20px rgba(34, 197, 94, 0.1);
-}
-
-body:not(.dark-theme) .mode-tab {
-    background: #f8fafc;
-}
-
-body:not(.dark-theme) .mode-tab:hover {
-    background: #f1f5f9;
-}
-
-body:not(.dark-theme) .mode-tab.active {
-    background: rgba(34, 197, 94, 0.1);
-}
-
-body:not(.dark-theme) .results-list-wrapper {
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-}
-
-body:not(.dark-theme) .route-input {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-}
-
-body:not(.dark-theme) .route-input:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
-}
-
-body:not(.dark-theme) .route-input:focus {
-    background: #ffffff;
-    border-color: var(--pm-green);
-}
-
-body:not(.dark-theme) .btn-time-picker,
-body:not(.dark-theme) .btn-swap-minimal {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-}
-
-body:not(.dark-theme) .btn-time-picker:hover {
-    background: #f1f5f9;
-}
-
-body:not(.dark-theme) .route-footer {
-    border-top-color: rgba(0, 0, 0, 0.06);
-}
-
-body:not(.dark-theme) .route-next-departures {
-    border-top-color: rgba(0, 0, 0, 0.08);
-}
-
-body:not(.dark-theme) .skeleton {
-    background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
-    background-size: 200% 100%;
-}
-
-body:not(.dark-theme) .autocomplete-suggestions,
-body:not(.dark-theme) #results-planner-options-popover {
-    background: rgba(255, 255, 255, 0.98);
-    border-color: #e2e8f0;
-}
-
-body:not(.dark-theme) .autocomplete-item:hover,
-body:not(.dark-theme) .autocomplete-item.is-selected {
-    background: rgba(34, 197, 94, 0.08);
 }

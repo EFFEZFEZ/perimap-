@@ -1,316 +1,482 @@
 /**
- * Boutons - Périmap
+ * Buttons Styles - Périmap v432
  * 
- * Système de boutons cohérent
+ * Tous les styles de boutons
+ * Source: style.css
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BOUTON DE BASE
+   BOUTONS DE BASE
    ═══════════════════════════════════════════════════════════════════════ */
 
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-2);
-    
-    padding: var(--spacing-2) var(--spacing-4);
-    min-height: 40px;
-    
-    font-family: var(--font-family);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    line-height: 1;
-    text-decoration: none;
-    white-space: nowrap;
-    
-    border: none;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
     border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    font-family: inherit;
+    text-decoration: none;
+    border: 1px solid transparent;
     cursor: pointer;
-    
-    transition: all var(--transition-quick);
-    
-    /* Prévenir la sélection de texte */
-    user-select: none;
-    -webkit-user-select: none;
-    
-    /* GPU acceleration */
-    will-change: transform, box-shadow;
+    transition: all var(--transition-normal);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
-    pointer-events: none;
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--pm-green);
-    outline-offset: 2px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   VARIANTES DE COULEUR
+   VARIANTES DE BOUTONS
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Primary - Vert Périmap */
+/* Primaire (vert) */
 .btn-primary {
     background: var(--pm-green);
     color: white;
+    border-color: var(--pm-green);
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
     background: var(--pm-green-hover);
+    border-color: var(--pm-green-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--pm-green-glow);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-primary:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-/* Secondary - Gris */
+/* Secondaire */
 .btn-secondary {
     background: var(--bg-secondary);
     color: var(--text-primary);
+    border-color: var(--border);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
     background: var(--bg-tertiary);
+    border-color: var(--secondary);
+}
+
+/* Ghost (transparent) */
+.btn-ghost {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 /* Outline */
 .btn-outline {
     background: transparent;
-    border: 1.5px solid var(--pm-green);
-    color: var(--pm-green);
+    border: 2px solid var(--primary);
+    color: var(--primary);
 }
 
-.btn-outline:hover {
-    background: var(--pm-green-light);
+.btn-outline:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
 }
 
-/* Ghost */
-.btn-ghost {
-    background: transparent;
-    color: var(--text-primary);
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTONS ICÔNES RONDS
+   ═══════════════════════════════════════════════════════════════════════ */
 
-.btn-ghost:hover {
+.btn-icon-round {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-normal);
 }
 
-/* Gradient Périmap */
-.btn-gradient {
-    background: var(--pm-gradient);
-    color: white;
-    border: none;
+.btn-icon-round:hover {
+    background: var(--bg-tertiary);
+    box-shadow: var(--shadow-md);
 }
 
-.btn-gradient:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+.btn-icon-round:focus,
+.btn-icon-round:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15), var(--shadow-md);
 }
 
-/* Danger */
-.btn-danger {
-    background: var(--color-error);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-/* Warning */
-.btn-warning {
-    background: var(--color-warning);
-    color: #0f172a;
-}
-
-.btn-warning:hover {
-    background: #ca8a04;
+body.dark-theme .btn,
+body.dark-theme .btn-icon-round {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.04);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TAILLES
+   BOUTON RECHERCHER PLANIFICATEUR
    ═══════════════════════════════════════════════════════════════════════ */
 
-.btn-xs {
-    padding: var(--spacing-1) var(--spacing-2);
-    min-height: 28px;
-    font-size: var(--font-size-xs);
-    border-radius: var(--radius-sm);
-}
-
-.btn-sm {
-    padding: var(--spacing-1) var(--spacing-3);
-    min-height: 32px;
-    font-size: var(--font-size-sm);
-}
-
-.btn-lg {
-    padding: var(--spacing-3) var(--spacing-6);
-    min-height: 48px;
-    font-size: var(--font-size-base);
-}
-
-.btn-xl {
-    padding: var(--spacing-4) var(--spacing-8);
-    min-height: 56px;
-    font-size: var(--font-size-lg);
-    border-radius: var(--radius-lg);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FORMES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.btn-square {
-    padding: 0;
-    width: 40px;
-    height: 40px;
-}
-
-.btn-square.btn-sm {
-    width: 32px;
-    height: 32px;
-}
-
-.btn-square.btn-lg {
-    width: 48px;
-    height: 48px;
-}
-
-.btn-circle {
-    padding: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-
-.btn-circle.btn-sm {
-    width: 32px;
-    height: 32px;
-}
-
-.btn-circle.btn-lg {
-    width: 48px;
-    height: 48px;
-}
-
-.btn-pill {
-    border-radius: var(--radius-full);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   ÉTATS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.btn-loading {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
-}
-
-.btn-loading::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border: 2px solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
-.btn-primary.btn-loading::after,
-.btn-gradient.btn-loading::after,
-.btn-danger.btn-loading::after {
-    border-color: white;
-    border-right-color: transparent;
-}
-
-/* Block (pleine largeur) */
-.btn-block {
+.planner-search-btn,
+#planner-submit-btn {
+    padding: 0.875rem 2rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 12px !important;
+    background: #2a9d8f !important;
+    border: none !important;
+    color: #ffffff !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.75rem;
     width: 100%;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+}
+
+.planner-search-btn:hover,
+#planner-submit-btn:hover {
+    background: #238b7e !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(42, 157, 143, 0.3);
+}
+
+.planner-search-btn:active,
+#planner-submit-btn:active {
+    transform: translateY(0);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ICÔNES
+   BOUTONS RETOUR - STYLE UNIFIÉ
    ═══════════════════════════════════════════════════════════════════════ */
 
-.btn svg {
-    width: 18px;
-    height: 18px;
+.app-back-btn {
+    cursor: pointer;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1a1a2e !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    height: 36px !important;
+    padding: 0 14px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.app-back-btn svg {
+    color: #22c55e;
+    width: 16px !important;
+    height: 16px !important;
     flex-shrink: 0;
 }
 
-.btn-sm svg {
-    width: 16px;
-    height: 16px;
+.app-back-btn span {
+    font-size: 13px;
+    font-weight: 600;
 }
 
-.btn-lg svg {
-    width: 20px;
-    height: 20px;
+.app-back-btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
-.btn-icon-only {
-    padding: var(--spacing-2);
+.app-back-btn:active {
+    transform: translateY(0);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   GROUPE DE BOUTONS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.btn-group {
-    display: inline-flex;
+body.dark-theme .app-back-btn {
+    background: rgba(20, 25, 38, 0.95) !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
 }
 
-.btn-group .btn {
-    border-radius: 0;
-}
-
-.btn-group .btn:first-child {
-    border-radius: var(--radius-md) 0 0 var(--radius-md);
-}
-
-.btn-group .btn:last-child {
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-}
-
-.btn-group .btn:not(:last-child) {
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   DARK THEME
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .btn-secondary {
-    background: #1e293b;
-    color: #e2e8f0;
-}
-
-body.dark-theme .btn-secondary:hover {
-    background: #334155;
-}
-
-body.dark-theme .btn-ghost {
-    color: #e2e8f0;
-}
-
-body.dark-theme .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-body.dark-theme .btn-outline {
-    border-color: #4ade80;
+body.dark-theme .app-back-btn svg {
     color: #4ade80;
 }
 
-body.dark-theme .btn-outline:hover {
-    background: rgba(74, 222, 128, 0.1);
+/* Force back buttons to be clickable */
+#btn-back-to-hall,
+#btn-back-to-dashboard-from-map,
+#btn-back-to-dashboard-from-results,
+#btn-back-to-hall-tarifs,
+#btn-back-to-results {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 3000 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTON SWAP DIRECTION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-swap-direction {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 0 0.75rem;
+    flex-shrink: 0;
+}
+
+.btn-swap-direction:hover {
+    background: #f8fafc;
+    border-color: #2a9d8f;
+    color: #2a9d8f;
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTON GÉOLOCALISATION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-geolocate {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: transparent;
+    color: #64748b;
+    border: none;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-geolocate:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #1e3a5f;
+}
+
+.btn-geolocate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-geolocate svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTON WHEN (Planificateur)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-when {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #f8fafc;
+    cursor: pointer;
+    text-align: left;
+    color: #1e3a5f;
+    transition: all 0.2s ease;
+}
+
+.btn-when > svg:first-child {
+    color: #1e3a5f;
+    flex-shrink: 0;
+}
+
+.btn-when > span {
+    flex: 1;
+}
+
+.btn-when > .chevron {
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-when:hover {
+    border-color: #1e3a5f;
+    background: #ffffff;
+}
+
+.btn-when.popover-active > .chevron {
+    transform: rotate(180deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTONS DE NAVIGATION CONDENSÉE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nav-button-condensed {
+    background: rgba(0, 90, 156, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    box-shadow: var(--elevation-1);
+    transition: all var(--transition-normal), transform var(--transition-bounce);
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    overflow: hidden;
+}
+
+.nav-button-condensed::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.nav-button-condensed:hover {
+    background: rgba(0, 74, 128, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 30px -5px rgba(0, 90, 156, 0.4);
+}
+
+.nav-button-condensed:hover::before {
+    opacity: 1;
+}
+
+.nav-button-condensed:active {
+    transform: translateY(-2px) scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+.nav-button-condensed svg {
+    width: 28px;
+    height: 28px;
+    transition: transform var(--transition-normal);
+}
+
+.nav-button-condensed:hover svg {
+    transform: scale(1.15);
+}
+
+.nav-button-condensed .notification-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+/* Variantes de couleurs */
+.nav-button-condensed[data-view="horaires"] {
+    background: rgba(40, 167, 69, 0.75);
+}
+
+.nav-button-condensed[data-view="horaires"]:hover {
+    background: rgba(35, 139, 58, 0.9);
+    box-shadow: 0 15px 30px -5px rgba(40, 167, 69, 0.5);
+}
+
+.nav-button-condensed[data-view="info-trafic"] {
+    background: rgba(253, 126, 20, 0.75);
+}
+
+.nav-button-condensed[data-view="info-trafic"]:hover {
+    background: rgba(228, 113, 18, 0.9);
+    box-shadow: 0 15px 30px -5px rgba(253, 126, 20, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTON BLOCK LINK
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.btn-block-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+}
+
+.btn-block-link svg {
+    transition: transform 0.2s ease;
+}
+
+.btn-block-link:hover svg {
+    transform: translateY(3px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HALL LINE BUTTONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.hall-line-btn {
+    flex: 0 0 auto;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hall-line-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Couleurs des lignes */
+.hall-line-btn.line-a { background: #fbd12e; color: #000; }
+.hall-line-btn.line-b { background: #1e91ff; color: #000; }
+.hall-line-btn.line-c { background: #dd1b75; color: #fff; }
+.hall-line-btn.line-d { background: #41ae18; color: #fff; }

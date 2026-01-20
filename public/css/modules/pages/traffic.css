@@ -1,449 +1,206 @@
 /**
- * Traffic page styles - Périmap
+ * Traffic Page Styles - Périmap v432
  * 
- * Styles spécifiques à la page d'info trafic
+ * Styles spécifiques à la page info trafic
+ * Source: style.css
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   EN-TÊTE STATUT RÉSEAU
+   TABS
    ═══════════════════════════════════════════════════════════════════════ */
 
-.traffic-header {
+.tabs {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-4);
-    padding: var(--spacing-4);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-4);
-}
-
-.traffic-status-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.traffic-status-icon.status-normal {
-    background: rgba(34, 197, 94, 0.1);
-    color: var(--color-success);
-}
-
-.traffic-status-icon.status-warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning);
-}
-
-.traffic-status-icon.status-critical {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-error);
-}
-
-.traffic-status-icon svg {
-    width: 28px;
-    height: 28px;
-}
-
-.traffic-status-content {
-    flex: 1;
-}
-
-.traffic-status-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-1);
-}
-
-.traffic-status-subtitle {
-    font-size: 14px;
-    color: var(--text-secondary);
-}
-
-.traffic-last-update {
-    font-size: 12px;
-    color: var(--text-tertiary);
-    flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FILTRES PAR LIGNE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.traffic-filters {
-    display: flex;
-    gap: var(--spacing-2);
-    padding: var(--spacing-3);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-4);
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.traffic-filters::-webkit-scrollbar {
-    display: none;
-}
-
-.traffic-filter-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    padding: var(--spacing-2) var(--spacing-3);
-    border: none;
-    border-radius: var(--border-radius-full);
-    background: var(--bg-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all var(--transition-base);
-}
-
-.traffic-filter-btn:hover {
-    background: var(--pm-green-light);
-    color: var(--pm-green);
-}
-
-.traffic-filter-btn.is-active {
-    background: var(--pm-green);
-    color: white;
-}
-
-.traffic-filter-line {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 700;
-    color: white;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LISTE DES ALERTES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.traffic-alerts {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-3);
-}
-
-.traffic-alert-card {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-tab-active);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
     overflow: hidden;
-    transition: all var(--transition-base);
+    background: var(--bg-main);
 }
 
-.traffic-alert-card:hover {
-    box-shadow: var(--elevation-2);
-}
-
-/* Barre colorée selon la sévérité */
-.traffic-alert-card::before {
-    content: '';
-    height: 4px;
-}
-
-.traffic-alert-card.severity-info::before {
-    background: var(--color-info);
-}
-
-.traffic-alert-card.severity-warning::before {
-    background: var(--color-warning);
-}
-
-.traffic-alert-card.severity-critical::before {
-    background: var(--color-error);
-}
-
-.traffic-alert-header {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-}
-
-.traffic-alert-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--border-radius-md);
-    flex-shrink: 0;
-}
-
-.traffic-alert-icon.type-detour {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning);
-}
-
-.traffic-alert-icon.type-delay {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-error);
-}
-
-.traffic-alert-icon.type-info {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--color-info);
-}
-
-.traffic-alert-icon.type-event {
-    background: rgba(168, 85, 247, 0.1);
-    color: #a855f7;
-}
-
-.traffic-alert-icon svg {
-    width: 20px;
-    height: 20px;
-}
-
-.traffic-alert-content {
+.tab {
     flex: 1;
-    min-width: 0;
-}
-
-.traffic-alert-lines {
-    display: flex;
-    gap: var(--spacing-1);
-    margin-bottom: var(--spacing-2);
-}
-
-.traffic-alert-title {
-    font-size: 15px;
+    padding: 0.6rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-1);
+    color: var(--color-tab-active);
+    transition: all var(--transition-normal);
+    text-transform: capitalize;
+    position: relative;
 }
 
-.traffic-alert-description {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.5;
+.tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--color-tab-active);
+    transition: width var(--transition-fast), left var(--transition-fast);
 }
 
-.traffic-alert-meta {
+.tab:not(.active):hover::after {
+    width: 100%;
+    left: 0;
+}
+
+.tab.active {
+    background: var(--color-tab-active);
+    color: white;
+}
+
+.tab:not(.active):hover {
+    background: rgba(0, 128, 128, 0.1);
+}
+
+.tab:first-child {
+    border-right: 1px solid var(--color-tab-active);
+}
+
+.tab-content {
+    max-height: 450px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TRAFIC GROUP
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.trafic-group {
+    margin-bottom: 1.5rem;
+}
+
+.trafic-group h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.trafic-badge-list {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-3);
-    padding: var(--spacing-3) var(--spacing-4);
-    background: var(--bg-secondary);
-    font-size: 12px;
-    color: var(--text-tertiary);
-}
-
-.traffic-alert-meta-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-}
-
-.traffic-alert-meta-item svg {
-    width: 14px;
-    height: 14px;
+    gap: 1rem 0.75rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   ÉTAT DES LIGNES
+   ALERT BANNER
    ═══════════════════════════════════════════════════════════════════════ */
 
-.traffic-line-status {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-3);
-    margin-bottom: var(--spacing-4);
-}
-
-.line-status-card {
+#alert-banner {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(135deg, var(--color-yellow) 0%, #fbbf24 100%);
+    color: #1a1a1a;
+    padding: 0.65rem 1rem;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
-    transition: all var(--transition-base);
-}
-
-.line-status-card:hover {
-    box-shadow: var(--elevation-1);
-}
-
-.line-status-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    font-size: 20px;
-    font-weight: 700;
-    color: white;
-    flex-shrink: 0;
-}
-
-.line-status-content {
-    flex: 1;
-}
-
-.line-status-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-1);
-}
-
-.line-status-text {
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-.line-status-indicator {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--border-radius-sm);
-    font-size: 12px;
+    font-size: 0.85rem;
     font-weight: 500;
-    flex-shrink: 0;
+    margin: 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.line-status-indicator.status-normal {
-    background: rgba(34, 197, 94, 0.1);
-    color: var(--color-success);
+#alert-banner.type-perturbation {
+    background: linear-gradient(135deg, var(--color-orange) 0%, #ea580c 100%);
+    color: white;
+    border-bottom-color: rgba(255,255,255,0.2);
 }
 
-.line-status-indicator.status-warning {
-    background: rgba(245, 158, 11, 0.1);
-    color: var(--color-warning);
+#alert-banner.type-annulation {
+    background: linear-gradient(135deg, var(--color-red) 0%, #dc2626 100%);
+    color: white;
+    border-bottom-color: rgba(255,255,255,0.2);
 }
 
-.line-status-indicator.status-critical {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-error);
+#alert-banner.type-retard {
+    background: linear-gradient(135deg, var(--color-yellow) 0%, #fbbf24 100%);
+    color: #1a1a1a;
 }
 
-.line-status-indicator::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   MESSAGE AUCUNE ALERTE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.traffic-empty {
+#alert-banner-content {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: var(--spacing-8);
-    text-align: center;
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
+    gap: 0.5rem;
+    flex: 1;
+    overflow: hidden;
 }
 
-.traffic-empty svg {
-    width: 80px;
-    height: 80px;
-    color: var(--color-success);
-    margin-bottom: var(--spacing-4);
+#alert-banner-content svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
 }
 
-.traffic-empty-title {
-    font-size: 18px;
+#alert-banner-content strong {
     font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-2);
 }
 
-.traffic-empty-text {
-    font-size: 14px;
-    color: var(--text-secondary);
-    max-width: 320px;
+#alert-banner-close {
+    background: rgba(0,0,0,0.1);
+    border: none;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DARK THEME
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .traffic-header {
-    background: #1e2330;
+#alert-banner-close:hover {
+    opacity: 1;
+    background: rgba(0,0,0,0.2);
 }
 
-body.dark-theme .traffic-filters {
-    background: #1e2330;
+#alert-banner.type-perturbation #alert-banner-close,
+#alert-banner.type-annulation #alert-banner-close {
+    background: rgba(255,255,255,0.15);
 }
 
-body.dark-theme .traffic-filter-btn {
-    background: #2a3142;
-}
-
-body.dark-theme .traffic-filter-btn:hover {
-    background: rgba(74, 222, 128, 0.1);
-}
-
-body.dark-theme .traffic-alert-card {
-    background: #1e2330;
-}
-
-body.dark-theme .traffic-alert-meta {
-    background: #2a3142;
-}
-
-body.dark-theme .line-status-card {
-    background: #1e2330;
-}
-
-body.dark-theme .traffic-empty {
-    background: #1e2330;
+#alert-banner.type-perturbation #alert-banner-close:hover,
+#alert-banner.type-annulation #alert-banner-close:hover {
+    background: rgba(255,255,255,0.25);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MOBILE
+   RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    .traffic-header {
-        flex-direction: column;
-        text-align: center;
-        padding: var(--spacing-4);
+    #alert-banner {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
     }
-    
-    .traffic-last-update {
-        margin-top: var(--spacing-2);
+
+    #alert-banner-content {
+        gap: 0.4rem;
     }
-    
-    .traffic-filters {
-        border-radius: 0;
+
+    #alert-banner-content svg {
+        width: 16px;
+        height: 16px;
     }
-    
-    .traffic-line-status {
-        grid-template-columns: 1fr;
+
+    #alert-banner-close {
+        padding: 0.2rem 0.4rem;
+        font-size: 1.1rem;
     }
-    
-    .line-status-card {
-        flex-wrap: wrap;
-    }
-    
-    .line-status-indicator {
-        width: 100%;
-        justify-content: center;
-        margin-top: var(--spacing-2);
+
+    #info-trafic .tab-content {
+        max-height: none;
+        overflow-y: visible;
     }
 }

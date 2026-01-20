@@ -1,458 +1,225 @@
 /**
- * Schedules page styles - Périmap
+ * Schedules Page Styles - Périmap v432
  * 
- * Styles spécifiques aux pages d'horaires
+ * Styles spécifiques à la page horaires
+ * Source: style.css
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SÉLECTEUR DE LIGNE
+   FICHE HORAIRE CONTAINER
    ═══════════════════════════════════════════════════════════════════════ */
 
-.schedule-line-selector {
-    display: flex;
-    justify-content: center;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-4);
-}
-
-.schedule-line-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border: none;
-    border-radius: 50%;
-    font-size: 18px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    opacity: 0.6;
-}
-
-.schedule-line-btn:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
-}
-
-.schedule-line-btn.is-active {
-    opacity: 1;
-    transform: scale(1.1);
-    box-shadow: var(--elevation-2);
-}
-
-.schedule-line-btn.line-a { background: var(--line-a); }
-.schedule-line-btn.line-b { background: var(--line-b); }
-.schedule-line-btn.line-c { background: var(--line-c); }
-.schedule-line-btn.line-d { background: var(--line-d); }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SÉLECTEUR DE DIRECTION
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.schedule-direction-selector {
-    display: flex;
-    gap: var(--spacing-2);
-    padding: var(--spacing-2);
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius-full);
-    margin-bottom: var(--spacing-4);
-}
-
-.schedule-direction-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-2);
-    padding: var(--spacing-3);
-    border: none;
-    border-radius: var(--border-radius-full);
-    background: transparent;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.schedule-direction-btn:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.schedule-direction-btn.is-active {
-    background: var(--bg-main);
-    color: var(--pm-green);
-    box-shadow: var(--elevation-1);
-}
-
-.schedule-direction-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LISTE DES ARRÊTS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.schedule-stops {
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
+#fiche-horaire-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     overflow: hidden;
-}
-
-.schedule-stop-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-3);
-    padding: var(--spacing-3) var(--spacing-4);
-    cursor: pointer;
-    transition: background var(--transition-quick);
-    position: relative;
-}
-
-.schedule-stop-item:hover {
-    background: var(--pm-green-light);
-}
-
-.schedule-stop-item.is-selected {
-    background: rgba(34, 197, 94, 0.1);
-}
-
-/* Ligne verticale connectant les arrêts */
-.schedule-stop-item::before {
-    content: '';
-    position: absolute;
-    left: 26px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--pm-green);
-    opacity: 0.3;
-}
-
-.schedule-stop-item:first-child::before {
-    top: 50%;
-}
-
-.schedule-stop-item:last-child::before {
-    bottom: 50%;
-}
-
-.stop-bullet {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: white;
-    border: 2px solid var(--pm-green);
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.schedule-stop-item.is-terminus .stop-bullet {
-    width: 16px;
-    height: 16px;
-    background: var(--pm-green);
-    border-width: 3px;
-    border-color: white;
-    box-shadow: 0 0 0 2px var(--pm-green);
-}
-
-.stop-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.stop-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.stop-code {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.stop-time {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--pm-green);
-    flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TABLEAU DES HORAIRES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.schedule-table-container {
-    overflow-x: auto;
     background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
+    margin-bottom: 3rem;
 }
 
-.schedule-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-.schedule-table th {
-    padding: var(--spacing-3) var(--spacing-4);
-    text-align: left;
+.fiche-horaire-title {
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.schedule-table th.hour-col {
-    width: 60px;
-    text-align: center;
-}
-
-.schedule-table td {
-    padding: var(--spacing-3) var(--spacing-4);
-    color: var(--text-primary);
-    border-top: 1px solid var(--border-color);
-}
-
-.schedule-table td.hour-col {
-    font-weight: 700;
-    color: var(--pm-green);
-    text-align: center;
-    background: rgba(34, 197, 94, 0.05);
-}
-
-.schedule-minutes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-2);
-}
-
-.schedule-minute {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    height: 28px;
-    padding: 0 var(--spacing-1);
-    border-radius: var(--border-radius-sm);
-    font-size: 13px;
-    color: var(--text-primary);
-    transition: all var(--transition-quick);
-}
-
-.schedule-minute:hover {
-    background: var(--pm-green-light);
-    color: var(--pm-green);
-}
-
-.schedule-minute.is-next {
-    background: var(--pm-green);
-    color: white;
-    font-weight: 600;
-}
-
-.schedule-minute.is-passed {
-    color: var(--text-tertiary);
-    text-decoration: line-through;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   PROCHAINS PASSAGES
+   ACCORDION
    ═══════════════════════════════════════════════════════════════════════ */
 
-.schedule-next-departures {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-    background: var(--pm-green-light);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: var(--spacing-4);
+.accordion-group details {
+    border-bottom: 1px solid var(--border);
 }
 
-.next-departure-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--pm-green);
-    margin-bottom: var(--spacing-2);
+.accordion-group details:last-child {
+    border-bottom: none;
 }
 
-.next-departure-item {
+.accordion-group summary {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-3);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-md);
-}
-
-.next-departure-destination {
-    font-size: 14px;
-    color: var(--text-primary);
-}
-
-.next-departure-time {
-    display: flex;
     align-items: center;
-    gap: var(--spacing-2);
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    list-style: none;
+    transition: background 0.2s ease;
 }
 
-.next-departure-countdown {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--pm-green);
+.accordion-group summary:hover {
+    background: #f1f5f9;
 }
 
-.next-departure-exact {
-    font-size: 13px;
+.accordion-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.accordion-group summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
     color: var(--text-secondary);
+    transition: transform 0.3s ease-in-out;
+}
+
+.accordion-group details[open] summary {
+    background: var(--bg-main);
+}
+
+.accordion-group details[open] summary::after {
+    transform: rotate(45deg);
+}
+
+.accordion-content {
+    background: var(--bg-main);
+    padding: 0 var(--spacing-5);
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height var(--transition-smooth);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+details[open] .accordion-content {
+    max-height: 1000px;
+}
+
+.accordion-content-inner {
+    padding: 1rem 0;
+}
+
+.accordion-content-inner a {
+    display: block;
+    padding: 0.75rem 0;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+}
+
+.accordion-content-inner a:last-child {
+    border-bottom: none;
+}
+
+.accordion-content-inner a:hover {
+    text-decoration: underline;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   FICHE HORAIRE PDF
+   HORAIRES SEARCH SHORTCUT
    ═══════════════════════════════════════════════════════════════════════ */
 
-.schedule-pdf-embed {
-    width: 100%;
-    height: 600px;
-    border: none;
-    border-radius: var(--border-radius-lg);
-    background: var(--bg-main);
-}
-
-.schedule-pdf-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-8);
+#horaires-search-shortcut {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
     text-align: center;
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
 }
 
-.schedule-pdf-fallback svg {
-    width: 48px;
-    height: 48px;
-    color: var(--text-tertiary);
-    margin-bottom: var(--spacing-4);
-}
-
-.schedule-pdf-fallback p {
-    margin-bottom: var(--spacing-4);
+#horaires-search-shortcut p {
+    font-size: 0.9rem;
     color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+#btn-horaires-search-focus {
+    font-weight: 600;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   DARK THEME
+   SCHEDULE SHEETS SECTION
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.dark-theme .schedule-line-selector {
-    background: #1e2330;
+.search-priority-section {
+    margin-bottom: var(--spacing-8);
+    padding-bottom: var(--spacing-6);
+    border-bottom: 2px solid var(--border);
 }
 
-body.dark-theme .schedule-direction-selector {
-    background: #2a3142;
+.search-priority-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
 }
 
-body.dark-theme .schedule-direction-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+.schedule-sheets-section {
+    margin-top: var(--spacing-6);
 }
 
-body.dark-theme .schedule-direction-btn.is-active {
-    background: #1e2330;
-}
-
-body.dark-theme .schedule-stops {
-    background: #1e2330;
-}
-
-body.dark-theme .schedule-stop-item:hover {
-    background: rgba(74, 222, 128, 0.1);
-}
-
-body.dark-theme .stop-bullet {
-    background: #1e2330;
-}
-
-body.dark-theme .schedule-table-container {
-    background: #1e2330;
-}
-
-body.dark-theme .schedule-table th {
-    background: #2a3142;
-}
-
-body.dark-theme .schedule-table td {
-    border-color: #3b4556;
-}
-
-body.dark-theme .schedule-table td.hour-col {
-    background: rgba(74, 222, 128, 0.08);
-}
-
-body.dark-theme .schedule-next-departures {
-    background: rgba(74, 222, 128, 0.1);
-}
-
-body.dark-theme .next-departure-item {
-    background: #1e2330;
+.schedule-sheets-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MOBILE
+   HALL LINE SHORTCUTS
    ═══════════════════════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
-    .schedule-line-selector {
-        padding: var(--spacing-3);
-        border-radius: 0;
-    }
-    
-    .schedule-line-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 16px;
-    }
-    
-    .schedule-direction-selector {
-        border-radius: var(--border-radius-lg);
-    }
-    
-    .schedule-direction-btn {
-        padding: var(--spacing-2);
-        font-size: 13px;
-    }
-    
-    .schedule-stop-item {
-        padding: var(--spacing-3);
-    }
-    
-    .schedule-table th,
-    .schedule-table td {
-        padding: var(--spacing-2);
-    }
-    
-    .schedule-pdf-embed {
-        height: 400px;
-    }
+.hall-line-shortcuts {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-theme .hall-line-shortcuts {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.hall-line-shortcuts-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.hall-line-shortcuts-title {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #1e3a5f;
+}
+
+body.dark-theme .hall-line-shortcuts-title {
+    color: #e2e8f0;
+}
+
+.hall-line-shortcuts-all {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2a9d8f;
+    text-decoration: none;
+}
+
+.hall-line-shortcuts-all:hover {
+    text-decoration: underline;
+}
+
+.hall-line-btns {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.hall-line-btns::-webkit-scrollbar {
+    display: none;
 }

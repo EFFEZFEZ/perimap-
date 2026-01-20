@@ -1,7 +1,8 @@
 /**
- * Dark Theme - Périmap
+ * Dark Theme - Périmap v432
  * 
- * Variables et overrides pour le mode sombre
+ * Tous les styles du mode sombre
+ * Source: style.css lignes 593-656 et éparpillés
  */
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -9,162 +10,285 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 body.dark-theme {
-    /* Backgrounds */
-    --bg-main: #0f172a;
-    --bg-light: #1e293b;
-    --bg-secondary: #1e293b;
-    --bg-tertiary: #334155;
-    
-    /* Textes */
+    --bg-page: #0b1220;
+    --bg-card: #0f1724;
+    --bg-elevated: #151d2b;
+    --bg-main: #0b1220;
+    --bg-secondary: #0f1724;
+    --bg-tertiary: #1a2332;
+    --bg-light: #0b1220;
     --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    
-    /* Bordures */
-    --border: #334155;
-    --border-light: #1e293b;
-    
-    /* Ombres */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-    
-    /* Élévation */
-    --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-    --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-    --elevation-3: 0 6px 16px rgba(0, 0, 0, 0.4), 0 3px 6px rgba(0, 0, 0, 0.3);
-    --elevation-4: 0 12px 24px rgba(0, 0, 0, 0.4), 0 6px 12px rgba(0, 0, 0, 0.3);
-    --elevation-5: 0 24px 48px rgba(0, 0, 0, 0.5), 0 12px 24px rgba(0, 0, 0, 0.4);
-    
-    /* Couleurs Périmap en mode sombre */
-    --pm-green: #4ade80;
-    --pm-green-hover: #22c55e;
-    --pm-green-light: rgba(74, 222, 128, 0.15);
-    --pm-green-glow: rgba(74, 222, 128, 0.4);
-    
-    --pm-cyan: #22d3ee;
-    --pm-cyan-hover: #06b6d4;
-    --pm-cyan-light: rgba(34, 211, 238, 0.15);
-    
-    /* Couleurs sémantiques */
-    --color-success: #4ade80;
-    --color-warning: #facc15;
-    --color-error: #f87171;
-    --color-info: #60a5fa;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border: rgba(255,255,255,0.08);
+    --primary: var(--pm-green);
+    --primary-dark: var(--pm-green-hover);
+    --color-tab-active: var(--pm-green);
+    --color-nav-condensed-bg: rgba(11, 18, 32, 0.95);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   BODY
+   HEADER
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.dark-theme {
-    background-color: var(--bg-main);
+body.dark-theme #main-header {
+    background: var(--bg-page);
+    border-bottom-color: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTES ET CONTENEURS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .card,
+body.dark-theme .instruction-content {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   POPUPS LEAFLET
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .leaflet-popup-content-wrapper {
+    background: #0f172a !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+
+body.dark-theme .leaflet-popup-tip {
+    background: #0f172a !important;
+}
+
+body.dark-theme .stop-schedule-popup .leaflet-popup-content-wrapper {
+    background: #0f172a !important;
+}
+
+body.dark-theme .stop-schedule-popup .leaflet-popup-tip {
+    background: #0f172a !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BOUTONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .btn,
+body.dark-theme .btn-icon-round {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.04);
+}
+
+body.dark-theme .nav-button-condensed {
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme #map {
+    background: #06131b;
+}
+
+body.dark-theme #results-map,
+body.dark-theme #detail-map {
+    background: #050c15;
+}
+
+body.dark-theme .leaflet-control-attribution {
+    background: rgba(15, 20, 30, 0.7) !important;
+    color: rgba(255,255,255,0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTRÔLES CARTE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .map-floating-controls {
+    background: #1e2330;
+    box-shadow: 
+        0 4px 24px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .map-btn-locate:hover {
+    background: rgba(34, 197, 94, 0.12);
+}
+
+body.dark-theme .map-btn-locate svg {
+    color: #4ade80;
+}
+
+body.dark-theme .map-btn-locate:hover svg {
+    color: #22c55e;
+}
+
+body.dark-theme .map-btn-locate.has-error {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TOP BAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme #top-bar {
+    background: transparent;
+}
+
+body.dark-theme #btn-back-to-dashboard-from-map,
+body.dark-theme #clock,
+body.dark-theme #status-info {
+    background: rgba(20, 25, 38, 0.95) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+body.dark-theme #btn-back-to-dashboard-from-map {
+    color: #e2e8f0 !important;
+}
+
+body.dark-theme #btn-back-to-dashboard-from-map:hover {
+    background: rgba(30, 38, 55, 0.98) !important;
+}
+
+body.dark-theme #clock {
+    color: #e2e8f0;
+}
+
+body.dark-theme #clock svg {
+    color: #64748b;
+}
+
+body.dark-theme #current-time {
+    color: #f1f5f9;
+}
+
+body.dark-theme #date-indicator {
+    color: #94a3b8;
+    border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme #status-info {
+    color: #e2e8f0;
+}
+
+body.dark-theme #bus-count {
+    color: #4ade80 !important;
+}
+
+body.dark-theme #data-status {
+    color: #94a3b8;
+    border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme #data-status.loaded {
+    color: #4ade80;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FILTRES ET PANELS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme #map-container #map-view #top-bar > #btn-toggle-filter {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-theme #route-filter-panel {
+    background: rgba(4, 10, 18, 0.95);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 30px rgba(0,0,0,0.65);
+}
+
+body.dark-theme #detail-map-summary {
+    background: rgba(6, 12, 20, 0.9);
+    color: var(--text-primary);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+}
+
+body.dark-theme #detail-map-header #btn-back-to-results {
+    background: rgba(15, 23, 42, 0.95) !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INPUTS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme input[type="text"],
+body.dark-theme input[type="search"],
+body.dark-theme textarea,
+body.dark-theme select {
+    background: var(--bg-elevated);
+    border-color: var(--border);
     color: var(--text-primary);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SCROLLBARS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-body.dark-theme ::-webkit-scrollbar-track {
-    background: #1e293b;
-}
-
-body.dark-theme ::-webkit-scrollbar-thumb {
-    background: #475569;
-    border-radius: 4px;
-}
-
-body.dark-theme ::-webkit-scrollbar-thumb:hover {
-    background: #64748b;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SELECTION
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme ::selection {
-    background: rgba(74, 222, 128, 0.3);
-    color: #f1f5f9;
+body.dark-theme input[type="text"]::placeholder,
+body.dark-theme input[type="search"]::placeholder,
+body.dark-theme textarea::placeholder {
+    color: var(--text-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
    FOCUS VISIBLE
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.dark-theme :focus-visible {
-    outline-color: #4ade80;
+body.dark-theme button:focus-visible,
+body.dark-theme a:focus-visible,
+body.dark-theme input:focus-visible {
+    outline-color: var(--pm-cyan);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LIENS
+   OFFLINE BANNER
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.dark-theme a:not([class]) {
-    color: #4ade80;
+body.dark-theme .offline-banner {
+    background: linear-gradient(135deg, #422006 0%, #451a03 100%);
+    color: #fde68a;
+    border-color: rgba(253, 230, 138, 0.2);
 }
 
-body.dark-theme a:not([class]):hover {
-    color: #22c55e;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CODE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme code {
+body.dark-theme .offline-toast {
     background: #1e293b;
     color: #e2e8f0;
 }
 
-body.dark-theme pre {
-    background: #1e293b;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   HORIZONTAL RULE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme hr {
-    border-color: #334155;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   IMAGES ADJUSTMENT
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme img {
-    filter: brightness(0.95);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LEAFLET MAP OVERRIDES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .leaflet-control-attribution {
-    background: rgba(15, 23, 42, 0.85) !important;
-    color: rgba(148, 163, 184, 0.8);
-}
-
-body.dark-theme .leaflet-control-attribution a {
+body.dark-theme .offline-toast-success {
     color: #4ade80;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   TRANSITION POUR LE CHANGEMENT DE THÈME
+   BOTTOM NAV
    ═══════════════════════════════════════════════════════════════════════ */
 
-body.theme-transition,
-body.theme-transition *,
-body.theme-transition *::before,
-body.theme-transition *::after {
-    transition: background-color 0.3s ease, 
-                border-color 0.3s ease,
-                color 0.3s ease,
-                box-shadow 0.3s ease !important;
+body.dark-theme .bottom-nav {
+    background: rgba(15, 23, 42, 0.95);
+    border-top-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .bottom-nav-item--primary {
+    color: #e2e8f0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RIPPLE EFFECT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+body.dark-theme .pm-ripple {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body.dark-theme .pm-skeleton-card {
+    border-color: rgba(255, 255, 255, 0.06);
 }

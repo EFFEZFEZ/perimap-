@@ -1,8 +1,70 @@
 /**
- * Loading states - Périmap
+ * Loading Styles - Périmap v432
  * 
- * Indicateurs de chargement et spinners
+ * Styles des états de chargement et skeletons
+ * Source: style.css
  */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SKELETON LOADING
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-light) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 1rem;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text--sm {
+    height: 0.75rem;
+}
+
+.skeleton-text--lg {
+    height: 1.25rem;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+.skeleton-rect {
+    border-radius: var(--radius-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SKELETON STACK (pour listes)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pm-skeleton-stack {
+    display: grid;
+    gap: 10px;
+}
+
+.pm-skeleton-card {
+    padding: 12px 12px;
+    border-radius: 14px;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+body.dark-theme .pm-skeleton-card {
+    border-color: rgba(255, 255, 255, 0.06);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════
    SPINNER
@@ -10,41 +72,30 @@
 
 .spinner {
     display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--bg-tertiary);
-    border-top-color: var(--pm-green);
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
-.spinner-sm {
-    width: 16px;
-    height: 16px;
-    border-width: 2px;
+.spinner--sm {
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
 }
 
-.spinner-lg {
+.spinner--lg {
     width: 32px;
     height: 32px;
     border-width: 3px;
 }
 
-.spinner-xl {
-    width: 48px;
-    height: 48px;
-    border-width: 4px;
-}
-
-/* Couleurs */
-.spinner-white {
-    border-color: rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-}
-
-.spinner-primary {
-    border-color: var(--pm-green-light);
-    border-top-color: var(--pm-green);
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -53,61 +104,60 @@
 
 .loading-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: var(--spacing-3);
-    z-index: var(--z-overlay);
-}
-
-.loading-overlay-text {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
+    z-index: 100;
 }
 
 body.dark-theme .loading-overlay {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.loading-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LOADING DOTS
+   LOADING PULSE (pour les points)
    ═══════════════════════════════════════════════════════════════════════ */
 
 .loading-dots {
     display: inline-flex;
-    align-items: center;
     gap: 4px;
 }
 
-.loading-dots span {
+.loading-dot {
     width: 6px;
     height: 6px;
-    background: var(--pm-green);
+    background: var(--primary);
     border-radius: 50%;
-    animation: loadingDots 1.4s infinite ease-in-out both;
+    animation: loadingPulse 1.4s ease-in-out infinite;
 }
 
-.loading-dots span:nth-child(1) {
-    animation-delay: -0.32s;
+.loading-dot:nth-child(2) {
+    animation-delay: 0.2s;
 }
 
-.loading-dots span:nth-child(2) {
-    animation-delay: -0.16s;
+.loading-dot:nth-child(3) {
+    animation-delay: 0.4s;
 }
 
-.loading-dots span:nth-child(3) {
-    animation-delay: 0;
-}
-
-@keyframes loadingDots {
+@keyframes loadingPulse {
     0%, 80%, 100% {
-        transform: scale(0);
+        transform: scale(0.6);
         opacity: 0.5;
     }
     40% {
@@ -117,206 +167,85 @@ body.dark-theme .loading-overlay {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LOADING BAR
+   EMPTY STATE
    ═══════════════════════════════════════════════════════════════════════ */
 
-.loading-bar {
-    position: relative;
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-10) var(--spacing-6);
+    color: var(--text-secondary);
+}
+
+.empty-state .check-icon {
+    color: var(--pm-green);
+    margin: 0 auto var(--spacing-4);
+    display: block;
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PROGRESS BAR
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.progress-bar {
     width: 100%;
     height: 4px;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border-radius: 2px;
     overflow: hidden;
 }
 
-.loading-bar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
+.progress-bar-fill {
     height: 100%;
-    width: 30%;
-    background: var(--pm-gradient);
+    background: var(--pm-green);
     border-radius: 2px;
-    animation: loadingBar 1.5s ease-in-out infinite;
+    transition: width 0.3s ease;
 }
 
-@keyframes loadingBar {
+.progress-bar--indeterminate .progress-bar-fill {
+    width: 30%;
+    animation: progressIndeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progressIndeterminate {
     0% {
-        left: -30%;
+        transform: translateX(-100%);
     }
     100% {
-        left: 100%;
+        transform: translateX(400%);
     }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   SKELETON LOADING
+   BUS APPEAR ANIMATION
    ═══════════════════════════════════════════════════════════════════════ */
 
-.skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--bg-secondary) 25%,
-        var(--bg-light) 50%,
-        var(--bg-secondary) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: var(--radius-sm);
-}
-
-.skeleton-line {
-    height: 1em;
-    margin-bottom: 0.5em;
-}
-
-.skeleton-line:last-child {
-    width: 70%;
-    margin-bottom: 0;
-}
-
-.skeleton-circle {
-    border-radius: 50%;
-    aspect-ratio: 1;
-}
-
-.skeleton-card {
-    height: 120px;
-    border-radius: var(--radius-lg);
-}
-
-.skeleton-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-}
-
-.skeleton-badge {
-    width: 60px;
-    height: 24px;
-    border-radius: var(--radius-sm);
-}
-
-/* Skeleton composé */
-.skeleton-result-card {
-    display: flex;
-    gap: var(--spacing-3);
-    padding: var(--spacing-4);
-    background: var(--bg-main);
-    border-radius: var(--radius-lg);
-    margin-bottom: var(--spacing-3);
-}
-
-.skeleton-result-card .skeleton-avatar {
-    flex-shrink: 0;
-}
-
-.skeleton-result-card-content {
-    flex: 1;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   PULSE ANIMATION (pour temps réel)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.pulse-dot {
-    position: relative;
-    width: 8px;
-    height: 8px;
-    background: var(--pm-green);
-    border-radius: 50%;
-}
-
-.pulse-dot::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: inherit;
-    border-radius: 50%;
-    animation: pulse-ring 1.5s ease-out infinite;
-}
-
-@keyframes pulse-ring {
-    0% {
+@keyframes pm-bus-pop {
+    from {
+        transform: scale(0.88);
+        opacity: 0;
+        filter: saturate(0.9);
+    }
+    to {
         transform: scale(1);
         opacity: 1;
-    }
-    100% {
-        transform: scale(2.5);
-        opacity: 0;
+        filter: none;
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DARK THEME
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .spinner {
-    border-color: #334155;
-    border-top-color: #4ade80;
-}
-
-body.dark-theme .loading-bar {
-    background: #334155;
-}
-
-body.dark-theme .skeleton {
-    background: linear-gradient(
-        90deg,
-        #1e293b 25%,
-        #334155 50%,
-        #1e293b 75%
-    );
-    background-size: 200% 100%;
-}
-
-body.dark-theme .skeleton-result-card {
-    background: #1e293b;
-}
-
-body.dark-theme .loading-overlay-text {
-    color: #94a3b8;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SKELETON ITINÉRAIRES
-   V220: Loaders pour la recherche d'itinéraires
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.skeleton-wrapper {
-    margin-bottom: var(--spacing-3);
-}
-
-.skeleton-route {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-4);
-    padding: var(--spacing-4);
-    background: var(--bg-main);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
-}
-
-.skeleton-route .route-option-left {
-    flex-shrink: 0;
-}
-
-.skeleton-route .route-option-center {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.skeleton-route .route-option-right {
-    flex-shrink: 0;
-}
-
-body.dark-theme .skeleton-route {
-    background: var(--bg-card);
-    border-color: var(--border-dark);
+.bus-icon-rect.bus-appear div {
+    animation: pm-bus-pop 260ms cubic-bezier(0.2, 0.9, 0.2, 1) 1;
 }
