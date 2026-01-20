@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v437)
+ * PÉRIMAP - CSS PRINCIPAL (v438)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -3404,11 +3404,6 @@ body.dark-theme .app-back-btn svg {
     max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
-}
-
-/* Largeur fixe demandée pour la carte horaires */
-#horaires.view-active {
-    width: 382px;
 }
 
 #fiche-horaire-container {
