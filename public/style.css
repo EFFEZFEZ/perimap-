@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v435)
+ * PÉRIMAP - CSS PRINCIPAL (v436)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -3404,6 +3404,11 @@ body.dark-theme .app-back-btn svg {
     max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Largeur fixe demandée pour la carte horaires */
+#horaires.view-active {
+    width: 382px;
 }
 
 #fiche-horaire-container {
@@ -6992,51 +6997,58 @@ body.itinerary-view-active #itinerary-results-container {
  * ========================================= */
 
 /* Top bar épurée */
+/* V436: Header moderne et minimaliste */
 .itinerary-top-bar {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding: 0.625rem 0.875rem;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-/* Bouton retour sobre */
+/* Bouton retour moderne */
 .itinerary-top-bar .app-back-btn {
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 8px;
-    font-size: 0.8125rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .itinerary-top-bar .app-back-btn:hover {
-    background: var(--bg-light);
-    border-color: var(--primary);
+    background: rgba(34, 197, 94, 0.1);
+    transform: translateX(-2px);
 }
 
 .itinerary-top-bar .app-back-btn svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
 }
 
 .itinerary-top-bar h2 {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: 1.125rem;
+    font-weight: 700;
     margin: 0;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
 }
 
-/* Panneau formulaire */
+/* V436: Panneau formulaire moderne */
 #itinerary-edit-panel {
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    padding: 0.875rem;
+    padding: 1.25rem;
     position: relative;
     z-index: 100;
 }
@@ -7104,18 +7116,19 @@ body.itinerary-view-active #itinerary-results-container {
     position: relative;
 }
 
-/* Input style sobre */
+/* V436: Input moderne avec effets premium */
 .route-input {
     width: 100%;
-    padding: 0.625rem 2.5rem 0.625rem 0.75rem;
+    padding: 0.875rem 3rem 0.875rem 1rem;
     background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.875rem;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-size: 0.9375rem;
     color: var(--text-primary);
-    min-height: 42px;
+    min-height: 50px;
     box-sizing: border-box;
-    transition: all 0.15s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
 }
 
 .route-input::placeholder {
@@ -7124,39 +7137,43 @@ body.itinerary-view-active #itinerary-results-container {
 }
 
 .route-input:hover {
-    border-color: var(--text-tertiary);
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.2);
 }
 
 .route-input:focus {
     background: var(--bg-main);
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1), 0 4px 12px rgba(34, 197, 94, 0.15);
     outline: none;
+    transform: translateY(-1px);
 }
 
-/* Bouton géolocalisation sobre */
+/* V436: Bouton géolocalisation moderne */
 .btn-geolocate-minimal {
     position: absolute;
-    right: 0.375rem;
+    right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     background: transparent;
-    color: var(--text-tertiary);
+    color: var(--primary);
     border: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-geolocate-minimal:hover:not(:disabled) {
     background: var(--primary);
     color: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 .btn-geolocate-minimal:disabled {
@@ -7164,28 +7181,28 @@ body.itinerary-view-active #itinerary-results-container {
     cursor: not-allowed;
 }
 
-/* Bouton inverser sobre */
+/* V436: Bouton inverser moderne */
 .btn-swap-minimal {
     align-self: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    color: var(--text-tertiary);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--primary);
+    border: none;
+    color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
 }
 
 .btn-swap-minimal:hover {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #ffffff;
-    transform: rotate(180deg);
+    background: #16a34a;
+    transform: rotate(180deg) scale(1.05);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
 }
 
 /* Actions row */
@@ -7197,20 +7214,20 @@ body.itinerary-view-active #itinerary-results-container {
     z-index: 10;
 }
 
-/* Bouton time picker sobre */
+/* V436: Bouton time picker moderne */
 .btn-time-picker {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
     background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     position: relative;
     z-index: 5;
@@ -7220,34 +7237,51 @@ body.itinerary-view-active #itinerary-results-container {
 .btn-time-picker svg {
     color: var(--primary);
     flex-shrink: 0;
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
 }
 
 .btn-time-picker .chevron {
     color: var(--text-tertiary);
     margin-left: 0.125rem;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
 }
 
 .btn-time-picker:hover {
     border-color: var(--primary);
-    background: rgba(34, 197, 94, 0.04);
+    background: rgba(34, 197, 94, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
 }
 
-/* Bouton rechercher sobre */
+/* V436: Bouton rechercher premium */
 .btn-search-route {
     flex: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: 8px;
-    min-height: 38px;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    border-radius: 12px;
+    min-height: 50px;
+    background: linear-gradient(135deg, var(--primary) 0%, #16a34a 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+}
+
+.btn-search-route:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.4);
+}
+
+.btn-search-route:active {
+    transform: translateY(0);
 }
 
 /* Dark theme */
@@ -7363,16 +7397,13 @@ body.dark-theme #results-planner-to:focus {
     border-radius: var(--radius-md);
 }
 
-/* =========================================
- * V433: ONGLETS MODE - DESIGN MINIMALISTE
- * Style épuré, clair et moderne
- * ========================================= */
+/* V436: ONGLETS MODE - DESIGN PREMIUM MINIMALISTE */
 #results-mode-tabs {
     display: flex;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     background: var(--bg-main);
-    padding: 0.875rem 1rem;
+    padding: 1.25rem 1.25rem;
     flex-shrink: 0;
     border-bottom: 1px solid var(--border);
 }
@@ -7381,27 +7412,30 @@ body.dark-theme #results-planner-to:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.75rem 1rem;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
     border: none;
     background: var(--bg-secondary);
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     flex: 1;
-    max-width: 100px;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
+    max-width: 110px;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
 .mode-tab:hover {
     background: var(--bg-light);
-    border-color: var(--border);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .mode-tab.active {
-    background: rgba(34, 197, 94, 0.08);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.08) 100%);
     border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
 }
 
 .mode-tab.hidden {
@@ -7409,30 +7443,32 @@ body.dark-theme #results-planner-to:focus {
 }
 
 .mode-tab svg {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     color: var(--text-tertiary);
-    transition: color 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .mode-tab:hover svg {
-    color: var(--text-secondary);
+    color: var(--primary);
+    transform: scale(1.1);
 }
 
 .mode-tab.active svg {
     color: var(--primary);
+    filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));
 }
 
 .mode-tab-duration {
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: 0.875rem;
+    font-weight: 700;
     color: var(--text-secondary);
     letter-spacing: -0.01em;
 }
 
 .mode-tab.active .mode-tab-duration {
     color: var(--primary);
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .mode-tab-duration.empty {
@@ -7527,32 +7563,47 @@ body.dark-theme #results-planner-to:focus {
 }
 
 /* =========================================
- * V433: CARTES D'ITINÉRAIRES - DESIGN MINIMALISTE
- * Épuré, clair et moderne
+ * V436: CARTES D'ITINÉRAIRES - DESIGN PREMIUM MINIMALISTE
+ * Moderne, élégant avec effets subtils
  * ========================================= */
 .route-option {
     display: flex;
     flex-direction: column;
     background: var(--bg-main);
-    border-radius: 14px;
-    padding: 1rem 1.125rem;
-    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.375rem;
+    border: 2px solid var(--border);
     cursor: pointer;
-    transition: all 0.2s ease;
-    gap: 0.875rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 1rem;
     position: relative;
+    overflow: hidden;
+}
+
+.route-option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .route-option:hover {
     border-color: var(--primary);
-    background: rgba(34, 197, 94, 0.02);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-option:hover::before {
+    opacity: 1;
 }
 
 .route-option.is-active {
     border-color: var(--primary);
-    background: rgba(34, 197, 94, 0.04);
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 16px rgba(34, 197, 94, 0.2);
 }
 
 /* --- (1) Ligne des bus --- */
@@ -7564,32 +7615,34 @@ body.dark-theme #results-planner-to:focus {
     flex-wrap: wrap;
 }
 
-/* V433: Icônes transport minimalistes */
+/* V436: Icônes transport premium */
 .route-summary-bus-icon,
 .route-summary-bike-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     color: var(--text-secondary);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .route-summary-bus-icon svg,
 .route-summary-bike-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
 }
 
 .route-option:hover .route-summary-bus-icon,
 .route-option:hover .route-summary-bike-icon {
-    background: rgba(34, 197, 94, 0.08);
-    border-color: rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
     color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
 }
 
 /* V433: Icône de marche minimaliste */
@@ -7623,65 +7676,67 @@ body.dark-theme #results-planner-to:focus {
     opacity: 0.6;
 }
 
-/* V433: Badge ligne minimaliste */
+/* V436: Badge ligne premium */
 .route-line-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    font-size: 0.875rem;
-    border-radius: 6px;
-    min-width: 36px;
-    height: 28px;
-    padding: 0 10px;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    border-radius: 8px;
+    min-width: 42px;
+    height: 32px;
+    padding: 0 12px;
     text-align: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-    letter-spacing: 0.01em;
-    transition: transform 0.15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
 }
 
 .route-option:hover .route-line-badge {
-    transform: scale(1.02);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* V433: Footer des cartes minimaliste */
+/* V436: Footer des cartes premium */
 .route-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 0.75rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--border);
 }
 
 .route-time {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.125rem;
+    font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
 
 .route-duration {
-    font-size: 0.9375rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--text-secondary);
 }
 
 .route-duration-eco {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.5rem;
     color: var(--primary);
-    background: rgba(34, 197, 94, 0.08);
-    padding: 0.375rem 0.75rem;
-    border-radius: 16px;
-    font-weight: 600;
-    font-size: 0.875rem;
+    background: rgba(34, 197, 94, 0.12);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
 }
 
 .route-duration-eco svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
 }
 
 /* V433: Prochains départs */
