@@ -9107,6 +9107,36 @@ body.dark-theme .stat-item {
     }
 }
 
+/* =========================================
+ * V421: HERO SECTION DESKTOP - REMPLIT TOUTE LA PAGE
+ * ========================================= */
+@media (min-width: 769px) {
+    .hero-section {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem 2rem;
+        margin-bottom: 0;
+        padding-bottom: 6rem;
+    }
+    
+    .hero-headline {
+        margin-bottom: 3rem;
+        padding-top: 0;
+    }
+    
+    .hero-headline h1 {
+        font-size: 3.5rem;
+        font-weight: 900;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.35rem;
+    }
+}
+
 /* --- FOOTER PROFESSIONNEL --- */
 #site-footer {
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
