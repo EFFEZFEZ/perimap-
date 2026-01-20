@@ -1,12 +1,14 @@
 ﻿/**
  * busPositionCalculator.js
  * * Calcule les positions géographiques interpolées des bus entre deux arrêts
- * * OPTIMISÉ V417 (Masquage bus trop loin):
- * * - V417: Si RT dit que le bus arrive dans X min, et segment dure Y min,
- * *   et X > Y * 2.5, alors le bus N'EST PAS dans ce segment → retourne null
- * *   → Le bus n'est pas affiché à une position incorrecte
- * * - Contrainte: bus JAMAIS après un arrêt où RT dit qu'il n'est pas arrivé
+ * * OPTIMISÉ V416 (Contrainte par Segment RT):
+ * * - V416: Nouvelle logique pivotBasedEstimate()
+ * *   → Utilise le segment GTFS statique (fromStop → toStop) comme base
+ * *   → Cherche les données RT pour le toStop (prochain arrêt)
+ * *   → Contraint le bus à être AVANT le toStop si RT > 0
+ * *   → Le bus ne peut JAMAIS être après un arrêt où il n'est pas arrivé
  * * - Anti-téléportation avec lissage pour mouvements fluides
+ * * - Indicateur de confiance (hasRealtime, isEstimated)
  */
 
 export class BusPositionCalculator {
@@ -194,45 +196,34 @@ export class BusPositionCalculator {
             
             // Durée estimée du segment (en minutes)
             const segmentDurationSec = (segment.arrivalTime || 0) - (segment.departureTime || 0);
-            const segmentDurationMin = Math.max(1, segmentDurationSec / 60); // Minimum 1 minute
+            const segmentDurationMin = segmentDurationSec / 60;
             
-            // V417: CORRECTION CRITIQUE
-            // Si le RT dit que le bus arrive dans X minutes, mais que le segment
-            // ne dure que Y minutes, et X > Y * 2, alors le bus N'EST PAS dans ce segment!
-            // Il est probablement plusieurs arrêts en arrière.
-            // On retourne null pour NE PAS afficher le bus à cette position incorrecte.
-            
-            const SEUIL_RETARD_MAX = 2.5; // Si RT > 2.5x la durée du segment, bus pas dans ce segment
-            
-            if (rtMinutesToNext > segmentDurationMin * SEUIL_RETARD_MAX) {
-                // Le bus est BEAUCOUP trop loin pour être dans ce segment
-                // Retourner null pour forcer le fallback ou masquer le bus
-                console.log(`[BusPosition] Bus trop loin: RT=${rtMinutesToNext}min, segment=${segmentDurationMin.toFixed(1)}min -> skip`);
-                return null;
-            }
-            
-            if (rtMinutesToNext <= 0) {
-                // Le bus est à l'arrêt ou vient d'arriver -> progress ~95%
-                progress = 0.95;
-                confidence = 'realtime-arriving';
-            } else if (rtMinutesToNext >= segmentDurationMin) {
-                // Le bus vient de quitter le fromStop ou est encore au fromStop
-                // Calculer un progress très faible basé sur le ratio
-                const ratio = rtMinutesToNext / segmentDurationMin;
-                if (ratio >= 2) {
-                    // Bus probablement encore à l'arrêt précédent
-                    progress = 0.02;
+            if (segmentDurationMin > 0) {
+                if (rtMinutesToNext <= 0) {
+                    // Le bus est à l'arrêt ou vient d'arriver -> progress ~95%
+                    progress = 0.95;
+                    confidence = 'realtime-arriving';
+                } else if (rtMinutesToNext >= segmentDurationMin) {
+                    // Le bus n'a pas encore quitté le fromStop -> progress ~5%
+                    progress = 0.05;
+                    confidence = 'realtime-departing';
                 } else {
-                    // Bus vient juste de partir
-                    progress = Math.max(0.02, 1 - (ratio - 1));
+                    // Le bus est en route -> calculer proportionnellement
+                    // temps passé = durée segment - temps restant RT
+                    const tempsPasseMin = segmentDurationMin - rtMinutesToNext;
+                    progress = Math.max(0.05, Math.min(0.95, tempsPasseMin / segmentDurationMin));
+                    confidence = 'realtime-moving';
                 }
-                confidence = 'realtime-departing';
             } else {
-                // Le bus est en route -> calculer proportionnellement
-                // temps passé = durée segment - temps restant RT
-                const tempsPasseMin = segmentDurationMin - rtMinutesToNext;
-                progress = Math.max(0.05, Math.min(0.95, tempsPasseMin / segmentDurationMin));
-                confidence = 'realtime-moving';
+                // Durée segment non définie, utiliser une estimation simple
+                if (rtMinutesToNext <= 1) {
+                    progress = 0.9;
+                } else if (rtMinutesToNext <= 3) {
+                    progress = 0.6;
+                } else {
+                    progress = 0.3;
+                }
+                confidence = 'realtime-estimated';
             }
         }
         
@@ -303,7 +294,7 @@ export class BusPositionCalculator {
 
     /**
      * Calcule la position interpolée d'un bus entre deux arrêts
-     * V417: Si RT indique que le bus est trop loin, retourner null pour ne pas l'afficher
+     * V306: Amélioration avec validation de cohérence et indicateurs de confiance
      */
     calculatePosition(segment, routeId = null, tripId = null, routeShortName = null, bus = null) {
         if (!segment || !segment.fromStopInfo || !segment.toStopInfo) {
@@ -320,35 +311,27 @@ export class BusPositionCalculator {
             return null;
         }
 
-        // Pour les lignes A/B/C/D, utiliser la stratégie pivot RT
-        const short = String(routeShortName || '').toUpperCase();
-        if (this.LIGNES_RT.includes(short)) {
-            try {
-                const pivotPos = this.pivotBasedEstimate(segment, tripId, routeShortName, bus);
-                // Si pivotBasedEstimate retourne null, c'est que le bus ne devrait PAS
-                // être affiché dans ce segment (trop loin selon RT)
-                // On retourne null pour ne pas afficher le bus
-                if (pivotPos === null) {
-                    return null; // V417: Ne pas afficher le bus si RT dit qu'il est trop loin
-                }
-                if (pivotPos) {
-                    pivotPos.rtInfo = pivotPos.rtInfo || null;
-                    pivotPos.confidence = pivotPos.confidence || 'realtime-pivot';
-                    pivotPos.hasRealtime = pivotPos.hasRealtime || false;
-                    pivotPos.isEstimated = pivotPos.isEstimated !== false;
-                    return pivotPos;
-                }
-            } catch (e) {
-                console.warn('[BusPositionCalculator] pivotBasedEstimate failed', e);
-                // En cas d'erreur, on continue avec le fallback
+        // Tentative: stratégie pivot (GTFS-RT partiel) — interpolation entre pivots
+        try {
+            const pivotPos = this.pivotBasedEstimate(segment, tripId, routeShortName, bus);
+            if (pivotPos) {
+                // Enrichir avec rtInfo si disponible et renvoyer
+                pivotPos.rtInfo = pivotPos.rtInfo || null;
+                pivotPos.confidence = pivotPos.confidence || 'realtime-pivot';
+                pivotPos.hasRealtime = pivotPos.hasRealtime || false;
+                pivotPos.isEstimated = pivotPos.isEstimated !== false;
+                return pivotPos;
             }
+        } catch (e) {
+            // Ne pas faire échouer la position en cas d'erreur pivot
+            console.warn('[BusPositionCalculator] pivotBasedEstimate failed', e);
         }
 
-        // Fallback pour les autres lignes ou si pivotBasedEstimate a échoué
+        // V306: Récupérer le progress théorique (basé sur l'heure)
         let theoreticalProgress = segment.progress; // 0.0 à 1.0
         let finalProgress = theoreticalProgress;
         let rtInfo = null;
-        let positionConfidence = 'theoretical';
+        let positionConfidence = 'theoretical'; // 'realtime', 'adjusted', 'theoretical'
         
         // V306: Tenter d'ajuster avec le temps réel
         // V310: Virtual Time - prefer position computed at (now - delay) when delay is known

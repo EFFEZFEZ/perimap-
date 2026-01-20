@@ -5388,6 +5388,18 @@ function updateData() {
             const remainingSecondsTheoretical = (bus.segment.arrivalTime - currentSeconds);
             const delaySeconds = Math.max(0, rtRemainingSeconds - remainingSecondsTheoretical);
 
+            // V416: Enregistrer le retard dans la base Neon pour analyse
+            if (delaySeconds > 60 && bus.route) { // Seuil: > 1 minute
+                const delayData = {
+                    tripId: bus.tripId,
+                    delaySeconds: delaySeconds,
+                    isMajor: delaySeconds >= 300, // > 5 min = majeur
+                    stopId: bus.segment.toStopInfo?.stop_id,
+                    relevantStop: bus.segment.toStopInfo
+                };
+                delayManager.recordDelay(delayData, bus.route, currentSeconds);
+            }
+
             const MIN_DELAY_FOR_REWIND = 30; // seulement si retard > 30s
             if (delaySeconds > MIN_DELAY_FOR_REWIND) {
                 const effectiveTime = currentSeconds - delaySeconds;
@@ -5398,7 +5410,8 @@ function updateData() {
                 if (adjustedPosition) {
                     return Object.assign({}, bus, {
                         position: adjustedPosition,
-                        bearing: adjustedPosition.bearing || bus.bearing
+                        bearing: adjustedPosition.bearing || bus.bearing,
+                        delay: delaySeconds // V416: Ajouter le retard au bus pour référence
                     });
                 }
             }

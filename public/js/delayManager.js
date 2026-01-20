@@ -155,6 +155,7 @@ export class DelayManager {
 
     /**
      * Collecte les données de retard pour les statistiques
+     * ET envoie au serveur pour stockage persistant dans Neon
      * @param {Object} delayData - Données de retard
      * @param {Object} route - Route du bus
      * @param {number} currentSeconds - Heure actuelle
@@ -164,9 +165,10 @@ export class DelayManager {
 
         const { tripId, delaySeconds, isMajor, stopId } = delayData;
         const lineId = route.route_id;
+        const lineCode = route.route_short_name || lineId;
         const currentHour = Math.floor(currentSeconds / 3600);
 
-        // Ajouter à l'historique
+        // Ajouter à l'historique local
         this.delayHistory.push({
             tripId,
             lineId,
@@ -215,6 +217,82 @@ export class DelayManager {
         this.stats.delaysByStop[stopId].count++;
 
         this.stats.totalObservations++;
+
+        // NOUVEAU: Envoyer au serveur Neon pour stockage persistant
+        this.sendDelayToServer(delayData, route, currentSeconds);
+    }
+
+    /**
+     * Envoie un rapport de retard au serveur pour stockage dans Neon DB
+     * @param {Object} delayData - Données de retard
+     * @param {Object} route - Route du bus  
+     * @param {number} currentSeconds - Heure actuelle
+     */
+    async sendDelayToServer(delayData, route, currentSeconds) {
+        // Éviter d'envoyer trop de rapports (throttle: 1 par ligne par minute)
+        const lineCode = route.route_short_name || route.route_id;
+        const throttleKey = `delay_sent_${lineCode}`;
+        const lastSent = this._throttleCache?.get(throttleKey) || 0;
+        const now = Date.now();
+        
+        if (now - lastSent < 60000) { // 1 minute minimum entre envois pour la même ligne
+            return;
+        }
+
+        // Initialiser le cache de throttle si nécessaire
+        if (!this._throttleCache) {
+            this._throttleCache = new Map();
+        }
+        this._throttleCache.set(throttleKey, now);
+
+        // Formater l'heure prévue
+        const hours = Math.floor(currentSeconds / 3600) % 24;
+        const minutes = Math.floor((currentSeconds % 3600) / 60);
+        const scheduled = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+        // Calculer l'heure réelle estimée
+        const actualSeconds = currentSeconds + (delayData.delaySeconds || 0);
+        const actualHours = Math.floor(actualSeconds / 3600) % 24;
+        const actualMinutes = Math.floor((actualSeconds % 3600) / 60);
+        const actual = `${String(actualHours).padStart(2, '0')}:${String(actualMinutes).padStart(2, '0')}`;
+
+        // Récupérer le nom de l'arrêt
+        let stopName = null;
+        if (delayData.stopId && this.dataManager) {
+            const stop = this.dataManager.getStop(delayData.stopId);
+            stopName = stop?.stop_name || null;
+        }
+
+        const payload = {
+            line: lineCode,
+            stop: stopName,
+            stopId: delayData.stopId,
+            scheduled,
+            actual,
+            delay: Math.round(delayData.delaySeconds / 60), // Convertir en minutes
+            direction: delayData.relevantStop?.stop_headsign || null,
+            isRealtime: true,
+            tripId: delayData.tripId,
+            source: 'hawk'
+        };
+
+        try {
+            const response = await fetch('/api/record-delay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(`[DelayManager] ✅ Retard envoyé à Neon: Ligne ${lineCode}, ${payload.delay} min`);
+            } else {
+                console.warn(`[DelayManager] ⚠️ Erreur serveur: ${response.status}`);
+            }
+        } catch (error) {
+            // Silencieux en cas d'erreur réseau - pas critique
+            console.debug('[DelayManager] Envoi serveur échoué:', error.message);
+        }
     }
 
     /**
