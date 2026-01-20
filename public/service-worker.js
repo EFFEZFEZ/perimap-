@@ -1,11 +1,8 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v422 - Fix accueil desktop
+ * Service Worker v422 - API Batch + Performance optimisée
  * 
  * Changements v422:
- * - Accueil desktop: boutons sous header + icônes centrées
- * - Corrections vue carte PC (top-bar)
- * - Optimisations précédentes (API Batch, GPS, performance)
  * - Support API batch realtime (?stops=...)
  * - GPS positioning amélioré
  * - Affichage PC desktop corrigé
