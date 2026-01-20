@@ -1,14 +1,14 @@
 ﻿/**
  * busPositionCalculator.js
  * * Calcule les positions géographiques interpolées des bus entre deux arrêts
- * * OPTIMISÉ V415 (Refonte Positionnement RT):
- * * - V415: REFONTE COMPLÈTE de pivotBasedEstimate() 
- * *   → Utilise directement les données RT des pivots (pas les horaires statiques)
- * *   → Identifie le pivot PASSÉ (rt=0) et le pivot SUIVANT (rt>0)
- * *   → Interpole entre les deux en fonction du temps RT restant
- * * - V306: Validation de cohérence RT pour éviter positions aberrantes
- * * - V306: Indicateur de confiance (hasRealtime, isEstimated)
+ * * OPTIMISÉ V416 (Contrainte par Segment RT):
+ * * - V416: Nouvelle logique pivotBasedEstimate()
+ * *   → Utilise le segment GTFS statique (fromStop → toStop) comme base
+ * *   → Cherche les données RT pour le toStop (prochain arrêt)
+ * *   → Contraint le bus à être AVANT le toStop si RT > 0
+ * *   → Le bus ne peut JAMAIS être après un arrêt où il n'est pas arrivé
  * * - Anti-téléportation avec lissage pour mouvements fluides
+ * * - Indicateur de confiance (hasRealtime, isEstimated)
  */
 
 export class BusPositionCalculator {
@@ -120,182 +120,132 @@ export class BusPositionCalculator {
     /**
      * Pivot-based position estimation for partial GTFS-RT lines.
      * 
-     * LOGIQUE V415 (REFONTE COMPLÈTE):
-     * 1. On récupère les données RT pour CHAQUE pivot de la ligne
-     * 2. On identifie le dernier pivot PASSÉ (temps RT = 0 ou non listé)
-     * 3. On identifie le prochain pivot À VENIR (temps RT > 0)
-     * 4. On interpole entre ces deux pivots en fonction du temps restant RT
+     * LOGIQUE V416 (CONTRAINTE PAR LE SEGMENT):
      * 
-     * Cela évite d'utiliser les horaires statiques GTFS qui peuvent être décalés.
+     * Le problème: les données RT de Hawk donnent les prochains passages pour TOUS les bus
+     * d'une ligne à un arrêt, pas l'état d'un bus SPÉCIFIQUE.
      * 
-     * Returns a position object { lat, lon, progress, bearing, rtInfo, confidence, hasRealtime, isEstimated }
-     * or null when the pivot strategy is not applicable.
+     * Solution:
+     * 1. On utilise le segment GTFS statique (fromStop -> toStop) comme base
+     * 2. On cherche les données RT pour le toStop (prochain arrêt du segment)
+     * 3. Si RT disponible: on contraint le bus à être AVANT le toStop
+     *    - Si RT dit "0 min" -> le bus est proche du toStop (progress ~0.9)
+     *    - Si RT dit "X min" -> on calcule la position proportionnellement
+     * 4. Le bus ne peut JAMAIS être affiché APRÈS un arrêt où le RT dit qu'il n'est pas arrivé
+     * 
+     * Returns a position object or null.
      */
     pivotBasedEstimate(segment, tripId, routeShortName, bus = null) {
         if (!routeShortName) return null;
         const short = String(routeShortName).toUpperCase();
         if (!this.LIGNES_RT.includes(short)) return null;
         
-        // S'assurer que l'index pivot est construit
-        if (!this.PIVOT_STOP_IDS || !this.PIVOT_STOP_IDS[short]) {
-            try {
-                this.buildPivotStopIdIndex();
-            } catch (e) {
-                return null;
-            }
-        }
+        // On DOIT avoir un segment valide avec fromStop et toStop
+        if (!segment || !segment.fromStopInfo || !segment.toStopInfo) return null;
         
-        const pivotEntries = this.PIVOT_STOP_IDS[short];
-        if (!pivotEntries || pivotEntries.length < 2) return null;
+        const fromStop = segment.fromStopInfo;
+        const toStop = segment.toStopInfo;
         
-        // Récupérer les temps RT pour chaque pivot
-        const pivotsWithRT = [];
-        const nowMs = Date.now();
+        // Récupérer les données RT pour le prochain arrêt (toStop)
+        let rtMinutesToNext = null;
+        let hasRealtimeForNextStop = false;
         
-        for (const entry of pivotEntries) {
-            if (!entry.stop) continue;
+        if (this.realtimeManager && this.realtimeManager.cache) {
+            // Chercher la clé hawk pour le toStop
+            const toStopCode = toStop.stop_code || '';
+            const toStopName = toStop.stop_name || '';
             
-            const stop = entry.stop;
-            const stopId = entry.stop_id;
-            const stopCode = entry.stop_code || stop.stop_code;
-            
-            // Chercher les données RT dans le cache du realtimeManager
-            let rtMinutes = null;
-            let hasRealtimeData = false;
-            
-            if (this.realtimeManager) {
-                // Chercher la clé hawk correspondante dans le cache
-                const hawkKey = this.realtimeManager.cache ? 
-                    Array.from(this.realtimeManager.cache.keys()).find(k => 
-                        k.includes(stopCode || stopId) || k.includes(stop.stop_name?.replace(/\s+/g, ''))
-                    ) : null;
+            // Chercher dans le cache RT
+            for (const [hawkKey, cachedRT] of this.realtimeManager.cache.entries()) {
+                // Matcher par stop_code ou nom d'arrêt
+                const keyMatches = hawkKey.includes(toStopCode) || 
+                    (toStopName && hawkKey.toLowerCase().includes(toStopName.toLowerCase().replace(/\s+/g, '')));
                 
-                if (hawkKey) {
-                    const cachedRT = this.realtimeManager.cache.get(hawkKey);
-                    if (cachedRT && cachedRT.data && cachedRT.data.departures) {
-                        // Chercher un départ pour cette ligne
-                        const matchingDep = cachedRT.data.departures.find(d => 
-                            d.line?.toUpperCase() === short
-                        );
-                        
-                        if (matchingDep) {
-                            rtMinutes = this.realtimeManager.parseTemps(matchingDep.time);
-                            hasRealtimeData = matchingDep.realtime !== false && rtMinutes !== null && rtMinutes < 999;
+                if (keyMatches && cachedRT && cachedRT.data && cachedRT.data.departures) {
+                    // Chercher un départ pour cette ligne
+                    const matchingDep = cachedRT.data.departures.find(d => 
+                        d.line?.toUpperCase() === short
+                    );
+                    
+                    if (matchingDep) {
+                        const parsed = this.realtimeManager.parseTemps(matchingDep.time);
+                        if (parsed !== null && parsed < 999) {
+                            rtMinutesToNext = parsed;
+                            hasRealtimeForNextStop = matchingDep.realtime !== false;
+                            break;
                         }
                     }
                 }
             }
-            
-            pivotsWithRT.push({
-                stop,
-                stopId,
-                stopCode,
-                lat: parseFloat(stop.stop_lat),
-                lon: parseFloat(stop.stop_lon),
-                rtMinutes,  // null = pas de données, nombre = minutes jusqu'au passage
-                hasRealtimeData
-            });
         }
         
-        // Filtrer les pivots sans coordonnées valides
-        const validPivots = pivotsWithRT.filter(p => !isNaN(p.lat) && !isNaN(p.lon));
-        if (validPivots.length < 2) return null;
+        // Coordonnées de base
+        const fromLat = parseFloat(fromStop.stop_lat);
+        const fromLon = parseFloat(fromStop.stop_lon);
+        const toLat = parseFloat(toStop.stop_lat);
+        const toLon = parseFloat(toStop.stop_lon);
         
-        // LOGIQUE CLEF: Identifier position entre pivots
-        // - Pivot PASSÉ: le dernier où rtMinutes est 0 ou null (bus déjà passé)
-        // - Pivot SUIVANT: le premier où rtMinutes > 0
+        if ([fromLat, fromLon, toLat, toLon].some(v => isNaN(v))) return null;
         
-        let lastPassedPivot = null;
-        let nextPivot = null;
+        // Calculer le progress basé sur le temps RT
+        let progress = segment.progress || 0.5; // Par défaut: progress GTFS statique
+        let confidence = 'theoretical';
         
-        for (let i = 0; i < validPivots.length; i++) {
-            const p = validPivots[i];
+        if (hasRealtimeForNextStop && rtMinutesToNext !== null) {
+            // On a des données temps réel pour le prochain arrêt!
             
-            if (p.hasRealtimeData && p.rtMinutes !== null) {
-                if (p.rtMinutes <= 0) {
-                    // Le bus est à cet arrêt ou vient de le passer
-                    lastPassedPivot = p;
-                    nextPivot = validPivots[i + 1] || null;
-                } else if (p.rtMinutes > 0) {
-                    // Premier pivot où le bus n'est pas encore arrivé
-                    if (!nextPivot) {
-                        nextPivot = p;
-                        // Le pivot passé est le précédent
-                        lastPassedPivot = validPivots[i - 1] || null;
-                    }
-                    break;
+            // Durée estimée du segment (en minutes)
+            const segmentDurationSec = (segment.arrivalTime || 0) - (segment.departureTime || 0);
+            const segmentDurationMin = segmentDurationSec / 60;
+            
+            if (segmentDurationMin > 0) {
+                if (rtMinutesToNext <= 0) {
+                    // Le bus est à l'arrêt ou vient d'arriver -> progress ~95%
+                    progress = 0.95;
+                    confidence = 'realtime-arriving';
+                } else if (rtMinutesToNext >= segmentDurationMin) {
+                    // Le bus n'a pas encore quitté le fromStop -> progress ~5%
+                    progress = 0.05;
+                    confidence = 'realtime-departing';
+                } else {
+                    // Le bus est en route -> calculer proportionnellement
+                    // temps passé = durée segment - temps restant RT
+                    const tempsPasseMin = segmentDurationMin - rtMinutesToNext;
+                    progress = Math.max(0.05, Math.min(0.95, tempsPasseMin / segmentDurationMin));
+                    confidence = 'realtime-moving';
                 }
-            }
-        }
-        
-        // Si on n'a pas trouvé de configuration valide, essayer une approche basée sur le segment statique
-        if (!lastPassedPivot && !nextPivot) {
-            // Fallback: utiliser le segment statique pour deviner
-            if (segment && segment.fromStopInfo && segment.toStopInfo) {
-                const fromName = segment.fromStopInfo.stop_name?.toLowerCase() || '';
-                const toName = segment.toStopInfo.stop_name?.toLowerCase() || '';
-                
-                // Chercher des pivots correspondants
-                for (let i = 0; i < validPivots.length; i++) {
-                    const pivotName = validPivots[i].stop.stop_name?.toLowerCase() || '';
-                    if (pivotName.includes(fromName) || fromName.includes(pivotName)) {
-                        lastPassedPivot = validPivots[i];
-                    }
-                    if (pivotName.includes(toName) || toName.includes(pivotName)) {
-                        nextPivot = validPivots[i];
-                        break;
-                    }
+            } else {
+                // Durée segment non définie, utiliser une estimation simple
+                if (rtMinutesToNext <= 1) {
+                    progress = 0.9;
+                } else if (rtMinutesToNext <= 3) {
+                    progress = 0.6;
+                } else {
+                    progress = 0.3;
                 }
+                confidence = 'realtime-estimated';
             }
         }
         
-        // Si toujours pas de pivots, on ne peut pas estimer
-        if (!lastPassedPivot || !nextPivot) {
-            return null;
-        }
-        
-        // Calculer la progression entre les deux pivots
-        let progress = 0.5; // Par défaut au milieu
-        
-        if (nextPivot.hasRealtimeData && nextPivot.rtMinutes !== null && nextPivot.rtMinutes > 0) {
-            // Estimer le temps total entre les deux pivots (approximation: 3 min par arrêt en moyenne)
-            const pivotIndex1 = validPivots.indexOf(lastPassedPivot);
-            const pivotIndex2 = validPivots.indexOf(nextPivot);
-            const nbArretsBetween = Math.abs(pivotIndex2 - pivotIndex1);
-            const estimatedTotalMinutes = nbArretsBetween * 2.5; // ~2.5 min par segment en ville
-            
-            if (estimatedTotalMinutes > 0) {
-                // temps passé = temps total estimé - temps restant RT
-                const tempsPasseMinutes = Math.max(0, estimatedTotalMinutes - nextPivot.rtMinutes);
-                progress = Math.min(1, tempsPasseMinutes / estimatedTotalMinutes);
-            }
-        } else if (lastPassedPivot.hasRealtimeData && lastPassedPivot.rtMinutes === 0) {
-            // Le bus vient juste de quitter le pivot passé
-            progress = 0.1;
-        }
-        
-        // Clamper le progress
-        progress = Math.max(0, Math.min(1, progress));
+        // CONTRAINTE CRITIQUE: Le bus ne peut pas être après le toStop
+        // Si progress > 1, le ramener à 0.95
+        progress = Math.max(0, Math.min(0.95, progress));
         
         // Interpoler les coordonnées
-        const lat = lastPassedPivot.lat + (nextPivot.lat - lastPassedPivot.lat) * progress;
-        const lon = lastPassedPivot.lon + (nextPivot.lon - lastPassedPivot.lon) * progress;
+        const lat = fromLat + (toLat - fromLat) * progress;
+        const lon = fromLon + (toLon - fromLon) * progress;
         
         // Calculer le bearing
-        const bearing = this.calculateLinearBearing(
-            lastPassedPivot.lat, lastPassedPivot.lon,
-            nextPivot.lat, nextPivot.lon
-        );
+        const bearing = this.calculateLinearBearing(fromLat, fromLon, toLat, toLon);
         
-        // Anti-téléportation: si on a une position précédente, lisser le mouvement
+        // Anti-téléportation: lisser si grande distance avec position précédente
         if (bus && bus.position && bus.position.lat && bus.position.lon) {
             try {
                 const dist = this.dataManager.calculateDistance(bus.position.lat, bus.position.lon, lat, lon);
                 if (dist > this.SEUIL_TELEPORT) {
-                    // Grande distance: lisser pour éviter les sauts
                     const lastLat = parseFloat(bus.position.lat);
                     const lastLon = parseFloat(bus.position.lon);
-                    const blendFactor = Math.min(0.5, (this.SEUIL_TELEPORT / dist) * 0.5);
+                    const blendFactor = Math.min(0.4, 150 / dist);
                     const smoothLat = lastLat + (lat - lastLat) * blendFactor;
                     const smoothLon = lastLon + (lon - lastLon) * blendFactor;
                     
@@ -305,18 +255,17 @@ export class BusPositionCalculator {
                         progress,
                         bearing,
                         rtInfo: {
-                            fromPivot: lastPassedPivot.stop.stop_name,
-                            toPivot: nextPivot.stop.stop_name,
-                            rtMinutesToNext: nextPivot.rtMinutes,
+                            toStop: toStop.stop_name,
+                            rtMinutes: rtMinutesToNext,
                             smoothed: true
                         },
-                        confidence: 'realtime-pivot-smoothed',
-                        hasRealtime: true,
-                        isEstimated: false
+                        confidence: confidence + '-smoothed',
+                        hasRealtime: hasRealtimeForNextStop,
+                        isEstimated: !hasRealtimeForNextStop
                     };
                 }
             } catch (e) {
-                // Ignorer les erreurs de calcul de distance
+                // Ignorer
             }
         }
         
@@ -326,15 +275,16 @@ export class BusPositionCalculator {
             progress,
             bearing,
             rtInfo: {
-                fromPivot: lastPassedPivot.stop.stop_name,
-                toPivot: nextPivot.stop.stop_name,
-                rtMinutesToNext: nextPivot.rtMinutes
+                fromStop: fromStop.stop_name,
+                toStop: toStop.stop_name,
+                rtMinutes: rtMinutesToNext
             },
-            confidence: 'realtime-pivot',
-            hasRealtime: nextPivot.hasRealtimeData || lastPassedPivot.hasRealtimeData,
-            isEstimated: false
+            confidence,
+            hasRealtime: hasRealtimeForNextStop,
+            isEstimated: !hasRealtimeForNextStop
         };
     }
+
     /**
      * V305: Configure le realtimeManager (peut être défini après construction)
      */
