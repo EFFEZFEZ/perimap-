@@ -194,13 +194,13 @@ export class UIManager {
         fromInput.addEventListener('input', (e) => {
             handleAutocomplete(e.target.value, fromSuggestions, (placeId) => {
                 setFromPlaceId(placeId);
-            });
+            }, fromInput); // Passer l'input explicitement
         });
 
         toInput.addEventListener('input', (e) => {
             handleAutocomplete(e.target.value, toSuggestions, (placeId) => {
                 setToPlaceId(placeId);
-            });
+            }, toInput); // Passer l'input explicitement
         });
 
         if (whenBtn && popover) {

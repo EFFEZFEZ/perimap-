@@ -2671,10 +2671,15 @@ function prefillOtherPlanner(sourceFormName, sourceElements) {
 let autocompleteTimeout = null;
 const AUTOCOMPLETE_DEBOUNCE_MS = 150;
 
-async function handleAutocomplete(query, container, onSelect) {
+async function handleAutocomplete(query, container, onSelect, inputElement = null) {
     // Annuler la requête précédente
     if (autocompleteTimeout) {
         clearTimeout(autocompleteTimeout);
+    }
+    
+    // Stocker l'input associé au container (critique pour éviter le bug de remplacement)
+    if (inputElement) {
+        container._associatedInput = inputElement;
     }
     
     if (query.length < 2) {
@@ -2703,7 +2708,13 @@ function renderSuggestions(suggestions, container, onSelect) {
         return;
     }
 
+    // Utiliser l'input stocké (priorité) ou fallback sur la recherche DOM
     const resolveInputElement = () => {
+        // Priorité: input explicitement associé (évite le bug de remplacement)
+        if (container._associatedInput) {
+            return container._associatedInput;
+        }
+        // Fallback: chercher dans le DOM (peut échouer si container déplacé)
         if (!container) return null;
         let sibling = container.previousElementSibling;
         while (sibling) {
