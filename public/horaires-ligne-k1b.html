@@ -722,16 +722,23 @@
         function getStaticDepartures(stopIds) {
             const now = new Date();
             const seconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            // Récupère les prochains départs (toutes lignes)
-            const allDepartures = dataManager.getUpcomingDepartures(stopIds, seconds, now, 50);
+            // Récupère beaucoup de départs pour avoir assez après filtrage
+            const allDepartures = dataManager.getUpcomingDepartures(stopIds, seconds, now, 100);
             // Filtre uniquement les départs de CETTE ligne (LINE_CONFIG.routeId)
             const lineRouteId = LINE_CONFIG.routeId;
             const filtered = allDepartures.filter(dep => {
                 const trip = dataManager.tripsByTripId?.[dep.tripId];
                 return trip && trip.route_id === lineRouteId;
             });
-            // Limite à 8 résultats
-            return filtered.slice(0, 8).map(dep => ({ ...dep, isRealtime: false }));
+            // Retourne tous les départs filtrés (le tri par direction limitera ensuite)
+            return filtered.map(dep => ({ ...dep, isRealtime: false }));
+        }
+
+        function timeToSeconds(timeStr) {
+            if (!timeStr) return 0;
+            const parts = timeStr.split(':').map(Number);
+            if (parts.length < 2) return 0;
+            return parts[0] * 3600 + parts[1] * 60 + (parts[2] || 0);
         }
 
         function splitByDirection(departures) {
@@ -753,6 +760,11 @@
                 }
                 (toB.length <= toA.length ? toB : toA).push(dep);
             });
+
+            // Trier par heure de départ (departureSeconds déjà calculé par getUpcomingDepartures)
+            const sortByTime = (a, b) => (a.departureSeconds || timeToSeconds(a.time)) - (b.departureSeconds || timeToSeconds(b.time));
+            toB.sort(sortByTime);
+            toA.sort(sortByTime);
 
             return { toB: toB.slice(0, 10), toA: toA.slice(0, 10) };
         }
