@@ -1,12 +1,12 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v410 - SEO improvements (BusRoute Schema.org + FAQPage)
+ * Service Worker v411 - Landing pages GTFS/RT integration (PapaParse fix)
  * 
  * AUCUNE restriction, AUCUN nettoyage agressif
  * Network-first pour tout, cache en fallback
  */
 
-const CACHE_VERSION = 'v410';
+const CACHE_VERSION = 'v411';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher (minimum vital)
