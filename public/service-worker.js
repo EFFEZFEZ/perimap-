@@ -1,8 +1,11 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v421 - API Batch + Performance optimisée
+ * Service Worker v422 - Fix accueil desktop
  * 
- * Changements v421:
+ * Changements v422:
+ * - Accueil desktop: boutons sous header + icônes centrées
+ * - Corrections vue carte PC (top-bar)
+ * - Optimisations précédentes (API Batch, GPS, performance)
  * - Support API batch realtime (?stops=...)
  * - GPS positioning amélioré
  * - Affichage PC desktop corrigé
@@ -14,7 +17,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v421';
+const CACHE_VERSION = 'v422';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

@@ -2937,6 +2937,7 @@ body.dark-theme .stats-section .stat-label {
     justify-content: center;
     gap: 0.75rem;
     overflow: hidden;
+    text-align: center;
 }
 .nav-button-condensed::before {
     content: '';
@@ -2963,6 +2964,8 @@ body.dark-theme .stats-section .stat-label {
     width: 28px;
     height: 28px;
     transition: transform var(--transition-normal);
+    display: block;
+    margin: 0 auto;
 }
 .nav-button-condensed:hover svg {
     transform: scale(1.15);
@@ -9115,11 +9118,10 @@ body.dark-theme .stat-item {
         min-height: calc(100vh - 64px);
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
-        padding: 4rem 2rem;
+        padding: 1.5rem 2rem 3rem;
         margin-bottom: 0;
-        padding-bottom: 6rem;
     }
     
     .hero-headline {
@@ -9134,6 +9136,10 @@ body.dark-theme .stat-item {
     
     .hero-subtitle {
         font-size: 1.35rem;
+    }
+
+    .main-nav-buttons-condensed {
+        margin-top: 1rem;
     }
 }
 
