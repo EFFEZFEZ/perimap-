@@ -2691,6 +2691,30 @@ body.dark-theme .express-chip {
     transform: translateY(-1px);
 }
 
+/* Chips personnalisées basées sur l'historique utilisateur */
+.express-chip.personalized {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(0, 200, 255, 0.12) 100%);
+    border-color: rgba(34, 197, 94, 0.35);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1);
+}
+
+body.dark-theme .express-chip.personalized {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(0, 200, 255, 0.15) 100%);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.hall-express-chips[data-personalized="true"]::before {
+    content: '⭐';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
 /* Desktop: harmoniser la largeur des 2 bandeaux */
 @media (min-width: 1024px) {
     .hall-line-shortcuts,

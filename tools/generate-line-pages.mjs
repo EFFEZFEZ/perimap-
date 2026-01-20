@@ -496,6 +496,10 @@ function generatePage({ template, lineCode, pdfFilename }) {
   }
   // LINE_CONFIG color
   html = html.replace(/color:\s*'#[0-9a-fA-F]{6}'/g, `color: '${color}'`);
+  
+  // User preferences: track the line visit
+  html = html.replace(/userPreferences\.trackLineClick\('A'\)/g, `userPreferences.trackLineClick('${display}')`);
+  
   // Ensure LINE_CONFIG closes correctly when stops injected above
   html = html.replace(/\}\s*;\s*\n\s*\n\s*let map;/m, `};\n\n        let map;`);
 

@@ -29,6 +29,7 @@ import { createGeolocationManager } from './geolocationManager.js';
 import { loadBaseLayout } from './viewLoader.js';
 import { realtimeManager } from './realtimeManager.js';
 import { analyticsManager } from './analyticsManager.js';
+import { userPreferences } from './userPreferences.js';
 
 // === Imports des modules extraits (V221) ===
 import { 
@@ -318,39 +319,61 @@ async function hydrateHallExpressChips() {
     const container = document.querySelector('.hall-express-chips');
     if (!container) return;
 
-    const fallbackLines = ['E1', 'E2', 'K5', 'K6', 'N', 'N1', 'R1', 'R12'];
-
+    const defaultLines = ['E1', 'E2', 'K5', 'K6', 'N', 'N1', 'R1', 'R12'];
     const normalizeLine = (value) => String(value || '').trim().toUpperCase();
     const lineToSlug = (line) => normalizeLine(line).toLowerCase();
 
-    let lines = fallbackLines;
-    try {
-        const res = await fetch('/data/express-lines.json', { cache: 'no-store' });
-        if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data)) {
-                const parsed = data
-                    .map(normalizeLine)
-                    .filter(Boolean);
-                if (parsed.length) lines = parsed;
-            }
+    // Vérifier si l'utilisateur a des préférences personnalisées
+    let lines = defaultLines;
+    let isPersonalized = false;
+    
+    if (userPreferences.hasPersonalizedData()) {
+        const popularLines = userPreferences.getPopularLines(8);
+        if (popularLines.length >= 3) {
+            lines = popularLines;
+            isPersonalized = true;
         }
-    } catch (e) {
-        // ignore: keep fallback
+    }
+
+    // Fallback: charger les lignes par défaut si pas de personnalisation
+    if (!isPersonalized) {
+        try {
+            const res = await fetch('/data/express-lines.json', { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const parsed = data.map(normalizeLine).filter(Boolean);
+                    if (parsed.length) lines = parsed;
+                }
+            }
+        } catch (e) { /* ignore */ }
     }
 
     const frag = document.createDocumentFragment();
     lines.forEach((line) => {
         const a = document.createElement('a');
         a.className = 'express-chip';
+        if (isPersonalized) a.classList.add('personalized');
         a.href = `/horaires-ligne-${lineToSlug(line)}.html`;
         a.textContent = line;
         a.setAttribute('aria-label', `Horaires ligne ${line}`);
+        
+        // Tracker le clic pour améliorer les recommandations
+        a.addEventListener('click', () => {
+            userPreferences.trackLineClick(line);
+        }, { passive: true });
+        
         frag.appendChild(a);
     });
 
     container.innerHTML = '';
     container.appendChild(frag);
+    
+    // Ajouter un indicateur si personnalisé
+    if (isPersonalized) {
+        container.setAttribute('data-personalized', 'true');
+        container.setAttribute('title', 'Lignes basées sur votre historique');
+    }
 }
 
 // Service Worker est enregistré dans app.js
