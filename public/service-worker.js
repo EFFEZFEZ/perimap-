@@ -1,6 +1,12 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v414 - Performance optimisée + cache intelligent
+ * Service Worker v421 - API Batch + Performance optimisée
+ * 
+ * Changements v421:
+ * - Support API batch realtime (?stops=...)
+ * - GPS positioning amélioré
+ * - Affichage PC desktop corrigé
+ * - Performance CSS optimisée (GPU acceleration)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -8,7 +14,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v419';
+const CACHE_VERSION = 'v421';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

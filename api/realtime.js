@@ -110,6 +110,98 @@ async function sleep(ms) {
 }
 
 // ============================================
+// V421: HANDLER BATCH POUR PLUSIEURS ARRÊTS
+// ============================================
+
+async function handleBatchRequest(req, res, stopsParam) {
+    // Parser les arrêts (séparés par virgule)
+    const stopKeys = String(stopsParam)
+        .split(',')
+        .map(s => s.trim().replace(/\D/g, ''))
+        .filter(s => s.length >= 2)
+        .slice(0, 20); // Limite à 20 arrêts max par sécurité
+    
+    if (stopKeys.length === 0) {
+        return res.status(400).json({ 
+            error: 'No valid stop IDs provided',
+            received: stopsParam
+        });
+    }
+
+    console.log(`[Realtime] Batch request for ${stopKeys.length} stops`);
+
+    const results = [];
+    const errors = [];
+    let cachedCount = 0;
+
+    // Traiter chaque arrêt avec délai anti-pattern
+    for (let i = 0; i < stopKeys.length; i++) {
+        const stopKey = stopKeys[i];
+        const cacheKey = `rt_${stopKey}`;
+        
+        try {
+            // Vérifier cache d'abord
+            const cached = getCached(cacheKey);
+            if (cached) {
+                results.push({
+                    stop: stopKey,
+                    ...cached,
+                    cached: true,
+                    cacheAge: Date.now() - cache.get(cacheKey).timestamp
+                });
+                cachedCount++;
+                continue;
+            }
+
+            // Jitter entre chaque requête (50-150ms)
+            if (i > 0) {
+                await sleep(randomJitter(50, 150));
+            }
+
+            // Scraper Hawk
+            const departures = await scrapeHawk(stopKey);
+            
+            const result = {
+                stop: stopKey,
+                timestamp: new Date().toISOString(),
+                departures,
+                count: departures.length,
+                source: 'hawk.perimouv.fr',
+                cached: false
+            };
+
+            // Mettre en cache
+            setCache(cacheKey, result);
+            results.push(result);
+
+        } catch (error) {
+            console.error(`[Realtime] Error for stop ${stopKey}:`, error.message);
+            errors.push({
+                stop: stopKey,
+                error: error.message
+            });
+        }
+    }
+
+    // Réponse agrégée
+    const response = {
+        batch: true,
+        requested: stopKeys.length,
+        successful: results.length,
+        failed: errors.length,
+        cached: cachedCount,
+        timestamp: new Date().toISOString(),
+        results,
+        errors: errors.length > 0 ? errors : undefined
+    };
+
+    // Cache HTTP
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
+    
+    return res.status(200).json(response);
+}
+
+// ============================================
 // SCRAPING AVEC FETCH
 // ============================================
 
@@ -228,12 +320,22 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { stop } = req.query;
+    // V421: Support multi-stops - passage de plusieurs arrêts en une requête
+    const { stop, stops } = req.query;
     
+    // Mode batch : plusieurs arrêts
+    if (stops) {
+        return handleBatchRequest(req, res, stops);
+    }
+    
+    // Mode single : un seul arrêt (legacy)
     if (!stop) {
         return res.status(400).json({ 
             error: 'Missing stop parameter',
-            usage: '/api/realtime?stop=77029'
+            usage: {
+                single: '/api/realtime?stop=77029',
+                batch: '/api/realtime?stops=77029,77030,77031'
+            }
         });
     }
 

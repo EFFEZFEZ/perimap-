@@ -42,16 +42,17 @@ export class RealtimeManager {
             preloadFailures: 0
         };
 
-        // V3: Configuration du préchargement PRIORITAIRE
+        // V421: Configuration optimisée pour discrétion maximale
         this.preloadConfig = {
-            enabled: true,                    // Activer le préchargement prioritaire
-            autoRefreshInterval: 60 * 1000,   // Rafraîchir les prioritaires toutes les 60s (sync avec Hawk)
-            delayBetweenRequests: 150,        // 150ms entre requêtes pour éviter surcharge
-            maxConcurrentRequests: 5          // Max 5 requêtes simultanées
+            enabled: true,
+            autoRefreshInterval: 60 * 1000,   // 60s - sync avec Hawk
+            delayBetweenRequests: 200,        // V421: 200ms → plus naturel, moins de burst
+            maxConcurrentRequests: 3,         // V421: 3 → spread plus long, moins détectable
+            randomJitter: 50                  // V421: +/- 50ms aléatoire entre requêtes
         };
 
         this.isPreloading = false;
-        this.autoRefreshTimer = null; // V3: Timer pour auto-refresh
+        this.autoRefreshTimer = null;
 
         // Sleep mode: permet de couper l'auto-refresh (économie API) jusqu'à une date donnée
         this.sleepUntilMs = 0;
@@ -86,12 +87,14 @@ export class RealtimeManager {
     }
 
     /**
-     * V3: Précharge UNIQUEMENT les arrêts prioritaires (les plus fréquentés)
+     * V421: Précharge UNIQUEMENT les arrêts prioritaires (les plus fréquentés) EN 1 SEUL APPEL BATCH
      * Liste définie dans PRIORITY_STOPS: Taillefer, Maurois, PEM, Gare SNCF, Tourny, Médiathèque, Boulazac CC
      * 
-     * Avantages:
-     * - Charge ~15 hawkKeys au lieu de centaines
-     * - Données disponibles instantanément pour les arrêts populaires
+     * Avantages V421 BATCH:
+     * - 1 seul appel API au lieu de 15 individuels
+     * - Moins détectable (pattern unique vs multiples requêtes espacées)
+     * - Plus économique (1 round-trip HTTP au lieu de 15)
+     * - Jitter géré côté serveur pour stealth
      * - Auto-refresh toutes les 45s pour maintenir les données fraîches
      */
     async preloadPriorityStops() {
@@ -106,42 +109,48 @@ export class RealtimeManager {
         this.isPreloading = true;
         const priorityHawkKeys = getPriorityHawkKeys();
         
-        console.log(`[Realtime] 🚀 Préchargement des ${priorityHawkKeys.length} arrêts prioritaires...`);
+        console.log(`[Realtime] 🚀 Préchargement BATCH des ${priorityHawkKeys.length} arrêts prioritaires...`);
         console.log('[Realtime] Arrêts prioritaires:', PRIORITY_STOPS.map(s => s.name).join(', '));
 
         let successCount = 0;
         let failureCount = 0;
 
         try {
-            // Charger par petits lots pour éviter surcharge
-            const batchSize = this.preloadConfig.maxConcurrentRequests;
+            // V421: UN SEUL APPEL BATCH
+            const stopsParam = priorityHawkKeys.join(',');
+            const response = await fetch(`/api/realtime?stops=${encodeURIComponent(stopsParam)}`);
             
-            for (let i = 0; i < priorityHawkKeys.length; i += batchSize) {
-                const batch = priorityHawkKeys.slice(i, i + batchSize);
-                
-                const promises = batch.map((hawkKey, index) => {
-                    return new Promise(resolve => {
-                        setTimeout(async () => {
-                            try {
-                                await this.fetchRealtimeByHawkKey(hawkKey);
-                                successCount++;
-                                resolve({ success: true, hawkKey });
-                            } catch (error) {
-                                failureCount++;
-                                resolve({ success: false, hawkKey, error: error.message });
-                            }
-                        }, index * this.preloadConfig.delayBetweenRequests);
-                    });
-                });
-
-                await Promise.all(promises);
+            if (!response.ok) {
+                throw new Error(`Batch request failed: ${response.status}`);
             }
 
-            this.stats.preloadRequests += priorityHawkKeys.length;
+            const batchData = await response.json();
+            
+            if (batchData.batch && Array.isArray(batchData.results)) {
+                // Traiter chaque arrêt du batch
+                for (const result of batchData.results) {
+                    const cacheKey = `hawk_${result.stop}`;
+                    
+                    this.cache.set(cacheKey, {
+                        data: result,
+                        fetchedAt: Date.now()
+                    });
+                    
+                    successCount++;
+                }
+                
+                failureCount = batchData.failed || 0;
+                
+                console.log(`[Realtime] ✅ Batch terminé: ${successCount}/${priorityHawkKeys.length} succès, ${batchData.cached} du cache`);
+            } else {
+                throw new Error('Invalid batch response format');
+            }
+
+            this.stats.preloadRequests += 1; // 1 seul appel batch
             this.stats.preloadSuccesses += successCount;
             this.stats.preloadFailures += failureCount;
 
-            console.log(`[Realtime] ✅ Préchargement prioritaire terminé: ${successCount}/${priorityHawkKeys.length} succès`);
+            console.log(`[Realtime] ✅ Préchargement prioritaire BATCH terminé: ${successCount}/${priorityHawkKeys.length} succès`);
             
             // V3: Démarrer l'auto-refresh des arrêts prioritaires
             this.startAutoRefresh();
@@ -319,6 +328,9 @@ export class RealtimeManager {
      * V3: Démarre l'auto-refresh des arrêts prioritaires
      * Rafraîchit les données toutes les 45 secondes
      */
+    /**
+     * V421: Auto-refresh optimisé avec BATCH API
+     */
     startAutoRefresh() {
         if (this.isSleeping()) {
             return;
@@ -327,33 +339,45 @@ export class RealtimeManager {
             clearInterval(this.autoRefreshTimer);
         }
 
-        console.log(`[Realtime] ⏰ Auto-refresh activé (intervalle: ${this.preloadConfig.autoRefreshInterval / 1000}s)`);
+        console.log(`[Realtime] ⏰ Auto-refresh BATCH activé (intervalle: ${this.preloadConfig.autoRefreshInterval / 1000}s)`);
 
         this.autoRefreshTimer = setInterval(async () => {
             if (this.isPreloading) return; // Ne pas interférer avec un préchargement en cours
             
             const priorityHawkKeys = getPriorityHawkKeys();
-            console.log(`[Realtime] 🔄 Auto-refresh des ${priorityHawkKeys.length} arrêts prioritaires...`);
+            console.log(`[Realtime] 🔄 Auto-refresh BATCH des ${priorityHawkKeys.length} arrêts prioritaires...`);
             
-            let refreshCount = 0;
-            
-            for (const hawkKey of priorityHawkKeys) {
-                try {
-                    // Invalider le cache pour forcer le refresh
+            try {
+                // V421: Invalider le cache et faire 1 appel batch
+                for (const hawkKey of priorityHawkKeys) {
                     const cacheKey = `hawk_${hawkKey}`;
                     this.cache.delete(cacheKey);
-                    
-                    await this.fetchRealtimeByHawkKey(hawkKey);
-                    refreshCount++;
-                    
-                    // Petit délai entre les requêtes
-                    await new Promise(r => setTimeout(r, 100));
-                } catch (error) {
-                    // Ignorer les erreurs silencieusement pour l'auto-refresh
                 }
+                
+                // 1 appel batch pour tous les arrêts
+                const stopsParam = priorityHawkKeys.join(',');
+                const response = await fetch(`/api/realtime?stops=${encodeURIComponent(stopsParam)}`);
+                
+                if (response.ok) {
+                    const batchData = await response.json();
+                    let refreshCount = 0;
+                    
+                    if (batchData.batch && Array.isArray(batchData.results)) {
+                        for (const result of batchData.results) {
+                            const cacheKey = `hawk_${result.stop}`;
+                            this.cache.set(cacheKey, {
+                                data: result,
+                                fetchedAt: Date.now()
+                            });
+                            refreshCount++;
+                        }
+                    }
+                    
+                    console.log(`[Realtime] ✅ Auto-refresh BATCH: ${refreshCount}/${priorityHawkKeys.length} mis à jour`);
+                }
+            } catch (error) {
+                console.warn('[Realtime] Erreur auto-refresh batch:', error.message);
             }
-            
-            console.log(`[Realtime] ✅ Auto-refresh: ${refreshCount}/${priorityHawkKeys.length} mis à jour`);
             
         }, this.preloadConfig.autoRefreshInterval);
     }
