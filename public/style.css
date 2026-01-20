@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v433)
+ * PÉRIMAP - CSS PRINCIPAL (v434)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -3391,6 +3391,10 @@ body.dark-theme .app-back-btn svg {
     max-height: 2000px; 
     padding: 1.5rem;
     opacity: 1;
+    /* V434: Uniformiser la largeur avec le hero */
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #fiche-horaire-container {
@@ -3579,7 +3583,11 @@ body.dark-theme .app-back-btn svg {
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: var(--bg-main); 
+    background: var(--bg-main);
+    /* V434: Uniformiser la largeur avec le hero */
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
 }
 .accordion-group details {
     border-bottom: 1px solid var(--border);
@@ -8046,6 +8054,10 @@ body.dark-theme .route-next-departures {
         overflow: visible;
         max-height: none;
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
+        /* V434: Uniformiser la largeur avec le hero */
+        max-width: var(--container-hero);
+        margin-left: auto;
+        margin-right: auto;
     }
     
     /* V353: Header compact pour mobile */

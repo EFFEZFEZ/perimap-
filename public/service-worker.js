@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v433 - Refonte graphique vue itinéraire minimaliste
+ * Service Worker v434 - Uniformisation largeurs conteneurs
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -8,7 +8,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v433';
+const CACHE_VERSION = 'v434';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
