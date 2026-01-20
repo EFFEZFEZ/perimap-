@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horaires Ligne - Périmap</title>
+    <meta name="description" content="Horaires et temps réel de la ligne Péribus">
+    <meta name="theme-color" content="#0f141e">
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pm-green: #22c55e;
+            --pm-green-dark: #16a34a;
+            --pm-bg: #0f141e;
+            --pm-card: #1a1f2e;
+            --pm-border: #2a3040;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--pm-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+        
+        body:not(.dark-theme) {
+            --pm-bg: #f8fafc;
+            --pm-card: #ffffff;
+            --pm-border: #e2e8f0;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+        }
+
+        /* Header */
+        .header {
+            background: var(--pm-card);
+            border-bottom: 1px solid var(--pm-border);
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        
+        .logo img {
+            height: 32px;
+            width: auto;
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--pm-green);
+        }
+
+        /* Main content */
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Line Header */
+        #line-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .line-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .line-info h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .line-direction {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Map */
+        .map-container {
+            background: var(--pm-card);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--pm-border);
+        }
+        
+        #line-map {
+            height: 250px;
+            width: 100%;
+        }
+
+        /* Departures Card */
+        .departures-card {
+            background: var(--pm-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--pm-border);
+        }
+        
+        .departures-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .departures-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .departures-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--pm-green);
+        }
+        
+        #realtime-badge {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--pm-green);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--pm-green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Stop selector */
+        .stop-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        #stop-select {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--pm-border);
+            background: var(--pm-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        #locate-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 1px solid var(--pm-border);
+            background: var(--pm-bg);
+            color: var(--pm-green);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+        
+        #locate-btn:hover {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--pm-green);
+        }
+        
+        #locate-btn.loading svg {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Departures content */
+        #departures-content {
+            min-height: 100px;
+        }
+        
+        .departures-placeholder {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 24px;
+            font-style: italic;
+        }
+        
+        .direction-block {
+            margin-bottom: 16px;
+        }
+        
+        .direction-block:last-child {
+            margin-bottom: 0;
+        }
+        
+        .direction-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+        
+        .direction-header .arrow {
+            color: var(--pm-green);
+        }
+        
+        .direction-times {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .time-badge {
+            padding: 8px 14px;
+            background: var(--pm-bg);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            border: 1px solid var(--pm-border);
+        }
+        
+        .time-badge.realtime {
+            border-color: var(--pm-green);
+            color: var(--pm-green);
+        }
+        
+        .no-departures {
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 8px;
+        }
+
+        /* FAQ Card */
+        .faq-card {
+            background: var(--pm-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--pm-border);
+        }
+        
+        .faq-card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+        }
+        
+        .faq-card h2 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--pm-green);
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid var(--pm-border);
+            padding: 12px 0;
+        }
+        
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-item summary {
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-primary);
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-item summary::after {
+            content: '+';
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+        
+        .faq-item[open] summary::after {
+            content: '−';
+        }
+        
+        .faq-answer {
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--pm-card);
+            border: 1px solid var(--pm-border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--pm-green);
+            background: rgba(34, 197, 94, 0.05);
+        }
+        
+        .action-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--pm-green);
+            flex-shrink: 0;
+        }
+
+        /* Error */
+        .error-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .error-message h2 {
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+        
+        .error-message a {
+            color: var(--pm-green);
+        }
+
+        /* Mobile menu (simplified) */
+        .mobile-menu.hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .main {
+                padding: 32px 24px;
+            }
+            
+            #line-map {
+                height: 300px;
+            }
+            
+            .actions {
+                flex-direction: row;
+            }
+            
+            .action-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo">
+                <img src="/icons/icon-192x192.png" alt="Périmap">
+                <span class="logo-text">Périmap</span>
+            </a>
+            <div class="header-actions">
+                <button id="theme-toggle-btn" class="icon-btn" aria-label="Changer de thème">
+                    <span id="theme-toggle-icon">☀️</span>
+                </button>
+                <button id="mobile-menu-toggle" class="icon-btn" aria-label="Menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu hidden">
+        <nav>
+            <a href="/">Accueil</a>
+            <a href="/horaires.html">Toutes les lignes</a>
+            <a href="/carte.html">Carte</a>
+        </nav>
+    </div>
+
+    <main class="main" id="line-content">
+        <div id="line-header">
+            <!-- Rempli dynamiquement -->
+            <div class="line-badge" style="background: #666">?</div>
+            <div class="line-info">
+                <h1>Chargement...</h1>
+                <p class="line-direction">Veuillez patienter</p>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="line-map"></div>
+        </div>
+
+        <div class="departures-card">
+            <div class="departures-header">
+                <div class="departures-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12,6 12,12 16,14"/>
+                    </svg>
+                    <span>Prochains passages</span>
+                </div>
+                <div id="realtime-badge">
+                    <span class="pulse-dot"></span>
+                    <span>Temps réel</span>
+                </div>
+            </div>
+
+            <div class="stop-selector">
+                <select id="stop-select">
+                    <option value="">Sélectionner un arrêt</option>
+                </select>
+                <button id="locate-btn" aria-label="Me localiser">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="departures-content">
+                <div class="departures-placeholder">Sélectionnez un arrêt pour afficher les prochains passages</div>
+            </div>
+        </div>
+
+        <div class="faq-card">
+            <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Questions fréquentes</span>
+            </h2>
+            <div id="faq-container">
+                <!-- Rempli dynamiquement -->
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/#carte" id="map-link" class="action-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Voir sur la carte interactive</span>
+            </a>
+            <a href="#" id="pdf-link" class="action-btn" target="_blank" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span>Télécharger la fiche horaires PDF</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script type="module">
+        import { LinePageLoader, initLinePageFromUrl } from '/js/linePageLoader.js';
+        
+        // Récupérer l'ID de ligne depuis l'URL
+        // Supporte: /horaires/a, /horaires/ligne/a, /horaires.html?ligne=a
+        const pathMatch = window.location.pathname.match(/\/horaires(?:\/ligne)?\/([a-z0-9]+)/i);
+        const urlParams = new URLSearchParams(window.location.search);
+        const lineId = pathMatch?.[1] || urlParams.get('ligne');
+        
+        if (lineId) {
+            const loader = new LinePageLoader();
+            document.addEventListener('DOMContentLoaded', () => {
+                loader.init(lineId);
+            });
+        } else {
+            // Pas d'ID de ligne, rediriger vers la liste
+            window.location.href = '/horaires.html';
+        }
+    </script>
+</body>
+</html>

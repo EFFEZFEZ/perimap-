@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v426 - Neon DB integration + GPS snap-to-route
+ * Service Worker v427 - Dynamic line pages + modules extraction
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -8,7 +8,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v426';
+const CACHE_VERSION = 'v427';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -20,7 +20,10 @@ const PRECACHE = [
   '/js/main.js',
   '/js/dataManager.js',
   '/js/userPreferences.js',
-  '/js/config/neonConfig.js'
+  '/js/config/neonConfig.js',
+  '/js/linePageLoader.js',
+  '/data/lines-config.json',
+  '/horaires/ligne.html'
 ];
 
 // Patterns pour stratégies de cache

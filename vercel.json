@@ -38,6 +38,14 @@
   ],
   "rewrites": [
     {
+      "source": "/horaires/ligne/:lineId",
+      "destination": "/horaires/ligne.html?ligne=:lineId"
+    },
+    {
+      "source": "/horaires/:lineId",
+      "destination": "/horaires/ligne.html?ligne=:lineId"
+    },
+    {
       "source": "/carte",
       "destination": "/index.html"
     },
