@@ -3397,6 +3397,14 @@ body.dark-theme .app-back-btn svg {
     margin-right: auto;
 }
 
+/* V434: Styles spécifiques pour chaque card */
+#horaires.view-active,
+#info-trafic.view-active {
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #fiche-horaire-container {
     margin-bottom: 3rem; /* Espace pour ne pas cacher le footer */
 }
