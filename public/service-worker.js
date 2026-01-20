@@ -1,12 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v422 - API Batch + Performance optimisée
- * 
- * Changements v422:
- * - Support API batch realtime (?stops=...)
- * - GPS positioning amélioré
- * - Affichage PC desktop corrigé
- * - Performance CSS optimisée (GPU acceleration)
+ * Service Worker v422 - Performance optimisée + cache intelligent
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
