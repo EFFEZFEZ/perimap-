@@ -1,7 +1,8 @@
-import { sql } from '@vercel/postgres';
+import { neon } from '@neondatabase/serverless';
 
 /**
  * API pour enregistrer les données de retard dans Neon DB
+ * Utilise le driver @neondatabase/serverless (recommandé par Neon)
  * 
  * POST /api/record-delay
  * Body: {
@@ -30,6 +31,19 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Connexion à Neon - essayer DATABASE_URL d'abord, puis POSTGRES_URL
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  
+  if (!connectionString) {
+    console.error('[record-delay] ❌ Pas de connection string trouvée');
+    return res.status(500).json({ 
+      error: 'Database not configured',
+      message: 'DATABASE_URL ou POSTGRES_URL non configuré'
+    });
+  }
+
+  const sql = neon(connectionString);
 
   try {
     const { 
@@ -85,7 +99,7 @@ export default async function handler(req, res) {
     const dayOfWeek = now.getDay(); // 0 = Dimanche
     const hourOfDay = now.getHours();
 
-    // Insérer le rapport
+    // Insérer le rapport avec le driver Neon
     const result = await sql`
       INSERT INTO delay_reports (
         line_code, 

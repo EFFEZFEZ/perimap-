@@ -30,6 +30,7 @@
     "vitest": "^2.0.0"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@vercel/postgres": "^0.10.0"
   }
 }
