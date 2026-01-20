@@ -5153,7 +5153,7 @@ body.dark-theme .map-theme-toggle:hover {
 .btn:hover { background: var(--bg-secondary); border-color: var(--secondary); transform: translateY(-1px); }
 .btn:active { transform: scale(0.97) translateY(0); }
 .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
-.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: none; }
 .btn-primary::after { background: rgba(255, 255, 255, 0.2); }
 .btn-primary svg { margin-right: 0.25rem; }
 
@@ -8126,6 +8126,11 @@ body.dark-theme .route-next-departures {
         margin-top: 0;
     }
     
+    /* V442: Cacher le message de recherche en cours */
+    .results-message {
+        display: none !important;
+    }
+    
     .results-list {
         flex: none;
         overflow: visible;
@@ -8190,24 +8195,18 @@ body.dark-theme .route-next-departures {
     #itinerary-edit-panel {
         background: var(--bg-main);
         border-radius: 0;
-        padding: 1.5rem 1.25rem;
+        padding: 2rem 1.25rem 1.5rem;
         border: none;
         border-bottom: 1px solid var(--border);
         box-shadow: none;
-        margin: 0 auto;
+        margin: 0;
         position: relative;
         overflow: visible;
-        max-width: 500px;
+        width: 100%;
     }
     
     #itinerary-edit-panel::before {
         display: none;
-    }
-    
-    @media (max-width: 768px) {
-        #itinerary-edit-panel {
-            max-width: 100%;
-        }
     }
     
     /* V441: Conteneur inputs style IDFM - vertical avec labels */
@@ -8422,7 +8421,7 @@ body.dark-theme .route-next-departures {
     .btn-search-route:hover {
         background: #16a34a;
         transform: none;
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        box-shadow: none;
     }
     
     .btn-search-route:active {
