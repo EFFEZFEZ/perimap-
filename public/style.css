@@ -7011,6 +7011,7 @@ body.dark-theme .real-select option {
     cursor: pointer;
     padding-right: 2.5rem;
     /* Comportement par défaut, pas de scroll ni overflow ni max-height */
+}
 #results-side-panel {
     width: 380px;
     flex-shrink: 0;
