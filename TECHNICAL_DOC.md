@@ -1,6 +1,6 @@
 # 📋 DOCUMENTATION TECHNIQUE INTERNE - PériMap
 
-> **Version** : 2.6.1 (v428)  
+> **Version** : 2.6.2 (v430)  
 > **Dernière mise à jour** : 20 janvier 2026  
 > **Statut** : Production stable
 
@@ -15,6 +15,65 @@ PériMap est une Progressive Web App (PWA) de transport en commun pour le résea
 - **Carte interactive** avec position des bus en temps réel
 - **Mode hors ligne** grâce au Service Worker
 - **Statistiques de retards** stockées dans Neon PostgreSQL
+
+---
+
+## 🎨 ARCHITECTURE CSS MODULAIRE (V430)
+
+```
+public/
+├── style.css              ← Point d'entrée (importe css/main.css)
+└── css/
+    ├── main.css           ← Index des imports
+    ├── legacy.css         ← Ancien code (migration progressive)
+    ├── brand.css          ← Identité visuelle
+    ├── line-pages.css     ← Pages horaires
+    ├── delay-stats.css    ← UI statistiques
+    ├── data-exporter.css  ← Console admin
+    └── modules/
+        ├── base/
+        │   ├── variables.css   ← Design tokens (couleurs, spacing, etc.)
+        │   ├── reset.css       ← Normalisation
+        │   ├── typography.css  ← Polices, titres
+        │   └── animations.css  ← Keyframes partagées
+        ├── layout/
+        │   ├── header.css      ← En-tête, logo
+        │   ├── navigation.css  ← Bottom nav, menu mobile
+        │   └── grid.css        ← Grilles, conteneurs
+        ├── components/
+        │   ├── buttons.css     ← Boutons (.btn, .btn-primary, etc.)
+        │   ├── cards.css       ← Cartes génériques
+        │   ├── forms.css       ← Inputs, selects
+        │   ├── modals.css      ← Popups modales
+        │   ├── popups.css      ← Popovers, tooltips
+        │   ├── badges.css      ← Badges lignes
+        │   └── loading.css     ← Skeleton, spinners
+        ├── pages/
+        │   ├── map.css         ← Vue carte
+        │   ├── itinerary.css   ← Vue itinéraires (refonte V429)
+        │   ├── schedules.css   ← Vue horaires
+        │   └── traffic.css     ← Vue trafic
+        ├── utilities/
+        │   ├── spacing.css     ← Marges, paddings
+        │   ├── display.css     ← Flex, hidden, etc.
+        │   └── accessibility.css ← Focus, skip links
+        └── themes/
+            └── dark.css        ← Surcharges dark mode
+```
+
+### Comment modifier les styles
+
+1. **Identifier le module** concerné (ex: itinerary.css pour les cartes d'itinéraires)
+2. **Modifier dans css/modules/** - pas dans legacy.css
+3. **Bump le service worker** dans service-worker.js (incrémenter CACHE_VERSION)
+4. **Tester localement** avec `npm run build`
+
+### Migration progressive
+
+Le fichier `css/legacy.css` contient l'ancien code monolithique. Au fur et à mesure :
+- Extraire les styles vers le bon module
+- Supprimer du legacy.css
+- Objectif : legacy.css = 0 lignes
 
 ---
 

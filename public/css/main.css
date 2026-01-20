@@ -1,0 +1,74 @@
+/**
+ * Périmap - CSS Entry Point
+ * V430: Architecture CSS modulaire
+ * 
+ * Ce fichier importe tous les modules CSS organisés.
+ * Vite va automatiquement les compiler et bundler.
+ * 
+ * Structure des modules:
+ * ├── modules/base/        → Variables, reset, typography, animations
+ * ├── modules/layout/      → Header, navigation, grid
+ * ├── modules/components/  → Buttons, cards, forms, modals, etc.
+ * ├── modules/pages/       → Styles spécifiques par page
+ * ├── modules/utilities/   → Classes utilitaires
+ * └── modules/themes/      → Dark theme
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BASE - Variables, Reset, Typography
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/base/variables.css';
+@import './modules/base/reset.css';
+@import './modules/base/typography.css';
+@import './modules/base/animations.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LAYOUT - Structure globale
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/layout/header.css';
+@import './modules/layout/navigation.css';
+@import './modules/layout/grid.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COMPONENTS - Éléments réutilisables
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/components/buttons.css';
+@import './modules/components/cards.css';
+@import './modules/components/forms.css';
+@import './modules/components/modals.css';
+@import './modules/components/popups.css';
+@import './modules/components/badges.css';
+@import './modules/components/loading.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGES - Styles spécifiques
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/pages/map.css';
+@import './modules/pages/itinerary.css';
+@import './modules/pages/schedules.css';
+@import './modules/pages/traffic.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UTILITIES - Classes utilitaires
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/utilities/spacing.css';
+@import './modules/utilities/display.css';
+@import './modules/utilities/accessibility.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THEMES - Dark mode
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './modules/themes/dark.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   EXTRAS - Styles additionnels
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './brand.css';
+@import './line-pages.css';
+@import './delay-stats.css';
+@import './data-exporter.css';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LEGACY - Styles non encore migrés (à nettoyer progressivement)
+   ═══════════════════════════════════════════════════════════════════════ */
+@import './legacy.css';
