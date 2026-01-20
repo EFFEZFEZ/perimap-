@@ -70,6 +70,14 @@
     "api/realtime.js": {
       "maxDuration": 15,
       "memory": 256
+    },
+    "api/record-delay.js": {
+      "maxDuration": 10,
+      "memory": 256
+    },
+    "api/delay-stats.js": {
+      "maxDuration": 10,
+      "memory": 256
     }
   }
 }
