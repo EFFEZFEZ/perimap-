@@ -6661,7 +6661,8 @@ body.dark-theme .real-select option {
 /* V445: Scrollbars visibles pour les sélecteurs */
 .popover-time-inputs .real-select {
     overflow-y: auto;
-    max-height: 150px;
+    max-height: min(320px, 45vh);
+    scrollbar-width: thin;
 }
 
 .popover-time-inputs .real-select::-webkit-scrollbar {
@@ -6669,17 +6670,16 @@ body.dark-theme .real-select option {
 }
 
 .popover-time-inputs .real-select::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: 3px;
+    background: transparent;
 }
 
 .popover-time-inputs .real-select::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
 }
 
 .popover-time-inputs .real-select::-webkit-scrollbar-thumb:hover {
-    background: var(--text-tertiary);
+    background: rgba(0, 0, 0, 0.35);
 }
 
 .time-select-wrapper {
