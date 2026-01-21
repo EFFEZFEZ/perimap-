@@ -209,6 +209,13 @@ export class UIManager {
                 popover.classList.toggle('hidden');
                 whenBtn.classList.toggle('popover-active');
                 userAdjustedTime = false;
+                
+                // Auto-scroll pour que le popover soit visible
+                if (!popover.classList.contains('hidden')) {
+                    setTimeout(() => {
+                        popover.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 50);
+                }
             });
             popover.querySelectorAll('.popover-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
