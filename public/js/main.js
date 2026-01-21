@@ -2859,7 +2859,9 @@ async function handleAutocomplete(query, container, onSelect, inputElement = nul
     autocompleteTimeout = setTimeout(async () => {
         try {
             const apiFactory = getAPIServiceFactory();
-            const suggestions = await apiFactory.getPlacePredictions(query);
+            const result = await apiFactory.getPlacePredictions(query);
+            // V491: getPlacePredictions renvoie { predictions: [...], status: '...' }
+            const suggestions = result?.predictions || [];
             renderSuggestions(suggestions, container, onSelect);
         } catch (error) {
             console.warn("Erreur d'autocomplétion:", error);
