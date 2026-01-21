@@ -78,12 +78,17 @@
         })();
     </script>
     
-    <!-- Favicons & Icons -->
+    <!-- Favicons & Icons - Bloquer l'icône par défaut -->
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192">
     <link rel="icon" href="/icons/icon-512.png" type="image/png" sizes="512x512">
     <link rel="icon" href="/icons/perimap-logo.webp" type="image/webp">
+    <link rel="shortcut icon" href="/icons/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/icons/icon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="/icons/icon-512.png" sizes="512x512">
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-config" content="/browserconfig.xml">
+    <meta name="msapplication-TileImage" content="/icons/icon-192.png">
     
     <!-- Preload ressources critiques -->
     <link rel="preload" href="style.css" as="style">

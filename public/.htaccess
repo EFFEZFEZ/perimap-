@@ -1,0 +1,28 @@
+# Forcer le type MIME correct pour les favicons
+<FilesMatch "\.(ico|png|webp)$">
+    Header set Content-Type "image/x-icon"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Favicons spécifiques
+<FilesMatch "favicon\.ico$">
+    Header set Content-Type "image/x-icon"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+<FilesMatch "\.webp$">
+    Header set Content-Type "image/webp"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</FilesMatch>
+
+# Manifest JSON
+<FilesMatch "manifest\.json$">
+    Header set Content-Type "application/manifest+json"
+    Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
+
+# browserconfig.xml
+<FilesMatch "browserconfig\.xml$">
+    Header set Content-Type "application/xml"
+    Header set Cache-Control "public, max-age=3600"
+</FilesMatch>
