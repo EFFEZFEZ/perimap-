@@ -1036,6 +1036,7 @@ body.dark-theme .pm-skeleton-card {
         right: 0; /* V366: Collé au bord droit */
         bottom: 0; /* V366: Collé en bas, stable et prévisible */
         height: var(--bottom-nav-height);
+        padding: 0;
         padding-bottom: env(safe-area-inset-bottom); /* V366: Safe area gérée en padding interne */
         border-radius: 0; /* V366: Pas de coins arrondis, style IDFM/Google Maps */
         background: rgba(255, 255, 255, 0.98); /* V366: Plus opaque pour stabilité visuelle */
@@ -1045,6 +1046,7 @@ body.dark-theme .pm-skeleton-card {
         -webkit-backdrop-filter: blur(12px);
         z-index: 15000;
         overflow: hidden;
+        gap: 0;
         will-change: transform;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
@@ -1068,6 +1070,7 @@ body.dark-theme .pm-skeleton-card {
         justify-content: center;
         gap: 4px;
         padding: 10px 6px;
+        margin: 0;
         cursor: pointer;
         min-width: 0;
         user-select: none;
