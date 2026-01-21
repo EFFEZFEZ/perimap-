@@ -2016,7 +2016,8 @@ body.itinerary-view-active #legal-strip {
 }
 
 .header-logo-img {
-    max-width: 170px;
+    height: 40px;
+    max-width: 140px;
     width: auto;
     object-fit: contain;
     display: block;
