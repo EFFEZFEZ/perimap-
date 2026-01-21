@@ -6739,13 +6739,13 @@ body.dark-theme .real-select option {
     transform: translateY(-40%) rotate(135deg);
 }
 
-/* Menu temps - s'ouvre vers le HAUT avec scroll si nécessaire */
+/* Menu temps - s'ouvre vers le BAS, scrollable si nécessaire */
 .time-select-menu {
     position: absolute;
     left: 0;
     right: auto;
-    bottom: calc(100% + 8px);
-    top: auto;
+    top: calc(100% + 8px);
+    bottom: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -6753,7 +6753,7 @@ body.dark-theme .real-select option {
     padding: var(--spacing-2) 0;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(calc(-1 * var(--spacing-2)));
+    transform: translateY(8px);
     transition: opacity var(--transition-quick), transform var(--transition-quick);
     z-index: 20001;
     display: flex;
