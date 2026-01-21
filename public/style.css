@@ -6575,7 +6575,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
     z-index: 20000;
-    overflow: hidden;
+    overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #planner-options-popover {
@@ -6620,11 +6620,14 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 .popover-content {
     padding: 1rem;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
     max-height: none;
-    overflow: hidden;
+    overflow: visible;
 }
 .popover-time-inputs {
     display: flex;
