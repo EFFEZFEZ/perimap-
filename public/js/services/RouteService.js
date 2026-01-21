@@ -130,12 +130,32 @@ export class RouteService {
      * Fetch bus route via Google backend (Vercel proxy)
      */
     async _fetchBusRouteGoogle(fromPlaceId, toPlaceId, searchTime = null, fromCoords = null, toCoords = null) {
-        logger.debug('RouteService._fetchBusRouteGoogle', { fromPlaceId, toPlaceId });
+        logger.debug('RouteService._fetchBusRouteGoogle', { fromPlaceId, toPlaceId, fromCoords, toCoords });
         
         try {
+            // Construire origin: utiliser coords si placeId absent/invalide
+            let origin;
+            if (fromPlaceId && fromPlaceId.startsWith('ChIJ')) {
+                origin = { placeId: fromPlaceId };
+            } else if (fromCoords?.lat && fromCoords?.lng) {
+                origin = { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } };
+            } else {
+                throw new Error('Origine invalide: ni placeId ni coordonnées');
+            }
+            
+            // Construire destination: utiliser coords si placeId absent/invalide
+            let destination;
+            if (toPlaceId && toPlaceId.startsWith('ChIJ')) {
+                destination = { placeId: toPlaceId };
+            } else if (toCoords?.lat && toCoords?.lng) {
+                destination = { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } };
+            } else {
+                throw new Error('Destination invalide: ni placeId ni coordonnées');
+            }
+            
             const payload = {
-                origin: { placeId: fromPlaceId },
-                destination: { placeId: toPlaceId },
+                origin,
+                destination,
                 travelMode: 'TRANSIT',
                 transitPreferences: {
                     allowedTravelModes: ['BUS', 'WALKING']
@@ -145,7 +165,9 @@ export class RouteService {
                 routeModifiers: {
                     avoidTolls: true
                 },
-                ...(searchTime && { departureTime: Math.floor(new Date(searchTime).getTime() / 1000) })
+                languageCode: 'fr',
+                units: 'METRIC',
+                ...(searchTime && { departureTime: new Date(searchTime).toISOString() })
             };
 
             const response = await fetch(`${this.apiEndpoints.routes}`, {
