@@ -23,6 +23,13 @@
     z-index: 100;
 }
 
+/* Isoler le conteneur itinéraire quand caché */
+#itinerary-results-container.hidden {
+    position: fixed;
+    z-index: -1;
+    pointer-events: none;
+}
+
 body.itinerary-view-active #itinerary-results-container {
     top: 64px;
     height: calc(100svh - 64px);

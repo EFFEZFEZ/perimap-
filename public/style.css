@@ -2171,12 +2171,18 @@ body:not(.dark-theme) .header-logo-img {
     position: relative;
     z-index: auto;
     padding-top: var(--spacing-12);
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Isoler le planner du dashboard - z-index auto pour éviter les conflits avec les vues superposées */
 #dashboard-hall .planner-section {
     z-index: auto;
     position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .planner-block {
