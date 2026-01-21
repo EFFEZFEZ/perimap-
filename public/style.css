@@ -6617,14 +6617,11 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 .popover-content {
     padding: 1.25rem;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
+    overflow: visible;
 }
 .popover-time-inputs {
     display: flex;
@@ -6929,32 +6926,29 @@ body.dark-theme .real-select option {
         z-index: 500; 
     }
 
-    /* 3. LE MENU LUI-MÊME */
+    /* 3. LE MENU LUI-MÊME - Modal centré */
     #planner-options-popover {
-        /* Position absolue par rapport à .form-group-when */
-        position: absolute !important; 
-        top: calc(100% + 10px); /* Juste sous le bouton */
-        left: 0;
-        width: 100%;
-        
-        /* Design */
-        max-height: none;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: min(360px, calc(100vw - 32px)) !important;
+        max-height: calc(100vh - 120px) !important;
         overflow: visible;
         background: var(--bg-main);
         border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        box-shadow: var(--elevation-4);
-        
-        /* CRUCIAL : Z-Index très haut pour flotter AU DESSUS de la bottom-nav */
-        z-index: 16000;
-        
-        /* S'assurer qu'il est cliquable */
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+        z-index: 99999 !important;
         pointer-events: auto;
     }
 
     /* 4. Cacher proprement quand c'est fermé */
     #planner-options-popover.hidden {
-        display: none !important;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95) !important;
+        pointer-events: none;
+        visibility: hidden;
     }
 
     /* 5. LE BOUTON RECHERCHER */
