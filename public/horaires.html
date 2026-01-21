@@ -279,16 +279,19 @@
       color: var(--text-primary);
     }
 
-    /* Page & Grille - utilise les variables globales via style.css */
+    /* Page & Grille - même largeur que le dashboard accueil (600px) */
     .horaires-page {
-      max-width: var(--container-content, 1100px);
+      max-width: 600px;
+      width: 100%;
       margin: 0 auto;
-      padding: 0 18px 30px;
+      padding: 0 1rem 2rem;
     }
 
     @media (max-width: 767px) {
       .horaires-page {
         padding-top: 0;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
       }
     }
 

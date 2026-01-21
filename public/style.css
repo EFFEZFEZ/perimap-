@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v441)
+ * PÉRIMAP - CSS PRINCIPAL (v437)
  * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
@@ -1032,15 +1032,15 @@ body.dark-theme .pm-skeleton-card {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
         position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        left: 0; /* V366: Collé au bord gauche */
+        right: 0; /* V366: Collé au bord droit */
+        bottom: 0; /* V366: Collé en bas, stable et prévisible */
         height: var(--bottom-nav-height);
-        padding-bottom: env(safe-area-inset-bottom);
-        border-radius: 0;
-        background: rgba(255, 255, 255, 0.98);
-        border-top: 1px solid rgba(15, 23, 42, 0.12);
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+        padding-bottom: env(safe-area-inset-bottom); /* V366: Safe area gérée en padding interne */
+        border-radius: 0; /* V366: Pas de coins arrondis, style IDFM/Google Maps */
+        background: rgba(255, 255, 255, 0.98); /* V366: Plus opaque pour stabilité visuelle */
+        border-top: 1px solid rgba(15, 23, 42, 0.12); /* V366: Bordure top uniquement */
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08); /* V366: Shadow vers le haut */
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         z-index: 15000;
@@ -1048,11 +1048,6 @@ body.dark-theme .pm-skeleton-card {
         will-change: transform;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        /* V441: Force le collage au bas sans écart */
-        margin: 0;
-        padding-left: 0;
-        padding-right: 0;
-        transform: translateZ(0);
     }
 
     body.dark-theme .bottom-nav {
@@ -2169,13 +2164,8 @@ body:not(.dark-theme) .header-logo-img {
 .planner-section {
     padding: 0;
     position: relative;
-    z-index: 10;
+    z-index: 50;
     padding-top: var(--spacing-12);
-}
-
-/* Styles spécifiques pour le planner dans le dashboard */
-#dashboard-hall .planner-section {
-    position: relative;
 }
 
 .planner-block {
@@ -2340,9 +2330,7 @@ body:not(.dark-theme) .header-logo-img {
 /* Options (Partir maintenant) */
 .planner-options {
     position: relative;
-    /* Ne pas créer de stacking context trop élevé ici : le popover est en position fixed
-       et doit contrôler son propre z-index. */
-    z-index: auto;
+    z-index: 16000; /* V363: Assez haut pour que le popover enfant soit au-dessus de bottom-nav */
 }
 
 .btn-when {
@@ -2773,7 +2761,7 @@ body.dark-theme .quick-action-card span {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: auto;
+    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
     pointer-events: auto;
     width: 100%;
 }
@@ -2825,7 +2813,7 @@ body.dark-theme .hall-line-shortcuts {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: auto;
+    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
     pointer-events: auto;
     width: 100%;
 }
@@ -3404,22 +3392,23 @@ body.dark-theme .app-back-btn svg {
     max-height: 2000px; 
     padding: 1.5rem;
     opacity: 1;
-    /* V438: Largeur dynamique comme les héros */
-    width: 100%;
-    max-width: 100%;
+    /* V434: Uniformiser la largeur avec le hero */
+    max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
-    box-sizing: border-box;
 }
 
-/* V438: Styles spécifiques pour chaque card - largeur dynamique */
+/* V434: Styles spécifiques pour chaque card */
 #horaires.view-active,
 #info-trafic.view-active {
-    width: 100%;
-    max-width: 100%;
-    padding: 1rem;
+    max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Largeur fixe demandée pour la carte horaires */
+#horaires.view-active {
+    width: 382px;
 }
 
 #fiche-horaire-container {
@@ -5160,7 +5149,7 @@ body.dark-theme .map-theme-toggle:hover {
 .btn:hover { background: var(--bg-secondary); border-color: var(--secondary); transform: translateY(-1px); }
 .btn:active { transform: scale(0.97) translateY(0); }
 .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
-.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: none; }
+.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
 .btn-primary::after { background: rgba(255, 255, 255, 0.2); }
 .btn-primary svg { margin-right: 0.25rem; }
 
@@ -6538,39 +6527,30 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 
 #planner-options-popover, #results-planner-options-popover {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background: white;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
-    /* Doit être supérieur aux autres éléments (bottom-nav, planners, etc.) */
-    z-index: 20001;
-    overflow-y: auto;
-    padding: 0.75rem 0.875rem;
-    max-height: 50vh;
+    position: absolute;
+    top: calc(100% + 8px); 
+    right: 0; 
+    width: 320px; 
+    background: var(--bg-main);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    z-index: 16000; /* V362: Au dessus de la bottom-nav (15000) */
+    overflow: auto; /* V364: Permettre le scroll interne */
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    max-height: calc(100vh - 350px); /* V364: Limiter pour éviter de dépasser la bottom-nav */
 }
-
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-}
-
 #planner-options-popover.hidden, #results-planner-options-popover.hidden {
-    display: none !important;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    visibility: hidden; /* V362: Empêche toute interaction même invisible */
 }
-
 /* Positionnement spécifique pour le popover des résultats */
 #results-planner-options-popover {
-    width: 100%;
-}
-
-body.dark-theme #planner-options-popover,
-body.dark-theme #results-planner-options-popover {
-    background: var(--bg-main);
-    color: var(--text-primary);
+    left: 0;
+    right: 0;
+    width: auto;
 }
 
 
@@ -6599,7 +6579,7 @@ body.dark-theme #results-planner-options-popover {
 }
 
 .popover-content {
-    padding: 0.75rem 0;
+    padding: 1rem;
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
@@ -6608,14 +6588,12 @@ body.dark-theme #results-planner-options-popover {
 }
 .popover-time-inputs {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
     align-items: stretch;
-    margin: 0.5rem 0;
 }
 .popover-time-inputs .form-group {
     flex: 1;
     min-width: 0;
-    margin-bottom: 0;
 }
 .popover-time-inputs .form-group label {
     font-size: 0.8rem;
@@ -6664,30 +6642,6 @@ body.dark-theme .real-select option {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     outline: none;
-}
-
-/* V445: Scrollbars visibles pour les sélecteurs */
-.popover-time-inputs .real-select {
-    overflow-y: auto;
-    max-height: min(320px, 45vh);
-    scrollbar-width: thin;
-}
-
-.popover-time-inputs .real-select::-webkit-scrollbar {
-    width: 6px;
-}
-
-.popover-time-inputs .real-select::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.popover-time-inputs .real-select::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 999px;
-}
-
-.popover-time-inputs .real-select::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.35);
 }
 
 .time-select-wrapper {
@@ -7001,25 +6955,26 @@ body.dark-theme .real-select option {
     bottom: 0;
     width: 100%;
     height: 100vh;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    font-family: inherit;
-    transition: all 0.15s ease;
-    color: var(--text-primary);
-    background-color: var(--bg-secondary);
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 12px;
-    cursor: pointer;
-    padding-right: 2.5rem;
-    /* Comportement par défaut, pas de scroll ni overflow ni max-height */
+    z-index: 100;
 }
+
+/* V359: La vue itinéraire est en position fixed (plein écran),
+   donc on la décale sous l'en-tête PériMap pour éviter le chevauchement. */
+body.itinerary-view-active #itinerary-results-container {
+    top: 64px;
+    height: calc(100svh - 64px);
+    height: calc(100vh - 64px);
+}
+
+@media (max-width: 768px) {
+    body.itinerary-view-active #itinerary-results-container {
+        top: 56px;
+        height: calc(100svh - 56px);
+        height: calc(100vh - 56px);
+    }
+}
+
+/* V433: Panneau latéral - Design minimaliste */
 #results-side-panel {
     width: 380px;
     flex-shrink: 0;
@@ -8138,25 +8093,18 @@ body.dark-theme .route-next-departures {
         display: none;
     }
 
-    /* =========================================
-     * V441: REFONTE STYLE IDFM - ÉPURÉ ET PROFESSIONNEL
-     * Inspiré Île-de-France Mobilités
-     * ========================================= */
-    
+    /* Le panneau latéral prend tout l'écran */
     #results-side-panel {
         width: 100%;
         flex: 1;
         border-right: none;
         height: 100%;
-        overflow-y: auto;
+        overflow-y: auto; /* Toute la colonne redevient scrollable */
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
-        min-height: 0;
-        padding: 0;
-        box-sizing: border-box;
-        background: var(--bg-main);
+        min-height: 0; /* Crucial pour permettre le scroll dans un flex column */
     }
 
     .results-list-wrapper {
@@ -8164,318 +8112,94 @@ body.dark-theme .route-next-departures {
         display: block;
         overflow: visible;
         padding-bottom: 0;
-        margin-top: 0;
     }
-    
-    /* V442: Cacher le message de recherche en cours */
-    .results-message {
-        display: none !important;
-    }
-    
     .results-list {
         flex: none;
         overflow: visible;
         max-height: none;
         padding: 1rem 1rem calc(2rem + env(safe-area-inset-bottom));
-        max-width: 100%;
-        margin: 0;
+        /* V434: Uniformiser la largeur avec le hero */
+        max-width: var(--container-hero);
+        margin-left: auto;
+        margin-right: auto;
     }
     
-    /* V441: Header IDFM - simple et propre */
+    /* V353: Header compact pour mobile */
     .itinerary-top-bar {
-        padding: 1rem 1.25rem;
-        background: var(--bg-main);
-        border-bottom: 1px solid var(--border);
-        max-width: 100%;
-        flex-direction: row;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .itinerary-top-bar .app-back-btn {
-        padding: 0.625rem 1rem;
-        background: var(--bg-secondary);
-        border-radius: 10px;
-        font-size: 0.875rem;
-        margin-bottom: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-primary);
-        border: none;
-        cursor: pointer;
-        font-weight: 500;
-    }
-    
-    .itinerary-top-bar .app-back-btn svg {
-        width: 18px;
-        height: 18px;
-    }
-    
-    .itinerary-top-bar .app-back-btn:hover {
-        background: var(--bg-light);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-    
-    .itinerary-top-bar .app-back-btn:active {
-        transform: scale(0.98);
+        padding: 0.5rem 0.75rem;
     }
     
     .itinerary-top-bar h2 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        background: none;
-        -webkit-background-clip: unset;
-        -webkit-text-fill-color: var(--text-primary);
-        background-clip: unset;
-        color: var(--text-primary);
+        font-size: 0.9375rem;
     }
     
-    /* V441: Formulaire IDFM - fond propre, pas de bordure colorée */
     #itinerary-edit-panel {
-        background: var(--bg-main);
-        border-radius: 0;
-        padding: 2rem 1.25rem 1.5rem;
-        border: none;
-        border-bottom: 1px solid var(--border);
-        box-shadow: none;
-        margin: 0;
-        position: relative;
-        overflow: visible;
-        width: 100%;
+        padding: 0.75rem;
     }
     
-    #itinerary-edit-panel::before {
-        display: none;
-    }
-    
-    /* V441: Conteneur inputs style IDFM - vertical avec labels */
+    /* V353: Formulaire Google Maps style mobile */
     .route-input-container {
-        flex-direction: column;
-        gap: 0;
-        align-items: stretch;
-        position: relative;
+        gap: 0.5rem;
     }
     
-    /* V441: Cacher les indicateurs visuels (style IDFM) */
     .route-visual-indicators {
-        display: none;
+        width: 16px;
+        padding: 0.625rem 0;
     }
     
-    /* V441: Stack inputs en vertical avec espace pour le swap */
-    .route-inputs-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 3rem;
-        position: relative;
-        padding-right: 0;
-        margin-bottom: 1.5rem;
+    .indicator-dot {
+        width: 10px;
+        height: 10px;
     }
     
-    /* V441: Wrapper input avec label IDFM */
-    .route-input-wrapper {
-        position: relative;
-    }
-    
-    .route-input-wrapper::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 0.6875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-tertiary);
-        margin-bottom: 0.5rem;
-    }
-    
-    .route-input-wrapper:first-child::before {
-        content: 'DÉPART';
-    }
-    
-    .route-input-wrapper:last-child::before {
-        content: 'ARRIVÉE';
-    }
-    
-    /* V441: Inputs IDFM - fond clair, bordure subtile */
     .route-input {
-        min-height: 52px;
-        font-size: 1rem;
-        padding: 0.875rem 3rem 0.875rem 1rem;
-        border-radius: 10px;
-        background: var(--bg-secondary);
-        border: 1.5px solid var(--border);
-        font-weight: 400;
-        letter-spacing: 0;
-        width: 100%;
-        box-sizing: border-box;
-        position: relative;
+        min-height: 48px;
+        font-size: 0.9375rem;
+        padding: 0.75rem 2.75rem 0.75rem 0.9rem;
+        border-radius: 12px;
     }
     
-    .route-input::placeholder {
-        color: var(--text-tertiary);
-    }
-    
-    .route-input:focus {
-        background: var(--bg-main);
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-    }
-    
-    /* V441: Bouton géoloc discret */
     .btn-geolocate-minimal {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: transparent;
-        position: absolute;
-        right: 0.5rem;
-        top: 3.25rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--text-secondary);
+        width: 34px;
+        height: 34px;
     }
     
-    .route-input-wrapper:first-child .btn-geolocate-minimal {
-        position: absolute;
-        top: calc(50% + 1.25rem);
-        right: 0.5rem;
+    .btn-geolocate-minimal svg {
+        width: 18px;
+        height: 18px;
     }
     
-    /* V441: Bouton swap IDFM - entre les deux inputs */
     .btn-swap-minimal {
-        position: absolute;
-        right: 50%;
-        top: 50%;
-        transform: translate(50%, -50%);
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: var(--bg-light);
-        border: 1px solid var(--border);
-        box-shadow: none;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        width: 40px;
+        height: 40px;
     }
     
     .btn-swap-minimal svg {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
     }
     
-    .btn-swap-minimal:hover {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: white;
-        transform: translate(50%, -50%);
-        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
-    }
-    
-    .btn-swap-minimal:active {
-        transform: translate(50%, -50%) scale(0.95);
-    }
-    
-    /* V441: Actions row IDFM - propre et aéré */
     .route-actions {
-        margin-top: 1.25rem;
+        margin-top: 0.5rem;
         gap: 0.75rem;
-        padding-top: 0;
-        border-top: none;
-        flex-direction: column;
     }
     
-    /* V441: Time picker IDFM */
     .btn-time-picker {
-        padding: 0.875rem 1rem;
-        font-size: 0.9375rem;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
         border-radius: 10px;
-        background: var(--bg-secondary);
-        border: 1.5px solid var(--border);
-        font-weight: 500;
-        justify-content: space-between;
-        width: 100%;
-        position: relative;
-        margin-top: 1.5rem;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--text-primary);
-    }
-    
-    .btn-time-picker::before {
-        content: 'QUAND';
-        position: absolute;
-        top: -1.75rem;
-        left: 0;
-        font-size: 0.6875rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-tertiary);
-    }
-    
-    .btn-time-picker:hover {
-        background: var(--bg-light);
-        border-color: var(--primary);
-        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
-    }
-    
-    .btn-time-picker:active {
-        transform: scale(0.98);
     }
     
     .btn-time-picker svg:first-child {
-        width: 18px;
-        height: 18px;
-        margin-right: 0.5rem;
-    }
-    
-    .btn-time-picker svg.chevron {
         width: 16px;
         height: 16px;
-        color: var(--text-tertiary);
     }
     
-    /* V441: Bouton rechercher IDFM - simple et efficace */
     .btn-search-route {
-        padding: 1rem 1.5rem;
-        font-size: 1rem;
-        min-height: 52px;
-        border-radius: 10px;
-        background: var(--primary);
-        color: white;
-        font-weight: 600;
-        letter-spacing: 0;
-        box-shadow: none;
-        text-transform: none;
-        width: 100%;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-top: 1rem;
-    }
-    
-    .btn-search-route:hover {
-        background: #16a34a;
-        transform: none;
-        box-shadow: none;
-    }
-    
-    .btn-search-route:active {
-        transform: scale(0.98);
-    }
-    
-    .btn-search-route:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9375rem;
+        min-height: 48px;
+        border-radius: 12px;
     }
 
     /* --- Styles mobiles pour les détails d'itinéraire (ACCORDÉON PC) --- */
@@ -11416,10 +11140,7 @@ body.dark-theme .tarifs-choice {
     /* Planner block mobile */
     .planner-block {
         padding: 1rem;
-        margin: 0 0 1rem;
-        background: #FFFFFF;
-        position: relative;
-        z-index: 10;
+        margin: -1rem 0 1rem;
     }
     
     .planner-block-wrapper {
@@ -11618,10 +11339,7 @@ body.dark-theme .tarifs-choice {
     }
     
     .planner-block {
-        margin: 0 0 0.75rem;
-        background: #FFFFFF;
-        position: relative;
-        z-index: 10;
+        margin: -1.5rem 0 0.75rem;
     }
     
     .services-section,
@@ -12176,9 +11894,6 @@ body.dark-theme .mode-tab.active {
     .planner-block {
         margin: 0 0 1rem;
         border-radius: var(--radius-lg);
-        background: #FFFFFF;
-        position: relative;
-        z-index: 10;
     }
     
     .planner-block .form-group input[type="text"] {
