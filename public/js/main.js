@@ -2277,6 +2277,12 @@ async function executeItinerarySearch(source, sourceElements) {
             allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
+            // Sauvegarder le trajet dans les trajets récents
+            if (searchResults?.from?.display_name && searchResults?.to?.display_name) {
+                const departureTime = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
+                addRecentJourney(searchResults.from.display_name, searchResults.to.display_name, departureTime);
+            }
+            
             // Fusionner avec GTFS si disponible
             if (hybridItins?.length) {
                 for (const gtfsIt of hybridItins) {
@@ -5174,7 +5180,7 @@ function showResultsView() {
         } catch (_) {}
 
         if (resultsListContainer) {
-            resultsListContainer.innerHTML = '<p class="results-message">Recherche d\'itinéraire en cours...</p>';
+            resultsListContainer.innerHTML = '';
         }
         
         // V355: Invalider la carte avec RAF pour synchronisation optimale

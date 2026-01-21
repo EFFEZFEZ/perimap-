@@ -2183,7 +2183,7 @@ body:not(.dark-theme) .header-logo-img {
     position: relative;
     z-index: 100; /* V439: Au-dessus des autres blocs (hall-line-shortcuts=10, hall-express=10) */
     padding-top: var(--spacing-12);
-    padding-bottom: 200px; /* V485: Espace pour permettre le scroll quand le popover est ouvert */
+    padding-bottom: 0; /* Laisse l'espacement aux blocs suivants (mobile) */
 }
 
 .planner-block {
@@ -2195,6 +2195,7 @@ body:not(.dark-theme) .header-logo-img {
     transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
     position: relative;
     z-index: 100; /* V439: Au-dessus de tous les blocs (halls/express/shortcuts) */
+    margin-bottom: 0; /* Espacement géré par les blocs suivants */
 }
 
 .planner-block:hover {
@@ -2597,7 +2598,7 @@ body.dark-theme .btn-geolocate:hover:not(:disabled) {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 16px; /* Espacement cohérent avec le bandeau info trafic (desktop) */
     position: relative;
     z-index: 1;
 }
@@ -2687,7 +2688,7 @@ body.dark-theme .quick-action-card span {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-top: 1.5rem;
+    margin-top: 12px; /* Espacement uniforme mobile */
     padding: 0.875rem 1rem;
     background: #ffffff;
     border: 1px solid #e5e7eb;
@@ -2774,7 +2775,7 @@ body.dark-theme .quick-action-card span {
     gap: 10px;
     align-items: center;
     justify-content: center;
-    margin-top: 12px;
+    margin-top: 12px; /* Aligné avec le bandeau Actualités */
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid #e5e7eb;
@@ -2826,7 +2827,7 @@ body.dark-theme .hall-line-shortcuts {
  * HALL - HORAIRES EXPRESS (mobile-first)
  * ========================================= */
 .hall-express {
-    margin-top: 12px;
+    margin-top: 12px; /* Aligné avec les autres blocs hall */
     padding: 12px;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid #e5e7eb;
@@ -2836,6 +2837,24 @@ body.dark-theme .hall-line-shortcuts {
     z-index: 10; /* V439: Sous le planner-block (z-index:100) */
     pointer-events: auto;
     width: 100%;
+}
+
+/* Desktop overrides : espacement uniforme entre les blocs de la vue Hall */
+@media (min-width: 1024px) {
+    .planner-section {
+        padding-bottom: 0; /* Laisse le contrôle au margin-top des blocs suivants */
+    }
+    .planner-block {
+        margin-bottom: 0; /* On gère l'espacement via les blocs suivants */
+    }
+    .quick-actions-section {
+        margin-top: 16px;
+    }
+    .news-banner,
+    .hall-line-shortcuts,
+    .hall-express {
+        margin-top: 16px;
+    }
 }
 
 body.dark-theme .hall-express {
@@ -6583,6 +6602,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     overflow: visible;
     transition: opacity 0.25s ease, transform 0.25s ease;
     margin-bottom: 200px; /* Espace élargi pour permettre le scroll (Accueil + Trajets) */
+    padding: 0; /* pour laisser les tabs arrondis collés */
 }
 
 #planner-options-popover.hidden,
@@ -6596,6 +6616,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 .popover-tabs {
     display: flex;
     background: var(--bg-secondary);
+    border-radius: 14px 14px 0 0; /* angles arrondis en haut */
+    overflow: hidden;
 }
 .popover-tab {
     flex: 1;
@@ -6620,10 +6642,12 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 .popover-content {
     padding: 1.25rem;
     overflow: visible;
+    border-radius: 0 0 14px 14px; /* angles arrondis en bas du popover */
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
     overflow: visible;
+    border-radius: 0 0 14px 14px;
 }
 .popover-time-inputs {
     display: flex;
@@ -6659,7 +6683,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    border-radius: 12px; /* angles arrondis pour les sélecteurs horaires */
     font-size: 0.9rem;
     font-family: inherit;
     transition: all 0.15s ease;
@@ -7014,6 +7038,21 @@ body.itinerary-view-active #itinerary-results-container {
         top: 56px;
         height: calc(100svh - 56px);
         height: calc(100vh - 56px);
+    }
+
+    /* Permet au popover des horaires de déborder sur mobile */
+    #results-side-panel {
+        overflow-x: visible !important;
+        overflow-y: auto;
+    }
+
+    /* Popover Trajets en scroll : permet le dépassement */
+    #results-planner-options-popover {
+        overflow: visible !important;
+    }
+
+    #results-planner-options-popover > .popover-content {
+        overflow: visible !important;
     }
 }
 
@@ -7370,12 +7409,32 @@ body.dark-theme .indicator-dot.destination {
  * ========================================= */
 
 @media (max-width: 768px) {
+    /* Déverrouille complètement la vue itinéraires : plus de top/height forcés */
+    body.itinerary-view-active #itinerary-results-container {
+        position: static;
+        top: auto;
+        bottom: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
     #itinerary-results-container {
         background: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.12), transparent 28%),
                     radial-gradient(circle at 80% 0%, rgba(0, 200, 255, 0.16), transparent 30%),
                     var(--pm-navy);
         color: #e8f3ff;
         min-height: 100vh;
+        height: auto;
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        z-index: auto;
+        flex-direction: column; /* Stack panel + map */
+        overflow-y: auto; /* Permettre le scroll interne (body locké) */
+        -webkit-overflow-scrolling: touch;
     }
 
     #results-side-panel {
@@ -7385,7 +7444,11 @@ body.dark-theme .indicator-dot.destination {
         border-radius: 18px 18px 0 0;
         margin: 0 auto;
         max-width: 520px;
+        width: 100%;
+        height: auto;
         backdrop-filter: blur(10px);
+        padding-bottom: 200px; /* Espace pour scroller le popover */
+        overflow-y: visible; /* Scroll géré par le conteneur parent */
     }
 
     .itinerary-top-bar {
@@ -8270,6 +8333,16 @@ body.dark-theme .route-next-departures {
 
 /* Styles mobiles pour la vue résultats (Étape 1: Liste) */
 @media (max-width: 768px) {
+    /* Déverrouille le scroll pour la vue Itinéraires en mobile */
+    body.itinerary-view-active {
+        overflow-y: auto !important;
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        top: auto !important;
+        left: auto !important;
+    }
+
     /* AMÉLIORATION LECTURE (mobile) */
     .wait-time,
     .departure-time strong,
@@ -8282,8 +8355,10 @@ body.dark-theme .route-next-departures {
     /* Rétablit la direction en colonne sur mobile */
     #itinerary-results-container {
         flex-direction: column;
-        height: 100%;
-        height: 100vh; /* V152: Fallback */
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
     
     /* **CORRECTION IDFM**: Cache la carte sur la vue liste mobile */
@@ -8296,8 +8371,8 @@ body.dark-theme .route-next-departures {
         width: 100%;
         flex: 1;
         border-right: none;
-        height: 100%;
-        overflow-y: auto; /* Toute la colonne redevient scrollable */
+        height: auto;
+        overflow-y: visible; /* Scroll géré par le conteneur parent */
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
         display: flex;
