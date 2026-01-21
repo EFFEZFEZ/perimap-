@@ -33,6 +33,7 @@ import { loadBaseLayout } from './viewLoader.js';
 import { realtimeManager } from './realtimeManager.js';
 import { analyticsManager } from './analyticsManager.js';
 import { userPreferences } from './userPreferences.js';
+import { addRecentJourney } from './recentJourneys.js';
 
 // === PHASE 2: Modular API Services ===
 import { initializeAPIServices, getAPIServiceFactory } from './services/index.js';

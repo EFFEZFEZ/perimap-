@@ -151,3 +151,5 @@ function addRecentJourney(fromName, toName, departureTime = 'Maintenant') {
     }
     recentJourneysManager.addJourney(fromName, toName, departureTime);
 }
+
+export { initRecentJourneys, addRecentJourney };
