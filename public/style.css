@@ -6552,14 +6552,12 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     top: calc(100% + 8px); 
     right: 0; 
     width: 320px; 
-    max-height: calc(100vh - 200px); /* V453: Contraindre pour mobile */
     background: var(--bg-main);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
-    z-index: 20000; /* V451: Au dessus de tout (bottom-nav=15000) */
-    overflow-y: auto; /* V453: Scroll si trop grand */
-    overflow-x: hidden;
+    z-index: 20000;
+    overflow: visible; /* V454: Permet aux selects natifs de ne pas être clippés */
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #planner-options-popover.hidden, #results-planner-options-popover.hidden {
@@ -6605,8 +6603,9 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
-    overflow: visible;
-    max-height: none;
+    max-height: calc(100vh - 250px); /* V454: Limite interne pour scroll */
+    overflow-y: auto; /* V454: Scroll sur contenu, pas sur conteneur */
+    overflow-x: hidden;
 }
 .popover-time-inputs {
     display: flex;
