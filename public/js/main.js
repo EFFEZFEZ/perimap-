@@ -3,15 +3,18 @@
  * Ce code ne peut être ni copié, ni distribué, ni modifié sans l'autorisation écrite de l'auteur.
  */
 /**
- * main.js - V221 (Refactorisation + nettoyage code mort)
+ * main.js - V222 (Intégration EventBus + StateManager + Logger)
  *
- * Version refactorisée avec modules séparés pour:
- * - Dessin de routes (map/routeDrawing.js)
- * - Traitement itinéraires (search/itineraryProcessor.js)
- * - Formatage (utils/formatters.js)
- * - Configuration (config/icons.js, config/routes.js)
- * - UI (ui/resultsRenderer.js, ui/trafficInfo.js)
+ * Refactorisation avec architecture event-driven pour éliminer dépendances circulaires
+ * Nouvelle couche d'abstraction avec EventBus pub/sub
+ * Gestion d'état centralisée avec StateManager
+ * Logging unifié avec Logger
  */
+
+// === PHASE 1: Système de communication central ===
+import { EventBus, eventBus, EVENTS } from './EventBus.js';
+import { StateManager, stateManager } from './StateManager.js';
+import { Logger, logger } from './Logger.js';
 
 // === Imports des managers ===
 import { DataManager } from './dataManager.js';
@@ -1837,7 +1840,7 @@ function setupNavigationDropdowns() {
         });
     });
 
-    // Bottom navigation (mobile-first)
+    // Bottom navigation (mobile-first) - Intégration EventBus Phase 1
     document.querySelectorAll('.bottom-nav-item[data-action]').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1846,8 +1849,20 @@ function setupNavigationDropdowns() {
             if (mobileMenuToggle) mobileMenuToggle.classList.remove('is-active');
             if (mobileMenu) mobileMenu.classList.add('hidden');
             document.body.classList.remove('mobile-menu-open');
+            
+            // PHASE 1: Émettre via EventBus
+            logger.debug('Navigation button clicked', { action });
+            eventBus.emit('nav:select', { view: action });
+            
+            // Garder l'appel direct pour compatibilité transitoire
             handleNavigationAction(action);
         });
+    });
+    
+    // PHASE 1: Setup EventBus listeners pour navigation
+    eventBus.on('nav:select', ({ view }) => {
+        logger.info('Navigation event received', { view });
+        stateManager.setState({ currentView: view }, `nav:select:${view}`);
     });
     
     // Fermer les menus au clic ailleurs
@@ -1868,18 +1883,21 @@ async function ensureDashboardLoaded() {
     // Vérifier si les éléments clés du dashboard existent
     const dashboardExists = document.getElementById('dashboard-container');
     if (!dashboardExists) {
-        console.log('[Navigation] Dashboard non chargé, rechargement...');
+        logger.info('[Navigation] Dashboard non chargé, rechargement...');
         await reloadDashboardFromTarifs();
         return true; // Indique qu'on a rechargé
     }
     return false;
 }
 
-// Gérer les actions de navigation
+// Gérer les actions de navigation - PHASE 1: Intégration Logger
 async function handleNavigationAction(action) {
+    logger.debug('handleNavigationAction', { action });
+    
     // Empêcher les transitions concurrentes: on garde la dernière action demandée
     if (__pmIsScreenSwapping) {
         __pmPendingNavAction = action;
+        logger.warn('Screen swap in progress, queuing action', { action });
         return;
     }
 
@@ -1897,38 +1915,55 @@ async function handleNavigationAction(action) {
         }
     }
     
-    switch(action) {
-        case 'hall':
-            showDashboardHall();
-            break;
-        case 'itineraire':
-            // Aller à la vue résultats d'itinéraire (sans recherche préalable)
-            showResultsView();
-            break;
-        case 'horaires':
-            showDashboardView('horaires');
-            break;
-        case 'info-trafic':
-            showDashboardView('info-trafic');
-            break;
-        case 'carte':
-            showMapView();
-            break;
-        case 'tarifs':
-        case 'tarifs-grille':
-            showTarifsView('tarifs-grille');
-            break;
-        case 'tarifs-achat':
-            showTarifsView('tarifs-achat');
-            break;
-        case 'tarifs-billettique':
-            showTarifsView('tarifs-billettique');
-            break;
-        case 'tarifs-amendes':
-            showTarifsView('tarifs-amendes');
-            break;
-        default:
-            console.log('Action non gérée:', action);
+    try {
+        switch(action) {
+            case 'hall':
+                logger.info('Navigating to hall');
+                showDashboardHall();
+                break;
+            case 'itineraire':
+                logger.info('Navigating to itinerary search');
+                // Aller à la vue résultats d'itinéraire (sans recherche préalable)
+                showResultsView();
+                break;
+            case 'horaires':
+                logger.info('Navigating to schedule view');
+                showDashboardView('horaires');
+                break;
+            case 'info-trafic':
+                logger.info('Navigating to traffic info');
+                showDashboardView('info-trafic');
+                break;
+            case 'carte':
+                logger.info('Navigating to map view');
+                showMapView();
+                break;
+            case 'tarifs':
+            case 'tarifs-grille':
+                logger.info('Navigating to tariffs view', { page: 'tarifs-grille' });
+                showTarifsView('tarifs-grille');
+                break;
+            case 'tarifs-achat':
+                logger.info('Navigating to tariffs view', { page: 'tarifs-achat' });
+                showTarifsView('tarifs-achat');
+                break;
+            case 'tarifs-billettique':
+                logger.info('Navigating to tariffs view', { page: 'tarifs-billettique' });
+                showTarifsView('tarifs-billettique');
+                break;
+            case 'tarifs-amendes':
+                logger.info('Navigating to tariffs view', { page: 'tarifs-amendes' });
+                showTarifsView('tarifs-amendes');
+                break;
+            default:
+                logger.warn('Action not recognized', { action });
+        }
+    } catch (error) {
+        logger.error('Navigation error', error, { action });
+        eventBus.emit('ui:error', { 
+            message: `Erreur lors de la navigation vers ${action}`,
+            error 
+        });
     }
 }
 
