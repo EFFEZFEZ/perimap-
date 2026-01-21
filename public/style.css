@@ -3430,6 +3430,9 @@ body.dark-theme .app-back-btn svg {
     max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
+    overscroll-behavior: contain; /* V458: bloque le pull-to-refresh sur Chrome mobile */
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
 }
 
 /* Largeur responsive pour la carte horaires */
