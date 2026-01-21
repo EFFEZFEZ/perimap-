@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v450';
+const CACHE_VERSION = 'v451';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -17,6 +17,9 @@ const PRECACHE = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/css/_config.css',
+  '/css/components/itinerary.css',
+  '/css/components/timepicker.css',
   '/style.css',
   '/js/main.js',
   '/js/EventBus.js',

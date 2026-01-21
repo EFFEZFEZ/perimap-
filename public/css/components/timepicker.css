@@ -1,0 +1,38 @@
+/* components/timepicker.css - Accessible timepicker & popover layering */
+
+/* Trigger button ensures layered above nearby elements */
+.btn-time-picker { z-index: var(--z-timepicker); position: relative; }
+
+/* Popover container must allow overflow for dropdowns */
+#results-planner-options-popover { overflow: visible; z-index: var(--z-popover); position: relative; }
+
+/* Popover content: constrain height, scroll internally */
+#results-planner-options-popover .popover-content,
+#results-planner-options-popover .options-content {
+  max-height: min(60vh, 420px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Dropdown list layering consistent with tokens */
+.timepicker-dropdown,
+.combobox-dropdown,
+.autocomplete-dropdown {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  inset: auto 0 0 0;
+}
+
+/* ARIA combobox baseline styles */
+[role="combobox"] { position: relative; }
+[role="listbox"] { position: absolute; left: 0; right: 0; z-index: var(--z-dropdown); }
+
+/* Input & list visuals */
+.timepicker-input { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.75rem; }
+.timepicker-list { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.25); }
+.timepicker-list [role="option"] { padding: 0.5rem 0.75rem; cursor: pointer; }
+.timepicker-list [role="option"][aria-selected="true"], .timepicker-list [role="option"]:hover { background: rgba(34, 197, 94, 0.1); }
+
+/* Dark theme adjustments */
+body.dark-theme .timepicker-input { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #f8fbff; }
+body.dark-theme .timepicker-list { background: rgba(17, 27, 43, 0.92); border-color: rgba(255,255,255,0.08); }

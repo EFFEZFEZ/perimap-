@@ -30,8 +30,9 @@ Disallow: /data/gtfs/
 # Crawl-delay pour éviter la surcharge (optionnel)
 Crawl-delay: 1
 
-# Sitemap
+# Sitemap (pseudonyme IDN + unicode)
 Sitemap: https://www.xn--primap-bva.fr/sitemap.xml
+Sitemap: https://www.périmap.fr/sitemap.xml
 
 # Google specifique
 User-agent: Googlebot

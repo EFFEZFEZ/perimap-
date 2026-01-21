@@ -72,11 +72,17 @@
     
     /* Z-index */
     --z-dropdown: 1000;
-    --z-fixed: 1010;
-    --z-modal-backdrop: 1040;
-    --z-modal: 1050;
-    --z-toast: 1060;
-    --z-tooltip: 1070;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-appbar: 1100;
+    --z-drawer: 1200;
+    --z-modal-backdrop: 1300;
+    --z-modal: 1350;
+    --z-popover: 1400;
+    --z-tooltip: 1500;
+    --z-toast: 1600;
+    --z-bottom-nav: 15000; /* legacy high value used in app */
+    --z-timepicker: 1450;
     
     /* Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
