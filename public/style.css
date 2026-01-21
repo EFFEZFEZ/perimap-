@@ -6565,11 +6565,14 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 
 
-#planner-options-popover, #results-planner-options-popover {
+/* Popover Accueil - s'ouvre vers le bas */
+#planner-options-popover {
     position: absolute;
-    bottom: calc(100% + 8px);
-    top: auto;
-    right: 0; 
+    top: calc(100% + 8px);
+    bottom: auto;
+    left: 0;
+    right: auto;
+    width: min(360px, calc(100vw - 24px));
     background: var(--bg-main);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
@@ -6578,19 +6581,58 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
-#planner-options-popover {
-    width: min(360px, calc(100vw - 24px)); /* V457: Reste dans l'écran sur accueil */
-}
+
+/* Popover Trajets - bottom-sheet fixe en bas de l'écran sur mobile */
 #results-planner-options-popover {
+    position: fixed;
+    bottom: 0;
     left: 0;
     right: 0;
-    width: min(520px, calc(100vw - 24px)); /* V457: Large mais contenu visible en vue trajets */
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: 70vh;
+    background: var(--bg-main);
+    border-radius: 16px 16px 0 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    z-index: 20000;
+    overflow: visible;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: env(safe-area-inset-bottom, 12px);
 }
-#planner-options-popover.hidden, #results-planner-options-popover.hidden {
+
+#planner-options-popover.hidden {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px);
     pointer-events: none;
-    visibility: hidden; /* V362: Empêche toute interaction même invisible */
+    visibility: hidden;
+}
+
+#results-planner-options-popover.hidden {
+    transform: translateY(100%);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+/* Handle visuel pour le bottom-sheet trajets */
+#results-planner-options-popover::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+/* Contenu du popover trajets */
+#results-planner-options-popover > .popover-content,
+#results-planner-options-popover .popover-tabs {
+    padding-top: 20px; /* Espace pour le handle */
 }
 
 
