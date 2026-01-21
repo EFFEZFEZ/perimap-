@@ -2183,6 +2183,7 @@ body:not(.dark-theme) .header-logo-img {
     position: relative;
     z-index: 100; /* V439: Au-dessus des autres blocs (hall-line-shortcuts=10, hall-express=10) */
     padding-top: var(--spacing-12);
+    padding-bottom: 200px; /* V485: Espace pour permettre le scroll quand le popover est ouvert */
 }
 
 .planner-block {
@@ -6581,6 +6582,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     z-index: 99999; /* AU-DESSUS de la bottom-nav */
     overflow: visible;
     transition: opacity 0.25s ease, transform 0.25s ease;
+    margin-bottom: 120px; /* Espace pour permettre le scroll */
 }
 
 #planner-options-popover.hidden,
@@ -6733,13 +6735,13 @@ body.dark-theme .real-select option {
     transform: translateY(-40%) rotate(135deg);
 }
 
-/* Menu temps - s'ouvre vers le BAS */
+/* Menu temps - s'ouvre vers le HAUT */
 .time-select-menu {
     position: absolute;
     left: 0;
     right: auto;
-    top: calc(100% + 8px);
-    bottom: auto;
+    bottom: calc(100% + 8px);
+    top: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -6747,7 +6749,7 @@ body.dark-theme .real-select option {
     padding: var(--spacing-2) 0;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(8px);
+    transform: translateY(-8px);
     transition: opacity var(--transition-quick), transform var(--transition-quick);
     z-index: 100000;
     display: flex;
