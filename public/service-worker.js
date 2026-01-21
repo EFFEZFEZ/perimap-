@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v450 - Fix planner width on desktop + z-index on mobile
+ * Service Worker v451 - Fix planner visibility: remove negative margins, force background
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -8,7 +8,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v450';
+const CACHE_VERSION = 'v451';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

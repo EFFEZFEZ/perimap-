@@ -2169,20 +2169,13 @@ body:not(.dark-theme) .header-logo-img {
 .planner-section {
     padding: 0;
     position: relative;
-    z-index: auto;
+    z-index: 10;
     padding-top: var(--spacing-12);
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
 }
 
-/* Isoler le planner du dashboard - z-index auto pour éviter les conflits avec les vues superposées */
+/* Styles spécifiques pour le planner dans le dashboard */
 #dashboard-hall .planner-section {
-    z-index: auto;
     position: relative;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
 }
 
 .planner-block {
@@ -11423,7 +11416,10 @@ body.dark-theme .tarifs-choice {
     /* Planner block mobile */
     .planner-block {
         padding: 1rem;
-        margin: -1rem 0 1rem;
+        margin: 0 0 1rem;
+        background: #FFFFFF;
+        position: relative;
+        z-index: 10;
     }
     
     .planner-block-wrapper {
@@ -11622,7 +11618,10 @@ body.dark-theme .tarifs-choice {
     }
     
     .planner-block {
-        margin: -1.5rem 0 0.75rem;
+        margin: 0 0 0.75rem;
+        background: #FFFFFF;
+        position: relative;
+        z-index: 10;
     }
     
     .services-section,
@@ -12177,6 +12176,9 @@ body.dark-theme .mode-tab.active {
     .planner-block {
         margin: 0 0 1rem;
         border-radius: var(--radius-lg);
+        background: #FFFFFF;
+        position: relative;
+        z-index: 10;
     }
     
     .planner-block .form-group input[type="text"] {

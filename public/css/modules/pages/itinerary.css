@@ -25,9 +25,11 @@
 
 /* Isoler le conteneur itinéraire quand caché */
 #itinerary-results-container.hidden {
+    display: none !important;
     position: fixed;
     z-index: -1;
     pointer-events: none;
+    visibility: hidden;
 }
 
 body.itinerary-view-active #itinerary-results-container {
