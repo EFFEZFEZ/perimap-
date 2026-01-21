@@ -2083,19 +2083,49 @@ function setupPlannerListeners(source, elements) {
 async function executeItinerarySearch(source, sourceElements) {
     const { fromInput, toInput, dateSelect, hourSelect, minuteSelect, popover } = sourceElements;
     
+    logger.debug('Itinerary search start', { source, fromPlaceId, toPlaceId });
+    
     // V59: Reset complet pour nouvelle recherche
-    console.log('🔄 === NOUVELLE RECHERCHE ===');
+    logger.info('🔄 === NOUVELLE RECHERCHE ===');
     
     if (!fromPlaceId || !toPlaceId) {
-        alert("Veuillez sélectionner un point de départ et d'arrivée depuis les suggestions.");
+        const message = "Veuillez sélectionner un point de départ et d'arrivée depuis les suggestions.";
+        alert(message);
+        logger.warn('Search cancelled: incomplete locations', { from: !!fromPlaceId, to: !!toPlaceId });
+        eventBus.emit('search:error', { 
+            message,
+            error: new Error('Missing departure or arrival') 
+        });
         return;
     }
+    
+    // PHASE 1: Emit search:start event
     const searchTime = {
         type: popover.querySelector('.popover-tab.active').dataset.tab, 
         date: dateSelect.value,
         hour: hourSelect.value,
         minute: minuteSelect.value
     };
+    
+    eventBus.emit('search:start', {
+        departure: { placeId: fromPlaceId, label: fromInput?.value },
+        arrival: { placeId: toPlaceId, label: toInput?.value },
+        time: searchTime,
+        source
+    });
+    
+    stateManager.setState({
+        search: {
+            departure: { placeId: fromPlaceId, label: fromInput?.value },
+            arrival: { placeId: toPlaceId, label: toInput?.value },
+            departureTime: `${searchTime.hour}:${searchTime.minute}`,
+            arrivalTime: searchTime.type === 'arriver' ? `${searchTime.hour}:${searchTime.minute}` : null,
+            mode: searchTime.type,
+            results: [],
+            loading: true,
+            error: null
+        }
+    }, 'search:start');
 
     // V204 + correctif fuseau: calculer la date du jour en local (pas en UTC)
     const nowLocal = new Date();
@@ -2106,18 +2136,14 @@ async function executeItinerarySearch(source, sourceElements) {
     }
     
     // Debug: vérifier l'heure réellement sélectionnée
-    console.log('🕐 Heure sélectionnée:', {
+    logger.debug('Search time details', {
         date: searchTime.date,
         heure: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`,
         mode: searchTime.type,
         hourSelectValue: hourSelect.value,
-        hourSelectIndex: hourSelect.selectedIndex,
-        minuteSelectValue: minuteSelect.value,
-        minuteSelectIndex: minuteSelect.selectedIndex,
-        // Debug supplémentaire
-        hourOptions: hourSelect.options?.length,
-        selectedHourText: hourSelect.options?.[hourSelect.selectedIndex]?.textContent
+        minuteSelectValue: minuteSelect.value
     });
+    
     lastSearchMode = searchTime.type; // Mémoriser le mode pour le rendu/pagination
     lastSearchTime = { ...searchTime }; // V60: Mémoriser pour charger plus
     loadMoreOffset = 0; // V60: Reset l'offset
@@ -2127,13 +2153,19 @@ async function executeItinerarySearch(source, sourceElements) {
     allFetchedItineraries = [];
     
     prefillOtherPlanner(source, sourceElements);
-    console.log(`Recherche itinéraire (backend ${apiManager.backendMode || 'unknown'}) (source: ${source}):`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
+    logger.info(`Recherche itinéraire (backend ${apiManager.backendMode || 'unknown'})`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
+    
     if (source === 'hall') {
         showResultsView(); 
     }
+    
     // V220: Afficher des skeleton loaders pendant le chargement (plus joli qu'un texte)
     if (resultsRenderer) resultsRenderer.showSkeleton(4);
     resultsModeTabs.classList.add('hidden');
+    
+    // PHASE 1: Emit UI loading event
+    eventBus.emit('ui:loading', true);
+    
     try {
         let fromCoords = null;
         let toCoords = null;
@@ -2143,25 +2175,25 @@ async function executeItinerarySearch(source, sourceElements) {
         // 🚀 V60: Résolution des coordonnées EN PARALLÈLE
         const coordsStart = performance.now();
         const [fromResult, toResult] = await Promise.all([
-            apiManager.getPlaceCoords(fromPlaceId).catch(e => { console.warn('Coords départ:', e); return null; }),
-            apiManager.getPlaceCoords(toPlaceId).catch(e => { console.warn('Coords arrivée:', e); return null; })
+            apiManager.getPlaceCoords(fromPlaceId).catch(e => { logger.warn('Coords départ error', e); return null; }),
+            apiManager.getPlaceCoords(toPlaceId).catch(e => { logger.warn('Coords arrivée error', e); return null; })
         ]);
         
         if (fromResult) {
             fromCoords = { lat: fromResult.lat, lng: fromResult.lng };
             if (fromResult.isMultiStop && fromResult.gtfsStops) {
                 fromGtfsStops = fromResult.gtfsStops.map(s => s.stopId);
-                console.log(`🎓 Pôle multimodal origine: ${fromGtfsStops.length} arrêts`);
+                logger.debug(`🎓 Pôle multimodal origine: ${fromGtfsStops.length} arrêts`);
             }
         }
         if (toResult) {
             toCoords = { lat: toResult.lat, lng: toResult.lng };
             if (toResult.isMultiStop && toResult.gtfsStops) {
                 toGtfsStops = toResult.gtfsStops.map(s => s.stopId);
-                console.log(`🎓 Pôle multimodal destination: ${toGtfsStops.length} arrêts`);
+                logger.debug(`🎓 Pôle multimodal destination: ${toGtfsStops.length} arrêts`);
             }
         }
-        console.log(`⚡ Coords résolues en ${Math.round(performance.now() - coordsStart)}ms`);
+        logger.debug(`⚡ Coords résolues en ${Math.round(performance.now() - coordsStart)}ms`);
 
         const fromLabel = sourceElements.fromInput?.value || '';
         const toLabel = sourceElements.toInput?.value || '';
@@ -2179,22 +2211,22 @@ async function executeItinerarySearch(source, sourceElements) {
                     labels: { fromLabel, toLabel },
                     forcedStops: { from: fromGtfsStops, to: toGtfsStops }
                 });
-                console.log('🔍 GTFS local:', hybridItins?.length || 0, 'itinéraires');
+                logger.debug('🔍 GTFS local', { count: hybridItins?.length || 0 });
             } catch (e) {
-                console.warn('GTFS router error:', e);
+                logger.warn('GTFS router error', e);
             }
         }
 
         // Backend principal (Google Routes via Vercel proxy)
         const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
-            .catch(e => { console.error('Erreur routage principal:', e); return null; });
+            .catch(e => { logger.error('Erreur routage principal', e); return null; });
         
-        console.log(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
+        logger.debug(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
 
         // Traiter les résultats backend principal
         if (intelligentResults) {
             allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
-            console.log('✅ Backend principal:', allFetchedItineraries?.length || 0, 'itinéraires');
+            logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
             // Fusionner avec GTFS si disponible
             if (hybridItins?.length) {
@@ -2207,21 +2239,24 @@ async function executeItinerarySearch(source, sourceElements) {
                 }
             }
         } else if (hybridItins?.length) {
-            console.log('🔄 Fallback GTFS:', hybridItins.length, 'itinéraires');
+            logger.info('🔄 Fallback GTFS itineraries', { count: hybridItins.length });
             allFetchedItineraries = hybridItins;
         } else {
             allFetchedItineraries = [];
+            logger.warn('No itineraries found');
         }
 
         // Debug: vérifier si l'heure demandée correspond
         const heureDemandeMin = parseInt(searchTime.hour) * 60 + parseInt(searchTime.minute);
-        console.log('📊 Heure demandée:', `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`);
+        logger.debug('Requested time', { 
+            time: `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`
+        });
 
         // Ensure every BUS step has a polyline (GTFS constructed or fallback)
         try {
             await ensureItineraryPolylines(allFetchedItineraries);
         } catch (e) {
-            console.warn('Erreur lors de l\'assurance des polylines:', e);
+            logger.warn('Erreur lors de l\'assurance des polylines', e);
         }
 
         // TOUJOURS filtrer les trajets dont le départ est passé (même en mode "arriver")
@@ -2240,32 +2275,32 @@ async function executeItinerarySearch(source, sourceElements) {
         allFetchedItineraries = limitBikeWalkItineraries(allFetchedItineraries);
 
         // Debug: après filtrage
-        console.log('📋 Après filtrage:', {
+        logger.debug('After filtering', {
             mode: searchTime.type || 'partir',
-            restants: allFetchedItineraries?.length || 0
+            remaining: allFetchedItineraries?.length || 0
         });
 
         // V63: On ne déduplique PLUS - Google gère le ranking, on garde tous les horaires
         // const searchMode = searchTime.type || 'partir';
         // allFetchedItineraries = deduplicateItineraries(allFetchedItineraries, searchMode);
         
-        console.log('📊 Itinéraires disponibles:', allFetchedItineraries?.length || 0);
+        logger.info('📊 Available itineraries', { count: allFetchedItineraries?.length || 0 });
 
         // V137b: Forcer un ordre croissant clair (départs les plus proches → plus éloignés)
         const heureDemandee = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
         if (searchTime.type === 'arriver') {
-            console.log(`🎯 Mode ARRIVER: tri cible ${heureDemandee} (arrivée décroissante)`);
+            logger.info(`🎯 Mode ARRIVER: tri cible ${heureDemandee} (arrivée décroissante)`);
             const { rankArrivalItineraries } = await import('./itinerary/ranking.js');
             arrivalRankedAll = rankArrivalItineraries([...allFetchedItineraries], searchTime);
             arrivalRenderedCount = arrivalRankedAll.length; // Montrer tout, pas de pagination
         } else {
-            console.log(`🎯 Mode PARTIR: tri chrono croissant appliqué (base ${heureDemandee})`);
+            logger.info(`🎯 Mode PARTIR: tri chrono croissant appliqué (base ${heureDemandee})`);
             allFetchedItineraries = sortItinerariesByDeparture(allFetchedItineraries);
             arrivalRankedAll = [];
             arrivalRenderedCount = 0;
         }
         
-        console.log('📊 Itinéraires (ordre Google conservé):', 
+        logger.debug('Itineraries sorted', 
             allFetchedItineraries.slice(0, 5).map(it => ({
                 dep: it.departureTime,
                 arr: it.arrivalTime,
@@ -2274,6 +2309,22 @@ async function executeItinerarySearch(source, sourceElements) {
         
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
+        
+        // PHASE 1: Emit search:complete event
+        eventBus.emit('search:complete', { 
+            itineraries: allFetchedItineraries,
+            mode: searchTime.type,
+            source 
+        });
+        
+        stateManager.setState({
+            search: {
+                results: allFetchedItineraries,
+                loading: false,
+                error: null
+            }
+        }, 'search:complete');
+        
         if (allFetchedItineraries.length > 0) {
             // V117: S'assurer que la carte est bien dimensionnée avant de dessiner
             if (resultsMapRenderer && resultsMapRenderer.map) {
@@ -2286,12 +2337,34 @@ async function executeItinerarySearch(source, sourceElements) {
             }
             // V60: Le bouton GO est maintenant intégré dans le bottom sheet de chaque itinéraire
         }
+        
+        // PHASE 1: Emit UI loading completion
+        eventBus.emit('ui:loading', false);
+        
     } catch (error) {
-        console.error("Échec de la recherche d'itinéraire:", error);
+        logger.error("Échec de la recherche d'itinéraire", error);
+        
+        // PHASE 1: Emit search:error event
+        eventBus.emit('search:error', { 
+            message: `Impossible de calculer l'itinéraire. ${error.message}`,
+            error 
+        });
+        
+        stateManager.setState({
+            search: {
+                loading: false,
+                error: error.message,
+                results: []
+            }
+        }, 'search:error');
+        
         if (resultsListContainer) {
             resultsListContainer.innerHTML = `<p class="results-message error">Impossible de calculer l'itinéraire. ${error.message}</p>`;
         }
         resultsModeTabs.classList.add('hidden');
+        
+        // PHASE 1: Emit UI loading completion
+        eventBus.emit('ui:loading', false);
     }
 }
 
