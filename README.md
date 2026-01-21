@@ -74,6 +74,17 @@ L'autocomplétion comprend votre ville :
 
 ---
 
+## 🧭 Scrollytelling : du premier tap à l'arrivée
+
+1) **Tu ouvres PériMap** : l'écran Trajets s'allume, inputs prêts, bouton swap centré (sans halo vert).
+2) **Tu tapes deux lettres** : l'autocomplétion suggère tes arrêts locaux en < 250 ms.
+3) **Tu choisis l'heure** : popover arrondi (onglets Partir/Arriver), menus natifs scrollables.
+4) **Tu lances la recherche** : l'API retourne les trajets, le panneau se déverrouille pour scroller.
+5) **Tu reviens demain** : la section "Vos trajets" garde tes derniers parcours, recharge les inputs en un clic.
+6) **En route** : la carte et les horaires temps réel se mettent à jour toutes les 60 s pendant ton trajet.
+
+---
+
 ## 🚀 Installation
 
 ### Prérequis
