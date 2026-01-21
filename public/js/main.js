@@ -209,6 +209,18 @@ function getWaitStepPresentation(steps, index) {
 function onSelectItinerary(itinerary, cardEl) {
     if (!itinerary || !cardEl) return;
 
+    logger.debug('Itinerary selected', { 
+        departure: itinerary.departureTime, 
+        arrival: itinerary.arrivalTime 
+    });
+    
+    // PHASE 1: Emit map:route-selected event
+    eventBus.emit('map:route-selected', { itinerary, source: 'results' });
+    
+    stateManager.setState({
+        map: { selectedRoute: itinerary }
+    }, 'map:route-selected');
+
     // V59: Sur mobile, on affiche la vue détail overlay
     if (isMobileDetailViewport()) {
         // Marquer cette carte comme active visuellement
@@ -218,6 +230,8 @@ function onSelectItinerary(itinerary, cardEl) {
         // Rendre le détail dans la vue mobile et afficher l'overlay
         const routeLayer = renderItineraryDetail(itinerary);
         showDetailView(routeLayer);
+        
+        logger.debug('Showing itinerary detail view (mobile)');
         return;
     }
 
@@ -242,6 +256,7 @@ function onSelectItinerary(itinerary, cardEl) {
     if (wasExpanded) {
         detailsDiv.classList.add('hidden');
         cardEl.classList.remove('is-active');
+        logger.debug('Itinerary details collapsed');
     } else {
         // Générer le HTML des détails si pas encore fait
         if (!detailsDiv.innerHTML.trim()) {
@@ -249,6 +264,8 @@ function onSelectItinerary(itinerary, cardEl) {
         }
         detailsDiv.classList.remove('hidden');
         cardEl.classList.add('is-active');
+        
+        logger.debug('Itinerary details expanded (desktop)');
 
         // V117: Mettre à jour la carte avec l'itinéraire sélectionné
         if (resultsMapRenderer && resultsMapRenderer.map) {
