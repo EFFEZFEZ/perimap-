@@ -90,6 +90,36 @@ function setCache(key, data) {
 }
 
 // ============================================
+// OPTIMISATION HEURES CREUSES (Free Plan Vercel)
+// ============================================
+
+// Désactiver GTFS RT de 21h à 5h30 pour économiser les requêtes
+const BLACKOUT_START_HOUR = 21;      // 21h (9 PM)
+const BLACKOUT_END_HOUR = 5;         // 5h (5 AM)
+const BLACKOUT_END_MINUTE = 30;      // 5h30
+
+function isInBlackoutWindow() {
+    const now = new Date();
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+    
+    // Entre 21h et 23h59 OU entre 00h et 5h29
+    if (hour >= BLACKOUT_START_HOUR) {
+        return true; // 21h à 23h59
+    }
+    
+    if (hour < BLACKOUT_END_HOUR) {
+        return true; // 00h à 04h59
+    }
+    
+    if (hour === BLACKOUT_END_HOUR && minute < BLACKOUT_END_MINUTE) {
+        return true; // 05h00 à 05h29
+    }
+    
+    return false;
+}
+
+// ============================================
 // HELPERS
 // ============================================
 
@@ -318,6 +348,18 @@ export default async function handler(req, res) {
 
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // OPTIMISATION: Vérifier si on est en période de faible utilisation (21h-5h30)
+    if (isInBlackoutWindow()) {
+        const now = new Date();
+        return res.status(503).json({ 
+            error: 'Service unavailable during off-peak hours (21h00 - 05h30)',
+            timestamp: now.toISOString(),
+            reason: 'GTFS Realtime disabled to optimize Vercel Free Plan usage',
+            availableFrom: '05h30 CET',
+            service: 'realtime'
+        });
     }
 
     // V421: Support multi-stops - passage de plusieurs arrêts en une requête

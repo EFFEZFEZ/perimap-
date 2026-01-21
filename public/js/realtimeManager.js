@@ -58,6 +58,51 @@ export class RealtimeManager {
         this.sleepUntilMs = 0;
     }
 
+    // ============================================
+    // OPTIMISATION HEURES CREUSES (Free Plan Vercel)
+    // ============================================
+    
+    /**
+     * Vérifie si on est actuellement en période de faible utilisation (21h-5h30)
+     * Pour économiser les requêtes sur le free plan Vercel
+     */
+    isInBlackoutWindow() {
+        const now = new Date();
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        
+        // Entre 21h et 23h59 OU entre 00h et 5h29
+        if (hour >= 21) {
+            return true; // 21h à 23h59
+        }
+        
+        if (hour < 5) {
+            return true; // 00h à 04h59
+        }
+        
+        if (hour === 5 && minute < 30) {
+            return true; // 05h00 à 05h29
+        }
+        
+        return false;
+    }
+
+    /**
+     * Calcule le timestamp du prochain démarrage du service (5h30)
+     */
+    calculateNextServiceStartTime() {
+        const now = new Date();
+        const nextStart = new Date(now);
+        
+        if (this.isInBlackoutWindow()) {
+            // Si on est entre 21h et 5h30, le service redémarre demain à 5h30
+            nextStart.setDate(nextStart.getDate() + 1);
+        }
+        
+        nextStart.setHours(5, 30, 0, 0);
+        return nextStart.getTime();
+    }
+
     isSleeping() {
         return !!(this.sleepUntilMs && Date.now() < this.sleepUntilMs);
     }
@@ -67,6 +112,7 @@ export class RealtimeManager {
         this.sleepUntilMs = ts;
         if (this.isSleeping()) {
             this.stopAutoRefresh();
+            console.log('[Realtime] 🌙 Mode sleep activé jusqu\'à:', new Date(ts).toLocaleString('fr-FR'));
         }
     }
 
@@ -79,8 +125,15 @@ export class RealtimeManager {
         this.stops = stops;
         loadStopIdMapping(stops);
 
+        // OPTIMISATION: Activer le mode sleep si on est en heures creuses (21h-5h30)
+        if (this.isInBlackoutWindow()) {
+            const nextStart = this.calculateNextServiceStartTime();
+            this.setSleepUntil(nextStart);
+            console.log('[Realtime] ⏸️  Service en heures creuses (21h-5h30) - Mode sleep activé');
+        }
+
         // V3: Lancer le préchargement des arrêts PRIORITAIRES uniquement
-        if (autoPreload && this.preloadConfig.enabled) {
+        if (autoPreload && this.preloadConfig.enabled && !this.isSleeping()) {
             // Attendre un peu pour ne pas bloquer le démarrage de l'app
             setTimeout(() => this.preloadPriorityStops(), 800);
         }
