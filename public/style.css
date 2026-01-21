@@ -3416,9 +3416,13 @@ body.dark-theme .app-back-btn svg {
     margin-right: auto;
 }
 
-/* Largeur fixe demandée pour la carte horaires */
+/* Largeur responsive pour la carte horaires */
 #horaires.view-active {
-    width: 382px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 1.5rem;
 }
 
 #fiche-horaire-container {
