@@ -2169,8 +2169,14 @@ body:not(.dark-theme) .header-logo-img {
 .planner-section {
     padding: 0;
     position: relative;
-    z-index: 50;
+    z-index: auto;
     padding-top: var(--spacing-12);
+}
+
+/* Isoler le planner du dashboard - z-index auto pour éviter les conflits avec les vues superposées */
+#dashboard-hall .planner-section {
+    z-index: auto;
+    position: relative;
 }
 
 .planner-block {
@@ -2768,7 +2774,7 @@ body.dark-theme .quick-action-card span {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    z-index: auto;
     pointer-events: auto;
     width: 100%;
 }
@@ -2820,7 +2826,7 @@ body.dark-theme .hall-line-shortcuts {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    z-index: auto;
     pointer-events: auto;
     width: 100%;
 }
