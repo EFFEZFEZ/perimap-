@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v438 - Fix responsive layout horaires page (600px max-width)
+ * Service Worker v439 - Fix planner-block z-index and view separation
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -8,7 +8,7 @@
  * - Network-first pour pages HTML
  */
 
-const CACHE_VERSION = 'v438';
+const CACHE_VERSION = 'v439';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
