@@ -6623,6 +6623,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     max-height: calc(100vh - 250px);
     overflow-y: auto;
     overflow-x: hidden;
+    overflow-anchor: none;
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
@@ -6633,10 +6634,15 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     display: flex;
     gap: 1rem;
     align-items: stretch;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
 }
 .popover-time-inputs .form-group {
     flex: 1;
     min-width: 0;
+    overflow: visible;
+    position: relative;
 }
 .popover-time-inputs .form-group label {
     font-size: 0.8rem;
