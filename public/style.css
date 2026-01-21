@@ -6565,15 +6565,15 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 
 
-/* Popover Accueil et Trajets - Style identique, centré, visible entier */
+/* Popover Accueil et Trajets - EN DESSOUS du bouton "Partir maintenant" */
 #planner-options-popover,
 #results-planner-options-popover {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(360px, calc(100vw - 32px));
-    max-height: calc(100vh - 120px);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 360px;
     background: var(--bg-main);
     border-radius: 16px;
     border: 1px solid var(--border);
@@ -6586,7 +6586,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 #planner-options-popover.hidden,
 #results-planner-options-popover.hidden {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.95);
+    transform: translateY(-8px);
     pointer-events: none;
     visibility: hidden;
 }
@@ -6926,14 +6926,15 @@ body.dark-theme .real-select option {
         z-index: 500; 
     }
 
-    /* 3. LE MENU LUI-MÊME - Modal centré */
+    /* 3. LE MENU LUI-MÊME - En dessous du bouton */
     #planner-options-popover {
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: min(360px, calc(100vw - 32px)) !important;
-        max-height: calc(100vh - 120px) !important;
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: none !important;
         overflow: visible;
         background: var(--bg-main);
         border: 1px solid var(--border);
@@ -6946,7 +6947,7 @@ body.dark-theme .real-select option {
     /* 4. Cacher proprement quand c'est fermé */
     #planner-options-popover.hidden {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.95) !important;
+        transform: translateY(-8px) !important;
         pointer-events: none;
         visibility: hidden;
     }
