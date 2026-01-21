@@ -204,7 +204,17 @@ export default async function handler(req) {
   }
 
   const url = new URL(req.url);
-  const input = url.searchParams.get('input')?.trim();
+  let input = url.searchParams.get('input')?.trim();
+
+  // V490: Support POST requests with JSON body (AutocompleteService sends POST)
+  if (!input && req.method === 'POST') {
+    try {
+      const body = await req.json();
+      input = body.input?.trim();
+    } catch (e) {
+      console.error('[Places] Error parsing POST body:', e.message);
+    }
+  }
 
   if (!input || input.length < 2) {
     return new Response(JSON.stringify({ predictions: [] }), {

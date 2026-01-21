@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v486 - Time-select vers le HAUT + padding scroll pour popover
+ * Service Worker v490 - Fix API places POST + anti-zones grises mobile
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v489';
+const CACHE_VERSION = 'v490';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

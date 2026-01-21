@@ -616,6 +616,12 @@ body.dark-theme {
     --color-nav-condensed-bg: rgba(11, 18, 32, 0.95);
 }
 
+/* V490: Dark theme - fond solide sur html pour éviter zones grises Chrome */
+html.dark-theme,
+body.dark-theme {
+    background-color: #0b1220;
+}
+
 /* Small visual adjustments in dark mode */
 body.dark-theme #main-header {
     background: var(--bg-page);
@@ -1312,18 +1318,25 @@ body.dark-theme .leaflet-control-attribution a,
     box-sizing: border-box;
 }
 
-/* *** CORRECTION V28 + V59 + V347 + V455 SCROLL MOBILE *** */
-html, body {
+/* *** CORRECTION V28 + V59 + V347 + V455 + V490 SCROLL MOBILE *** */
+html {
     margin: 0;
     padding: 0;
-    height: auto; /* V59: Permettre au contenu de définir la hauteur */
+    height: 100%;
     min-height: 100%;
     width: 100%;
-    overflow-x: hidden; 
+    overflow-x: hidden;
+    /* V490: Fond solide sur html pour éviter les zones grises Chrome */
+    background-color: #f8fafc; /* Fallback clair si var non définie */
+    background-color: var(--bg-page, #f8fafc);
+    overscroll-behavior: none; /* V490: Empêche bounce/pull-to-refresh */
+}
+
+html, body {
     -webkit-font-smoothing: antialiased;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
-    background-color: var(--bg-page); 
+    background-color: var(--bg-page, #f8fafc); 
     overscroll-behavior-y: none; /* V455: Empêche pull-to-refresh Chrome */
     overscroll-behavior-x: none; /* V455: Empêche bounce horizontal */
     /* V347: Empêcher les sauts lors du scroll mobile (barre adresse) */
@@ -1880,7 +1893,7 @@ body.detail-view-open #legal-strip {
     -webkit-overflow-scrolling: touch;
 }
 
-/* V66: Bloquer le scroll du body UNIQUEMENT pour la vue carte */
+/* V66 + V490: Bloquer le scroll du body UNIQUEMENT pour la vue carte */
 body.view-map-locked {
     overflow: hidden !important;
     position: fixed !important;
@@ -1890,9 +1903,14 @@ body.view-map-locked {
     height: 100svh !important; /* Stable viewport height (évite les sauts UI navigateur) */
     top: 0 !important;
     left: 0 !important;
+    background-color: var(--bg-page, #f8fafc) !important; /* V490: Fond solide anti-zones grises */
 }
 
-/* V368: Bloquer le scroll du body aussi pour la vue itinéraire (empêcher Chrome UI de bouger) */
+body.dark-theme.view-map-locked {
+    background-color: #0b1220 !important; /* V490: Fond solide dark mode */
+}
+
+/* V368 + V490: Bloquer le scroll du body aussi pour la vue itinéraire (empêcher Chrome UI de bouger) */
 body.itinerary-view-active {
     overflow: hidden !important;
     position: fixed !important;
@@ -1902,6 +1920,11 @@ body.itinerary-view-active {
     height: 100svh !important;
     top: 0 !important;
     left: 0 !important;
+    background-color: var(--bg-page, #f8fafc) !important; /* V490: Fond solide anti-zones grises */
+}
+
+body.dark-theme.itinerary-view-active {
+    background-color: #0b1220 !important; /* V490: Fond solide dark mode */
 }
 
 /* V120: Forcer la vue carte en plein écran sur mobile */
