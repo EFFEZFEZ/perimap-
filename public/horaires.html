@@ -122,7 +122,7 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: none;
-      padding-top: 104px; /* 52px header + 52px top-bar */
+      padding-top: 0;
     }
 
     #main-header {
@@ -281,17 +281,14 @@
 
     /* Page & Grille - même largeur que trafic.html (980px) pour responsive */
     .horaires-page {
+      padding: 18px;
       max-width: 980px;
-      width: 100%;
       margin: 0 auto;
-      padding: 18px 2rem;
     }
 
     @media (max-width: 767px) {
       .horaires-page {
-        padding-top: 18px;
-        padding-left: 18px;
-        padding-right: 18px;
+        padding: 18px;
       }
     }
 
@@ -391,7 +388,8 @@
     </button>
     <h2>Horaires</h2>
   </div>
-  <div class="page-wrapper">  <main class="horaires-page">
+
+  <main class="horaires-page" style="padding: 18px; max-width: 980px; margin: 0 auto; margin-top: 52px;">
     <section class="horaires-hero">
       <h1>Horaires Péribus</h1>
       <p>Choisissez une ligne pour voir les prochains départs par arrêt, maintenant ou à l’heure choisie.</p>
@@ -569,6 +567,5 @@
       // Pas de CTA ici (déjà dans l'application)
     }
   </script>
-</div>
 </body>
 </html>
