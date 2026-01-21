@@ -2164,7 +2164,7 @@ body:not(.dark-theme) .header-logo-img {
 .planner-section {
     padding: 0;
     position: relative;
-    z-index: 50;
+    z-index: 100; /* V439: Au-dessus des autres blocs (hall-line-shortcuts=10, hall-express=10) */
     padding-top: var(--spacing-12);
 }
 
@@ -2175,6 +2175,8 @@ body:not(.dark-theme) .header-logo-img {
     box-shadow: var(--elevation-4);
     border: 2px solid rgba(34, 197, 94, 0.2);
     transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+    position: relative;
+    z-index: 100; /* V439: Au-dessus de tous les blocs (halls/express/shortcuts) */
 }
 
 .planner-block:hover {
@@ -2761,7 +2763,7 @@ body.dark-theme .quick-action-card span {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    z-index: 10; /* V439: Sous le planner-block (z-index:100) */
     pointer-events: auto;
     width: 100%;
 }
@@ -2813,7 +2815,7 @@ body.dark-theme .hall-line-shortcuts {
     border-radius: var(--radius-lg);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     position: relative;
-    z-index: 80; /* au-dessus du planner-section (z-index:50) pour clics */
+    z-index: 10; /* V439: Sous le planner-block (z-index:100) */
     pointer-events: auto;
     width: 100%;
 }
@@ -3273,9 +3275,17 @@ body.dark-theme .stats-section .stat-label {
     font-weight: 600;
     padding-left: 0.75rem;
 }
-#btn-back-to-hall:not(.app-back-btn):hover {
-    background: var(--border);
-    border-color: var(--secondary);
+/* V439: Dissociation explicite des vues - planner-block seulement en hall */
+#dashboard-hall .planner-section {
+    pointer-events: auto;
+    z-index: 100;
+}
+
+#dashboard-content-view .planner-section {
+    display: none;
+    pointer-events: none;
+    z-index: 0;
+}
 }
 #btn-back-to-hall:not(.app-back-btn) svg {
     margin-right: 0.5rem;
