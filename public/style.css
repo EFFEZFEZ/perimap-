@@ -940,6 +940,7 @@ body.dark-theme .offline-toast-success {
  * ========================================= */
 .pm-ripple-host {
     position: relative;
+    overflow: visible;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
 }
