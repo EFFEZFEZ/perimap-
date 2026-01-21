@@ -6730,13 +6730,13 @@ body.dark-theme .real-select option {
     transform: translateY(-40%) rotate(135deg);
 }
 
-/* V160: Menu temps qui s'ouvre vers le HAUT pour éviter de sortir de l'écran */
+/* Menu temps - ouverture vers le BAS pour éviter le clipping et autoriser le scroll complet */
 .time-select-menu {
     position: absolute;
     left: 0;
     right: auto;
-    bottom: calc(100% + 8px); /* S'ouvre vers le haut */
-    top: auto;
+    top: calc(100% + 8px);
+    bottom: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -6746,7 +6746,7 @@ body.dark-theme .real-select option {
     pointer-events: none;
     transform: translateY(var(--spacing-2));
     transition: opacity var(--transition-quick), transform var(--transition-quick);
-    z-index: var(--z-popover);
+    z-index: 20001;
     display: flex;
     flex-direction: column;
     width: 100px;
