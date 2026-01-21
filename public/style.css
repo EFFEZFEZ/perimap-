@@ -6556,8 +6556,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
-    z-index: 16000; /* V362: Au dessus de la bottom-nav (15000) */
-    overflow: visible; /* V449-fix: laisse passer les listes natives (select) */
+    z-index: 20000; /* V451: Au dessus de tout (bottom-nav=15000) */
+    overflow: visible; /* V451-fix: permet aux selects natifs de déborder */
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #planner-options-popover.hidden, #results-planner-options-popover.hidden {
@@ -6603,8 +6603,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
-    overflow: auto; /* Permettre le scroll interne sans clipper les menus natifs */
-    max-height: calc(100vh - 350px); /* Conserve la limite mais au niveau du contenu */
+    overflow: visible; /* V451: permet aux selects natifs de ne pas être clippés */
+    max-height: none; /* V451: pas de contrainte de hauteur pour éviter la coupure */
 }
 .popover-time-inputs {
     display: flex;

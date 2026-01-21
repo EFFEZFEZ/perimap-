@@ -3,8 +3,8 @@
 /* Trigger button ensures layered above nearby elements */
 .btn-time-picker { z-index: var(--z-timepicker); position: relative; }
 
-/* Popover container must allow overflow for dropdowns */
-#results-planner-options-popover { overflow: visible; z-index: var(--z-popover); position: relative; }
+/* Popover container must allow overflow for dropdowns and be above all UI (bottom-nav, etc.) */
+#results-planner-options-popover { overflow: visible; z-index: 20000; position: absolute; }
 
 /* Popover content: constrain height, scroll internally */
 #results-planner-options-popover .popover-content,
