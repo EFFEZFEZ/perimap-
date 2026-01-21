@@ -940,7 +940,6 @@ body.dark-theme .offline-toast-success {
  * ========================================= */
 .pm-ripple-host {
     position: relative;
-    overflow: visible;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
 }
@@ -6697,6 +6696,7 @@ body.dark-theme .real-select option {
 .time-select-wrapper {
     position: relative;
     width: 100%;
+    overflow: visible;
 }
 .time-select-native {
     position: absolute;
