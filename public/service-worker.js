@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v469 - Force full cache clear
+ * Service Worker v470 - Fix corrupted CSS (header-content block)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v469';
+const CACHE_VERSION = 'v470';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

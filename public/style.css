@@ -2002,21 +2002,24 @@ body.itinerary-view-active #legal-strip {
     display: flex;
     justify-content: space-between;
     align-items: center;
-#results-planner-options-popover > .popover-content {
-    max-height: min(70vh, 480px); /* V457: Accueil - hauteur contenue */
-    overflow-y: auto; /* Scroll interne */
-    overflow-x: hidden;
+    height: 64px;
+    max-width: 1300px;
+    margin: 0 auto;
 }
-#results-planner-options-popover > .popover-content {
-    max-height: calc(100vh - 200px); /* V457: Vue trajets - plus haute mais contenue */
-    overflow-y: auto;
-    overflow-x: hidden;
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 800;
+    color: var(--text-primary);
 }
+
+.header-logo-img {
     max-width: 170px;
     width: auto;
     object-fit: contain;
     display: block;
-    /* Pas de fond, on utilise un filtre pour le mode clair */
 }
 
 /* Logo en mode clair: inverser les couleurs pour visibilité */
@@ -6358,7 +6361,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 /* =========================================
  * STYLES PLANIFICATEUR (GÉNÉRAL)
- * ========================================= */ */
+ * ========================================= */
 .planner-block .form-group label,
 .itinerary-edit-form .form-group label {
     font-size: 0.75rem; 
