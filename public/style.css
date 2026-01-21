@@ -6552,12 +6552,14 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     top: calc(100% + 8px); 
     right: 0; 
     width: 320px; 
+    max-height: calc(100vh - 200px); /* V453: Contraindre pour mobile */
     background: var(--bg-main);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
     z-index: 20000; /* V451: Au dessus de tout (bottom-nav=15000) */
-    overflow: visible; /* V451-fix: permet aux selects natifs de déborder */
+    overflow-y: auto; /* V453: Scroll si trop grand */
+    overflow-x: hidden;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #planner-options-popover.hidden, #results-planner-options-popover.hidden {
@@ -6603,8 +6605,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
-    overflow: visible; /* V451: permet aux selects natifs de ne pas être clippés */
-    max-height: none; /* V451: pas de contrainte de hauteur pour éviter la coupure */
+    overflow: visible;
+    max-height: none;
 }
 .popover-time-inputs {
     display: flex;
