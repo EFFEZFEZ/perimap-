@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v465 - Hotfix: Restore full style.css
+ * Service Worker v466 - Stable (Full style.css)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v465';
+const CACHE_VERSION = 'v466';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -18,43 +18,8 @@ const PRECACHE = [
   '/index.html',
   '/manifest.json',
   '/css/_config.css',
-  '/css/base/reset.css',
-  '/css/themes/dark.css',
-  '/css/utilities/helpers.css',
-  '/css/utilities/animations.css',
-  '/css/components/layout.css',
-  '/css/components/buttons.css',
-  '/css/components/forms.css',
-  '/css/components/cards.css',
-  '/css/components/header.css',
-  '/css/components/footer.css',
-  '/css/components/alert-banner.css',
-  '/css/components/planner.css',
-  '/css/components/quick-actions.css',
-  '/css/components/news-banner.css',
-  '/css/components/hall-shortcuts.css',
-  '/css/components/dashboard.css',
-  '/css/components/hero.css',
-  '/css/components/map.css',
-  '/css/components/modals.css',
-  '/css/components/filters.css',
-  '/css/components/bottom-nav.css',
-  '/css/components/about.css',
   '/css/components/itinerary.css',
   '/css/components/timepicker.css',
-  '/css/components/horaires.css',
-  '/css/components/trafic.css',
-  '/css/components/route-results.css',
-  '/css/components/leaflet-overrides.css',
-  '/css/components/install-tip.css',
-  '/css/components/mobile-menu.css',
-  '/css/components/tarifs.css',
-  '/css/components/loading.css',
-  '/css/components/toast.css',
-  '/css/components/stop-popup.css',
-  '/css/components/autocomplete.css',
-  '/css/components/departures.css',
-  '/css/components/popovers.css',
   '/style.css',
   '/js/main.js',
   '/js/EventBus.js',
