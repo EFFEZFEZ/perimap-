@@ -1,0 +1,91 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * QUICK ACTIONS - Carte, Horaires, Trafic cards
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.quick-actions-section {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Hide on mobile (replaced by bottom-nav) */
+.quick-actions-section.desktop-only {
+    display: grid;
+}
+
+@media (max-width: 768px) {
+    .quick-actions-section.desktop-only {
+        display: none;
+    }
+}
+
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    text-decoration: none;
+    color: #1e3a5f;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.quick-action-card:hover {
+    border-color: #2a9d8f;
+    box-shadow: 0 8px 24px rgba(42, 157, 143, 0.18);
+    transform: translateY(-3px);
+}
+
+.quick-action-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(42, 157, 143, 0.1);
+    border-radius: 12px;
+    color: #2a9d8f;
+}
+
+.quick-action-icon svg {
+    stroke-width: 2.5;
+}
+
+.quick-action-card span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    color: #1e3a5f;
+}
+
+/* Dark theme */
+body.dark-theme .quick-action-card {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid #374151;
+    color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .quick-action-card:hover {
+    border-color: #2a9d8f;
+    background: rgba(42, 157, 143, 0.1);
+    box-shadow: 0 8px 24px rgba(42, 157, 143, 0.2);
+}
+
+body.dark-theme .quick-action-icon {
+    background: rgba(42, 157, 143, 0.2);
+    color: #2a9d8f;
+}
+
+body.dark-theme .quick-action-card span {
+    color: #e2e8f0;
+}

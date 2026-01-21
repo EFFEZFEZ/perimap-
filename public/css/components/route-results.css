@@ -1,0 +1,504 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ * ROUTE RESULTS - Itinerary results cards and list
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Onglets de mode (Transit/Vélo/Marche) - V436 */
+#results-mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--bg-main);
+    padding: 1.25rem 1.25rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.mode-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    cursor: pointer;
+    flex: 1;
+    max-width: 110px;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.mode-tab:hover {
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.08) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+}
+
+.mode-tab.hidden {
+    display: none;
+}
+
+.mode-tab svg {
+    width: 26px;
+    height: 26px;
+    color: var(--text-tertiary);
+    transition: all 0.3s ease;
+}
+
+.mode-tab:hover svg {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.mode-tab.active svg {
+    color: var(--primary);
+    filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));
+}
+
+.mode-tab-duration {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+}
+
+.mode-tab.active .mode-tab-duration {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.mode-tab-duration.empty {
+    color: var(--text-tertiary);
+    font-weight: 400;
+}
+
+/* Liste des résultats - V433 */
+.results-list-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-light);
+    padding: 0.75rem 0 calc(var(--bottom-nav-height, 64px) + 16px) 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+.results-list-wrapper::-webkit-scrollbar {
+    width: 5px;
+}
+
+.results-list-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.results-list-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.results-list {
+    padding: 0.5rem 0.875rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.results-message {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.results-message.error {
+    color: var(--color-red);
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* Cartes d'itinéraires - V436 */
+.route-option-wrapper {
+    margin-bottom: 0.375rem;
+}
+
+.route-option-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    padding-left: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.route-option-title::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.route-option {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    border-radius: 16px;
+    padding: 1.25rem 1.375rem;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.route-option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.route-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-option:hover::before {
+    opacity: 1;
+}
+
+.route-option.is-active {
+    border-color: var(--primary);
+    background: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 16px rgba(34, 197, 94, 0.2);
+}
+
+/* Ligne résumé des transports */
+.route-summary-line {
+    display: flex;
+    align-items: center;
+    column-gap: 0.375rem;
+    row-gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.route-summary-bus-icon,
+.route-summary-bike-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.route-summary-bus-icon svg,
+.route-summary-bike-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.route-option:hover .route-summary-bus-icon,
+.route-option:hover .route-summary-bike-icon {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.route-summary-walk-icon,
+.route-summary-walk-only-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    transition: all 0.2s ease;
+}
+
+.route-summary-walk-icon svg,
+.route-summary-walk-only-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.route-summary-dot {
+    color: var(--text-tertiary);
+    font-weight: 600;
+    font-size: 0.5rem;
+    opacity: 0.6;
+}
+
+/* Badge ligne */
+.route-line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    border-radius: 8px;
+    min-width: 42px;
+    height: 32px;
+    padding: 0 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+}
+
+.route-option:hover .route-line-badge {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer carte */
+.route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.route-time {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.route-duration {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.route-duration-eco {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    background: rgba(34, 197, 94, 0.12);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-duration-eco svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Prochains départs */
+.route-next-departures {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.next-departures-label {
+    font-weight: 500;
+    color: var(--primary);
+}
+
+.next-departures-more {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+body.dark-theme .route-next-departures {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Détails accordéon */
+.route-details {
+    padding: 1rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-top: -0.5rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.route-details.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Étapes détail */
+.route-details .step-detail {
+    display: flex;
+    position: relative;
+    padding-left: 3.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.route-details .step-detail:last-child {
+    margin-bottom: 0;
+}
+
+.route-details .step-detail::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 24px;
+    bottom: -1.5rem;
+    width: 4px;
+    background: var(--line-color, var(--border));
+}
+
+.route-details .step-detail:last-child::before {
+    bottom: 12px;
+}
+
+.route-details .step-detail.walk::before,
+.route-details .step-detail.bicycle::before {
+    background: repeating-linear-gradient(
+        var(--text-secondary) 0,
+        var(--text-secondary) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+.route-details .step-detail::after {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg-main);
+    border: 2px solid var(--line-color, var(--border));
+    z-index: 1;
+}
+
+.route-details .step-detail.walk::after,
+.route-details .step-detail.bicycle::after {
+    border-color: var(--text-secondary);
+}
+
+.route-details .step-icon {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    z-index: 2;
+    margin-right: 0.5rem;
+}
+
+.route-details .step-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.route-details .step-info {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+}
+
+.route-details .step-instruction {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.route-details .step-duration-inline {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Bouton load more */
+.btn-load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: 2px dashed rgba(34, 197, 94, 0.3);
+    border-radius: 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 0.75rem;
+}
+
+.btn-load-more:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(34, 197, 94, 0.08);
+    transform: translateY(-2px);
+}
+
+.btn-load-more:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.btn-load-more svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-load-more:hover svg {
+    transform: rotate(90deg);
+}
