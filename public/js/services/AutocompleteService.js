@@ -110,12 +110,13 @@ export class AutocompleteService {
 
             const data = await response.json();
             const predictions = (data.predictions || []).map(p => ({
-                placeId: p.place_id,
+                placeId: p.place_id || p.placeId,
                 description: p.description,
-                mainText: p.main_text,
-                secondaryText: p.secondary_text,
-                types: p.types,
-                matchedSubstrings: p.matched_substrings
+                mainText: p.main_text || p.name,
+                secondaryText: p.secondary_text || p.formattedAddress || '',
+                types: p.types || [p.type],
+                matchedSubstrings: p.matched_substrings,
+                coordinates: p.coordinates
             }));
 
             logger.debug('AutocompleteService predictions fetched', { count: predictions.length });

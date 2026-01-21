@@ -176,7 +176,10 @@ function formatResult(item, type, index) {
   
   return {
     description: description,
+    place_id: type === 'google' ? item.placeId : `local_${type}_${index}`,
     placeId: type === 'google' ? item.placeId : `local_${type}_${index}`,
+    main_text: item.name,
+    secondary_text: subtitle,
     coordinates: { lat: item.lat, lng: item.lng },
     source: type === 'google' ? 'google' : 'local',
     type: type
@@ -313,7 +316,10 @@ export default async function handler(req) {
               const location = details.location || { latitude: CENTER.lat, longitude: CENTER.lng };
               const item = {
                 description: `📍 ${name}, ${details.formattedAddress || ''}`,
+                place_id: placeId,
                 placeId: placeId,
+                main_text: name,
+                secondary_text: details.formattedAddress || '',
                 coordinates: { lat: location.latitude, lng: location.longitude },
                 source: 'google',
                 type: 'google',
