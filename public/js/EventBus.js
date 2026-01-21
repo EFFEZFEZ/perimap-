@@ -15,6 +15,11 @@ export class EventBus {
     this.wildcardListeners = [];
   }
 
+  _normalizeEventName(eventName) {
+    if (!eventName) return eventName;
+    return EVENTS?.[eventName] || eventName;
+  }
+
   /**
    * S'abonner à un événement
    * @param {string} eventName - Nom de l'événement
@@ -22,6 +27,7 @@ export class EventBus {
    * @param {Object} options - {once: bool, priority: number}
    */
   on(eventName, handler, options = {}) {
+    eventName = this._normalizeEventName(eventName);
     if (typeof handler !== 'function') {
       console.warn(`[EventBus] Handler must be a function for "${eventName}"`);
       return;
@@ -57,6 +63,7 @@ export class EventBus {
    * @param {Function} handler 
    */
   once(eventName, handler) {
+    eventName = this._normalizeEventName(eventName);
     return this.on(eventName, handler, { once: true });
   }
 
@@ -66,6 +73,7 @@ export class EventBus {
    * @param {*} data - Données à passer aux handlers
    */
   emit(eventName, data) {
+    eventName = this._normalizeEventName(eventName);
     if (!this.events.has(eventName)) {
       return false;
     }
@@ -122,6 +130,7 @@ export class EventBus {
    * @param {Function} handler 
    */
   off(eventName, handler) {
+    eventName = this._normalizeEventName(eventName);
     if (!this.events.has(eventName)) {
       return;
     }
@@ -143,6 +152,7 @@ export class EventBus {
    * @param {string} eventName 
    */
   removeAllListeners(eventName) {
+    eventName = this._normalizeEventName(eventName);
     if (eventName) {
       this.events.delete(eventName);
     } else {
@@ -172,38 +182,55 @@ export const eventBus = new EventBus();
 // Événements disponibles (documentation)
 export const EVENTS = {
   // Navigation
-  'nav:select': 'Utilisateur clique sur une vue de navigation',
-  'nav:update': 'La navigation doit être mise à jour',
+  NAV_SELECT: 'nav:select',
+  NAV_UPDATE: 'nav:update',
+  ROUTE_SELECTED: 'map:route-selected',
   
   // Recherche
-  'search:start': 'Début d\'une recherche d\'itinéraire',
-  'search:complete': 'Résultats de recherche disponibles',
-  'search:error': 'Erreur lors de la recherche',
+  SEARCH_START: 'search:start',
+  SEARCH_COMPLETE: 'search:complete',
+  SEARCH_ERROR: 'search:error',
   
   // Données
-  'data:loaded': 'Données GTFS/horaires chargées',
-  'data:updated': 'Mise à jour des données en temps réel',
-  'data:error': 'Erreur de chargement de données',
+  DATA_LOADED: 'data:loaded',
+  DATA_UPDATED: 'data:updated',
+  DATA_ERROR: 'data:error',
   
   // Carte
-  'map:ready': 'Carte initialisée',
-  'map:route-selected': 'Un itinéraire a été sélectionné',
-  'map:viewport-changed': 'La vue de la carte a changé',
+  MAP_READY: 'map:ready',
+  MAP_ROUTE_SELECTED: 'map:route-selected',
+  MAP_VIEWPORT_CHANGED: 'map:viewport-changed',
   
   // État
-  'state:changed': 'L\'état global a changé',
-  'state:reset': 'L\'état a été réinitialisé',
+  STATE_CHANGED: 'state:changed',
+  STATE_CHANGE: 'state:changed',
+  STATE_RESET: 'state:reset',
+  
+  // API
+  API_REQUEST: 'api:request',
+  API_SUCCESS: 'api:success',
+  API_ERROR: 'api:error',
   
   // UI
-  'ui:loading': 'Afficher un indicateur de chargement',
-  'ui:error': 'Afficher un message d\'erreur',
-  'ui:success': 'Afficher un message de succès',
+  UI_LOADING: 'ui:loading',
+  UI_ERROR: 'ui:error',
+  UI_SUCCESS: 'ui:success',
   
   // Trafic
-  'traffic:alert': 'Nouvelle alerte trafic',
-  'traffic:resolved': 'Une alerte trafic a été résolue',
+  TRAFFIC_ALERT: 'traffic:alert',
+  TRAFFIC_RESOLVED: 'traffic:resolved',
   
   // Géolocalisation
-  'location:found': 'Position utilisateur trouvée',
-  'location:lost': 'Perte du signal de géolocalisation'
+  LOCATION_FOUND: 'location:found',
+  LOCATION_LOST: 'location:lost',
+  
+  // API Services (Phase 2)
+  ROUTE_CALCULATED: 'route:calculated',
+  ROUTE_ERROR: 'route:error',
+  GEOCODE_RESOLVED: 'geocode:resolved',
+  GEOCODE_REVERSED: 'geocode:reversed',
+  GEOCODE_ERROR: 'geocode:error',
+  AUTOCOMPLETE_RESULTS: 'autocomplete:results',
+  AUTOCOMPLETE_ERROR: 'autocomplete:error',
+  PREDICTION_DETAILS_RESOLVED: 'prediction:details-resolved'
 };

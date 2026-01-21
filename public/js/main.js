@@ -34,6 +34,9 @@ import { realtimeManager } from './realtimeManager.js';
 import { analyticsManager } from './analyticsManager.js';
 import { userPreferences } from './userPreferences.js';
 
+// === PHASE 2: Modular API Services ===
+import { initializeAPIServices, getAPIServiceFactory } from './services/index.js';
+
 // === Imports des modules extraits (V221) ===
 import { 
     isWaitStep,
@@ -854,6 +857,32 @@ async function initializeApp() {
     });
 
     apiManager = new ApiManager(GOOGLE_API_KEY);
+    
+    // === PHASE 2c: Initialize modular API services ===
+    logger.info('Initializing Phase 2 API services', { backendMode: APP_CONFIG.backendMode });
+    const apiFactory = initializeAPIServices({
+        backendMode: APP_CONFIG.backendMode || 'vercel',
+        useOtp: APP_CONFIG.useOtp || false,
+        apiKey: GOOGLE_API_KEY,
+        apiEndpoints: APP_CONFIG.apiEndpoints || {}
+    });
+    logger.info('API services initialized', { health: apiFactory.getHealth() });
+    
+    // Setup API service event listeners
+    eventBus.on(EVENTS.ROUTE_CALCULATED, ({ mode, result }) => {
+        logger.debug('Route calculated via Phase 2 service', { mode, routes: result.itineraries?.length || 0 });
+        stateManager.setState({ 
+            api: { lastRouteMode: mode, lastRouteTimestamp: Date.now() }
+        }, 'route:calculated');
+    });
+    
+    eventBus.on(EVENTS.ROUTE_ERROR, ({ mode, error }) => {
+        logger.error('Route service error', { mode, error: error.message });
+        stateManager.setState({ 
+            api: { routeError: error.message, lastErrorMode: mode }
+        }, 'route:error');
+    });
+    
     dataManager = new DataManager();
     routerContext = createRouterContext({ dataManager, apiManager, icons: ICONS });
 
@@ -2189,11 +2218,12 @@ async function executeItinerarySearch(source, sourceElements) {
         let fromGtfsStops = null; // V49: Arrêts GTFS forcés pour les pôles multimodaux (tableau de stop_id)
         let toGtfsStops = null;
         
-        // 🚀 V60: Résolution des coordonnées EN PARALLÈLE
+        // 🚀 V60: Résolution des coordonnées EN PARALLÈLE (PHASE 2c: Using new service)
         const coordsStart = performance.now();
+        const apiFactory = getAPIServiceFactory();
         const [fromResult, toResult] = await Promise.all([
-            apiManager.getPlaceCoords(fromPlaceId).catch(e => { logger.warn('Coords départ error', e); return null; }),
-            apiManager.getPlaceCoords(toPlaceId).catch(e => { logger.warn('Coords arrivée error', e); return null; })
+            apiFactory.getPlaceCoords(fromPlaceId).catch(e => { logger.warn('Coords départ error (Phase 2)', e); return null; }),
+            apiFactory.getPlaceCoords(toPlaceId).catch(e => { logger.warn('Coords arrivée error (Phase 2)', e); return null; })
         ]);
         
         if (fromResult) {
@@ -2234,9 +2264,10 @@ async function executeItinerarySearch(source, sourceElements) {
             }
         }
 
-        // Backend principal (Google Routes via Vercel proxy)
-        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, searchTime)
-            .catch(e => { logger.error('Erreur routage principal', e); return null; });
+        // Backend principal (Google Routes via Vercel proxy - PHASE 2c: Using new service)
+        // Note: apiFactory already declared above, reuse it
+        const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords)
+            .catch(e => { logger.error('Erreur routage principal (Phase 2)', e); return null; });
         
         logger.debug(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
 
@@ -2465,8 +2496,9 @@ async function loadMoreDepartures() {
     console.log(`📦 Cache: ${existingSignatures.size} signatures, ${existingDepartures.size} heures de départ`);
 
     try {
-        // Appeler l'API avec le nouvel horaire
-        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
+        // Appeler l'API avec le nouvel horaire (PHASE 2c: Using new service)
+        const apiFactory = getAPIServiceFactory();
+        const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, offsetSearchTime);
         let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
         
         // V95: Filtrer strictement les nouveaux itinéraires
@@ -2686,7 +2718,8 @@ async function loadMoreArrivals() {
     console.log(`📦 Cache: ${existingSignatures.size} signatures, ${existingArrivals.size} heures d'arrivée`);
 
     try {
-        const intelligentResults = await apiManager.fetchItinerary(fromPlaceId, toPlaceId, offsetSearchTime);
+        const apiFactory = getAPIServiceFactory();
+        const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, offsetSearchTime);
         let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
         
         // Filtrer les nouveaux itinéraires
@@ -2817,7 +2850,8 @@ async function handleAutocomplete(query, container, onSelect, inputElement = nul
     // Debounce: attendre que l'utilisateur arrête de taper
     autocompleteTimeout = setTimeout(async () => {
         try {
-            const suggestions = await apiManager.getPlaceAutocomplete(query);
+            const apiFactory = getAPIServiceFactory();
+            const suggestions = await apiFactory.getPlacePredictions(query);
             renderSuggestions(suggestions, container, onSelect);
         } catch (error) {
             console.warn("Erreur d'autocomplétion:", error);

@@ -8,6 +8,8 @@
  * StateManager.subscribe(handler)
  */
 
+import { eventBus, EVENTS } from './EventBus.js';
+
 export class StateManager {
   constructor(initialState = {}) {
     this.state = Object.freeze(this._deepClone(initialState));
@@ -15,6 +17,14 @@ export class StateManager {
     this.history = [this._deepClone(initialState)];
     this.historyIndex = 0;
     this.maxHistory = 50;
+    this.eventBus = eventBus;
+  }
+
+  /**
+   * Compat: get() alias -> getStateValue / getState
+   */
+  get(path = null) {
+    return path ? this.getStateValue(path) : this.getState();
   }
 
   /**
@@ -53,6 +63,7 @@ export class StateManager {
       return;
     }
 
+    const prevState = this.state;
     const newState = Object.freeze({
       ...this.state,
       ...this._deepClone(updates)
@@ -77,11 +88,19 @@ export class StateManager {
 
     // Notifier les subscribers
     this._notifySubscribers({
-      oldState: this.state,
+      oldState: prevState,
       newState: this.state,
       updates,
       description,
       timestamp: new Date()
+    });
+
+    // Emit EventBus notification for compatibility
+    this.eventBus?.emit(EVENTS.STATE_CHANGED, {
+      path: null,
+      value: updates,
+      state: this.state,
+      description
     });
   }
 
@@ -110,23 +129,16 @@ export class StateManager {
    */
   subscribe(callback) {
     this.subscribers.push(callback);
-    return () => {
-      const index = this.subscribers.indexOf(callback);
-      if (index !== -1) {
-        this.subscribers.splice(index, 1);
-      }
-    };
+    return () => this._unsubscribe(callback);
   }
 
   /**
-   * S'abonner aux changements d'une partie spécifique
-   * @param {string} path - Chemin à observer
-   * @param {Function} callback 
-   * @returns {Function}
+   * S'abonner aux changements d'une partie spécifique (surcharge)
+   * @param {string|Function} path - Chemin ou callback direct
+   * @param {Function} callback
    */
-  subscribe(path, callback) {
+  subscribePath(path, callback) {
     if (typeof path === 'function') {
-      // Ancienne signature: subscribe(callback)
       return this.subscribe(path);
     }
 
@@ -204,16 +216,56 @@ export class StateManager {
     }
   }
 
+  /**
+   * Compat: set() alias -> setState with deep path support
+   */
+  set(path, value) {
+    if (!path || typeof path !== 'string') return;
+    const updates = this._buildNestedUpdate(path, value);
+    this.setState(updates, `set:${path}`);
+    this.eventBus?.emit(EVENTS.STATE_CHANGED, {
+      path,
+      value,
+      state: this.state,
+      description: `set:${path}`
+    });
+  }
+
   // === Helpers privés ===
 
   _notifySubscribers(change) {
     this.subscribers.forEach(callback => {
       try {
-        callback(change);
+        // Compat: passer l'état complet au callback (un seul argument)
+        callback(change.newState || this.state);
       } catch (error) {
         console.error('[StateManager] Error in subscriber:', error);
       }
     });
+  }
+
+  _unsubscribe(callback) {
+    const index = this.subscribers.indexOf(callback);
+    if (index !== -1) {
+      this.subscribers.splice(index, 1);
+    }
+  }
+
+  _buildNestedUpdate(path, value) {
+    const keys = path.split('.');
+    const root = {};
+    let current = root;
+
+    keys.forEach((key, idx) => {
+      if (idx === keys.length - 1) {
+        current[key] = value;
+      } else {
+        current[key] = {};
+        current = current[key];
+      }
+    });
+
+    return root;
   }
 
   _deepClone(obj) {

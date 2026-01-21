@@ -1,14 +1,15 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v446 - PHASE 1: Map & itinerary selection EventBus integration
+ * Service Worker v449 - PHASE 7: Migration Complete (Modular Architecture)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
  * - Stale-while-revalidate pour données GTFS
  * - Network-first pour pages HTML
+ * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v446';
+const CACHE_VERSION = 'v449';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -18,9 +19,15 @@ const PRECACHE = [
   '/manifest.json',
   '/style.css',
   '/js/main.js',
+  '/js/EventBus.js',
+  '/js/StateManager.js',
+  '/js/Logger.js',
   '/js/dataManager.js',
   '/js/userPreferences.js',
   '/js/config/neonConfig.js',
+  '/js/config.js',
+  '/js/services/index.js',
+  '/js/services/RouteService.js',
   '/js/linePageLoader.js',
   '/data/lines-config.json',
   '/horaires/ligne.html'
