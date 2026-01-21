@@ -1948,7 +1948,8 @@ async function handleNavigationAction(action) {
     }
 
     // V75: Pour les actions qui nécessitent le dashboard, s'assurer qu'il est chargé
-    const needsDashboard = ['itineraire', 'horaires', 'info-trafic', 'carte'].includes(action);
+    // V452: La carte ne nécessite pas le dashboard - évite le clignotement via accueil
+    const needsDashboard = ['itineraire', 'horaires', 'info-trafic'].includes(action);
     
     if (needsDashboard) {
         const wasReloaded = await ensureDashboardLoaded();
