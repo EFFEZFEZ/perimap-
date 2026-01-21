@@ -2335,7 +2335,9 @@ body:not(.dark-theme) .header-logo-img {
 /* Options (Partir maintenant) */
 .planner-options {
     position: relative;
-    z-index: 16000; /* V363: Assez haut pour que le popover enfant soit au-dessus de bottom-nav */
+    /* Ne pas créer de stacking context trop élevé ici : le popover est en position fixed
+       et doit contrôler son propre z-index. */
+    z-index: auto;
 }
 
 .btn-when {
@@ -6539,7 +6541,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     background: white;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
-    z-index: 2000;
+    /* Doit être supérieur aux autres éléments (bottom-nav, planners, etc.) */
+    z-index: 20001;
     overflow-y: auto;
     padding: 0.75rem 0.875rem;
     max-height: 50vh;
