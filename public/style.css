@@ -2001,19 +2001,16 @@ body.itinerary-view-active #legal-strip {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 64px;
-    max-width: 1300px;
-    margin: 0 auto;
+#results-planner-options-popover > .popover-content {
+    max-height: min(70vh, 480px); /* V457: Accueil - hauteur contenue */
+    overflow-y: auto; /* Scroll interne */
+    overflow-x: hidden;
 }
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-weight: 800;
-    color: var(--text-primary);
+#results-planner-options-popover > .popover-content {
+    max-height: calc(100vh - 200px); /* V457: Vue trajets - plus haute mais contenue */
+    overflow-y: auto;
+    overflow-x: hidden;
 }
-.header-logo-img {
-    height: 52px;
     max-width: 170px;
     width: auto;
     object-fit: contain;
@@ -6564,26 +6561,27 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     position: absolute;
     top: calc(100% + 8px); 
     right: 0; 
-    width: 320px; 
     background: var(--bg-main);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
     z-index: 20000;
-    overflow: visible; /* V454: Permet aux selects natifs de ne pas être clippés */
+    overflow: visible; /* V457: Laisse les selects natifs déborder */
     transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#planner-options-popover {
+    width: min(360px, calc(100vw - 24px)); /* V457: Reste dans l'écran sur accueil */
+}
+#results-planner-options-popover {
+    left: 0;
+    right: 0;
+    width: min(520px, calc(100vw - 24px)); /* V457: Large mais contenu visible en vue trajets */
 }
 #planner-options-popover.hidden, #results-planner-options-popover.hidden {
     opacity: 0;
     transform: translateY(-10px);
     pointer-events: none;
     visibility: hidden; /* V362: Empêche toute interaction même invisible */
-}
-/* Positionnement spécifique pour le popover des résultats */
-#results-planner-options-popover {
-    left: 0;
-    right: 0;
-    width: auto;
 }
 
 

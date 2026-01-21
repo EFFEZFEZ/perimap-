@@ -9,7 +9,7 @@
 /* Popover content: constrain height, scroll internally */
 #results-planner-options-popover .popover-content,
 #results-planner-options-popover .options-content {
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 200px); /* Vue trajets: hauteur confortable mais contenue */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
