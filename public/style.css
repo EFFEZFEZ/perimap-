@@ -6566,7 +6566,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 
 /* Popover Accueil - s'ouvre vers le bas, AU-DESSUS de la bottom-nav */
-#planner-options-popover {
+#planner-options-popover,
+#results-planner-options-popover {
     position: absolute;
     top: calc(100% + 8px);
     bottom: auto;
@@ -6578,23 +6579,6 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
     z-index: 99999; /* AU-DESSUS de la bottom-nav */
-    overflow: visible;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-/* Popover Trajets - popup simple */
-#results-planner-options-popover {
-    position: absolute;
-    top: calc(100% + 8px);
-    bottom: auto;
-    left: 0;
-    right: 0;
-    width: min(400px, calc(100vw - 24px));
-    background: var(--bg-main);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-lg);
-    z-index: 99999;
     overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
@@ -7049,7 +7033,7 @@ body.itinerary-view-active #itinerary-results-container {
     z-index: 10;
     min-height: 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible; /* Permet au popover de dépasser */
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
@@ -7113,7 +7097,8 @@ body.itinerary-view-active #itinerary-results-container {
     flex-shrink: 0;
     padding: 1.25rem;
     position: relative;
-    z-index: 100;
+    z-index: 200;
+    overflow: visible;
 }
 
 /* =========================================
@@ -7275,6 +7260,7 @@ body.itinerary-view-active #itinerary-results-container {
     margin-top: 0.625rem;
     position: relative;
     z-index: 10;
+    overflow: visible;
 }
 
 /* V436: Bouton time picker moderne */
