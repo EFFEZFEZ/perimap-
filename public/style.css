@@ -6567,14 +6567,15 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 
 #planner-options-popover, #results-planner-options-popover {
     position: absolute;
-    top: calc(100% + 8px); 
+    bottom: calc(100% + 8px);
+    top: auto;
     right: 0; 
     background: var(--bg-main);
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
     z-index: 20000;
-    overflow: visible; /* V457: Laisse les selects natifs déborder */
+    overflow: hidden;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 #planner-options-popover {
@@ -6622,9 +6623,8 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 #planner-options-popover > .popover-content,
 #results-planner-options-popover > .popover-content {
-    max-height: calc(100vh - 250px); /* V454: Limite interne pour scroll */
-    overflow-y: auto; /* V454: Scroll sur contenu, pas sur conteneur */
-    overflow-x: hidden;
+    max-height: none;
+    overflow: hidden;
 }
 .popover-time-inputs {
     display: flex;
@@ -6730,13 +6730,13 @@ body.dark-theme .real-select option {
     transform: translateY(-40%) rotate(135deg);
 }
 
-/* Menu temps - ouverture vers le BAS pour éviter le clipping et autoriser le scroll complet */
+/* Menu temps - s'ouvre vers le HAUT avec scroll si nécessaire */
 .time-select-menu {
     position: absolute;
     left: 0;
     right: auto;
-    top: calc(100% + 8px);
-    bottom: auto;
+    bottom: calc(100% + 8px);
+    top: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -6744,7 +6744,7 @@ body.dark-theme .real-select option {
     padding: var(--spacing-2) 0;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(var(--spacing-2));
+    transform: translateY(calc(-1 * var(--spacing-2)));
     transition: opacity var(--transition-quick), transform var(--transition-quick);
     z-index: 20001;
     display: flex;
