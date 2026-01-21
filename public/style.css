@@ -3286,7 +3286,7 @@ body.dark-theme .stats-section .stat-label {
     pointer-events: none;
     z-index: 0;
 }
-}
+
 #btn-back-to-hall:not(.app-back-btn) svg {
     margin-right: 0.5rem;
     color: var(--text-secondary);
@@ -4483,6 +4483,7 @@ body.dark-theme #map-container #btn-toggle-filter svg {
     #site-footer {
         /* V365: Ne pas ajouter de margin car il crée un espace vide en bas */
         /* Le footer est de toute façon caché sur mobile avec display: none sur les vues principales */
+        display: block; /* Placeholder: évite la règle vide */
     }
 }
 
