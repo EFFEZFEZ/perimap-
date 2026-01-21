@@ -6565,7 +6565,7 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
 }
 
 
-/* Popover Accueil - s'ouvre vers le bas */
+/* Popover Accueil - s'ouvre vers le bas, AU-DESSUS de la bottom-nav */
 #planner-options-popover {
     position: absolute;
     top: calc(100% + 8px);
@@ -6577,64 +6577,35 @@ body.dark-theme .stop-popup-v105 .popup-time.realtime {
     border-radius: var(--radius-md);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
-    z-index: 20000;
+    z-index: 99999; /* AU-DESSUS de la bottom-nav */
     overflow: visible;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Popover Trajets - bottom-sheet fixe en bas de l'écran sur mobile */
+/* Popover Trajets - popup simple */
 #results-planner-options-popover {
-    position: fixed;
-    bottom: 0;
+    position: absolute;
+    top: calc(100% + 8px);
+    bottom: auto;
     left: 0;
     right: 0;
-    top: auto;
-    width: 100%;
-    max-width: 100%;
-    max-height: 70vh;
+    width: min(400px, calc(100vw - 24px));
     background: var(--bg-main);
-    border-radius: 16px 16px 0 0;
-    border: none;
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-    z-index: 20000;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    z-index: 99999;
     overflow: visible;
-    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-    padding-bottom: env(safe-area-inset-bottom, 12px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#planner-options-popover.hidden {
+#planner-options-popover.hidden,
+#results-planner-options-popover.hidden {
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;
     visibility: hidden;
 }
-
-#results-planner-options-popover.hidden {
-    transform: translateY(100%);
-    pointer-events: none;
-    visibility: hidden;
-}
-
-/* Handle visuel pour le bottom-sheet trajets */
-#results-planner-options-popover::before {
-    content: '';
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-}
-
-/* Contenu du popover trajets */
-#results-planner-options-popover > .popover-content,
-#results-planner-options-popover .popover-tabs {
-    padding-top: 20px; /* Espace pour le handle */
-}
-
 
 .popover-tabs {
     display: flex;
@@ -6782,13 +6753,13 @@ body.dark-theme .real-select option {
     transform: translateY(-40%) rotate(135deg);
 }
 
-/* Menu temps - s'ouvre vers le BAS, scrollable si nécessaire */
+/* Menu temps - s'ouvre vers le HAUT */
 .time-select-menu {
     position: absolute;
     left: 0;
     right: auto;
-    top: calc(100% + 8px);
-    bottom: auto;
+    bottom: calc(100% + 8px);
+    top: auto;
     background: var(--bg-main);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -6796,9 +6767,9 @@ body.dark-theme .real-select option {
     padding: var(--spacing-2) 0;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(8px);
+    transform: translateY(-8px);
     transition: opacity var(--transition-quick), transform var(--transition-quick);
-    z-index: 20001;
+    z-index: 100000;
     display: flex;
     flex-direction: column;
     width: 100px;
