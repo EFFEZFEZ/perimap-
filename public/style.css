@@ -7513,15 +7513,16 @@ body.dark-theme .indicator-dot.destination {
     }
 
     #results-side-panel {
-        background: linear-gradient(160deg, rgba(17, 27, 43, 0.92), rgba(11, 18, 32, 0.92));
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        /* V508: Couleur unifiée mobile pour la page trajets */
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
         border-radius: 18px 18px 0 0;
         margin: 0 auto;
         max-width: 520px;
         width: 100%;
         height: auto;
-        backdrop-filter: blur(10px);
+        backdrop-filter: none;
         padding-bottom: 16px; /* V507: Marge raisonnable */
         overflow-y: visible; /* Scroll géré par le conteneur parent */
     }
@@ -7546,12 +7547,12 @@ body.dark-theme .indicator-dot.destination {
     }
 
     #itinerary-edit-panel {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
         margin: 0 1rem 0.75rem;
         padding: 1.15rem;
-        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+        box-shadow: none;
     }
 
     .route-input-container {
@@ -7642,12 +7643,26 @@ body.dark-theme .indicator-dot.destination {
     }
 
     .results-list {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        backdrop-filter: none;
+        box-shadow: none;
         overflow: hidden;
+    }
+    /* Unifier la section Vos trajets avec le même style et la même largeur */
+    .recent-journeys-section {
+        padding: 0 0 1.5rem; /* Laisser la largeur gérée par .results-list-wrapper */
+    }
+    #recent-journeys-container {
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 0.75rem;
+    }
+    .recent-journey-card {
+        background: #111b2b;
+        border-color: rgba(255, 255, 255, 0.08);
     }
 }
 

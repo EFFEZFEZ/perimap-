@@ -3018,31 +3018,57 @@ function renderSuggestions(suggestions, container, onSelect) {
     };
 
     const inputElement = resolveInputElement();
-    // Move the suggestions container to document.body so it escapes any stacking/transform context
-    // (resolveInputElement ran before moving, so we still have a reference to the input)
-    try {
-        if (container && container.parentElement !== document.body) {
-            document.body.appendChild(container);
-            container.style.zIndex = '20000';
-            container.style.pointerEvents = 'auto';
-        }
-    } catch (e) {
-        // ignore failures to move
-    }
-    // Ensure container is positioned relative to the input (use fixed to escape stacking contexts)
-    const positionSuggestionsOverInput = () => {
-        if (!inputElement || !container) return;
+    // Mobile-specific behavior: keep suggestions under the input inside its wrapper
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const isResultsPlanner = container && (container.id === 'results-from-suggestions' || container.id === 'results-to-suggestions');
+
+    let positionSuggestionsOverInput = () => {};
+
+    if (isMobile && isResultsPlanner) {
+        // Do NOT move to body; let CSS position them absolutely under the input
         try {
-            const rect = inputElement.getBoundingClientRect();
-            container.style.position = 'fixed';
-            container.style.left = `${rect.left}px`;
-            container.style.top = `${rect.bottom}px`;
-            container.style.width = `${rect.width}px`;
-            container.style.right = 'auto';
+            if (container && container.parentElement !== null) {
+                // Ensure local stacking and dimensions are controlled by CSS
+                container.style.position = 'absolute';
+                container.style.left = '';
+                container.style.right = '';
+                container.style.top = '';
+                container.style.bottom = '';
+                container.style.width = '';
+                container.style.zIndex = '30000';
+                container.style.pointerEvents = 'auto';
+            }
         } catch (e) {
-            // ignore positioning errors
+            // ignore
         }
-    };
+        // No JS positioning; CSS handles placement below the input
+        positionSuggestionsOverInput = () => {};
+    } else {
+        // Desktop or hall view: move to body to escape stacking contexts
+        try {
+            if (container && container.parentElement !== document.body) {
+                document.body.appendChild(container);
+                container.style.zIndex = '20000';
+                container.style.pointerEvents = 'auto';
+            }
+        } catch (e) {
+            // ignore failures to move
+        }
+        // Ensure container is positioned relative to the input (use fixed to escape stacking contexts)
+        positionSuggestionsOverInput = () => {
+            if (!inputElement || !container) return;
+            try {
+                const rect = inputElement.getBoundingClientRect();
+                container.style.position = 'fixed';
+                container.style.left = `${rect.left}px`;
+                container.style.top = `${rect.bottom}px`;
+                container.style.width = `${rect.width}px`;
+                container.style.right = 'auto';
+            } catch (e) {
+                // ignore positioning errors
+            }
+        };
+    }
 
     suggestions.forEach(suggestion => {
         const item = document.createElement('div');
