@@ -176,13 +176,9 @@ export class RouteService {
                 destination,
                 travelMode: 'TRANSIT',
                 transitPreferences: {
-                    allowedTravelModes: ['BUS', 'WALKING']
+                    routingPreference: 'FEWER_TRANSFERS'
                 },
-                routingPreference: 'TRAFFIC_AWARE_OPTIMAL',
                 computeAlternativeRoutes: true,
-                routeModifiers: {
-                    avoidTolls: true
-                },
                 languageCode: 'fr',
                 units: 'METRIC',
                 ...(departureTime && { departureTime })
