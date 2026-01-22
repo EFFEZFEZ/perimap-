@@ -2336,13 +2336,13 @@ async function executeItinerarySearch(source, sourceElements) {
             }
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
-            // V504: Sauvegarder le trajet dans les trajets récents avec visuels des lignes
+            // V506: Sauvegarder TOUS les itinéraires dans les trajets récents
             const fromDisplayName = sourceElements?.fromInput?.value;
             const toDisplayName = sourceElements?.toInput?.value;
             if (fromDisplayName && toDisplayName && allFetchedItineraries?.length > 0) {
                 const departureTime = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
-                // Passer le premier itinéraire pour les visuels (badges de lignes)
-                addRecentJourney(fromDisplayName, toDisplayName, departureTime, allFetchedItineraries[0]);
+                // Passer le premier itinéraire pour les visuels + TOUS les itinéraires pour le replay
+                addRecentJourney(fromDisplayName, toDisplayName, departureTime, allFetchedItineraries[0], allFetchedItineraries);
             }
             
             // Fusionner avec GTFS si disponible
@@ -5471,9 +5471,6 @@ function showDashboardView(viewName) {
 
         dashboardHall.classList.remove('view-is-active');
         dashboardContentView.classList.add('view-is-active');
-        
-        // V505: Ajouter classe sur body pour bloquer overscroll sur horaires/trafic
-        document.body.classList.add('content-view-active');
         
         if (dashboardContentView) dashboardContentView.scrollTop = 0;
         

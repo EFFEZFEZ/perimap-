@@ -6,8 +6,8 @@
 
 import { ICONS } from './config/icons.js';
 
-const RECENT_JOURNEYS_STORAGE_KEY = 'perimap_journeys_v2';
-const MAX_RECENT_JOURNEYS = 10;
+const RECENT_JOURNEYS_STORAGE_KEY = 'perimap_journeys_v3';
+const MAX_RECENT_JOURNEYS = 5; // V506: Limite à 5 trajets max
 const TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
 
 class RecentJourneysManager {
@@ -82,24 +82,33 @@ class RecentJourneysManager {
     }
 
     /**
-     * V505: Ajouter un trajet avec cache TTL 1 semaine
-     * Stocke l'itinéraire COMPLET pour permettre de revoir le trajet/carte
+     * V506: Ajouter un trajet avec cache TTL 1 semaine
+     * Stocke TOUS les itinéraires pour permettre de les afficher dans "Vos trajets"
+     * @param {Array} allItineraries - Tableau de tous les itinéraires de la recherche
      */
-    addJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null) {
+    addJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null) {
         const now = Date.now();
         const key = `${fromName.trim().toLowerCase()}|${toName.trim().toLowerCase()}`;
         
         // Chercher si le trajet existe déjà
         const existingIndex = this.journeys.findIndex(j => j.key === key);
 
+        // V506: Stocker TOUS les itinéraires s'ils sont fournis, sinon juste le premier
+        let cachedItineraries = null;
+        if (allItineraries && allItineraries.length > 0) {
+            cachedItineraries = allItineraries.slice(0, 10).map(it => this.cloneItinerary(it)).filter(Boolean);
+        } else if (itinerary) {
+            cachedItineraries = [this.cloneItinerary(itinerary)].filter(Boolean);
+        }
+        
         const journeyData = {
             key,
             fromName: fromName.trim(),
             toName: toName.trim(),
             departureTime,
             summary: itinerary ? this.createItinerarySummary(itinerary) : null,
-            // V505: Stocker l'itinéraire complet pour revoir le trajet/carte
-            fullItinerary: itinerary ? this.cloneItinerary(itinerary) : null,
+            // V506: Stocker TOUS les itinéraires pour affichage dans "Vos trajets"
+            fullItinerary: cachedItineraries,
             savedAt: now,
             expiresAt: now + TTL_MS, // 1 semaine
             accessCount: 1
@@ -342,13 +351,14 @@ function initRecentJourneys() {
 }
 
 /**
- * V504: Ajouter un trajet avec l'itinéraire complet pour les visuels
+ * V506: Ajouter un trajet avec TOUS les itinéraires pour les afficher dans "Vos trajets"
+ * @param {Array} allItineraries - Tableau de tous les résultats de recherche
  */
-function addRecentJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null) {
+function addRecentJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null) {
     if (!recentJourneysManager) {
         initRecentJourneys();
     }
-    recentJourneysManager.addJourney(fromName, toName, departureTime, itinerary);
+    recentJourneysManager.addJourney(fromName, toName, departureTime, itinerary, allItineraries);
 }
 
 export { initRecentJourneys, addRecentJourney };
