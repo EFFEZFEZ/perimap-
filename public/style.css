@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v468)
- * Cache-buster: 2026-01-21-1545
- * ~13,000 lignes - Fichier monolithique pour éviter les problèmes de cascade
+ * PÉRIMAP - CSS PRINCIPAL (v491)
+ * Cache-buster: 2026-01-22-1800
+ * ~13,400 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * TABLE DES MATIÈRES (Ctrl+F pour naviguer)
@@ -1060,6 +1060,9 @@ body.dark-theme .pm-skeleton-card {
         will-change: transform;
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
+        /* V491: Empêche le scroll quand on touche la barre de navigation */
+        touch-action: none;
+        overscroll-behavior: none;
     }
 
     body.dark-theme .bottom-nav {
@@ -1318,7 +1321,7 @@ body.dark-theme .leaflet-control-attribution a,
     box-sizing: border-box;
 }
 
-/* *** CORRECTION V28 + V59 + V347 + V455 + V490 SCROLL MOBILE *** */
+/* *** CORRECTION V28 + V59 + V347 + V455 + V490 + V491 SCROLL MOBILE *** */
 html {
     margin: 0;
     padding: 0;
@@ -1326,10 +1329,14 @@ html {
     min-height: 100%;
     width: 100%;
     overflow-x: hidden;
-    /* V490: Fond solide sur html pour éviter les zones grises Chrome */
+    overflow-y: auto;
+    /* V491: Fond solide sur html pour éviter les zones grises Chrome */
     background-color: #f8fafc; /* Fallback clair si var non définie */
     background-color: var(--bg-page, #f8fafc);
-    overscroll-behavior: none; /* V490: Empêche bounce/pull-to-refresh */
+    /* V491: Empêche bounce/pull-to-refresh et zones grises */
+    overscroll-behavior: none;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
 }
 
 html, body {
@@ -1337,8 +1344,10 @@ html, body {
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
     background-color: var(--bg-page, #f8fafc); 
-    overscroll-behavior-y: none; /* V455: Empêche pull-to-refresh Chrome */
-    overscroll-behavior-x: none; /* V455: Empêche bounce horizontal */
+    /* V491: Empêche bounce/pull-to-refresh et zones grises Chrome */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
     /* V347: Empêcher les sauts lors du scroll mobile (barre adresse) */
     overflow-anchor: none;
 }
@@ -1990,6 +1999,9 @@ body.view-map-locked #map {
     top: 0;
     z-index: 1050;
     flex-shrink: 0; /* Ne doit pas rétrécir */
+    /* V491: Empêche le scroll quand on touche le header */
+    touch-action: manipulation;
+    overscroll-behavior: none;
 }
 
 @supports not (backdrop-filter: blur(10px)) {
@@ -2170,6 +2182,7 @@ body:not(.dark-theme) .header-logo-img {
  * ========================================= */
 
 /* Hero Backdrop avec image de Périgueux - PLEIN ÉCRAN */
+/* V491: Optimisation du chargement - dégradé CSS immédiat + image lazy */
 .hero-backdrop {
     position: fixed;
     top: 0;
@@ -2178,9 +2191,34 @@ body:not(.dark-theme) .header-logo-img {
     bottom: 0;
     width: 100vw;
     height: 100vh;
-    background: url('https://www.voyageavecvue.com/wp-content/uploads/2023/11/perigueux.png') center top / cover no-repeat;
+    /* V491: Dégradé placeholder immédiat pendant le chargement de l'image */
+    background: 
+        linear-gradient(135deg, 
+            #1e3a5f 0%, 
+            #2d5a7b 30%, 
+            #4a90a4 60%, 
+            #87ceeb 100%
+        );
     z-index: 0;
     pointer-events: none;
+    /* V491: Optimisation performance */
+    contain: strict;
+    content-visibility: auto;
+}
+
+/* V491: Image chargée en lazy via pseudo-element pour éviter blocage initial */
+.hero-backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/icons/perigueux-hero.webp') center top / cover no-repeat;
+    opacity: 0;
+    animation: heroImageFadeIn 0.6s ease-out 0.3s forwards;
+    will-change: opacity;
+}
+
+@keyframes heroImageFadeIn {
+    to { opacity: 1; }
 }
 
 .hero-overlay {

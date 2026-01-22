@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v502 - Fix cache key for coordinate-based searches
+ * Service Worker v503 - Fix overscroll & optimize hero image loading
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v502';
+const CACHE_VERSION = 'v503';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -33,7 +33,8 @@ const PRECACHE = [
   '/js/services/RouteService.js',
   '/js/linePageLoader.js',
   '/data/lines-config.json',
-  '/horaires/ligne.html'
+  '/horaires/ligne.html',
+  '/icons/perigueux-hero.webp'
 ];
 
 // Patterns pour stratégies de cache

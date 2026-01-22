@@ -93,6 +93,8 @@
     <!-- Preload ressources critiques -->
     <link rel="preload" href="style.css" as="style">
     <link rel="preload" href="js/app.js" as="script" crossorigin>
+    <!-- Preload image hero optimisée (200KB vs 4MB externe) -->
+    <link rel="preload" href="/icons/perigueux-hero.webp" as="image" type="image/webp" fetchpriority="high">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://ep-fragrant-silence-abgl9bv2.apirest.eu-west-2.aws.neon.tech">
@@ -102,11 +104,11 @@
     <link rel="dns-prefetch" href="https://routes.googleapis.com">
     
     <!-- CSS critique en premier -->
-    <link rel="stylesheet" href="css/_config.css?v=489">
-    <link rel="stylesheet" href="style.css?v=489">
+    <link rel="stylesheet" href="css/_config.css?v=491">
+    <link rel="stylesheet" href="style.css?v=491">
     <!-- CSS composants (modulaire) -->
-    <link rel="stylesheet" href="css/components/itinerary.css?v=489">
-    <link rel="stylesheet" href="css/components/timepicker.css?v=489">
+    <link rel="stylesheet" href="css/components/itinerary.css?v=491">
+    <link rel="stylesheet" href="css/components/timepicker.css?v=491">
     
     <!-- CSS externes non-bloquants -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
