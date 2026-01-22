@@ -2275,7 +2275,21 @@ async function executeItinerarySearch(source, sourceElements) {
 
         // Traiter les résultats backend principal
         if (intelligentResults) {
-            allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+            // V493: Détecter le format des résultats
+            // Nouveau format RouteService: { routes: [...], itineraries: [...] }
+            // Ancien format apiManager: { bus: { data: {...} }, recommendations: [...] }
+            if (intelligentResults.routes || intelligentResults.itineraries) {
+                // Nouveau format: traiter directement les routes Google
+                const routes = intelligentResults.routes || intelligentResults.itineraries || [];
+                logger.info('📦 Format RouteService détecté', { routeCount: routes.length });
+                allFetchedItineraries = processGoogleRoutesResponse({ routes });
+            } else if (intelligentResults.recommendations) {
+                // Ancien format: utiliser processIntelligentResults
+                allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+            } else {
+                logger.warn('Format de résultat inconnu', intelligentResults);
+                allFetchedItineraries = [];
+            }
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
             // Sauvegarder le trajet dans les trajets récents
