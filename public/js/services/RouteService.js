@@ -62,8 +62,9 @@ export class RouteService {
         logger.info('RouteService.getBusRoute', { fromPlaceId, toPlaceId, searchTime });
         
         try {
-            // Check cache first
-            const cacheKey = `bus:${fromPlaceId}:${toPlaceId}:${searchTime || 'now'}`;
+            // Check cache first - V500: serialize searchTime properly
+            const timeKey = searchTime ? `${searchTime.date || ''}_${searchTime.hour || ''}${searchTime.minute || ''}` : 'now';
+            const cacheKey = `bus:${fromPlaceId}:${toPlaceId}:${timeKey}`;
             const cached = this._checkCache(cacheKey);
             if (cached) {
                 logger.debug('RouteService cache HIT', { cacheKey });
@@ -245,11 +246,11 @@ export class RouteService {
         logger.debug('RouteService._fetchBicycleRouteGoogle', { from: fromCoords, to: toCoords });
         
         try {
+            // V500: Remove routingPreference - only valid for DRIVE mode
             const payload = {
                 origin: { location: { latitude: fromCoords.lat, longitude: fromCoords.lng } },
                 destination: { location: { latitude: toCoords.lat, longitude: toCoords.lng } },
-                travelMode: 'BICYCLE',
-                routingPreference: 'TRAFFIC_AWARE_OPTIMAL'
+                travelMode: 'BICYCLE'
             };
 
             const response = await fetch(`${this.apiEndpoints.routes}`, {
