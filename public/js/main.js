@@ -5202,6 +5202,12 @@ function showResultsView() {
             resultsListContainer.innerHTML = '';
         }
         
+        // V496: Réafficher "Vos trajets" quand on entre dans la vue (pas de résultats encore)
+        const recentJourneysSection = document.getElementById('recent-journeys-section');
+        if (recentJourneysSection) {
+            recentJourneysSection.style.display = '';
+        }
+        
         // V355: Invalider la carte avec RAF pour synchronisation optimale
         if (resultsMapRenderer && resultsMapRenderer.map) {
             requestAnimationFrame(() => {

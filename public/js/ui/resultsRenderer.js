@@ -58,6 +58,12 @@ export function createResultsRenderer(deps) {
 
     resultsListContainer.innerHTML = '';
     
+    // V496: Cacher "Vos trajets" quand on affiche des résultats
+    const recentJourneysSection = document.getElementById('recent-journeys-section');
+    if (recentJourneysSection) {
+      recentJourneysSection.style.display = 'none';
+    }
+    
     // V214: Liste simple, pas de groupement
     let list;
     if (isArrival) {
