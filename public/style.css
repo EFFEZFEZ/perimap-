@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * PÉRIMAP - CSS PRINCIPAL (v491)
- * Cache-buster: 2026-01-22-1800
- * ~13,400 lignes - Fichier monolithique pour éviter les problèmes de cascade
+ * PÉRIMAP - CSS PRINCIPAL (v504)
+ * Cache-buster: 2026-01-22-1900
+ * ~13,500 lignes - Fichier monolithique pour éviter les problèmes de cascade
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * TABLE DES MATIÈRES (Ctrl+F pour naviguer)
@@ -1919,7 +1919,7 @@ body.dark-theme.view-map-locked {
     background-color: #0b1220 !important; /* V490: Fond solide dark mode */
 }
 
-/* V368 + V490: Bloquer le scroll du body aussi pour la vue itinéraire (empêcher Chrome UI de bouger) */
+/* V368 + V490 + V504: Bloquer le scroll du body pour la vue itinéraire (empêcher Chrome UI et zones grises) */
 body.itinerary-view-active {
     overflow: hidden !important;
     position: fixed !important;
@@ -1929,11 +1929,15 @@ body.itinerary-view-active {
     height: 100svh !important;
     top: 0 !important;
     left: 0 !important;
-    background-color: var(--bg-page, #f8fafc) !important; /* V490: Fond solide anti-zones grises */
+    background-color: var(--bg-page, #f8fafc) !important;
+    /* V504: Anti zones grises renforcé */
+    overscroll-behavior: none !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: none !important;
 }
 
 body.dark-theme.itinerary-view-active {
-    background-color: #0b1220 !important; /* V490: Fond solide dark mode */
+    background-color: #0b1220 !important;
 }
 
 /* V120: Forcer la vue carte en plein écran sur mobile */
@@ -3510,15 +3514,25 @@ body.dark-theme .app-back-btn svg {
     margin-right: auto;
 }
 
-/* V434: Styles spécifiques pour chaque card */
+/* V434 + V504: Styles spécifiques pour chaque card - Anti zones grises */
 #horaires.view-active,
 #info-trafic.view-active {
     max-width: var(--container-hero);
     margin-left: auto;
     margin-right: auto;
-    overscroll-behavior: contain; /* V458: bloque le pull-to-refresh sur Chrome mobile */
+    /* V504: Anti zones grises Chrome - triple protection */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    /* V504: Fond solide pour éviter zones grises au scroll */
+    background-color: var(--bg-page, #f8fafc);
+}
+
+body.dark-theme #horaires.view-active,
+body.dark-theme #info-trafic.view-active {
+    background-color: #0b1220;
 }
 
 /* Largeur responsive pour la carte horaires */
@@ -7796,20 +7810,25 @@ body.dark-theme #results-planner-to:focus {
 }
 
 
-/* V433: Conteneur liste résultats - Design minimaliste */
+/* V433 + V504: Conteneur liste résultats - Design minimaliste, pas de zone morte */
 .results-list-wrapper {
-    flex: 1;
+    flex: 1 1 auto;
     overflow-y: auto;
+    overflow-x: hidden;
     background: var(--bg-light);
-    padding: 0.75rem 0 calc(var(--bottom-nav-height, 64px) + 16px) 0;
+    /* V504: Padding ajusté pour éviter zone morte */
+    padding: 0.75rem 0 1rem 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    max-height: 100%; /* V504: Ne pas dépasser le conteneur parent */
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
-    overscroll-behavior: contain; /* V455: Empêche propagation scroll */
+    /* V504: Anti zones grises Chrome */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-y; /* V455: Scroll vertical uniquement */
+    touch-action: pan-y;
 }
 
 /* Scrollbar sobre */
@@ -7857,6 +7876,158 @@ body.dark-theme #results-planner-to:focus {
     color: var(--color-red);
     font-style: normal;
     font-weight: 600;
+}
+
+/* =========================================
+ * V504: TRAJETS RÉCENTS (CACHE PERSISTANT)
+ * ========================================= */
+.recent-journeys-section {
+    padding: 1rem 0.875rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.recent-journeys-section h3 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.recent-journeys-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.recent-journeys-empty p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+#recent-journeys-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Card trajet récent */
+.recent-journey-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--bg-main);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.recent-journey-card:hover {
+    border-color: var(--pm-green);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
+}
+
+.recent-journey-card:active {
+    transform: scale(0.98);
+}
+
+/* Ligne(s) de bus avec badges */
+.recent-journey-lines {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.recent-journey-lines .route-line-badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 26px;
+    text-align: center;
+}
+
+.recent-journey-lines .route-summary-dot {
+    font-size: 8px;
+    color: var(--text-secondary);
+}
+
+.recent-journey-lines .route-summary-walk-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+}
+
+/* Infos du trajet */
+.recent-journey-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recent-journey-route {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-journey-meta {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-journey-duration {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Bouton supprimer */
+.recent-journey-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    opacity: 0;
+}
+
+.recent-journey-card:hover .recent-journey-delete {
+    opacity: 1;
+}
+
+.recent-journey-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Dark theme */
+body.dark-theme .recent-journey-card {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .recent-journey-card:hover {
+    border-color: var(--pm-green);
+    background: rgba(30, 41, 59, 0.8);
 }
 
 .route-option-wrapper {

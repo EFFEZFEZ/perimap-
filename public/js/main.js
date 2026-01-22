@@ -2304,12 +2304,13 @@ async function executeItinerarySearch(source, sourceElements) {
             }
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
-            // Sauvegarder le trajet dans les trajets récents
+            // V504: Sauvegarder le trajet dans les trajets récents avec visuels des lignes
             const fromDisplayName = sourceElements?.fromInput?.value;
             const toDisplayName = sourceElements?.toInput?.value;
-            if (fromDisplayName && toDisplayName) {
+            if (fromDisplayName && toDisplayName && allFetchedItineraries?.length > 0) {
                 const departureTime = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
-                addRecentJourney(fromDisplayName, toDisplayName, departureTime);
+                // Passer le premier itinéraire pour les visuels (badges de lignes)
+                addRecentJourney(fromDisplayName, toDisplayName, departureTime, allFetchedItineraries[0]);
             }
             
             // Fusionner avec GTFS si disponible
