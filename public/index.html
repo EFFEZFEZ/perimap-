@@ -2,7 +2,8 @@
 <html lang="fr" prefix="og: https://ogp.me/ns#">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <!-- V505: maximum-scale=1 empêche le zoom auto quand on sélectionne un input sur iOS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- SEO Principal - Mots-clés stratégiques -->
     <title>PériMap : Horaires Péribus & Itinéraires Grand Périgueux (App Gratuite)</title>
@@ -104,11 +105,11 @@
     <link rel="dns-prefetch" href="https://routes.googleapis.com">
     
     <!-- CSS critique en premier -->
-    <link rel="stylesheet" href="css/_config.css?v=504">
-    <link rel="stylesheet" href="style.css?v=504">
+    <link rel="stylesheet" href="css/_config.css?v=505">
+    <link rel="stylesheet" href="style.css?v=505">
     <!-- CSS composants (modulaire) -->
-    <link rel="stylesheet" href="css/components/itinerary.css?v=504">
-    <link rel="stylesheet" href="css/components/timepicker.css?v=504">
+    <link rel="stylesheet" href="css/components/itinerary.css?v=505">
+    <link rel="stylesheet" href="css/components/timepicker.css?v=505">
     
     <!-- CSS externes non-bloquants -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 

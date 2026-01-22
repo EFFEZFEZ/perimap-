@@ -82,7 +82,8 @@ class RecentJourneysManager {
     }
 
     /**
-     * V504: Ajouter un trajet avec cache TTL 1 semaine
+     * V505: Ajouter un trajet avec cache TTL 1 semaine
+     * Stocke l'itinéraire COMPLET pour permettre de revoir le trajet/carte
      */
     addJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null) {
         const now = Date.now();
@@ -97,6 +98,8 @@ class RecentJourneysManager {
             toName: toName.trim(),
             departureTime,
             summary: itinerary ? this.createItinerarySummary(itinerary) : null,
+            // V505: Stocker l'itinéraire complet pour revoir le trajet/carte
+            fullItinerary: itinerary ? this.cloneItinerary(itinerary) : null,
             savedAt: now,
             expiresAt: now + TTL_MS, // 1 semaine
             accessCount: 1
@@ -115,7 +118,44 @@ class RecentJourneysManager {
         this.saveJourneys();
         this.renderRecentJourneys();
         
-        console.log('[RecentJourneys] Trajet sauvegardé (TTL 7j):', fromName, '->', toName);
+        console.log('[RecentJourneys] Trajet complet sauvegardé (TTL 7j):', fromName, '->', toName);
+    }
+    
+    /**
+     * V505: Cloner un itinéraire pour le stockage (évite les références circulaires)
+     */
+    cloneItinerary(itinerary) {
+        try {
+            // Ne garder que les propriétés essentielles pour éviter de dépasser le quota localStorage
+            return {
+                type: itinerary.type,
+                departureTime: itinerary.departureTime,
+                arrivalTime: itinerary.arrivalTime,
+                duration: itinerary.duration,
+                durationRaw: itinerary.durationRaw,
+                polyline: itinerary.polyline,
+                summarySegments: itinerary.summarySegments,
+                steps: itinerary.steps?.map(step => ({
+                    type: step.type,
+                    instruction: step.instruction,
+                    departureStop: step.departureStop,
+                    arrivalStop: step.arrivalStop,
+                    departureTime: step.departureTime,
+                    arrivalTime: step.arrivalTime,
+                    routeShortName: step.routeShortName,
+                    routeColor: step.routeColor,
+                    routeTextColor: step.routeTextColor,
+                    duration: step.duration,
+                    distance: step.distance,
+                    numStops: step.numStops,
+                    intermediateStops: step.intermediateStops,
+                    polyline: step.polyline
+                })) || []
+            };
+        } catch (e) {
+            console.warn('[RecentJourneys] Erreur clonage itinéraire:', e);
+            return null;
+        }
     }
 
     /**
@@ -222,6 +262,11 @@ class RecentJourneysManager {
         });
     }
 
+    /**
+     * V505: Charger un trajet depuis le cache
+     * Si l'itinéraire complet est disponible, on l'utilise directement
+     * Sinon on relance la recherche
+     */
     loadJourney(journey) {
         // Rafraîchir le TTL
         this.refreshTTL(journey.fromName, journey.toName);
@@ -232,17 +277,35 @@ class RecentJourneysManager {
         if (resultsFromInput && resultsToInput) {
             resultsFromInput.value = journey.fromName;
             resultsToInput.value = journey.toName;
-            
-            // Trigger search
-            resultsFromInput.dispatchEvent(new Event('input', { bubbles: true }));
-            resultsToInput.dispatchEvent(new Event('input', { bubbles: true }));
-            
-            // Déclencher la recherche automatiquement
+        }
+        
+        // V505: Si on a l'itinéraire complet en cache, déclencher un événement pour l'afficher
+        if (journey.fullItinerary) {
+            console.log('[RecentJourneys] Chargement itinéraire depuis cache:', journey.fromName, '->', journey.toName);
+            // Dispatch un événement custom pour que main.js puisse afficher l'itinéraire caché
+            window.dispatchEvent(new CustomEvent('perimap:loadCachedItinerary', {
+                detail: {
+                    from: journey.fromName,
+                    to: journey.toName,
+                    itinerary: journey.fullItinerary
+                }
+            }));
+        } else {
+            // Pas de cache complet, relancer la recherche
+            console.log('[RecentJourneys] Pas de cache, relance recherche:', journey.fromName, '->', journey.toName);
             setTimeout(() => {
                 const searchBtn = document.getElementById('results-planner-submit-btn');
                 if (searchBtn) searchBtn.click();
             }, 100);
         }
+    }
+    
+    /**
+     * V505: Récupérer un trajet par clé (utilisé par main.js)
+     */
+    getJourney(fromName, toName) {
+        const key = `${fromName.trim().toLowerCase()}|${toName.trim().toLowerCase()}`;
+        return this.journeys.find(j => j.key === key) || null;
     }
 
     removeJourney(key) {

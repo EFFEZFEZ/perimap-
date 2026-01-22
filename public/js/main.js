@@ -1578,6 +1578,38 @@ function setupStaticEventListeners() {
     if (window.location.hash) {
         setTimeout(handleHashNavigation, 100);
     }
+    
+    // V505: Écouter l'événement de chargement d'itinéraire en cache (trajets récents)
+    window.addEventListener('perimap:loadCachedItinerary', (e) => {
+        const { from, to, itinerary } = e.detail || {};
+        if (!itinerary || !itinerary.length) {
+            console.warn('[V505] loadCachedItinerary: itinéraire vide, relance recherche');
+            const searchBtn = document.getElementById('results-planner-submit-btn');
+            if (searchBtn) searchBtn.click();
+            return;
+        }
+        console.log(`[V505] Chargement ${itinerary.length} itinéraires depuis cache:`, from, '->', to);
+        
+        // Remplir allFetchedItineraries avec les données du cache
+        allFetchedItineraries = itinerary;
+        
+        // Afficher la vue résultats si pas déjà visible
+        showResultsView();
+        
+        // Configurer et afficher les onglets et résultats
+        setupResultTabs(allFetchedItineraries);
+        if (resultsRenderer) resultsRenderer.render('ALL');
+        
+        // Afficher le premier itinéraire sur la carte
+        if (allFetchedItineraries.length > 0 && resultsMapRenderer && resultsMapRenderer.map) {
+            setTimeout(() => {
+                resultsMapRenderer.map.invalidateSize();
+                drawRouteOnResultsMap(allFetchedItineraries[0]);
+            }, 100);
+        }
+        
+        console.log('[V505] Itinéraires affichés depuis cache');
+    });
 
     document.querySelectorAll('.service-card[data-view]').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -5174,7 +5206,7 @@ function showMapView() {
         if (dashboardHall) dashboardHall.classList.add('view-is-active');
         
         animateScreenSwap(fromScreen, mapContainer);
-        document.body.classList.remove('itinerary-view-active');
+        document.body.classList.remove('itinerary-view-active', 'content-view-active');
         document.body.classList.add('view-map-locked'); 
         setBottomNavActive('carte');
 
@@ -5214,7 +5246,7 @@ function showDashboardHall() {
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active', 'content-view-active');
         
         // Reset cartes en batch
         document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
@@ -5439,6 +5471,9 @@ function showDashboardView(viewName) {
 
         dashboardHall.classList.remove('view-is-active');
         dashboardContentView.classList.add('view-is-active');
+        
+        // V505: Ajouter classe sur body pour bloquer overscroll sur horaires/trafic
+        document.body.classList.add('content-view-active');
         
         if (dashboardContentView) dashboardContentView.scrollTop = 0;
         
