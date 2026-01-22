@@ -2294,9 +2294,11 @@ async function executeItinerarySearch(source, sourceElements) {
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
             // Sauvegarder le trajet dans les trajets récents
-            if (searchResults?.from?.display_name && searchResults?.to?.display_name) {
+            const fromDisplayName = sourceElements?.fromInput?.value;
+            const toDisplayName = sourceElements?.toInput?.value;
+            if (fromDisplayName && toDisplayName) {
                 const departureTime = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
-                addRecentJourney(searchResults.from.display_name, searchResults.to.display_name, departureTime);
+                addRecentJourney(fromDisplayName, toDisplayName, departureTime);
             }
             
             // Fusionner avec GTFS si disponible
