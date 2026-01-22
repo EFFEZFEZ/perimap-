@@ -133,24 +133,42 @@ export class RouteService {
         logger.debug('RouteService._fetchBusRouteGoogle', { fromPlaceId, toPlaceId, fromCoords, toCoords });
         
         try {
-            // Construire origin: utiliser coords si placeId absent/invalide
+            // Construire origin: gérer les 3 cas (placeId string, coords object, ou coords séparées)
             let origin;
-            if (fromPlaceId && fromPlaceId.startsWith('ChIJ')) {
+            if (typeof fromPlaceId === 'string' && fromPlaceId.startsWith('ChIJ')) {
+                // Cas 1: Google Place ID valide
                 origin = { placeId: fromPlaceId };
+            } else if (fromPlaceId && typeof fromPlaceId === 'object' && fromPlaceId.lat && fromPlaceId.lng) {
+                // Cas 2: fromPlaceId est en fait un objet coords (commune locale)
+                origin = { location: { latLng: { latitude: fromPlaceId.lat, longitude: fromPlaceId.lng } } };
             } else if (fromCoords?.lat && fromCoords?.lng) {
+                // Cas 3: coords fournis séparément
                 origin = { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } };
             } else {
                 throw new Error('Origine invalide: ni placeId ni coordonnées');
             }
             
-            // Construire destination: utiliser coords si placeId absent/invalide
+            // Construire destination: gérer les 3 cas
             let destination;
-            if (toPlaceId && toPlaceId.startsWith('ChIJ')) {
+            if (typeof toPlaceId === 'string' && toPlaceId.startsWith('ChIJ')) {
                 destination = { placeId: toPlaceId };
+            } else if (toPlaceId && typeof toPlaceId === 'object' && toPlaceId.lat && toPlaceId.lng) {
+                destination = { location: { latLng: { latitude: toPlaceId.lat, longitude: toPlaceId.lng } } };
             } else if (toCoords?.lat && toCoords?.lng) {
                 destination = { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } };
             } else {
                 throw new Error('Destination invalide: ni placeId ni coordonnées');
+            }
+            
+            // Construire departureTime à partir de l'objet searchTime {type, date, hour, minute}
+            let departureTime = null;
+            if (searchTime) {
+                if (typeof searchTime === 'string') {
+                    departureTime = new Date(searchTime).toISOString();
+                } else if (searchTime.date && searchTime.hour !== undefined) {
+                    const dateStr = `${searchTime.date}T${String(searchTime.hour).padStart(2, '0')}:${String(searchTime.minute || 0).padStart(2, '0')}:00`;
+                    departureTime = new Date(dateStr).toISOString();
+                }
             }
             
             const payload = {
@@ -167,7 +185,7 @@ export class RouteService {
                 },
                 languageCode: 'fr',
                 units: 'METRIC',
-                ...(searchTime && { departureTime: new Date(searchTime).toISOString() })
+                ...(departureTime && { departureTime })
             };
 
             const response = await fetch(`${this.apiEndpoints.routes}`, {
