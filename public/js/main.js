@@ -2271,6 +2271,18 @@ async function executeItinerarySearch(source, sourceElements) {
         const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, searchTime, fromCoords, toCoords)
             .catch(e => { logger.error('Erreur routage principal (Phase 2)', e); return null; });
         
+        // V500: Récupérer aussi les trajets vélo en parallèle
+        let bicycleItineraries = [];
+        try {
+            const bikeResult = await apiFactory.getBicycleRoute(fromPlaceId, toPlaceId, fromCoords, toCoords);
+            if (bikeResult?.itineraries?.length) {
+                bicycleItineraries = bikeResult.itineraries;
+                logger.debug('🚴 Trajets vélo récupérés', { count: bicycleItineraries.length });
+            }
+        } catch (e) {
+            logger.warn('Erreur récupération trajets vélo', e);
+        }
+        
         logger.debug(`⚡ Routage terminé en ${Math.round(performance.now() - routingStart)}ms`);
 
         // Traiter les résultats backend principal
@@ -2309,6 +2321,39 @@ async function executeItinerarySearch(source, sourceElements) {
                     );
                     if (!isDuplicate) allFetchedItineraries.push(gtfsIt);
                 }
+            }
+            
+            // V500: Fusionner les trajets vélo
+            if (bicycleItineraries?.length) {
+                for (const bikeRoute of bicycleItineraries) {
+                    // Convertir le format Google Routes en format interne pour vélo
+                    const bikeIt = {
+                        type: 'BIKE',
+                        _isBike: true,
+                        departureTime: searchTime.hour + ':' + String(searchTime.minute).padStart(2, '0'),
+                        arrivalTime: null,
+                        duration: bikeRoute.duration ? parseInt(bikeRoute.duration.replace('s', '')) : null,
+                        durationText: bikeRoute.duration ? Math.round(parseInt(bikeRoute.duration.replace('s', '')) / 60) + ' min' : null,
+                        distance: bikeRoute.distanceMeters || null,
+                        distanceText: bikeRoute.distanceMeters ? (bikeRoute.distanceMeters / 1000).toFixed(1) + ' km' : null,
+                        polyline: bikeRoute.polyline?.encodedPolyline || null,
+                        legs: [{
+                            mode: 'BICYCLE',
+                            duration: bikeRoute.duration ? parseInt(bikeRoute.duration.replace('s', '')) : 0,
+                            distance: bikeRoute.distanceMeters || 0
+                        }],
+                        steps: []
+                    };
+                    // Calculer l'heure d'arrivée
+                    if (bikeIt.duration) {
+                        const depDate = new Date();
+                        depDate.setHours(parseInt(searchTime.hour), parseInt(searchTime.minute), 0, 0);
+                        depDate.setSeconds(depDate.getSeconds() + bikeIt.duration);
+                        bikeIt.arrivalTime = String(depDate.getHours()).padStart(2, '0') + ':' + String(depDate.getMinutes()).padStart(2, '0');
+                    }
+                    allFetchedItineraries.push(bikeIt);
+                }
+                logger.debug('🚴 Trajets vélo ajoutés', { count: bicycleItineraries.length });
             }
         } else if (hybridItins?.length) {
             logger.info('🔄 Fallback GTFS itineraries', { count: hybridItins.length });
@@ -2523,7 +2568,17 @@ async function loadMoreDepartures() {
         // Appeler l'API avec le nouvel horaire (PHASE 2c: Using new service)
         const apiFactory = getAPIServiceFactory();
         const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, offsetSearchTime);
-        let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+        
+        // V499: Utiliser le même format que executeItinerarySearch
+        let newItineraries = [];
+        if (intelligentResults) {
+            if (intelligentResults.routes || intelligentResults.itineraries) {
+                const routes = intelligentResults.routes || intelligentResults.itineraries || [];
+                newItineraries = processGoogleRoutesResponse({ routes });
+            } else if (intelligentResults.recommendations) {
+                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+            }
+        }
         
         // V95: Filtrer strictement les nouveaux itinéraires
         const beforeFilter = newItineraries.length;
@@ -2744,7 +2799,17 @@ async function loadMoreArrivals() {
     try {
         const apiFactory = getAPIServiceFactory();
         const intelligentResults = await apiFactory.getBusRoute(fromPlaceId, toPlaceId, offsetSearchTime);
-        let newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+        
+        // V499: Utiliser le même format que executeItinerarySearch
+        let newItineraries = [];
+        if (intelligentResults) {
+            if (intelligentResults.routes || intelligentResults.itineraries) {
+                const routes = intelligentResults.routes || intelligentResults.itineraries || [];
+                newItineraries = processGoogleRoutesResponse({ routes });
+            } else if (intelligentResults.recommendations) {
+                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+            }
+        }
         
         // Filtrer les nouveaux itinéraires
         const beforeFilter = newItineraries.length;

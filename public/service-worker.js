@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v490 - Fix API places POST + anti-zones grises mobile
+ * Service Worker v500 - Fix loadMore format + ajout trajets vélo
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v499';
+const CACHE_VERSION = 'v500';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
