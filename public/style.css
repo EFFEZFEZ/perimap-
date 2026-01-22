@@ -7522,7 +7522,7 @@ body.dark-theme .indicator-dot.destination {
         width: 100%;
         height: auto;
         backdrop-filter: blur(10px);
-        padding-bottom: 200px; /* Espace pour scroller le popover */
+        padding-bottom: 16px; /* V507: Marge raisonnable */
         overflow-y: visible; /* Scroll géré par le conteneur parent */
     }
 
@@ -12019,6 +12019,12 @@ body.dark-theme .tarifs-choice {
 
 /* === 3. AUTOCOMPLÉTION MOBILE OPTIMISÉE === */
 @media (max-width: 768px) {
+    /* V507: S'assurer que le wrapper a position relative pour les suggestions */
+    .route-input-wrapper {
+        position: relative !important;
+        z-index: 100;
+    }
+    
     .autocomplete-suggestions,
     #horaires-search-results,
     #from-suggestions,
@@ -12030,7 +12036,7 @@ body.dark-theme .tarifs-choice {
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     }
     
-    /* V506: Suggestions en dessous du champ de saisie (pas en bas de l'écran) */
+    /* V507: Suggestions juste en dessous du champ de saisie */
     #results-from-suggestions,
     #results-to-suggestions {
         position: absolute !important;
@@ -12041,11 +12047,18 @@ body.dark-theme .tarifs-choice {
         width: 100% !important;
         max-width: none;
         transform: none;
-        z-index: 25000 !important;
-        background: var(--bg-surface, #fff);
-        border: 1px solid var(--border-color, #e0e0e0);
-        border-radius: var(--radius-md, 8px);
+        z-index: 30000 !important;
+        background: var(--bg-surface, #1a2536);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
         margin-top: 4px;
+        overflow-y: auto;
+    }
+    
+    body.dark-theme #results-from-suggestions,
+    body.dark-theme #results-to-suggestions {
+        background: #1a2536;
+        border-color: rgba(255, 255, 255, 0.1);
     }
     
     .autocomplete-item,
