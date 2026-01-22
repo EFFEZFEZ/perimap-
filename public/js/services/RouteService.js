@@ -62,9 +62,15 @@ export class RouteService {
         logger.info('RouteService.getBusRoute', { fromPlaceId, toPlaceId, searchTime });
         
         try {
-            // Check cache first - V500: serialize searchTime properly
+            // Check cache first - V501: serialize all values properly
+            const serializeLocation = (loc) => {
+                if (!loc) return 'null';
+                if (typeof loc === 'string') return loc;
+                if (loc.lat && loc.lng) return `${loc.lat.toFixed(5)},${loc.lng.toFixed(5)}`;
+                return JSON.stringify(loc);
+            };
             const timeKey = searchTime ? `${searchTime.date || ''}_${searchTime.hour || ''}${searchTime.minute || ''}` : 'now';
-            const cacheKey = `bus:${fromPlaceId}:${toPlaceId}:${timeKey}`;
+            const cacheKey = `bus:${serializeLocation(fromPlaceId)}:${serializeLocation(toPlaceId)}:${timeKey}`;
             const cached = this._checkCache(cacheKey);
             if (cached) {
                 logger.debug('RouteService cache HIT', { cacheKey });
@@ -215,7 +221,14 @@ export class RouteService {
         logger.info('RouteService.getBicycleRoute', { fromPlaceId, toPlaceId });
         
         try {
-            const cacheKey = `bicycle:${fromPlaceId}:${toPlaceId}`;
+            // V501: serialize locations properly
+            const serializeLocation = (loc) => {
+                if (!loc) return 'null';
+                if (typeof loc === 'string') return loc;
+                if (loc.lat && loc.lng) return `${loc.lat.toFixed(5)},${loc.lng.toFixed(5)}`;
+                return JSON.stringify(loc);
+            };
+            const cacheKey = `bicycle:${serializeLocation(fromCoords || fromPlaceId)}:${serializeLocation(toCoords || toPlaceId)}`;
             const cached = this._checkCache(cacheKey);
             if (cached) {
                 logger.debug('RouteService bicycle cache HIT');
@@ -246,11 +259,13 @@ export class RouteService {
         logger.debug('RouteService._fetchBicycleRouteGoogle', { from: fromCoords, to: toCoords });
         
         try {
-            // V500: Remove routingPreference - only valid for DRIVE mode
+            // V501: Fix payload format to match Google Routes API expected format
             const payload = {
-                origin: { location: { latitude: fromCoords.lat, longitude: fromCoords.lng } },
-                destination: { location: { latitude: toCoords.lat, longitude: toCoords.lng } },
-                travelMode: 'BICYCLE'
+                origin: { location: { latLng: { latitude: fromCoords.lat, longitude: fromCoords.lng } } },
+                destination: { location: { latLng: { latitude: toCoords.lat, longitude: toCoords.lng } } },
+                travelMode: 'BICYCLE',
+                languageCode: 'fr',
+                units: 'METRIC'
             };
 
             const response = await fetch(`${this.apiEndpoints.routes}`, {

@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v501 - Fix cache key + bicycle API
+ * Service Worker v502 - Fix cache key for coordinate-based searches
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v501';
+const CACHE_VERSION = 'v502';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
