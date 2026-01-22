@@ -2281,9 +2281,8 @@ async function executeItinerarySearch(source, sourceElements) {
             if (intelligentResults.routes || intelligentResults.itineraries) {
                 // Nouveau format: traiter directement les routes Google
                 const routes = intelligentResults.routes || intelligentResults.itineraries || [];
-                console.log('📦 Format RouteService détecté', { routeCount: routes.length, firstRouteKeys: routes[0] ? Object.keys(routes[0]) : [] });
+                logger.debug('📦 Format RouteService détecté', { routeCount: routes.length });
                 allFetchedItineraries = processGoogleRoutesResponse({ routes });
-                console.log('📦 Après processGoogleRoutesResponse:', { count: allFetchedItineraries.length });
             } else if (intelligentResults.recommendations) {
                 // Ancien format: utiliser processIntelligentResults
                 allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
@@ -2992,9 +2991,8 @@ function renderSuggestions(suggestions, container, onSelect) {
 }
 
 function processGoogleRoutesResponse(data) {
-    console.log('🔍 processGoogleRoutesResponse input:', { hasData: !!data, hasRoutes: !!data?.routes, routeCount: data?.routes?.length || 0 });
     if (!data || !data.routes || data.routes.length === 0) {
-        console.warn("Réponse de l'API Routes (BUS) vide ou invalide.", data);
+        console.warn("Réponse de l'API Routes (BUS) vide ou invalide.");
         return [];
     }
 
