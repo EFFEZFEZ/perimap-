@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr" prefix="og: https://ogp.me/ns#">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PL27BXXD');</script>
+    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <!-- V505: maximum-scale=1 empêche le zoom auto quand on sélectionne un input sur iOS -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -8,7 +15,7 @@
     <!-- SEO Principal - Mots-clés stratégiques -->
     <title>PériMap : Horaires Péribus & Itinéraires Grand Périgueux (App Gratuite)</title>
     <meta name="description" content="PériMap : Horaires Péribus en temps réel, calcul d'itinéraire et plan interactif pour le Grand Périgueux. Application gratuite pour vos trajets en bus.">
-    <meta name="keywords" content="péribus, bus périgueux, horaires péribus, itinéraire bus périgueux, grand périgueux transport, réseau péribus, péribus horaires, bus périgueux gratuit, application péribus, plan bus périgueux, transports grand périgueux, peribus, bus perigueux, horaires peribus, péribus temps réel, ligne A B C D péribus, prochain bus périgueux, tarif péribus, abonnement péribus, carte péribus, arrêt bus périgueux, gare périgueux, centre ville périgueux bus, transport périgueux, mobilité périgueux, bus trélissac, bus boulazac, bus chancelade, dordogne transport, nouvelle aquitaine bus, calcul trajet périgueux, meilleur app péribus, perimap, perimap application">
+    <meta name="keywords" content="péribus, bus périgueux, horaires péribus, itinéraire bus périgueux, grand périgueux transport, réseau péribus, péribus horaires, bus périgueux gratuit, application péribus, plan bus périgueux, transports grand périgueux, peribus, bus perigueux, horaires peribus, péribus temps réel, ligne A B C D péribus, prochain bus périgueux, tarif péribus, abonnement péribus, carte péribus, arrêt bus périgueux, gare périgueux, centre ville périgueux bus, transport périgueux, mobilité© périgueux, bus trélissac, bus boulazac, bus chancelade, dordogne transport, nouvelle aquitaine bus, calcul trajet périgueux, meilleur app péribus, perimap, perimap application">
     <meta name="author" content="PériMap - Application indépendante Grand Périgueux">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow">
@@ -92,7 +99,7 @@
     <meta name="msapplication-TileImage" content="/icons/icon-192.png">
     
     <!-- Preload ressources critiques -->
-    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="style.modules.css" as="style">
     <link rel="preload" href="js/app.js" as="script" crossorigin>
     <!-- Preload image hero optimisée (200KB vs 4MB externe) -->
     <link rel="preload" href="/icons/perigueux-hero.webp" as="image" type="image/webp" fetchpriority="high">
@@ -106,7 +113,7 @@
     
     <!-- CSS critique en premier -->
     <link rel="stylesheet" href="css/_config.css?v=507">
-    <link rel="stylesheet" href="style.css?v=507">
+    <link rel="stylesheet" href="style.modules.css">
     <!-- CSS composants (modulaire) -->
     <link rel="stylesheet" href="css/components/itinerary.css?v=507">
     <link rel="stylesheet" href="css/components/timepicker.css?v=507">
@@ -301,6 +308,12 @@
     <link rel="alternate" hreflang="x-default" href="https://www.xn--primap-bva.fr/">
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PL27BXXD"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
 
     <!-- Preloader removed: instant load requested by user -->
 
@@ -524,7 +537,7 @@
                             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                         </a>
                     </div>
-                    <p class="footer-copyright">© 2026 PériMap · Tous droits réservés · Fait avec ❤️ pour le Grand Périgueux</p>
+                    <p class="footer-copyright">&copy; 2026 PériMap &middot; Tous droits réservés &middot; Fait avec ❤️ pour le Grand Périgueux</p>
                 </div>
             </div>
         </div>
