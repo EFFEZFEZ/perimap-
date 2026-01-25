@@ -19,7 +19,6 @@
 ## 🏗️ ARCHITECTURE EN 6 COUCHES
 
 ### COUCHE 1 : CŒUR SYSTÈME (Le nerveux central)
-**Fichiers** : `/public/js/EventBus.js`, `StateManager.js`, `Logger.js`
 
 **Rôle** : Éliminer dépendances circulaires par communication centralisée
 

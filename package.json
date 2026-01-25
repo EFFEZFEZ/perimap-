@@ -16,7 +16,7 @@
     "lint:fix": "eslint public/js --ext .js,.mjs --fix"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "22.x"
   },
   "author": "Périmap",
   "license": "UNLICENSED",
