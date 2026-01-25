@@ -29,7 +29,7 @@ function copyStaticFolders() {
       });
       
       // Copier les fichiers individuels à la racine
-      const rootFiles = ['service-worker.js', 'manifest.json', 'robots.txt', 'sitemap.xml'];
+      const rootFiles = ['service-worker.js', 'manifest.json', 'robots.txt', 'sitemap.xml', 'google66fb00a1cc526ca0.html'];
       rootFiles.forEach(file => {
         const src = resolve(__dirname, 'public', file);
         const dest = resolve(__dirname, 'dist', file);
