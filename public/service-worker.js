@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v511';
+const CACHE_VERSION = 'v512';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
