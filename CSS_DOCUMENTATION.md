@@ -4,6 +4,11 @@ This document is the single source of truth for the CSS split. It tracks the
 current monolithic file, the planned module layout, and the validation status
 for each block. It will be updated after each block extraction.
 
+## Update 2026-01-25 — Monolithic `style.css` is now obsolete
+- **Action**: The monolithic file `public/style.css` has been emptied and replaced with a deprecation notice.
+- **Reason**: The CSS refactoring to a modular architecture is complete. All styles are now loaded via `public/style.modules.css`, which imports individual modules from `public/css/modules/`.
+- **Status**: The old `style.css` file is **not used** by any part of the application. It is kept as an empty file solely to prevent any legacy build process or cached link from accidentally loading it and causing style conflicts. It can be safely ignored.
+
 ## Update 2026-01-24 — Active module index & SW v510
 - Active stylesheet: `public/style.modules.css` is loaded on all public pages and replaces the monolithic `public/style.css` in production usage. The monolithic file remains archived and is not referenced by HTML.
 - Import order in `style.modules.css` mirrors the original cascade to preserve visuals. Modules include base (variables, reset, animations), utilities (performance, accessibility, mobile, stacking), layout (header, navigation, header.dropdown), pages (map, home, itinerary, schedules, traffic), and components (hero, offline, banners, banners.alert, cards, common, leaflet, popups, forms, modals).
@@ -11,7 +16,7 @@ for each block. It will be updated after each block extraction.
 - Build: Vite (v5) applies cache busting (hashed filenames) for CSS/JS. Even when hashed, cache-first captures the first request and stores it; no visual regressions expected.
 - Next optional step: evaluate migration of non-module CSS still referenced (e.g., `public/css/_config.css`, `public/css/components/itinerary.css`, `public/css/components/timepicker.css`) into `public/css/modules/` to fully homogenize, preserving import order.
 
-## File: public/style.css (v504)
+## File: public/style.css (v504) - DEPRECATED
 
 ### Resume global
 - Lines: 12448 (measured)
@@ -38,6 +43,25 @@ extraction.
 | 9. Dark theme top bar | top bar theme rules | public/css/modules/themes/dark.css |
 | 10. Planner form | origin/destination inputs, swap/clear | public/css/modules/components/forms.css |
 | 11. Itinerary results | route cards, badges, durations | public/css/modules/pages/itinerary.css |
+| 12. Header mobile fixe | header principal toujours visible sur mobile, compensation zones grises Chrome | public/css/modules/layout/header.css |
+
+### Section : Header mobile fixe (ajout 2026-01-25)
+
+**Rôle** :
+- Rend le header principal (#main-header) toujours visible en haut de l’écran sur mobile (≤900px).
+- Empêche le header de sortir de l’écran pendant le scroll.
+- Compense les zones grises Chrome (barres système) avec `env(safe-area-inset-top)`.
+- Applique un z-index élevé et une largeur 100vw pour garantir la visibilité.
+- Améliore l’expérience utilisateur sur la vue itinéraires et toutes les pages mobiles.
+
+**Pages concernées** :
+- Principalement `itineraire.html`, mais impacte toutes les vues utilisant #main-header sur mobile.
+
+**Pourquoi ?**
+- Sur mobile, le header disparaissait au scroll, rendant la navigation désagréable.
+- Les zones grises Chrome n’étaient pas compensées, gênant le scroll.
+
+**Statut** : Nouvelle règle (v506, 2026-01-25, module layout/header.css)
 | 12. Header & nav | site header, hamburger, dropdown | public/css/modules/layout/header.css |
 | 13. Home hero | home page hero | public/css/modules/pages/home.css |
 | 14. Quick actions | home shortcuts cards | public/css/modules/components/cards.css |
@@ -1226,7 +1250,7 @@ used in the UI.
   tarifs-location-stops, tarifs-mediation, tarifs-mediation-box,
   tarifs-mediation-choices, tarifs-mediation-conditions, tarifs-mediation-docs,
   tarifs-mediation-question, tarifs-nav-arrow, tarifs-nav-card, tarifs-nav-grid,
-  tarifs-nav-icon, tarifs-nav-title, tarifs-note, tarifs-page, tarifs-pass-details,
+  tarifs-nav-icon, tarifs-nav-title, tarifs-note, tarifs-pass-details,
   tarifs-payment-icon, tarifs-payment-option, tarifs-payment-options,
   tarifs-payment-text, tarifs-price, tarifs-price-highlight, tarifs-section-title,
   tarifs-small, tarifs-subtitle

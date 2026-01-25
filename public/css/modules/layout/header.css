@@ -22,6 +22,23 @@
     flex-shrink: 0; /* Ne doit pas rétrécir */
     /* V491: Empêche le scroll quand on touche le header */
     touch-action: manipulation;
+}
+
+/* Correction mobile : header toujours fixe sur la vue trajets */
+@media (max-width: 900px) {
+    #main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100vw;
+        z-index: 2000;
+        background: var(--bg-page, #fff);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border-bottom: 1px solid var(--border, #e5e7eb);
+        padding-top: env(safe-area-inset-top, 0px);
+    }
+}
     overscroll-behavior: none;
 }
 
