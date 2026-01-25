@@ -86,7 +86,7 @@ class RecentJourneysManager {
      * Stocke TOUS les itinéraires pour permettre de les afficher dans "Vos trajets"
      * @param {Array} allItineraries - Tableau de tous les itinéraires de la recherche
      */
-    addJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null) {
+    addJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null, searchTime = null) {
         const now = Date.now();
         const key = `${fromName.trim().toLowerCase()}|${toName.trim().toLowerCase()}`;
         
@@ -96,7 +96,7 @@ class RecentJourneysManager {
         // V506: Stocker TOUS les itinéraires s'ils sont fournis, sinon juste le premier
         let cachedItineraries = null;
         if (allItineraries && allItineraries.length > 0) {
-            cachedItineraries = allItineraries.slice(0, 10).map(it => this.cloneItinerary(it)).filter(Boolean);
+            cachedItineraries = allItineraries.map(it => this.cloneItinerary(it)).filter(Boolean);
         } else if (itinerary) {
             cachedItineraries = [this.cloneItinerary(itinerary)].filter(Boolean);
         }
@@ -109,6 +109,7 @@ class RecentJourneysManager {
             summary: itinerary ? this.createItinerarySummary(itinerary) : null,
             // V506: Stocker TOUS les itinéraires pour affichage dans "Vos trajets"
             fullItinerary: cachedItineraries,
+            searchTime: searchTime ? this.deepClone(searchTime) : null,
             savedAt: now,
             expiresAt: now + TTL_MS, // 1 semaine
             accessCount: 1
@@ -130,42 +131,113 @@ class RecentJourneysManager {
         console.log('[RecentJourneys] Trajet complet sauvegardé (TTL 7j):', fromName, '->', toName);
     }
     
-    /**
-     * V505: Cloner un itinéraire pour le stockage (évite les références circulaires)
-     */
-    cloneItinerary(itinerary) {
-        try {
-            // Ne garder que les propriétés essentielles pour éviter de dépasser le quota localStorage
-            return {
-                type: itinerary.type,
-                departureTime: itinerary.departureTime,
-                arrivalTime: itinerary.arrivalTime,
-                duration: itinerary.duration,
-                durationRaw: itinerary.durationRaw,
-                polyline: itinerary.polyline,
-                summarySegments: itinerary.summarySegments,
-                steps: itinerary.steps?.map(step => ({
-                    type: step.type,
-                    instruction: step.instruction,
-                    departureStop: step.departureStop,
-                    arrivalStop: step.arrivalStop,
-                    departureTime: step.departureTime,
-                    arrivalTime: step.arrivalTime,
-                    routeShortName: step.routeShortName,
-                    routeColor: step.routeColor,
-                    routeTextColor: step.routeTextColor,
-                    duration: step.duration,
-                    distance: step.distance,
-                    numStops: step.numStops,
-                    intermediateStops: step.intermediateStops,
-                    polyline: step.polyline
-                })) || []
-            };
-        } catch (e) {
-            console.warn('[RecentJourneys] Erreur clonage itinéraire:', e);
-            return null;
-        }
+/**
+ * V505: Cloner un itinéraire pour le stockage (évite les références circulaires)
+ */
+cloneItinerary(itinerary) {
+    try {
+        const safeItinerary = {
+            type: itinerary.type,
+            _isBike: itinerary._isBike,
+            _isWalk: itinerary._isWalk,
+            departureTime: itinerary.departureTime,
+            arrivalTime: itinerary.arrivalTime,
+            duration: itinerary.duration,
+            durationRaw: itinerary.durationRaw,
+            distance: itinerary.distance,
+            distanceMeters: itinerary.distanceMeters,
+            polyline: this.clonePolyline(itinerary.polyline),
+            summarySegments: this.deepClone(itinerary.summarySegments),
+            steps: Array.isArray(itinerary.steps) ? itinerary.steps.map(step => this.cloneStep(step)).filter(Boolean) : [],
+            legs: this.deepClone(itinerary.legs),
+            tripId: itinerary.tripId || itinerary.trip?.trip_id,
+            routeId: itinerary.routeId || itinerary.route?.route_id,
+            shapeId: itinerary.shapeId || itinerary.shape_id,
+            departureLocation: this.cloneLocation(itinerary.departureLocation || itinerary.startLocation),
+            arrivalLocation: this.cloneLocation(itinerary.arrivalLocation || itinerary.endLocation),
+            searchMetadata: this.deepClone(itinerary.searchMetadata || null)
+        };
+        return this.compactObject(safeItinerary);
+    } catch (e) {
+        console.warn('[RecentJourneys] Erreur clonage itinéraire:', e);
+        return null;
     }
+}
+
+cloneStep(step) {
+    if (!step) return null;
+    return this.compactObject({
+        type: step.type,
+        instruction: step.instruction,
+        departureStop: this.deepClone(step.departureStop),
+        arrivalStop: this.deepClone(step.arrivalStop),
+        departureTime: step.departureTime,
+        arrivalTime: step.arrivalTime,
+        departureLocation: this.cloneLocation(step.departureLocation || step.startLocation),
+        arrivalLocation: this.cloneLocation(step.arrivalLocation || step.endLocation),
+        routeShortName: step.routeShortName,
+        routeColor: step.routeColor,
+        routeTextColor: step.routeTextColor,
+        routeId: step.routeId || step.route_id,
+        tripId: step.tripId || step.trip_id,
+        shapeId: step.shapeId || step.shape_id,
+        duration: step.duration,
+        durationRaw: step.durationRaw || step._durationSeconds,
+        distance: step.distance,
+        distanceMeters: step.distanceMeters || step._distanceMeters,
+        numStops: step.numStops,
+        intermediateStops: this.deepClone(step.intermediateStops),
+        stopTimes: this.deepClone(step.stopTimes),
+        polyline: this.clonePolyline(step.polyline),
+        polylines: this.deepClone(step.polylines),
+        legGeometry: this.deepClone(step.legGeometry),
+        subSteps: Array.isArray(step.subSteps) ? step.subSteps.map(s => this.cloneStep(s)).filter(Boolean) : [],
+        alerts: this.deepClone(step.alerts),
+        agencyName: step.agencyName,
+        line: step.line,
+        _isWalk: step._isWalk,
+        _isBike: step._isBike
+    });
+}
+
+cloneLocation(loc) {
+    if (!loc) return null;
+    return this.compactObject({
+        lat: loc.lat || loc.latitude,
+        lon: loc.lon || loc.lng || loc.longitude,
+        placeId: loc.placeId,
+        name: loc.name || loc.label,
+        stopId: loc.stopId || loc.stop_id
+    });
+}
+
+clonePolyline(poly) {
+    if (!poly) return null;
+    if (typeof poly === 'string') return poly;
+    return this.compactObject({
+        encodedPolyline: poly.encodedPolyline || poly.points || null,
+        latLngs: Array.isArray(poly.latLngs) ? this.deepClone(poly.latLngs) : null
+    });
+}
+
+deepClone(value) {
+    try {
+        return JSON.parse(JSON.stringify(value, (_k, v) => typeof v === 'function' ? undefined : v));
+    } catch (e) {
+        console.warn('[RecentJourneys] deepClone failed', e);
+        return null;
+    }
+}
+
+compactObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    const cleaned = {};
+    Object.entries(obj).forEach(([k, v]) => {
+        if (v !== undefined) cleaned[k] = v;
+    });
+    return cleaned;
+}
+
 
     /**
      * V504: Rafraîchir TTL quand l'utilisateur reclique
@@ -296,7 +368,8 @@ class RecentJourneysManager {
                 detail: {
                     from: journey.fromName,
                     to: journey.toName,
-                    itinerary: journey.fullItinerary
+                    itinerary: journey.fullItinerary,
+                    searchTime: journey.searchTime || null
                 }
             }));
         } else {
@@ -354,11 +427,11 @@ function initRecentJourneys() {
  * V506: Ajouter un trajet avec TOUS les itinéraires pour les afficher dans "Vos trajets"
  * @param {Array} allItineraries - Tableau de tous les résultats de recherche
  */
-function addRecentJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null) {
+function addRecentJourney(fromName, toName, departureTime = 'Maintenant', itinerary = null, allItineraries = null, searchTime = null) {
     if (!recentJourneysManager) {
         initRecentJourneys();
     }
-    recentJourneysManager.addJourney(fromName, toName, departureTime, itinerary, allItineraries);
+    recentJourneysManager.addJourney(fromName, toName, departureTime, itinerary, allItineraries, searchTime);
 }
 
 export { initRecentJourneys, addRecentJourney };

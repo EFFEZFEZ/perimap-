@@ -49,12 +49,17 @@
     font-size: 1rem;
     font-weight: 600;
     background: var(--bg-secondary);
+    box-shadow: var(--elevation-0);
     list-style: none;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, box-shadow var(--transition-normal), transform var(--transition-quick);
 }
 
 .accordion-group summary:hover {
     background: #f1f5f9;
+}
+
+.accordion-group summary:active {
+    transform: scale(0.985);
 }
 
 .accordion-group summary::-webkit-details-marker {
@@ -82,13 +87,17 @@
     padding: 0 var(--spacing-5);
     overflow: hidden;
     max-height: 0;
-    transition: max-height var(--transition-smooth);
-    overscroll-behavior: contain;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: max-height var(--transition-smooth), opacity var(--transition-normal), transform var(--transition-normal);
+    overscroll-behavior: auto;
     -webkit-overflow-scrolling: touch;
 }
 
 details[open] .accordion-content {
     max-height: 1000px;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .accordion-content-inner {
@@ -222,4 +231,195 @@ body.dark-theme .hall-line-shortcuts-title {
 
 .hall-line-btns::-webkit-scrollbar {
     display: none;
+}
+
+/**
+ * Schedule Card (Horaires)
+ *
+ * Extracted from public/style.css (CARTE HORAIRES).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 3676-3835
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * CARTE HORAIRES
+ * ========================================= */
+#horaires-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+#horaires-search-container svg {
+    position: absolute;
+    left: 14px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    z-index: 1;
+}
+#horaires-search-bar {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem; 
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+}
+#horaires-search-bar:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: none;
+}
+#horaires-search-results {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-3);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: var(--z-dropdown);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: auto;
+}
+.search-result-item {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition-quick);
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--bg-secondary); }
+.search-result-item strong { color: var(--primary); }
+
+.fiche-horaire-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+#fiche-horaire-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-main);
+    /* V434: Uniformiser la largeur avec le hero */
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
+}
+.accordion-group details {
+    border-bottom: 1px solid var(--border);
+}
+.accordion-group details:last-child {
+    border-bottom: none;
+}
+.accordion-group summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    box-shadow: var(--elevation-0);
+    list-style: none; 
+    transition: background 0.2s ease, box-shadow var(--transition-normal), transform var(--transition-quick);
+}
+.accordion-group summary:hover {
+    background: #f1f5f9;
+}
+.accordion-group summary::-webkit-details-marker {
+    display: none; 
+}
+.accordion-group summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease-in-out;
+}
+.accordion-group details[open] summary {
+    background: var(--bg-main);
+    box-shadow: var(--elevation-1);
+}
+.accordion-group details[open] summary::after {
+    transform: rotate(45deg);
+}
+
+.accordion-content {
+    background: var(--bg-main);
+    padding: 0 var(--spacing-5); 
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: max-height var(--transition-smooth), opacity var(--transition-normal), transform var(--transition-normal);
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: touch;
+}
+details[open] .accordion-content {
+    max-height: 1000px; 
+    opacity: 1;
+    transform: translateY(0);
+}
+.accordion-content-inner {
+    padding: 1rem 0;
+}
+.accordion-content-inner a {
+    display: block;
+    padding: 0.75rem 0;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+}
+.accordion-content-inner a:last-child {
+    border-bottom: none;
+}
+.accordion-content-inner a:hover {
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce), (update: slow) {
+    .accordion-group summary,
+    .accordion-group summary::after,
+    .accordion-content {
+        transition: none !important;
+    }
+
+    .accordion-group summary:active,
+    details[open] .accordion-content {
+        transform: none !important;
+    }
+
+    .accordion-content {
+        opacity: 1;
+    }
+}
+
+#horaires-search-shortcut {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+}
+#horaires-search-shortcut p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+#btn-horaires-search-focus {
+    font-weight: 600;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
 }

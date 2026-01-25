@@ -99,7 +99,7 @@ body.dark-theme .indicator-dot.origin, body.dark-theme .indicator-dot.destinatio
 
   /* Déverrouille le scroll pour la vue Itinéraires en mobile */
   body.itinerary-view-active {
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     position: relative !important;
     width: 100% !important;
     height: auto !important;
@@ -130,8 +130,6 @@ body.dark-theme .indicator-dot.origin, body.dark-theme .indicator-dot.destinatio
     border: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
     border-radius: 18px 18px 0 0;
-    margin: 0 auto;
-    max-width: 520px;
     height: auto;
     width: 100%;
     backdrop-filter: blur(10px);
@@ -178,21 +176,68 @@ body.dark-theme .indicator-dot.origin, body.dark-theme .indicator-dot.destinatio
   .btn-time-picker { width: 100%; background: rgba(255, 255, 255, 0.06); color: #e8f3ff; border: 1px solid rgba(255, 255, 255, 0.08); justify-content: space-between; padding: 0.85rem 1rem; }
   .btn-time-picker:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.14); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); }
   .btn-search-route { width: 100%; background: linear-gradient(135deg, var(--primary) 0%, #16a34a 100%); box-shadow: 0 18px 36px rgba(34, 197, 94, 0.35); letter-spacing: 0.03em; }
-  .results-list-wrapper { display: block; padding: 0 1rem 1.5rem; }
-  .results-list { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; backdrop-filter: blur(8px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35); overflow: hidden; }
+  .results-list-wrapper { display: block; padding: 0.75rem 1rem 1.25rem; }
+  .results-list { background: transparent; border: none; border-radius: 0; backdrop-filter: none; box-shadow: none; overflow: visible; width: 100%; box-sizing: border-box; padding: 0; }
   
-  /* Recent journeys section - styled like other cards */
-  .recent-journeys-section { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 16px; padding: 1rem; margin-top: 1rem; backdrop-filter: blur(8px); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18); }
-  .recent-journeys-section h3 { font-family: Manrope, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.75rem 0; }
-  #recent-journeys-list { display: flex; flex-direction: column; gap: 0.75rem; }
-  
-  .recent-journey-item { padding: 0.8rem 1rem; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; cursor: pointer; transition: all 0.2s ease; }
-  .recent-journey-item:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255, 255, 255, 0.14); }
-  .recent-journey-item .journey-route { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
-  .recent-journey-item .journey-time { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem; }
-  
-  .recent-journeys-empty { padding: 1.2rem; border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(255, 255, 255, 0.02); text-align: center; }
-  .recent-journeys-empty p { font-size: 0.95rem; color: var(--text-secondary); margin: 0; }
+  /* Recent journeys section - aligned with schedule block */
+  .recent-journeys-section {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin-top: var(--spacing-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  .recent-journeys-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-4) 0;
+  }
+  #recent-journeys-container {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #recent-journeys-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  .recent-journey-card,
+  .recent-journey-item {
+    padding: 0.9rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--elevation-0);
+  }
+  .recent-journey-card:hover,
+  .recent-journey-item:hover {
+    border-color: var(--primary);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28), 0 4px 14px rgba(34, 197, 94, 0.15);
+    transform: translateY(-3px);
+  }
+  .recent-journeys-empty {
+    padding: var(--spacing-4);
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .recent-journeys-empty p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
 
   /* Override green glow/background for swap button in itinerary view */
   #itinerary-results-container .btn-swap-minimal,

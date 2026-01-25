@@ -1,86 +1,45 @@
 /**
- * Accessibility Utilities - Périmap v432
- * 
- * Classes utilitaires pour l'accessibilité
- * Source: style.css
+ * Accessibility Utilities - Perimap v504
+ *
+ * Extracted from public/style.css section 5 (Accessibility WCAG).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 562-673
+ * Updated: 2026-01-24
  */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SCREEN READER ONLY
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-.sr-only-focusable:active,
-.sr-only-focusable:focus {
-    position: static;
-    width: auto;
-    height: auto;
-    margin: 0;
-    overflow: visible;
-    clip: auto;
-    white-space: normal;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FOCUS STATES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Focus visible - outline moderne */
-:focus-visible {
-    outline: 2px solid var(--primary-color, #1565C0);
+/* =========================================
+ * ACCESSIBILITÉ WCAG - FOCUS VISIBLE
+ * ========================================= */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 3px solid var(--pm-green);
     outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
-/* Focus ring utility */
-.focus-ring:focus-visible {
-    outline: 2px solid var(--primary-color, #1565C0);
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.15);
+/* Focus pour éléments dans fond sombre */
+body.dark-theme button:focus-visible,
+body.dark-theme a:focus-visible,
+body.dark-theme input:focus-visible {
+    outline-color: var(--pm-cyan);
 }
 
-/* Remove default focus for mouse users */
-:focus:not(:focus-visible) {
-    outline: none;
+/* Touch targets minimum 44x44px (WCAG 2.5.5) */
+.btn-icon-round,
+.btn-geolocate,
+.btn-swap-direction,
+button.btn-close,
+button.tab {
+    min-width: 44px;
+    min-height: 44px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SKIP LINKS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--primary-color, #1565C0);
-    color: white;
-    padding: var(--spacing-2) var(--spacing-4);
-    z-index: 10000;
-    transition: top 0.3s ease;
-    text-decoration: none;
-    font-weight: 600;
-    border-radius: 0 0 var(--border-radius-md) 0;
-}
-
-.skip-link:focus {
-    top: 0;
-    outline: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* Support prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -90,150 +49,73 @@
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
-    
-    .skeleton {
-        animation: none;
-        background: var(--gray-100);
-    }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   HIGH CONTRAST MODE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-@media (prefers-contrast: high) {
-    :root {
-        --border-color: #000;
-    }
-    
-    .btn,
-    .card,
-    input,
-    select,
-    textarea {
-        border: 2px solid currentColor;
-    }
-    
-    .btn-primary {
-        background: #000;
-        color: #fff;
-    }
+/* Dark theme - Aligné sur charte Périmap */
+body.dark-theme {
+    --bg-page: #0b1220;
+    --bg-card: #0f1724;
+    --bg-elevated: #151d2b;
+    --bg-main: #0b1220;
+    --bg-secondary: #0f1724;
+    --bg-tertiary: #1a2332;
+    --bg-light: #0b1220;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;  /* Contraste amélioré WCAG 7:1 */
+    --text-muted: #94a3b8;
+    --border: rgba(255,255,255,0.08);
+    --primary: var(--pm-green);
+    --primary-dark: var(--pm-green-hover);
+    --color-tab-active: var(--pm-green);
+    --color-nav-condensed-bg: rgba(11, 18, 32, 0.95);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   KEYBOARD NAVIGATION INDICATOR
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Show focus styles only when keyboard navigating */
-body.keyboard-nav *:focus-visible {
-    outline: 3px solid var(--primary-color, #1565C0);
-    outline-offset: 3px;
+/* V490: Dark theme - fond solide sur html pour éviter zones grises Chrome */
+html.dark-theme,
+body.dark-theme {
+    background-color: #0b1220;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   TOUCH TARGET SIZE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Ensure minimum touch target size (WCAG 2.5.5) */
-.touch-target {
-    min-width: 44px;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+/* Small visual adjustments in dark mode */
+body.dark-theme #main-header {
+    background: var(--bg-page);
+    border-bottom-color: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-/* Mobile touch targets */
-@media (pointer: coarse) {
-    button,
-    [role="button"],
-    a,
-    input[type="checkbox"],
-    input[type="radio"] {
-        min-height: 44px;
-        min-width: 44px;
-    }
+body.dark-theme .card, body.dark-theme .instruction-content {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ARIA UTILITIES
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Hide elements that are aria-hidden */
-[aria-hidden="true"] {
-    display: none !important;
+body.dark-theme .leaflet-popup-content-wrapper {
+    background: #0f172a !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
 }
 
-/* Visual indicator for expanded state */
-[aria-expanded="true"] .icon-chevron,
-[aria-expanded="true"] .accordion-icon {
-    transform: rotate(180deg);
+body.dark-theme .leaflet-popup-tip {
+    background: #0f172a !important;
 }
 
-/* Disabled state */
-[aria-disabled="true"] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
+/* V229: Popup arrêts complètement opaque en dark mode */
+body.dark-theme .stop-schedule-popup .leaflet-popup-content-wrapper {
+    background: #0f172a !important;
 }
-
-/* Loading state */
-[aria-busy="true"] {
-    cursor: wait;
+body.dark-theme .stop-schedule-popup .leaflet-popup-tip {
+    background: #0f172a !important;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   COLOR BLINDNESS SAFE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Never rely on color alone - add icons/patterns */
-.status-success::before { content: "✓ "; }
-.status-error::before { content: "✕ "; }
-.status-warning::before { content: "⚠ "; }
-.status-info::before { content: "ℹ "; }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TEXT ACCESSIBILITY
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* Prevent text from being cut off */
-.truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+body.dark-theme .btn, body.dark-theme .btn-icon-round {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.04);
 }
-
-/* Line clamp for multi-line truncation */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+body.dark-theme .nav-button-condensed {
+    color: white;
 }
+body.dark-theme #map { background: #06131b; }
 
-.line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Prevent text from overflowing */
-.break-word {
-    word-break: break-word;
-    overflow-wrap: break-word;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   FOCUS TRAP SUPPORT
-   ═══════════════════════════════════════════════════════════════════════ */
-
-/* When modal is open, prevent focus on background elements */
-body.modal-open > *:not(.modal):not(.line-detail-modal):not(.banner-detail-modal) {
-    inert: true;
-}
-
-/* Visible focus trap indicator for debugging */
-[data-focus-trap] {
-    position: relative;
-}

@@ -13,13 +13,14 @@
     display: flex;
     flex-direction: row;
     background: var(--bg-light);
-    position: fixed;
-    top: 0;
+    position: relative;
+    top: auto;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: auto;
     width: 100%;
-    height: 100vh;
+    min-height: calc(100vh - 64px);
+    height: auto;
     z-index: 100;
 }
 
@@ -33,9 +34,9 @@
 }
 
 body.itinerary-view-active #itinerary-results-container {
-    top: 64px;
-    height: calc(100svh - 64px);
-    height: calc(100vh - 64px);
+    top: auto;
+    min-height: calc(100vh - 64px);
+    height: auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -317,9 +318,9 @@ body.dark-theme #detail-map-header #btn-back-to-results {
 
 @media (max-width: 768px) {
     body.itinerary-view-active #itinerary-results-container {
-        top: 56px;
-        height: calc(100svh - 56px);
-        height: calc(100vh - 56px);
+        top: auto;
+        min-height: calc(100vh - 56px);
+        height: auto;
     }
 
     #itinerary-results-container {
@@ -356,3 +357,4556 @@ body.dark-theme #detail-map-header #btn-back-to-results {
         min-width: 160px;
     }
 }
+
+/**
+ * Itinerary Results View and Form
+ *
+ * Extracted from public/style.css (NOUVELLE VUE ITINERAIRE + FORMULAIRE).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 7095-10430
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * NOUVELLE VUE : RÉSULTATS D'ITINÉRAIRE
+ * ========================================= */
+
+/* Le conteneur principal est maintenant un flex en LIGNE */
+#itinerary-results-container {
+    display: flex;
+    flex-direction: row; /* Panneau à gauche, carte à droite */
+    background: var(--bg-light);
+    /* V152: Position fixed pour occuper tout l'écran */
+    position: relative;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    height: auto;
+    z-index: 100;
+}
+
+/* V359: La vue itinéraire est en position fixed (plein écran),
+   donc on la décale sous l'en-tête PériMap pour éviter le chevauchement. */
+body.itinerary-view-active #itinerary-results-container {
+    top: auto;
+    min-height: calc(100vh - 64px);
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    body.itinerary-view-active #itinerary-results-container {
+        top: auto;
+        min-height: calc(100vh - 56px);
+        height: auto;
+    }
+
+    /* Permet au popover des horaires de déborder sur mobile */
+    #results-side-panel {
+        overflow-x: visible !important;
+        overflow-y: auto;
+    }
+
+    /* Popover Trajets en scroll : permet le dépassement */
+    #results-planner-options-popover {
+        overflow: visible !important;
+    }
+
+    #results-planner-options-popover > .popover-content {
+        overflow: visible !important;
+    }
+}
+
+/* V433: Panneau latéral - Design minimaliste */
+#results-side-panel {
+    width: 380px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-light);
+    border-right: 1px solid var(--border);
+    z-index: 10;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: visible; /* Permet au popover de dépasser */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================
+ * V433: FORMULAIRE ITINÉRAIRE MINIMALISTE
+ * Design épuré et moderne
+ * ========================================= */
+
+/* Top bar épurée */
+/* V436: Header moderne et minimaliste */
+.itinerary-top-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Bouton retour moderne */
+.itinerary-top-bar .app-back-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.itinerary-top-bar .app-back-btn:hover {
+    background: rgba(34, 197, 94, 0.1);
+    transform: translateX(-2px);
+}
+
+.itinerary-top-bar .app-back-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.itinerary-top-bar h2 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+/* V436: Panneau formulaire moderne */
+#itinerary-edit-panel {
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    padding: 1.25rem;
+    position: relative;
+    z-index: 200;
+    overflow: visible;
+}
+
+/* =========================================
+ * V433: FORMULAIRE ITINÉRAIRE MINIMALISTE
+ * Design épuré avec indicateurs visuels
+ * ========================================= */
+
+.route-input-container {
+    display: flex;
+    align-items: stretch;
+    gap: 0.625rem;
+    position: relative;
+}
+
+/* Indicateurs visuels (points + ligne) */
+.route-visual-indicators {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.625rem 0;
+    flex-shrink: 0;
+    width: 18px;
+}
+
+.indicator-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.indicator-dot.origin {
+    background: var(--primary);
+    border: 2px solid var(--bg-main);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.indicator-dot.destination {
+    background: #ef4444;
+    border: 2px solid var(--bg-main);
+    box-shadow: 0 0 0 1px #ef4444;
+}
+
+.indicator-line {
+    flex: 1;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), #ef4444);
+    margin: 3px 0;
+    border-radius: 1px;
+    min-height: 16px;
+}
+
+/* Stack des inputs */
+.route-inputs-stack {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.route-input-wrapper {
+    position: relative;
+}
+
+/* V436: Input moderne avec effets premium */
+.route-input {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1rem;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    min-height: 50px;
+    box-sizing: border-box;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+
+.route-input::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 400;
+}
+
+.route-input:hover {
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.route-input:focus {
+    background: var(--bg-main);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1), 0 4px 12px rgba(34, 197, 94, 0.15);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+/* V436: Bouton géolocalisation moderne */
+.btn-geolocate-minimal {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--primary);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-geolocate-minimal:hover:not(:disabled) {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-geolocate-minimal:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* V436: Bouton inverser moderne */
+.btn-swap-minimal {
+    align-self: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--primary);
+    border: none;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+}
+
+.btn-swap-minimal:hover {
+    background: #16a34a;
+    transform: rotate(180deg) scale(1.05);
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+}
+
+/* Actions row */
+.route-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+    position: relative;
+    z-index: 10;
+    overflow: visible;
+}
+
+/* V436: Bouton time picker moderne */
+.btn-time-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto;
+}
+
+.btn-time-picker svg {
+    color: var(--primary);
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.btn-time-picker .chevron {
+    color: var(--text-tertiary);
+    margin-left: 0.125rem;
+    width: 14px;
+    height: 14px;
+}
+
+.btn-time-picker:hover {
+    border-color: var(--primary);
+    background: rgba(34, 197, 94, 0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+/* V436: Bouton rechercher premium */
+.btn-search-route {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    border-radius: 12px;
+    min-height: 50px;
+    background: linear-gradient(135deg, var(--primary) 0%, #16a34a 100%);
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+}
+
+.btn-search-route:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.4);
+}
+
+.btn-search-route:active {
+    transform: translateY(0);
+}
+
+/* Dark theme */
+body.dark-theme .route-input {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .route-input:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-theme .route-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+}
+
+body.dark-theme .btn-swap-minimal,
+body.dark-theme .btn-time-picker {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .btn-swap-minimal:hover {
+    background: var(--primary);
+}
+
+body.dark-theme .btn-time-picker:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-theme .indicator-dot.origin,
+body.dark-theme .indicator-dot.destination {
+    border-color: var(--bg-main);
+}
+
+/* =========================================
+ * V449: Refonte mobile vue Itinéraires (PériMap)
+ * Palette : vert Périmap + cyan, fond navy texturé
+ * Typography : Manrope renforcé
+ * ========================================= */
+
+@media (max-width: 768px) {
+    /* Déverrouille complètement la vue itinéraires : plus de top/height forcés */
+    body.itinerary-view-active #itinerary-results-container {
+        position: static;
+        top: auto;
+        bottom: auto;
+        height: auto;
+        min-height: auto;
+    }
+
+    #itinerary-results-container {
+        background: radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.12), transparent 28%),
+                    radial-gradient(circle at 80% 0%, rgba(0, 200, 255, 0.16), transparent 30%),
+                    var(--pm-navy);
+        color: #e8f3ff;
+        min-height: auto;
+        height: auto;
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        z-index: auto;
+        flex-direction: column; /* Stack panel + map */
+        overflow-y: auto; /* Permettre le scroll interne (body locké) */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #results-side-panel {
+        /* V508: Couleur unifiée mobile pour la page trajets */
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+        border-radius: 18px 18px 0 0;
+        margin: 0 auto;
+        max-width: 520px;
+        width: 100%;
+        height: auto;
+        min-height: auto;
+        flex: 0 1 auto;
+        backdrop-filter: none;
+        padding-bottom: 8px;
+        overflow-y: visible; /* Scroll géré par le conteneur parent */
+    }
+
+    .itinerary-top-bar {
+        background: transparent;
+        border: none;
+        padding: 0.75rem 1rem 0.5rem;
+    }
+
+    .itinerary-top-bar h2 {
+        color: #f8fbff;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    .itinerary-top-bar .app-back-btn {
+        background: rgba(255, 255, 255, 0.06);
+        color: #dfffea;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    #itinerary-edit-panel {
+        background: #111b2b;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        margin: 0 0.75rem 0.5rem;
+        padding: 0.9rem;
+        box-shadow: none;
+    }
+
+    .route-input-container {
+        align-items: center;
+    }
+
+    .route-visual-indicators .indicator-dot.origin {
+        box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35);
+    }
+
+    .route-visual-indicators .indicator-dot.destination {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+    }
+
+    .route-input {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #f8fbff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .route-input::placeholder {
+        color: rgba(248, 251, 255, 0.7);
+    }
+
+    .route-input:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .route-input:focus {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--pm-cyan);
+        box-shadow: 0 0 0 4px rgba(0, 200, 255, 0.16), 0 14px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-geolocate-minimal {
+        color: #dfffea;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-geolocate-minimal:hover:not(:disabled) {
+        background: var(--pm-gradient);
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba(0, 200, 255, 0.32);
+    }
+
+    .btn-swap-minimal {
+        background: var(--pm-gradient);
+        box-shadow: 0 10px 30px rgba(34, 197, 94, 0.38);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-swap-minimal:hover {
+        transform: rotate(180deg) scale(1.08);
+    }
+
+    .route-actions {
+        flex-direction: column;
+    }
+
+    .btn-time-picker {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e8f3ff;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        justify-content: space-between;
+        padding: 0.85rem 1rem;
+    }
+
+    .btn-time-picker:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.14);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-search-route {
+        width: 100%;
+        background: var(--pm-gradient);
+        box-shadow: 0 18px 36px rgba(34, 197, 94, 0.35);
+        letter-spacing: 0.03em;
+    }
+
+    .results-list-wrapper {
+        background: transparent;
+        padding: 0.75rem 0.75rem 1rem 0.75rem;
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+
+    .results-list {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        backdrop-filter: none;
+        box-shadow: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+    /* Section Vos trajets : alignée avec Horaires */
+    .recent-journeys-section {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        margin-top: var(--spacing-6);
+        flex: 0 1 auto;
+        width: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+    }
+    .recent-journeys-section h3 {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 var(--spacing-4) 0;
+    }
+    #recent-journeys-container {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-4);
+        box-sizing: border-box;
+        width: 100%;
+    }
+    .recent-journeys-empty {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    .recent-journey-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0.9rem 1rem;
+        box-shadow: var(--elevation-0);
+    }
+    /* Effet "liquid glass" sur le container principal */
+    #itinerary-results-container {
+        background: transparent;
+        border-radius: 0;
+        border: none;
+        padding: 0;
+        box-shadow: none;
+        max-width: 480px;
+        margin: 0 auto;
+    }
+    #itinerary-edit-panel {
+        background: rgba(13, 21, 39, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 1rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    
+}
+
+/* =========================================
+ * ANCIEN STYLES - Conservés pour compatibilité
+ * ========================================= */
+
+/* V66: En-tête itinéraire (ancien, remplacé par itinerary-top-bar) */
+.itinerary-edit-header {
+    display: none; /* Remplacé par .itinerary-top-bar */
+}
+
+/* V66: Formulaire harmonisé avec le style du hall (ancien) */
+.itinerary-edit-form {
+    padding: 0;
+    position: relative;
+}
+
+.itinerary-edit-form .form-group {
+    margin-bottom: 0.4rem;
+}
+
+.itinerary-edit-form .form-group:last-of-type {
+    margin-bottom: 0.5rem;
+}
+
+/* Inputs style général */
+#results-planner-from,
+#results-planner-to {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    width: 100%;
+    transition: all 0.15s ease;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+#results-planner-from:focus,
+#results-planner-to:focus {
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+    outline: none;
+}
+
+/* Dark theme pour les inputs itinéraire */
+body.dark-theme #results-planner-from,
+body.dark-theme #results-planner-to {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme #results-planner-from:focus,
+body.dark-theme #results-planner-to:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+}
+
+/* Bloc d'inputs pour la vue résultats */
+.results-planner-inputs {
+    --swap-col-width: 56px;
+    margin-bottom: 1rem;
+}
+.results-planner-inputs .form-group {
+    margin-bottom: 0;
+}
+
+/* Bouton "Lancer la recherche" pleine largeur */
+.btn-full-width {
+    width: 100%;
+    justify-content: center;
+    padding: 0.5rem; /* COMPACT: Réduction du padding */
+    font-size: 0.9rem; /* COMPACT: Réduction de la taille */
+    font-weight: 600;
+    border-radius: var(--radius-md);
+}
+
+/* V436: ONGLETS MODE - DESIGN PREMIUM MINIMALISTE */
+#results-mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--bg-main);
+    padding: 1.25rem 1.25rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.mode-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    cursor: pointer;
+    flex: 1;
+    max-width: 110px;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.mode-tab:hover {
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.08) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+}
+
+.mode-tab.hidden {
+    display: none;
+}
+
+.mode-tab svg {
+    width: 26px;
+    height: 26px;
+    color: var(--text-tertiary);
+    transition: all 0.3s ease;
+}
+
+.mode-tab:hover svg {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.mode-tab.active svg {
+    color: var(--primary);
+    filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));
+}
+
+.mode-tab-duration {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+}
+
+.mode-tab.active .mode-tab-duration {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.mode-tab-duration.empty {
+    color: var(--text-tertiary);
+    font-weight: 400;
+}
+
+
+/* V433 + V504: Conteneur liste résultats - Design minimaliste, pas de zone morte */
+.results-list-wrapper {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-light);
+    /* V504: Padding ajusté pour éviter zone morte */
+    padding: 0.75rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%; /* V504: Ne pas dépasser le conteneur parent */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    /* V504: Anti zones grises Chrome */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+
+/* Scrollbar sobre */
+.results-list-wrapper::-webkit-scrollbar {
+    width: 5px;
+}
+.results-list-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+}
+.results-list-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+.results-list-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+.results-list {
+    padding: 0;
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.results-list .btn-load-more {
+    width: 100%;
+    margin-top: 0.75rem;
+    border-radius: 14px;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+/* La CARTE prend le reste de l'espace */
+#results-map {
+    flex: 1; /* Prend tout l'espace restant à droite */
+    min-width: 0; /* V151: Permet au flex de fonctionner correctement */
+    height: 100%;
+    background: #e5e5e5;
+    touch-action: pan-x pan-y;
+    position: relative; /* V151: Nécessaire pour Leaflet */
+    z-index: 1; /* V152: S'assurer que la carte est visible */
+}
+
+
+.results-message {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+.results-message.error {
+    color: var(--color-red);
+    font-style: normal;
+    font-weight: 600;
+}
+
+/* =========================================
+ * V504: TRAJETS RÉCENTS (CACHE PERSISTANT)
+ * ========================================= */
+.recent-journeys-section {
+    display: flex !important;
+    padding: 0;
+    margin-top: var(--spacing-6);
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.recent-journeys-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-4) 0;
+}
+
+#recent-journeys-container {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.recent-journeys-empty {
+    padding: 0.5rem 0;
+    display: flex;
+    text-align: center;
+    color: var(--text-secondary);
+    align-items: center;
+    justify-content: center;
+}
+
+.recent-journeys-empty p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+#recent-journeys-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+/* Card trajet récent */
+.recent-journey-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: var(--elevation-0);
+}
+
+.recent-journey-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28), 0 4px 14px rgba(34, 197, 94, 0.15);
+    transform: translateY(-3px);
+}
+
+.recent-journey-card:active {
+    transform: scale(0.98);
+}
+
+/* Ligne(s) de bus avec badges */
+.recent-journey-lines {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.recent-journey-lines .route-line-badge {
+    font-size: 0.6875rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 26px;
+    text-align: center;
+}
+
+.recent-journey-lines .route-summary-dot {
+    font-size: 8px;
+    color: var(--text-secondary);
+}
+
+.recent-journey-lines .route-summary-walk-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+}
+
+/* Infos du trajet */
+.recent-journey-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recent-journey-route {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-journey-meta {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-journey-duration {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Bouton supprimer */
+.recent-journey-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    opacity: 0;
+}
+
+.recent-journey-card:hover .recent-journey-delete {
+    opacity: 1;
+}
+
+.recent-journey-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Dark theme */
+body.dark-theme .recent-journey-card {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .recent-journey-card:hover {
+    border-color: var(--pm-green);
+    background: rgba(30, 41, 59, 0.8);
+}
+
+.route-option-wrapper {
+    margin-bottom: 0.375rem;
+}
+
+.route-option-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    padding-left: 0.375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.route-option-title::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* =========================================
+ * V436: CARTES D'ITINÉRAIRES - DESIGN PREMIUM MINIMALISTE
+ * Moderne, élégant avec effets subtils
+ * ========================================= */
+.route-option {
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, #0f1a2a 100%);
+    border-radius: 14px;
+    padding: 1.15rem 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+}
+
+.route-option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.route-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28), 0 4px 14px rgba(34, 197, 94, 0.15);
+}
+
+.route-option:hover::before {
+    opacity: 1;
+}
+
+.route-option.is-active {
+    border-color: var(--primary);
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, rgba(15, 26, 42, 0.95) 100%);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18), 0 6px 18px rgba(34, 197, 94, 0.22);
+}
+
+/* --- (1) Ligne des bus --- */
+.route-summary-line {
+    display: flex;
+    align-items: center;
+    column-gap: 0.375rem;
+    row-gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+/* V436: Icônes transport premium */
+.route-summary-bus-icon,
+.route-summary-bike-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.route-summary-bus-icon svg,
+.route-summary-bike-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.route-option:hover .route-summary-bus-icon,
+.route-option:hover .route-summary-bike-icon {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+/* V433: Icône de marche minimaliste */
+.route-summary-walk-icon,
+.route-summary-walk-only-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    transition: all 0.2s ease;
+}
+
+.route-summary-walk-icon svg,
+.route-summary-walk-only-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.route-option:hover .route-summary-walk-icon {
+    color: var(--text-secondary);
+}
+
+.route-summary-dot {
+    color: var(--text-tertiary);
+    font-weight: 600;
+    font-size: 0.5rem;
+    opacity: 0.6;
+}
+
+/* V436: Badge ligne premium */
+.route-line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    border-radius: 8px;
+    min-width: 42px;
+    height: 32px;
+    padding: 0 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.02em;
+    transition: all 0.2s ease;
+}
+
+.route-option:hover .route-line-badge {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* V436: Footer des cartes premium */
+.route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.route-time {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.route-duration {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.route-duration-eco {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    background: rgba(34, 197, 94, 0.12);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-duration-eco svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* V433: Prochains départs */
+.route-next-departures {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.next-departures-label {
+    font-weight: 500;
+    color: var(--primary);
+}
+
+.next-departures-more {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* Dark theme pour prochains départs */
+body.dark-theme .route-next-departures {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+
+/* --- Styles pour les détails d'itinéraire (PC - Accordéon) --- */
+/* (Ces styles s'appliqueront > 768px) */
+.route-details {
+    padding: 1rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-top: -0.5rem; /* Chevauche la carte */
+    animation: fadeIn 0.3s ease;
+}
+.route-details.hidden {
+    display: none;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* *** NOUVEAU V34 : Styles pour l'accordéon PC *** */
+.route-details .step-detail {
+    display: flex;
+    position: relative;
+    padding-left: 3.5rem; /* MODIFIÉ: 3rem -> 3.5rem (plus d'espace) */
+    margin-bottom: 1.5rem;
+    /* variable --line-color définie inline par JS */
+}
+.route-details .step-detail:last-child {
+    margin-bottom: 0;
+}
+.route-details .step-detail::before { /* Ligne verticale */
+    content: '';
+    position: absolute;
+    left: 19px; /* Centre de l'icône de 40px */
+    top: 24px;
+    bottom: -1.5rem;
+    width: 4px; /* Augmenté pour la visibilité */
+    background: var(--line-color, var(--border));
+}
+.route-details .step-detail:last-child::before {
+    bottom: 12px; /* conserve un trait court sous la dernière icône */
+}
+/* *** CORRECTION V36 : Utilise text-secondary pour le contraste *** */
+.route-details .step-detail.walk::before,
+.route-details .step-detail.bicycle::before { /* Ajout vélo */
+    background: repeating-linear-gradient(
+        var(--text-secondary) 0,
+        var(--text-secondary) 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+/* *** NOUVEAU V36 : Point de connexion (cercle) *** */
+.route-details .step-detail::after {
+    content: '';
+    position: absolute;
+    left: 14px; /* (40px icon / 2) - ( (12px dot + 2*2px border) / 2 ) */
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg-main);
+    border: 2px solid var(--line-color, var(--border));
+    z-index: 1; /* Derrière l'icône, mais devant la ligne */
+}
+.route-details .step-detail.walk::after,
+.route-details .step-detail.bicycle::after { /* Ajout vélo */
+    border-color: var(--text-secondary);
+}
+
+
+.route-details .step-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    /* *** CORRECTION V36: Ajout du Z-index *** */
+    position: relative; /* z-index a besoin de position */
+    z-index: 2;
+    margin-right: 0.5rem;
+}
+.route-details .step-detail.walk .step-icon,
+.route-details .step-detail.bicycle .step-icon { /* Ajout vélo */
+    background: transparent;
+    color: var(--text-secondary);
+}
+.route-details .step-icon svg {
+    width: 20px;
+    height: 20px;
+}
+.route-details .step-detail.walk .step-icon svg,
+.route-details .step-detail.bicycle .step-icon svg {
+    color: inherit;
+}
+.route-details .step-icon .route-line-badge {
+    font-size: 0.9rem;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 9999px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.route-details .step-info {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px; /* Aligner avec l'icône */
+}
+.route-details .step-instruction {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.route-details .step-duration-inline {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+}
+.route-details .wait-info .wait-time {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.route-details .wait-info .wait-duration {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.route-details .step-sub-instruction {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+.route-details .step-stop-point {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+.route-details .step-stop-point::before { /* Puce avant le temps/arrêt */
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+}
+.route-details .step-stop-point .step-time-detail {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-left: 0.25rem;
+}
+.route-details .step-stop-point strong {
+    font-weight: 700;
+}
+
+.route-details .intermediate-stops {
+    margin: 0.5rem 0 0.5rem 1rem;
+}
+.route-details .intermediate-stops summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--primary);
+    list-style: none; /* Cache le marqueur par défaut */
+    padding: 0.25rem 0;
+}
+.route-details .intermediate-stops summary::-webkit-details-marker {
+    display: none; /* Cache le marqueur sur Chrome/Safari */
+}
+.route-details .intermediate-stops summary .chevron {
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+.route-details .intermediate-stops[open] summary .chevron {
+    transform: rotate(180deg);
+}
+.route-details .intermediate-stops-list {
+    margin: 0.5rem 0 0 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--line-color, var(--border));
+    list-style-type: none;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+}
+.route-details .intermediate-stops-list li {
+    position: relative;
+    padding: 0.25rem 0 0.25rem 0.75rem;
+}
+.route-details .intermediate-stops-list li::before { /* Puce pour la liste d'arrêts */
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0.7em;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--line-color, var(--border));
+}
+
+/* NOUVEAU V46: Styles pour les étapes de marche détaillées */
+.route-details .intermediate-stops-list.walk-steps {
+    border-left-color: transparent;
+    padding-left: 0;
+    margin-left: 0;
+    font-weight: 500;
+}
+.route-details .intermediate-stops-list.walk-steps li {
+    padding-left: 0;
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+.route-details .intermediate-stops-list.walk-steps li::before {
+    display: none;
+}
+.route-details .intermediate-stops-list.walk-steps svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    margin-top: 0.2em;
+}
+.route-details .intermediate-stops-list .walk-step-info {
+    display: flex;
+    flex-direction: column;
+}
+.route-details .intermediate-stops-list .walk-step-meta {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+
+/* =========================================
+ * VUE 3: DÉTAIL D'ITINÉRAIRE (MOBILE IDFM)
+ * ========================================= */
+
+#itinerary-detail-container {
+    /* Caché par défaut, géré par JS */
+    display: none;
+}
+
+#itinerary-detail-backdrop {
+    display: none;
+}
+
+/* V68: Styles desktop pour le header de détail avec bouton retour */
+@media (min-width: 769px) {
+    #detail-map-header {
+        display: none; /* Caché par défaut sur desktop car on utilise l'accordéon */
+    }
+
+    /* Sur desktop, afficher le bouton retour quand la vue détail est active */
+    #itinerary-detail-container.is-active #detail-map-header {
+        display: flex;
+        position: absolute;
+        top: var(--spacing-4);
+        left: var(--spacing-4);
+        z-index: var(--z-overlay);
+        gap: var(--spacing-4);
+        align-items: center;
+        background: none;
+    }
+    #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
+        background: rgba(255, 255, 255, 0.95);
+        color: #1e293b;
+        box-shadow: var(--shadow-md);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    body.dark-theme #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results {
+        background: rgba(15, 23, 42, 0.95);
+        color: #f1f5f9;
+    }
+    #itinerary-detail-container.is-active #detail-map-header #btn-back-to-results:hover {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-lg);
+    }
+}
+
+/* Styles mobiles pour la vue résultats (Étape 1: Liste) */
+@media (max-width: 768px) {
+    /* Déverrouille le scroll pour la vue Itinéraires en mobile */
+    body.itinerary-view-active {
+        overflow-y: visible !important;
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        top: auto !important;
+        left: auto !important;
+    }
+
+    /* AMÉLIORATION LECTURE (mobile) */
+    .wait-time,
+    .departure-time strong,
+    .step-time-detail {
+        font-size: 0.875rem; /* Au lieu de 0.8125rem */
+    }
+
+    /* ÉTAPE 1: VUE LISTE (IDFM-style) */
+    
+    /* Rétablit la direction en colonne sur mobile */
+    #itinerary-results-container {
+        flex-direction: column;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* **CORRECTION IDFM**: Cache la carte sur la vue liste mobile */
+    #itinerary-results-container #results-map {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
+    }
+
+    /* Le panneau latéral prend tout l'écran */
+    #results-side-panel {
+        width: 100%;
+        flex: 0 1 auto;
+        border-right: none;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow-y: visible; /* Scroll géré par le conteneur parent */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        display: flex;
+        flex-direction: column;
+        min-height: 0; /* Crucial pour permettre le scroll dans un flex column */
+    }
+
+    .results-list-wrapper {
+        flex: none;
+        display: block;
+        overflow: visible;
+        width: 100%;
+        padding: 0.75rem 1rem 1.25rem 1rem !important;
+    }
+    .results-list {
+        flex: none;
+        overflow: visible;
+        max-height: none;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .recent-journeys-section {
+        display: flex !important;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        flex: 0 1 auto !important;
+        padding: 0 !important;
+        margin-top: var(--spacing-6);
+    }
+
+    .recent-journeys-empty {
+        padding: 0.5rem 0 !important;
+    }
+
+    body.itinerary-view-active .results-list {
+        padding: 0;
+    }
+
+    body.itinerary-view-active .recent-journeys-section {
+        display: flex !important;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        flex: 0 1 auto !important;
+        padding: 0 !important;
+        margin-top: var(--spacing-6);
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    body.itinerary-view-active .recent-journeys-empty {
+        padding: 0.5rem 0;
+    }
+
+    body.itinerary-view-active .results-list-wrapper {
+        padding-bottom: 0;
+    }
+
+    body.itinerary-view-active #itinerary-results-container {
+        padding-bottom: 0;
+    }
+    
+    /* V353: Header compact pour mobile */
+    .itinerary-top-bar {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .itinerary-top-bar h2 {
+        font-size: 0.9375rem;
+    }
+    
+    #itinerary-edit-panel {
+        padding: 0.75rem;
+    }
+    
+    /* V353: Formulaire Google Maps style mobile */
+    .route-input-container {
+        gap: 0.5rem;
+    }
+    
+    .route-visual-indicators {
+        width: 16px;
+        padding: 0.625rem 0;
+    }
+    
+    .indicator-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .route-input {
+        min-height: 48px;
+        font-size: 0.9375rem;
+        padding: 0.75rem 2.75rem 0.75rem 0.9rem;
+        border-radius: 12px;
+    }
+    
+    .btn-geolocate-minimal {
+        width: 34px;
+        height: 34px;
+    }
+    
+    .btn-geolocate-minimal svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .btn-swap-minimal {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .btn-swap-minimal svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .route-actions {
+        margin-top: 0.5rem;
+        gap: 0.75rem;
+    }
+    
+    .btn-time-picker {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        border-radius: 10px;
+    }
+    
+    .btn-time-picker svg:first-child {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .btn-search-route {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9375rem;
+        min-height: 48px;
+        border-radius: 12px;
+    }
+
+    /* --- Styles mobiles pour les détails d'itinéraire (ACCORDÉON PC) --- */
+    /* On cache l'accordéon PC sur mobile */
+    .route-details {
+        display: none !important;
+    }
+
+
+    /* ============================================ */
+    /* ÉTAPE 2 & 3: VUE DÉTAIL (Overlay IDFM-style) */
+    /* ============================================ */
+
+    #itinerary-detail-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgb(8, 15, 28);
+        z-index: 1080;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #itinerary-detail-backdrop.is-active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    #itinerary-detail-backdrop.hidden {
+        display: none !important;
+    }
+
+    #itinerary-detail-container {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1110;
+        pointer-events: none;
+        /* Bloquer absolument tout scroll */
+        overflow: hidden !important;
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+        overscroll-behavior: none;
+        touch-action: none;
+        /* Pas de scrollbar */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    #itinerary-detail-container::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+    #itinerary-detail-container.is-active {
+        pointer-events: auto;
+    }
+    #itinerary-detail-container.hidden {
+        display: none !important;
+    }
+
+    #detail-map {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: #e5e5e5;
+        z-index: 0;
+        touch-action: manipulation; /* Permet le pinch-to-zoom mais bloque le scroll natif */
+        overflow: hidden !important; /* Bloquer scroll natif */
+        -webkit-overflow-scrolling: auto;
+        /* Cacher toutes les scrollbars */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+    }
+    #detail-map::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+    /* Cacher aussi les scrollbars des éléments enfants de la carte */
+    #detail-map * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    #detail-map *::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
+    /* Le fond de carte reste toujours interactif */
+
+    /* V433: Bottom Sheet minimaliste */
+    #detail-bottom-sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-main);
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+        height: 100%;
+        max-height: 90vh;
+        padding-top: 10px;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+        transform: translate3d(0, 100%, 0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+        overflow: hidden;
+        pointer-events: auto;
+        display: flex;
+        flex-direction: column;
+        z-index: 1200;
+        will-change: transform;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    /* Quand FERMÉ = caché en bas */
+    #itinerary-detail-container:not(.is-active) #detail-bottom-sheet {
+        transform: translate3d(0, 100%, 0) !important;
+    }
+    
+    /* V269: Quand OUVERT = appliquer les niveaux */
+    #itinerary-detail-container.is-active #detail-bottom-sheet.sheet-level-0 {
+        transform: translate3d(0, 80%, 0); /* 20% visible */
+    }
+    #itinerary-detail-container.is-active #detail-bottom-sheet.sheet-level-1 {
+        transform: translate3d(0, 50%, 0); /* 50% visible */
+    }
+    #itinerary-detail-container.is-active #detail-bottom-sheet.sheet-level-2 {
+        transform: translate3d(0, 10%, 0); /* 90% visible */
+    }
+    
+    /* Handle sobre */
+    #detail-bottom-sheet::before {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 32px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        z-index: 10;
+    }
+    
+    /* Extension du fond */
+    #detail-bottom-sheet::after {
+        content: '';
+        position: absolute;
+        bottom: -100vh;
+        left: 0;
+        right: 0;
+        height: 100vh;
+        background: var(--bg-main);
+        z-index: -1;
+        pointer-events: none;
+    }
+    
+    #detail-bottom-sheet.is-dragging {
+        transition: none !important;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    #detail-bottom-sheet.sheet-height-no-transition {
+        transition: none !important;
+    }
+
+    #detail-bottom-sheet .panel-handle {
+        display: none;
+    }
+
+    /* V433: Header carte minimaliste */
+    #detail-map-header {
+        position: absolute;
+        top: calc(env(safe-area-inset-top) + 12px);
+        left: 0;
+        right: 0;
+        z-index: 1100;
+        padding: 0 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.75rem;
+        background: none;
+        border-bottom: none;
+        pointer-events: none;
+    }
+    
+    #detail-map-header #btn-back-to-results {
+        background: var(--bg-main);
+        color: var(--text-primary);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        pointer-events: auto;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        min-height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        transform: none;
+        transition: all 0.15s ease;
+    }
+    
+    #detail-map-header #btn-back-to-results span {
+        display: none;
+    }
+    
+    #detail-map-header #btn-back-to-results svg {
+        color: var(--text-primary);
+        width: 18px;
+        height: 18px;
+    }
+    
+    #detail-map-header #btn-back-to-results:active {
+        background: var(--bg-secondary);
+    }
+
+    body.dark-theme #detail-map-header #btn-back-to-results {
+        background: rgba(6, 12, 20, 0.9) !important;
+        color: var(--text-primary) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    }
+
+    #detail-map-header #detail-map-summary {
+        position: static;
+        inset: auto;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+        max-width: 100%;
+        text-align: left;
+    }
+    
+    /* V433: Summary badge sobre */
+    #detail-map-summary {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        font-weight: 500;
+        font-size: 0.8125rem;
+        pointer-events: none;
+    }
+    
+    #detail-map-summary .route-time { 
+        margin-right: 0.5rem;
+        font-weight: 600;
+    }
+    
+    #detail-map-summary .route-duration { 
+        color: var(--text-secondary);
+    }
+
+    #detail-panel-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+        min-height: 0;
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: none;
+        padding-top: 0;
+        position: relative;
+        box-sizing: border-box;
+    }
+    
+    /* Scroll quand expanded */
+    #detail-bottom-sheet.is-expanded #detail-panel-wrapper {
+        overflow-y: auto;
+        overflow-x: hidden;
+        touch-action: pan-y;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+    
+    #detail-bottom-sheet.is-expanded #detail-panel-wrapper::-webkit-scrollbar {
+        width: 5px;
+    }
+    #detail-bottom-sheet.is-expanded #detail-panel-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    #detail-bottom-sheet.is-expanded #detail-panel-wrapper::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+    #detail-bottom-sheet.is-expanded #detail-panel-wrapper::-webkit-scrollbar-thumb:hover {
+        background: var(--text-tertiary);
+    }
+    
+    /* Masquer scrollbar quand non expanded */
+    #detail-bottom-sheet:not(.is-expanded) #detail-panel-wrapper {
+        overflow: hidden !important;
+        touch-action: none !important;
+        scrollbar-width: none;
+    }
+    #detail-bottom-sheet:not(.is-expanded) #detail-panel-wrapper::-webkit-scrollbar {
+        display: none;
+        width: 0;
+    }
+
+    #detail-panel-content {
+        padding: 0.5rem 0.875rem 3rem 0.875rem;
+        box-sizing: border-box;
+        background: var(--bg-main);
+    }
+
+/* ============================================ */
+/* V433: STYLAGE DES ÉTAPES MINIMALISTE */
+/* ============================================ */
+
+#detail-panel-content .step-detail {
+    display: flex;
+    position: relative;
+    padding-left: 2.25rem;
+    padding-bottom: 1rem;
+    min-height: 36px;
+}
+
+#detail-panel-content .step-detail:last-child {
+    padding-bottom: 0;
+}
+
+#detail-panel-content .step-detail::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: -1rem;
+    width: 3px;
+    background: var(--line-color, var(--border));
+    border-radius: 2px;
+}
+
+#detail-panel-content .step-detail:last-child::before {
+    bottom: 0.5rem;
+}
+    
+    /* Point de départ/arrêt */
+    #detail-panel-content .step-detail::after {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 3px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--bg-main);
+        border: 2px solid var(--line-color, var(--border));
+        z-index: 1;
+    }
+    
+    #detail-panel-content .step-detail.walk::before,
+    #detail-panel-content .step-detail.bicycle::before {
+        background: repeating-linear-gradient(
+            var(--line-color, var(--text-secondary)) 0,
+            var(--line-color, var(--text-secondary)) 3px,
+            transparent 3px,
+            transparent 6px
+        );
+    }
+    #detail-panel-content .step-detail.walk::after,
+    #detail-panel-content .step-detail.bicycle::after { /* Ajout vélo */
+        border-color: var(--line-color, var(--text-secondary));
+    }
+    
+    /* Icône de l'étape */
+    #detail-panel-content .step-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--bg-main);
+        z-index: 2; /* Au-dessus de la ligne */
+    }
+    
+    /* Icône pour la MARCHE */
+    #detail-panel-content .step-detail.walk .step-icon,
+    #detail-panel-content .step-detail.bicycle .step-icon { /* Ajout vélo */
+        background: var(--bg-main);
+        color: var(--text-secondary);
+    }
+    #detail-panel-content .step-detail.walk .step-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    /* NOUVEAU: Ajout vélo */
+    #detail-panel-content .step-detail.bicycle .step-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Icône pour le BUS (badge) */
+    #detail-panel-content .step-icon .route-line-badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+        min-width: 32px;
+        height: 32px;
+        border-radius: 50%; /* Rond comme IDFM */
+        box-shadow: var(--shadow-sm);
+        border: 2px solid white;
+    }
+    
+    #detail-panel-content .step-info {
+        display: flex;
+        flex-direction: column;
+        padding-top: 4px; /* Aligner avec l'icône */
+        min-width: 0; /* Important pour le flex wrapping */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    #detail-panel-content .step-instruction {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        word-break: break-word;
+    }
+
+    #detail-panel-content .step-detail.wait .wait-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+    #detail-panel-content .wait-info .wait-time {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    #detail-panel-content .wait-info .wait-duration {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    #detail-panel-content .step-duration-inline {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-left: 0.25rem;
+    }
+    #detail-panel-content .step-sub-instruction {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Montée et Descente */
+    #detail-panel-content .step-stop-point {
+        margin-top: 0.75rem;
+        padding-left: 0;
+        position: relative;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    #detail-panel-content .step-stop-point::before {
+        /* On n'utilise plus la puce, on a la ligne verticale */
+        display: none;
+    }
+    #detail-panel-content .step-stop-point .step-time-detail {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-left: 0.5rem;
+        font-weight: 500;
+    }
+    
+    /* V227: Labels contexte pour Montée/Descente/Terminus */
+    #detail-panel-content .stop-context {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.5rem;
+        align-items: baseline;
+    }
+    #detail-panel-content .stop-context .stop-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        opacity: 0.8;
+        white-space: nowrap;
+    }
+    #detail-panel-content .stop-context .step-time {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    #detail-panel-content .stop-context.is-terminus .stop-label {
+        color: var(--primary);
+        opacity: 1;
+        font-weight: 800;
+    }
+    #detail-panel-content .stop-context.is-terminus .step-time {
+        color: var(--primary);
+    }
+    
+    /* Arrêts intermédiaires */
+    #detail-panel-content .intermediate-stops {
+        margin: 0.75rem 0 0.75rem 0;
+        padding-left: 0;
+    }
+    #detail-panel-content .intermediate-stops summary {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--primary);
+        padding: 0.25rem 0;
+    }
+    #detail-panel-content .intermediate-stops-list {
+        margin: 0.5rem 0 0 0;
+        padding-left: 0.5rem;
+        list-style-type: none;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        border-left: 4px solid var(--line-color, var(--border));
+    }
+    #detail-panel-content .intermediate-stops-list li {
+        position: relative;
+        padding: 0.3rem 0 0.3rem 0.75rem;
+    }
+    #detail-panel-content .intermediate-stops-list li::before {
+        content: '';
+        position: absolute;
+        left: -0.7rem;
+        top: 0.65em;
+        width: 8px;
+        height: 2px;
+        background: var(--line-color, var(--border));
+    }
+    
+    /* NOUVEAU V46: Styles pour les étapes de marche détaillées */
+    #detail-panel-content .intermediate-stops-list.walk-steps {
+        border-left-color: transparent;
+        padding-left: 0;
+        margin-top: 0.75rem;
+    }
+    #detail-panel-content .intermediate-stops-list.walk-steps li {
+        padding-left: 0;
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        padding-bottom: 0.5rem;
+    }
+    #detail-panel-content .intermediate-stops-list.walk-steps li::before {
+        display: none;
+    }
+    #detail-panel-content .intermediate-stops-list.walk-steps svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        color: var(--text-secondary);
+        margin-top: 0.2em;
+    }
+    #detail-panel-content .intermediate-stops-list .walk-step-info {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.5;
+    }
+    #detail-panel-content .intermediate-stops-list .walk-step-meta {
+        font-size: 0.9em;
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+/* =========================================
+ * ANIMATIONS & MOBILE OPTIMIZATIONS
+ * ========================================= */
+
+/* 1. L'Animation d'entrée (Le site "glisse" vers le haut) */
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-section, 
+.main-nav-buttons-condensed {
+    animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; /* Caché au départ */
+}
+.main-nav-buttons-condensed { animation-delay: 0.1s; }
+
+/* .bottom-content-wrapper ne doit PAS avoir d'animation :
+   une animation crée un stacking context qui gêne l'empilement
+   avec le planificateur. On conserve son rendu sans animation. */
+.bottom-content-wrapper {
+    opacity: 1; /* visible par défaut, pas d'animation */
+}
+
+
+/* 2. RESTRUCTURATION MOBILE (Le plus important) */
+    
+    /* Réduire les marges du bloc principal */
+    .hero-section {
+        padding: 1.25rem 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* TRANSFORMER LES 3 BOUTONS EN GRILLE MOBILE OPTIMISÉE */
+    .main-nav-buttons-condensed {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: var(--spacing-3);
+        margin-top: var(--spacing-6);
+    }
+
+    /* Bouton Itinéraire - CTA PRIMAIRE pleine largeur */
+    .nav-button-condensed[data-view="itineraire"] {
+        grid-column: 1 / -1; /* Prend toute la largeur */
+        padding: var(--spacing-5);
+        font-size: var(--font-size-lg);
+        aspect-ratio: auto;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--elevation-3);
+    }
+
+    /* Boutons secondaires - plus discrets */
+    .nav-button-condensed[data-view="horaires"],
+    .nav-button-condensed[data-view="info-trafic"] {
+        padding: var(--spacing-4);
+        font-size: var(--font-size-sm);
+        flex-direction: column;
+        text-align: center;
+        justify-content: center;
+        aspect-ratio: 1.2 / 1;
+        border-radius: var(--radius-md);
+    }
+
+    .nav-button-condensed svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: var(--spacing-2);
+    }
+
+    .nav-button-condensed[data-view="itineraire"] svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    /* ALIGNER LES CHIFFRES CLÉS SUR UNE LIGNE */
+    .key-figures-grid {
+        display: flex;
+        flex-direction: row; /* Force la ligne */
+        justify-content: space-between; /* Espacement égal */
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        /* Défensif : s'assurer que ce bloc reste sous le popover 'Quand' */
+        position: relative;
+        z-index: 10 !important;
+    }
+
+    .key-figure-item {
+        flex: 1;
+        margin-bottom: 0; /* Supprime la marge verticale */
+    }
+
+    .key-figure-number {
+        font-size: 1.5rem; /* Chiffres un peu plus petits pour tenir */
+    }
+
+    .key-figure-label {
+        font-size: 0.7rem;
+    }
+    
+    /* Réduire la taille du titre "Où allons-nous ?" */
+    .hero-section .planner-block .planner-title-bar h3 {
+        font-size: 1.2rem;
+    }
+
+    
+
+    /* Ajustement spécifique des badges dans le panneau détail (mobile) */
+    #detail-panel-content .step-icon .route-line-badge {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+        min-width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        border: 2px solid white;
+    }
+
+} /* ⬅️ FIN du @media (max-width: 768px) */
+/* ⬅️ FIN du @media (max-width: 768px) pour itinerary-detail */
+
+/* ============================================
+   BANNIÈRE DE MISE À JOUR
+   ============================================ */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+#update-banner {
+    font-family: inherit;
+}
+
+#update-banner .update-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+#update-banner .btn-sm {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+
+#update-banner #update-dismiss {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+#update-banner #update-dismiss:hover {
+    color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+    #update-banner {
+        left: 10px;
+        right: 10px;
+        transform: none;
+        bottom: 10px;
+    }
+    
+    #update-banner .update-banner-content {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* =========================================
+ * NOUVEAU DESIGN IDFM-STYLE
+ * ========================================= */
+
+/* --- BARRE SUPÉRIEURE INFO --- */
+#top-info-bar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0d2137 100%);
+    padding: 0.5rem 1.5rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.top-info-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.top-info-left {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.top-info-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.top-info-link:hover {
+    color: #fff;
+}
+
+.top-info-link svg {
+    opacity: 0.7;
+}
+
+.top-info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    border-radius: var(--radius-full);
+    color: #4ade80;
+    font-weight: 600;
+}
+
+/* Cache la barre sur les vues plein écran */
+body.view-is-locked #top-info-bar {
+    display: none;
+}
+
+/* Dark mode */
+body.dark-theme #top-info-bar {
+    background: linear-gradient(135deg, #0a1929 0%, #071018 100%);
+}
+
+/* Mobile: simplifie */
+@media (max-width: 768px) {
+    #top-info-bar {
+        padding: 0.4rem 1rem;
+    }
+    
+    .top-info-left {
+        gap: 0.75rem;
+    }
+    
+    .top-info-link span {
+        display: none;
+    }
+    
+    .top-info-badge span {
+        display: none;
+    }
+}
+
+/* --- HEADER NAVIGATION LINK --- */
+.header-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.85rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+}
+
+.header-nav-link:hover {
+    background: var(--bg-secondary);
+    color: var(--primary);
+}
+
+.header-nav-link svg {
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    .header-nav-link span {
+        display: none;
+    }
+    
+    .header-nav-link {
+        padding: 0.5rem;
+    }
+}
+
+/* --- HERO HEADLINE --- */
+.hero-headline {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+}
+
+.hero-headline h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(0, 0, 0, 0.3);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+}
+
+.hero-headline h1 .highlight {
+    background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.hero-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    margin: 0;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .hero-headline {
+        margin-bottom: 1.25rem;
+        padding-top: 0.5rem;
+    }
+    
+    .hero-headline h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+}
+
+/* --- SERVICES SECTION --- */
+.services-section {
+    max-width: 900px;
+    margin: 2.5rem auto 0;
+    padding: 0 1rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 1.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title::before {
+    content: '';
+    width: 4px;
+    height: 1.25rem;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.service-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    transition: all var(--transition-normal), transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: left;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.service-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15);
+    transform: translateY(-3px) scale(1.01);
+}
+
+.service-card:active {
+    transform: translateY(-1px) scale(0.99);
+    transition: transform 0.1s ease;
+}
+
+.service-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.service-card:hover .service-card-icon {
+    transform: scale(1.1) rotate(3deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.service-card-icon--green {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #16a34a;
+}
+
+.service-card-icon--orange {
+    background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+    color: #ea580c;
+}
+
+.service-card-icon--blue {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #2563eb;
+}
+
+.service-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.service-card-content h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.35rem 0;
+}
+
+.service-card-content p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.service-card-arrow {
+    color: var(--text-secondary);
+    opacity: 0.5;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.service-card:hover .service-card-arrow {
+    opacity: 1;
+    color: var(--primary);
+    transform: translateX(4px);
+}
+
+.service-card .notification-badge {
+    position: absolute;
+    top: 1rem;
+    right: 3rem;
+}
+
+/* Dark mode */
+body.dark-theme .service-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .service-card-icon--green {
+    background: rgba(34, 197, 94, 0.15);
+}
+
+body.dark-theme .service-card-icon--orange {
+    background: rgba(249, 115, 22, 0.15);
+}
+
+body.dark-theme .service-card-icon--blue {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .services-section {
+        margin-top: 1.5rem;
+    }
+    
+    .service-card {
+        padding: 1rem;
+    }
+    
+    .service-card-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .service-card-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .service-card-content h3 {
+        font-size: 1rem;
+    }
+    
+    .service-card-content p {
+        font-size: 0.8rem;
+    }
+}
+
+/* --- PROMO BANNER --- */
+.promo-banner {
+    max-width: 900px;
+    margin: 2rem auto 0;
+    padding: 0 1rem;
+}
+
+.promo-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+}
+
+.promo-banner-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.promo-banner-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.promo-banner-text strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.promo-banner-text span {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.promo-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: #fff;
+    color: #0284c7;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.promo-banner-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .promo-banner-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem 1rem;
+    }
+    
+    .promo-banner-icon {
+        display: none;
+    }
+    
+    .promo-banner-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --- STATS SECTION --- */
+.stats-section {
+    max-width: 900px;
+    margin: 2rem auto 0;
+    padding: 0 1rem 2rem;
+}
+
+.stats-card {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.stats-header svg {
+    color: var(--primary);
+}
+
+.stats-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.2;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* Dark mode */
+body.dark-theme .stats-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .stat-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+/* --- FOOTER PROFESSIONNEL --- */
+#site-footer {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    color: #e2e8f0;
+    margin-top: auto;
+    padding: 0;
+    position: relative;
+    z-index: 10; /* V365: Très bas, jamais au-dessus des popovers/modales */
+}
+
+/* V367: Cacher le footer sur mobile (liens accessibles via menu hamburger) */
+@media (max-width: 768px) {
+    #site-footer {
+        display: none !important;
+    }
+}
+
+/* Cache le footer sur les vues plein écran */
+body.view-is-locked #site-footer {
+    display: none;
+}
+
+/* V88: Cache le footer sur la vue carte sur desktop (carte plein écran) */
+@media (min-width: 769px) {
+    body.view-map-locked #site-footer {
+        display: none;
+    }
+}
+
+.footer-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        padding-bottom: 1.5rem;
+    }
+}
+
+.footer-main {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.footer-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.footer-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-brand-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(120deg, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.footer-brand-tagline {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    align-items: start;
+}
+
+.footer-links-column h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1rem 0;
+}
+
+.footer-links-column a {
+    display: block;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.35rem 0;
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    position: relative;
+}
+
+.footer-links-column a:hover {
+    color: #60a5fa;
+    transform: translateX(4px);
+}
+
+.footer-links-column a::before {
+    content: '→';
+    position: absolute;
+    left: -15px;
+    opacity: 0;
+    transition: opacity var(--transition-fast), left var(--transition-fast);
+}
+
+.footer-links-column a:hover::before {
+    opacity: 1;
+    left: -12px;
+}
+
+.footer-data-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.footer-data-info svg {
+    opacity: 0.6;
+}
+
+.footer-license {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0.25rem 0 0 0;
+}
+
+.footer-bottom {
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.footer-independent {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+    padding: 0.35rem 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+}
+
+.footer-independent svg {
+    opacity: 0.6;
+}
+
+.footer-copyright {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* === FOOTER SOCIAL LINKS === */
+.footer-social-column {
+    min-width: 100px;
+}
+
+.footer-social-column h4 {
+    margin-bottom: 0.75rem !important;
+}
+
+.footer-social-links {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0;
+    align-items: center;
+}
+
+.footer-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-social-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Instagram gradient */
+.footer-social-btn[aria-label*="Instagram"]:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Facebook blue */
+.footer-social-btn[aria-label*="Facebook"]:hover {
+    background: #1877f2;
+    color: white;
+    border-color: transparent;
+}
+
+/* Footer bottom social (mobile) */
+.footer-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.footer-social-mobile {
+    display: none;
+}
+
+.footer-social-btn-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.footer-social-btn-sm svg {
+    width: 16px;
+    height: 16px;
+}
+
+.footer-social-btn-sm:hover {
+    transform: scale(1.1);
+}
+
+.footer-social-btn-sm[aria-label*="Instagram"]:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+}
+
+.footer-social-btn-sm[aria-label*="Facebook"]:hover {
+    background: #1877f2;
+    color: white;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .footer-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .footer-brand {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .footer-links-column h4 {
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-social-links {
+        justify-content: center;
+    }
+    
+    .footer-social-column {
+        order: -1; /* Social en premier sur mobile */
+    }
+
+    .footer-data-info {
+        justify-content: center;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .footer-bottom-right {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .footer-social-mobile {
+        display: flex;
+        gap: 0.5rem;
+    }
+}
+
+/* --- ANIMATIONS POUR LES NOUVELLES SECTIONS --- */
+.services-section,
+.promo-banner,
+.stats-section {
+    animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    /* Visible par défaut au cas où l'animation ne joue pas */
+}
+
+.services-section { animation-delay: 0.15s; }
+.promo-banner { animation-delay: 0.25s; }
+.stats-section { animation-delay: 0.35s; }
+
+/* --- NETWORK DELAYS WIDGET REPOSITIONNÉ --- */
+.network-delays-widget {
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    padding: 0 1rem;
+}
+
+.network-delays-widget .network-delays-header {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.network-delays-widget .network-delays-list {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 0.5rem;
+}
+
+/* --- FIX: Adjust header padding --- */
+body:not(.view-is-locked) {
+    padding-top: 0; /* Reset default padding */
+}
+
+@media (min-width: 769px) {
+    body:not(.view-is-locked) #main-header {
+        top: 0;
+    }
+    
+    #main-header {
+        position: sticky;
+        top: 0;
+    }
+}
+
+/**
+ * Itinerary Page Styles - V91/V93 premium redesign
+ *
+ * Extracted from public/style.css lines 12597-13685.
+ * No rule changes; order preserved.
+ * Updated: 2026-01-24
+ */
+
+/* =========================================
+ * V91: REDESIGN ITINÃ‰RAIRES - STYLE TBM/SNCF/IDFM
+ * Design Ã©purÃ©, minimaliste et moderne
+ * ========================================= */
+
+/* === PANNEAU LATÃ‰RAL Ã‰PURÃ‰ === */
+#results-side-panel {
+    background: #f8fafc;
+}
+
+body.dark-theme #results-side-panel {
+    background: #0c1220;
+}
+
+/* === EN-TÃŠTE ITINÃ‰RAIRES MINIMAL === */
+.itinerary-edit-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: none;
+}
+
+.itinerary-edit-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* === PANNEAU DE RECHERCHE COMPACT === */
+#itinerary-edit-panel {
+    background: transparent;
+    padding: 0 1.25rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body.dark-theme #itinerary-edit-panel {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Inputs minimalistes style TBM */
+.itinerary-edit-form .form-group input[type="text"],
+#results-planner-from,
+#results-planner-to {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+    box-shadow: none;
+}
+
+body.dark-theme .itinerary-edit-form .form-group input[type="text"],
+body.dark-theme #results-planner-from,
+body.dark-theme #results-planner-to {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.itinerary-edit-form .form-group input[type="text"]:focus,
+#results-planner-from:focus,
+#results-planner-to:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Labels ultra discrets */
+.itinerary-edit-form .form-group label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* V436: ONGLETS MODE - DESIGN PREMIUM MINIMALISTE (final) */
+#results-mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--bg-main);
+    padding: 1.25rem 1.25rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+body.dark-theme #results-mode-tabs {
+    border-bottom-color: var(--border);
+}
+
+.mode-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border: none;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    cursor: pointer;
+    flex: 1;
+    max-width: 110px;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.mode-tab:hover {
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.08) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+}
+
+.mode-tab svg {
+    width: 26px;
+    height: 26px;
+    color: var(--text-tertiary);
+    transition: all 0.3s ease;
+}
+
+.mode-tab:hover svg {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.mode-tab.active svg {
+    color: var(--primary);
+    filter: drop-shadow(0 2px 4px rgba(34, 197, 94, 0.3));
+}
+
+.mode-tab-duration {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+}
+
+.mode-tab.active .mode-tab-duration {
+    color: var(--primary);
+    font-weight: 800;
+}
+
+.mode-tab-duration.empty {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* === LISTE DES RÃ‰SULTATS AÃ‰RÃ‰E === */
+.results-list {
+    padding: 0.75rem;
+    background: transparent;
+}
+
+/* === TITRES DE SECTION DISCRETS === */
+.route-option-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 1rem 0.5rem 0.5rem;
+    padding: 0;
+}
+
+body.dark-theme .route-option-title {
+    color: #94a3b8;
+}
+
+/* V436: CARTES ITINÃ‰RAIRES - DESIGN PREMIUM MINIMALISTE (final) */
+.route-option {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    border-radius: 16px;
+    padding: 1.25rem 1.375rem;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.route-option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.route-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-option:hover::before {
+    opacity: 1;
+}
+
+.route-option.is-active {
+    border-color: var(--primary);
+    background: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 16px rgba(34, 197, 94, 0.2);
+}
+
+body.dark-theme .route-option {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .route-option:hover {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: var(--primary);
+}
+
+body.dark-theme .route-option.is-active {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+}
+
+/* Ligne de rÃ©sumÃ© premium */
+.route-summary-line {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* IcÃ´nes transport premium */
+.route-summary-bus-icon,
+.route-summary-bike-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.route-summary-bus-icon svg,
+.route-summary-bike-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.route-option:hover .route-summary-bus-icon,
+.route-option:hover .route-summary-bike-icon {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.route-summary-walk-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+}
+
+.route-summary-walk-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* SÃ©parateur point */
+.route-summary-dot {
+    color: #cbd5e1;
+    font-size: 0.5rem;
+    margin: 0 0.125rem;
+}
+
+body.dark-theme .route-summary-dot {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* === BADGES DE LIGNE - STYLE MODERNE TBM/SNCF === */
+.route-line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 6px;
+    box-shadow: none;
+    letter-spacing: 0.02em;
+}
+
+/* === FOOTER - HORAIRES ET DURÃ‰E === */
+.route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.25rem;
+}
+
+.route-time {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+}
+
+body.dark-theme .route-time {
+    color: #f1f5f9;
+}
+
+.route-duration {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+body.dark-theme .route-duration {
+    color: #94a3b8;
+}
+
+/* DurÃ©e Ã©co - vert TBM */
+.route-duration-eco {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #059669;
+    font-weight: 700;
+}
+
+.route-duration-eco svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* === SECTION "AUSSI Ã€" - TRÃˆS DISCRÃˆTE === */
+.route-next-departures {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    padding-top: 0.625rem;
+    margin-top: 0.625rem;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.75rem;
+}
+
+body.dark-theme .route-next-departures {
+    border-top-color: rgba(255, 255, 255, 0.04);
+}
+
+.next-departures-label {
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.next-departures-time {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    background: #f1f5f9;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #475569;
+}
+
+body.dark-theme .next-departures-time {
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+}
+
+.next-departures-more {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* === BOUTONS Ã‰PURÃ‰S === */
+.btn-full-width {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.15s ease;
+}
+
+.btn-full-width:hover {
+    background: #1d4ed8;
+}
+
+/* Bouton "Charger plus" */
+.load-more-wrapper {
+    padding: 0.75rem;
+}
+
+.load-more-wrapper .btn,
+.load-more-departures .btn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    color: #475569;
+    border-radius: 8px;
+    padding: 0.625rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    width: 100%;
+    justify-content: center;
+}
+
+.load-more-wrapper .btn:hover,
+.load-more-departures .btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+body.dark-theme .load-more-wrapper .btn,
+body.dark-theme .load-more-departures .btn {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+body.dark-theme .load-more-wrapper .btn:hover,
+body.dark-theme .load-more-departures .btn:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* === BOUTON QUAND - STYLE SNCF === */
+.btn-when,
+.btn-when-inline {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-when:hover,
+.btn-when-inline:hover {
+    border-color: #cbd5e1;
+    background: #fafafa;
+}
+
+body.dark-theme .btn-when,
+body.dark-theme .btn-when-inline {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+}
+
+.btn-when svg,
+.btn-when-inline svg {
+    color: #94a3b8;
+    width: 18px;
+    height: 18px;
+}
+
+/* === MOBILE SPÃ‰CIFIQUE === */
+@media (max-width: 768px) {
+    #results-side-panel {
+        background: var(--bg-main);
+    }
+    
+    body.dark-theme #results-side-panel {
+        background: #0a0f18;
+    }
+    
+    .itinerary-edit-header {
+        padding: 0.875rem 1rem 0.5rem;
+    }
+    
+    .itinerary-edit-header h2 {
+        font-size: 1.125rem;
+    }
+    
+    #itinerary-edit-panel {
+        padding: 0 1rem 0.875rem;
+    }
+    
+    #results-mode-tabs {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .mode-tab {
+        padding: 0.875rem 1rem;
+        max-width: none;
+        border-radius: 12px;
+    }
+    
+    .mode-tab svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .mode-tab-duration {
+        font-size: 0.85rem;
+    }
+    
+    .results-list {
+        padding: 0.5rem;
+    }
+    
+    .route-option {
+        padding: 1.05rem 1.15rem;
+        margin-bottom: 0.75rem;
+        border-radius: 14px;
+        border-width: 2px;
+    }
+    
+    .route-line-badge {
+        min-width: 36px;
+        height: 26px;
+        font-size: 0.8125rem;
+        border-radius: 6px;
+    }
+    
+    .route-time {
+        font-size: 1rem;
+    }
+    
+    .route-duration {
+        font-size: 0.9rem;
+    }
+}
+
+/* =========================================
+ * V93: REDESIGN INTERFACE Ã‰PURÃ‰E
+ * Design moderne style Apple/Citymapper/TBM
+ * ========================================= */
+
+/* === ONGLETS DE TRANSPORT (hÃ©ritent du design V436) === */
+#results-mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--bg-main);
+    padding: 1.25rem 1.25rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+body.dark-theme #results-mode-tabs {
+    background: var(--bg-main);
+    box-shadow: none;
+}
+
+.mode-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.mode-tab:hover {
+    background: var(--bg-light);
+    border-color: rgba(34, 197, 94, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mode-tab.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.08) 100%);
+    border-color: var(--primary);
+    box-shadow: 0 2px 12px rgba(34, 197, 94, 0.2);
+}
+
+.mode-tab svg {
+    width: 26px;
+    height: 26px;
+    color: var(--text-tertiary);
+}
+
+.mode-tab.active svg {
+    color: var(--primary);
+}
+
+.mode-tab-duration {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.mode-tab.active .mode-tab-duration {
+    color: var(--primary);
+}
+
+/* === CARTES ITINÃ‰RAIRES (hÃ©ritent du design V436) === */
+.route-option {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    border-radius: 16px;
+    padding: 1.25rem 1.375rem;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: none;
+}
+
+.route-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-option.is-active {
+    border-color: var(--primary);
+    background: rgba(34, 197, 94, 0.05);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15), 0 4px 16px rgba(34, 197, 94, 0.2);
+}
+
+body.dark-theme .route-option {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .route-option:hover {
+    background: rgba(34, 197, 94, 0.08);
+    border-color: var(--primary);
+}
+
+body.dark-theme .route-option.is-active {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+}
+
+/* === LIGNE DE RÃ‰SUMÃ‰ & BADGES (design V436) === */
+.route-summary-line {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.route-summary-bus-icon,
+.route-summary-bike-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.route-summary-bus-icon svg,
+.route-summary-bike-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.route-option:hover .route-summary-bus-icon,
+.route-option:hover .route-summary-bike-icon {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.route-summary-walk-icon,
+.route-summary-walk-only-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-tertiary);
+}
+
+.route-summary-walk-icon svg,
+.route-summary-walk-only-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.route-summary-dot {
+    color: var(--text-tertiary);
+    font-weight: 600;
+    font-size: 0.5rem;
+    opacity: 0.6;
+}
+
+.route-line-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    border-radius: 8px;
+    min-width: 42px;
+    height: 32px;
+    padding: 0 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.02em;
+}
+
+/* === HORAIRES ET DURÃ‰E (design V436) === */
+.route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.route-time {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.route-duration {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.route-duration-eco {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    background: rgba(34, 197, 94, 0.12);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.15);
+}
+
+.route-duration-eco svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* === PROCHAINS DÃ‰PARTS (design V436) === */
+.route-next-departures {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.next-departures-label {
+    font-weight: 500;
+    color: var(--primary);
+}
+
+.next-departures-more {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
+
+/* === TITRES DE SECTION (design V436) === */
+.route-option-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 1rem 0.5rem 0.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.route-option-title::before {
+    content: '';
+    width: 3px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* === BOUTON QUAND PREMIUM === */
+.btn-when,
+.btn-when-inline {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-when:hover,
+.btn-when-inline:hover {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.dark-theme .btn-when,
+body.dark-theme .btn-when-inline {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-when:hover,
+body.dark-theme .btn-when-inline:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.btn-when svg,
+.btn-when-inline svg {
+    color: #94a3b8;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease;
+}
+
+.btn-when:hover svg,
+.btn-when-inline:hover svg {
+    transform: translateY(1px);
+}
+
+/* === BOUTONS D'ACTION MODERNES === */
+.load-more-wrapper {
+    padding: 0.5rem;
+}
+
+.load-more-wrapper .btn,
+.load-more-departures .btn {
+    background: transparent;
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    color: #64748b;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: 100%;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.load-more-wrapper .btn:hover,
+.load-more-departures .btn:hover {
+    background: rgba(37, 99, 235, 0.04);
+    border-color: #2563eb;
+    border-style: solid;
+    color: #2563eb;
+}
+
+body.dark-theme .load-more-wrapper .btn,
+body.dark-theme .load-more-departures .btn {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+body.dark-theme .load-more-wrapper .btn:hover,
+body.dark-theme .load-more-departures .btn:hover {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+/* === RÃ‰SULTATS LISTE AÃ‰RÃ‰E === */
+.results-list {
+    padding: 0.5rem 0.75rem 1rem;
+    background: transparent;
+}
+
+/* === PANNEAU LATÃ‰RAL MODERNE === */
+#results-side-panel {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+body.dark-theme #results-side-panel {
+    background: linear-gradient(180deg, #0c1220 0%, #0a0f18 100%);
+}
+
+/* === INPUT RECHERCHE PREMIUM === */
+.itinerary-edit-form .form-group input[type="text"],
+#results-planner-from,
+#results-planner-to {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-height: 48px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: all 0.15s ease;
+}
+
+.itinerary-edit-form .form-group input[type="text"]:focus,
+#results-planner-from:focus,
+#results-planner-to:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), 0 1px 2px rgba(0, 0, 0, 0.04);
+    outline: none;
+}
+
+body.dark-theme .itinerary-edit-form .form-group input[type="text"],
+body.dark-theme #results-planner-from,
+body.dark-theme #results-planner-to {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f1f5f9;
+}
+
+body.dark-theme .itinerary-edit-form .form-group input[type="text"]:focus,
+body.dark-theme #results-planner-from:focus,
+body.dark-theme #results-planner-to:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* === BOUTON LANCER RECHERCHE === */
+#planner-submit-btn,
+#results-planner-submit-btn {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+#planner-submit-btn:hover,
+#results-planner-submit-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+}
+
+#planner-submit-btn:active,
+#results-planner-submit-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+}
+
+/* === ANIMATIONS DOUCES === */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.route-option-wrapper {
+    animation: fadeInUp 0.25s ease-out;
+}
+
+.route-option-wrapper:nth-child(2) { animation-delay: 0.03s; }
+.route-option-wrapper:nth-child(3) { animation-delay: 0.06s; }
+.route-option-wrapper:nth-child(4) { animation-delay: 0.09s; }
+.route-option-wrapper:nth-child(5) { animation-delay: 0.12s; }
+
+/* === RESPONSIVE MOBILE V93 === */
+@media (max-width: 768px) {
+    #results-mode-tabs {
+        margin: 0 0.5rem;
+        padding: 0.375rem;
+        border-radius: 12px;
+    }
+    
+    .mode-tab {
+        padding: 0.375rem 0.25rem;
+        border-radius: 8px;
+    }
+    
+    .mode-tab svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .mode-tab-duration {
+        font-size: 0.65rem;
+    }
+    
+    .results-list {
+        padding: 0.375rem 0.5rem 1rem;
+    }
+    
+    .route-option {
+        padding: 0.875rem 1rem;
+        margin-bottom: 0.375rem;
+        border-radius: 14px;
+    }
+    
+    .route-summary-bus-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+    }
+    
+    .route-summary-bus-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .route-line-badge {
+        width: 26px;
+        min-width: 26px;
+        height: 26px;
+        padding: 0;
+        font-size: 0.7rem;
+        border-radius: 9999px;
+    }
+    
+    .route-time {
+        font-size: 0.95rem;
+    }
+    
+    .route-duration {
+        font-size: 0.8rem;
+    }
+    
+    .route-next-departures {
+        gap: 0.25rem;
+    }
+    
+    .next-departures-time {
+        padding: 0.2rem 0.375rem;
+        font-size: 0.65rem;
+    }
+    
+    .btn-when,
+    .btn-when-inline {
+        border-radius: 10px;
+        padding: 0.625rem 0.875rem;
+    }
+}
+
+/* V510: Mobile results width harmonization and load-more handling */
+@media (max-width: 768px) {
+    #results-mode-tabs {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .results-list-wrapper {
+        padding: 0.75rem 1rem 1.25rem;
+        box-sizing: border-box;
+    }
+
+    .results-list {
+        padding: 0;
+    }
+
+    .route-option-wrapper,
+    .route-option {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .route-option {
+        margin-bottom: 0.75rem;
+    }
+
+    .results-list .btn-load-more {
+        display: flex;
+    }
+}
+

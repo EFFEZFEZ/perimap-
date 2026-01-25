@@ -1,0 +1,31 @@
+/**
+ * Stacking Corrections
+ *
+ * Extracted from public/style.css (CORRECTION D'EMPILEMENT GLOBAL).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 5625-5648
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * CORRECTION D'EMPILEMENT GLOBAL (Empêche le menu d'être coupé)
+ * ========================================= */
+
+/* On force la section du haut (Hero) à être AU-DESSUS de la section du bas */
+.hero-section {
+    position: relative;
+    z-index: 20; /* Plus haut que le contenu en dessous */
+}
+
+/* On force la section du bas à être EN-DESSOUS */
+.bottom-content-wrapper {
+    position: relative;
+    z-index: 10; 
+}
+
+/* On s'assure que rien ne coupe le contenu qui dépasse */
+.hero-section, 
+.planner-block-wrapper, 
+.planner-block, 
+.planner-form {
+    overflow: visible !important;
+}

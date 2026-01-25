@@ -1,0 +1,102 @@
+/**
+ * Offline UI - Perimap v504
+ *
+ * Extracted from public/style.css section 6 (Offline mode).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 674-766
+ * Updated: 2026-01-24
+ */
+
+/* =========================================
+ * MODE HORS LIGNE - INDICATEUR VISUEL
+ * ========================================= */
+.offline-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border-bottom: 1px solid rgba(146, 64, 14, 0.2);
+    animation: slideDown 0.3s ease;
+    z-index: 1000;
+}
+
+.offline-banner svg {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.offline-banner.hiding {
+    animation: slideUp 0.3s ease forwards;
+}
+
+body.dark-theme .offline-banner {
+    background: linear-gradient(135deg, #422006 0%, #451a03 100%);
+    color: #fde68a;
+    border-color: rgba(253, 230, 138, 0.2);
+}
+
+/* Toast de reconnexion */
+.offline-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--bg-main, #fff);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10001;
+    animation: fadeInUp 0.3s ease;
+}
+
+.offline-toast-success {
+    border: 2px solid var(--pm-green, #22c55e);
+    color: var(--pm-green-hover, #16a34a);
+}
+
+.offline-toast.hiding {
+    animation: fadeOutDown 0.3s ease forwards;
+}
+
+body.dark-theme .offline-toast {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-theme .offline-toast-success {
+    color: #4ade80;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOutDown {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+}
+

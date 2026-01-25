@@ -1,143 +1,15 @@
 /**
- * Dark Theme - Périmap v432
- * 
- * Tous les styles du mode sombre
- * Source: style.css lignes 593-656 et éparpillés
+ * Dark Theme - Top Bar - Perimap v504
+ *
+ * Extracted from public/style.css section 9 (Dark theme top bar).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 1147-1325
+ * Updated: 2026-01-24
  */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   VARIABLES DARK THEME
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme {
-    --bg-page: #0b1220;
-    --bg-card: #0f1724;
-    --bg-elevated: #151d2b;
-    --bg-main: #0b1220;
-    --bg-secondary: #0f1724;
-    --bg-tertiary: #1a2332;
-    --bg-light: #0b1220;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --border: rgba(255,255,255,0.08);
-    --primary: var(--pm-green);
-    --primary-dark: var(--pm-green-hover);
-    --color-tab-active: var(--pm-green);
-    --color-nav-condensed-bg: rgba(11, 18, 32, 0.95);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   HEADER
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme #main-header {
-    background: var(--bg-page);
-    border-bottom-color: rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CARTES ET CONTENEURS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .card,
-body.dark-theme .instruction-content {
-    background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(255,255,255,0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   POPUPS LEAFLET
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .leaflet-popup-content-wrapper {
-    background: #0f172a !important;
-    border-color: rgba(255,255,255,0.1) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
-}
-
-body.dark-theme .leaflet-popup-tip {
-    background: #0f172a !important;
-}
-
-body.dark-theme .stop-schedule-popup .leaflet-popup-content-wrapper {
-    background: #0f172a !important;
-}
-
-body.dark-theme .stop-schedule-popup .leaflet-popup-tip {
-    background: #0f172a !important;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   BOUTONS
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .btn,
-body.dark-theme .btn-icon-round {
-    background: rgba(255,255,255,0.02);
-    color: var(--text-primary);
-    border-color: rgba(255,255,255,0.04);
-}
-
-body.dark-theme .nav-button-condensed {
-    color: white;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CARTE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme #map {
-    background: #06131b;
-}
-
-body.dark-theme #results-map,
-body.dark-theme #detail-map {
-    background: #050c15;
-}
-
-body.dark-theme .leaflet-control-attribution {
-    background: rgba(15, 20, 30, 0.7) !important;
-    color: rgba(255,255,255,0.5);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CONTRÔLES CARTE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .map-floating-controls {
-    background: #1e2330;
-    box-shadow: 
-        0 4px 24px rgba(0, 0, 0, 0.4),
-        0 2px 8px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-body.dark-theme .map-btn-locate:hover {
-    background: rgba(34, 197, 94, 0.12);
-}
-
-body.dark-theme .map-btn-locate svg {
-    color: #4ade80;
-}
-
-body.dark-theme .map-btn-locate:hover svg {
-    color: #22c55e;
-}
-
-body.dark-theme .map-btn-locate.has-error {
-    background: rgba(239, 68, 68, 0.15);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TOP BAR
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* =========================================
+ * DARK THEME - TOP BAR V156
+ * ========================================= */
 body.dark-theme #top-bar {
     background: transparent;
 }
@@ -187,108 +59,130 @@ body.dark-theme #data-status {
     border-left-color: rgba(255, 255, 255, 0.1);
 }
 
-body.dark-theme #data-status.loaded {
-    color: #4ade80;
+body.dark-theme #data-status.loaded { 
+    color: #4ade80; 
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   FILTRES ET PANELS
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* V72: Style dark mode séparé pour le bouton filtrer */
 body.dark-theme #map-container #map-view #top-bar > #btn-toggle-filter {
     background: rgba(15, 23, 42, 0.95) !important;
     border-color: rgba(255,255,255,0.1) !important;
     color: #f1f5f9 !important;
 }
-
 body.dark-theme #route-filter-panel {
     background: rgba(4, 10, 18, 0.95);
     border-left: 1px solid rgba(255,255,255,0.08);
     box-shadow: 0 20px 30px rgba(0,0,0,0.65);
 }
-
 body.dark-theme #detail-map-summary {
     background: rgba(6, 12, 20, 0.9);
     color: var(--text-primary);
     box-shadow: 0 12px 30px rgba(0,0,0,0.55);
 }
-
 body.dark-theme #detail-map-header #btn-back-to-results {
     background: rgba(15, 23, 42, 0.95) !important;
     color: #f1f5f9 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   INPUTS
-   ═══════════════════════════════════════════════════════════════════════ */
-
 body.dark-theme input[type="text"],
 body.dark-theme input[type="search"],
-body.dark-theme textarea,
-body.dark-theme select {
-    background: var(--bg-elevated);
-    border-color: var(--border);
-    color: var(--text-primary);
+body.dark-theme .real-select,
+body.dark-theme textarea {
+    color: #f5f7fb;
+    background-color: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.15);
 }
-
 body.dark-theme input[type="text"]::placeholder,
 body.dark-theme input[type="search"]::placeholder,
 body.dark-theme textarea::placeholder {
-    color: var(--text-muted);
+    color: rgba(245,247,251,0.6);
+}
+/* Adjust leaflet locate control in dark */
+body.dark-theme .leaflet-control-locate { background-color: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.04); }
+
+/* Smooth theme transition for colors/backgrounds */
+body, .card, .planner-block, #main-header, #map, .btn, .btn-icon-round {
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   FOCUS VISIBLE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme button:focus-visible,
-body.dark-theme a:focus-visible,
-body.dark-theme input:focus-visible {
-    outline-color: var(--pm-cyan);
+/* Ensure buttons remain interactive in dark-mode and have clear contrast */
+.btn, .btn-icon-round {
+    pointer-events: auto;
+}
+.btn-icon-round {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   OFFLINE BANNER
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .offline-banner {
-    background: linear-gradient(135deg, #422006 0%, #451a03 100%);
-    color: #fde68a;
-    border-color: rgba(253, 230, 138, 0.2);
+.btn-icon-round:focus,
+.btn-icon-round:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15), var(--shadow-md);
 }
 
-body.dark-theme .offline-toast {
-    background: #1e293b;
-    color: #e2e8f0;
+/* V153: Contrôles Leaflet modernisés */
+.leaflet-bar {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
-body.dark-theme .offline-toast-success {
-    color: #4ade80;
+/* V153: Attribution Leaflet discrète */
+.leaflet-control-attribution {
+    background: rgba(255, 255, 255, 0.7) !important;
+    color: #666 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    box-shadow: none !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.leaflet-control-attribution:hover {
+    opacity: 1;
+}
+.leaflet-control-attribution a {
+    color: #444 !important;
+    text-decoration: none;
+}
+.leaflet-control-attribution a:hover {
+    text-decoration: underline;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   BOTTOM NAV
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .bottom-nav {
-    background: rgba(15, 23, 42, 0.95);
-    border-top-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+body.dark-theme .leaflet-control-attribution,
+#map.dark-theme .leaflet-control-attribution,
+#detail-map.dark-theme .leaflet-control-attribution,
+#results-map.dark-theme .leaflet-control-attribution {
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+body.dark-theme .leaflet-control-attribution a,
+#map.dark-theme .leaflet-control-attribution a,
+#detail-map.dark-theme .leaflet-control-attribution a,
+#results-map.dark-theme .leaflet-control-attribution a {
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
-body.dark-theme .bottom-nav-item--primary {
-    color: #e2e8f0;
+/* Ensure the map container is not covered by header or other elements */
+#map { z-index: 1; }
+
+/* V153: Positionnement du bouton localisation */
+.leaflet-top.leaflet-right {
+    right: 12px;
+    top: 12px;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   RIPPLE EFFECT
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme .pm-ripple {
-    background: rgba(255, 255, 255, 0.14);
+/* Mobile: bouton plus bas pour éviter les contrôles système */
+@media (max-width: 768px) {
+    .leaflet-top.leaflet-right {
+        right: 10px;
+        top: auto;
+        bottom: 80px;
+    }
 }
 
-body.dark-theme .pm-skeleton-card {
-    border-color: rgba(255, 255, 255, 0.06);
-}

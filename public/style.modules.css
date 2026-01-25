@@ -1,0 +1,39 @@
+﻿/*
+ * Perimap CSS module index
+ *
+ * Import order follows the original style.css sequence as closely as possible.
+ * Updated: 2026-01-24
+ */
+@import "css/modules/pages/map.css";
+@import "css/modules/base/variables.css";
+@import "css/modules/components/hero.css";
+@import "css/modules/utilities/performance.css";
+@import "css/modules/utilities/accessibility.css";
+@import "css/modules/components/offline.css";
+@import "css/modules/base/animations.css";
+@import "css/modules/layout/navigation.css";
+@import "css/modules/themes/dark.css";
+@import "css/modules/base/reset.css";
+@import "css/modules/layout/header.css";
+@import "css/modules/components/banners.alert.css";
+@import "css/modules/components/banners.css";
+@import "css/modules/pages/home.css";
+@import "css/modules/components/cards.css";
+@import "css/modules/pages/schedules.css";
+@import "css/modules/pages/traffic.css";
+@import "css/modules/components/modals.css";
+@import "css/modules/components/common.css";
+@import "css/modules/utilities/stacking.css";
+@import "css/modules/components/leaflet.css";
+@import "css/modules/components/popups.css";
+@import "css/modules/components/forms.css";
+@import "css/modules/pages/itinerary.css";
+@import "css/modules/layout/header.dropdown.css";
+@import "css/modules/layout/grid.css";
+@import "css/modules/base/typography.css";
+@import "css/modules/components/badges.css";
+@import "css/modules/components/buttons.css";
+@import "css/modules/components/loading.css";
+@import "css/modules/utilities/display.css";
+@import "css/modules/utilities/spacing.css";
+@import "css/modules/utilities/mobile.css";

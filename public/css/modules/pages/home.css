@@ -1,0 +1,1302 @@
+/**
+ * Home Hero and Planner - Perimap v504
+ *
+ * Extracted from public/style.css (Dashboard hall + hero + planner).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 2183-2669
+ * Updated: 2026-01-24
+ */
+
+/* =========================================
+ * NOUVEAU TABLEAU DE BORD (HALL)
+ * ========================================= */
+#dashboard-main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    position: relative;
+    z-index: 1;
+    overflow-x: visible;
+}
+
+/* =========================================
+ * DESIGN MINIMALISTE STYLE VITALIS
+ * ========================================= */
+
+/* Hero Backdrop avec image de Périgueux - PLEIN ÉCRAN */
+/* V491: Optimisation du chargement - dégradé CSS immédiat + image lazy */
+.hero-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    /* V491: Dégradé placeholder immédiat pendant le chargement de l'image */
+    background: 
+        linear-gradient(135deg, 
+            #1e3a5f 0%, 
+            #2d5a7b 30%, 
+            #4a90a4 60%, 
+            #87ceeb 100%
+        );
+    z-index: 0;
+    pointer-events: none;
+    /* V491: Optimisation performance */
+    contain: strict;
+    content-visibility: auto;
+}
+
+/* V491: Image chargée en lazy via pseudo-element pour éviter blocage initial */
+.hero-backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('/icons/perigueux-hero.webp') center top / cover no-repeat;
+    opacity: 0;
+    animation: heroImageFadeIn 0.6s ease-out 0.3s forwards;
+    will-change: opacity;
+}
+
+@keyframes heroImageFadeIn {
+    to { opacity: 1; }
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(30, 58, 95, 0.3) 0%,
+        rgba(30, 58, 95, 0.35) 30%,
+        rgba(255, 255, 255, 0.75) 60%, 
+        rgba(255, 255, 255, 0.9) 80%,
+        rgba(255, 255, 255, 0.98) 100%);
+    pointer-events: none;
+}
+
+#dashboard-hall {
+    position: relative;
+    z-index: 1;
+    min-height: 100%;
+}
+
+.planner-section {
+    padding: 0;
+    position: relative;
+    z-index: 100; /* V439: Au-dessus des autres blocs (hall-line-shortcuts=10, hall-express=10) */
+    padding-top: var(--spacing-12);
+    padding-bottom: 0; /* Laisse l'espacement aux blocs suivants (mobile) */
+}
+
+.planner-block {
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    box-shadow: var(--elevation-4);
+    border: 2px solid rgba(34, 197, 94, 0.2);
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+    position: relative;
+    z-index: 100; /* V439: Au-dessus de tous les blocs (halls/express/shortcuts) */
+    margin-bottom: 0; /* Espacement géré par les blocs suivants */
+}
+
+.planner-block:hover {
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: var(--elevation-5);
+}
+
+.planner-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e3a5f;
+    margin: 0 0 1.25rem 0;
+    text-align: center;
+}
+
+/* STYLES PLANIFICATEUR VERTICAL */
+.planner-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.planner-inputs-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.planner-inputs-vertical .form-group {
+    margin-bottom: 0;
+}
+
+/* Ligne de swap - dans son propre espace */
+.swap-button-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0;
+    position: relative;
+    z-index: 5;
+}
+
+.swap-line {
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.btn-swap-direction {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 0 0.75rem;
+    flex-shrink: 0;
+}
+.btn-swap-direction:hover {
+    background: #f8fafc;
+    border-color: #2a9d8f;
+    color: #2a9d8f;
+    box-shadow: 0 4px 12px rgba(42, 157, 143, 0.2);
+}
+
+/* Champs de saisie style Vitalis */
+.planner-block .form-group input[type="text"] {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1rem 1rem 2.75rem;
+    font-size: 16px; /* FORCE 16px pour empêcher le zoom iOS */
+    color: #1e3a5f;
+    width: 100%;
+    transition: all 0.2s ease;
+    min-height: 52px;
+    box-sizing: border-box;
+}
+
+.planner-block .form-group input[type="text"]::placeholder {
+    color: #94a3b8;
+}
+
+.planner-block .form-group input[type="text"]:focus {
+    background: #ffffff;
+    border-color: #1e3a5f;
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+    outline: none;
+}
+
+/* Icônes dans les inputs */
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.input-with-icon input[type="text"] {
+    padding-left: 2.75rem;
+}
+
+/* Bouton géolocalisation */
+.btn-geolocate {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: transparent;
+    color: #64748b;
+    border: none;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-geolocate:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #1e3a5f;
+}
+
+.btn-geolocate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-geolocate svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Options (Partir maintenant) */
+.planner-options {
+    position: relative;
+    z-index: 16000; /* V363: Assez haut pour que le popover enfant soit au-dessus de bottom-nav */
+}
+
+.btn-when {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #f8fafc;
+    cursor: pointer;
+    text-align: left;
+    color: #1e3a5f;
+    transition: all 0.2s ease;
+}
+
+.btn-when > svg:first-child {
+    color: #1e3a5f;
+    flex-shrink: 0;
+}
+
+.btn-when > span {
+    flex: 1;
+}
+
+.btn-when > .chevron {
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-when:hover {
+    border-color: #1e3a5f;
+    background: #ffffff;
+}
+
+.btn-when.popover-active > .chevron {
+    transform: rotate(180deg);
+}
+
+/* Bouton Rechercher style PériMap (vert teal/canard) */
+.planner-search-btn,
+#planner-submit-btn {
+    padding: 0.875rem 2rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 12px !important;
+    background: #2a9d8f !important;
+    border: none !important;
+    color: #ffffff !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.75rem;
+    width: 100%;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+}
+
+.planner-search-btn:hover,
+#planner-submit-btn:hover {
+    background: #238b7e !important;
+    box-shadow: 0 6px 20px rgba(42, 157, 143, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+.planner-search-btn:active,
+#planner-submit-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Popover styles */
+.popover-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+}
+
+.popover-tab {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.popover-tab.active {
+    color: #1e3a5f;
+    border-bottom-color: #1e3a5f;
+}
+
+.popover-time-inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.time-separator {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    padding-bottom: 0.75rem;
+}
+
+/* Dark theme support */
+body.dark-theme .hero-backdrop {
+    opacity: 0.5;
+}
+
+body.dark-theme .hero-overlay {
+    background: linear-gradient(to bottom, 
+        rgba(15, 23, 42, 0.4) 0%, 
+        rgba(15, 23, 42, 0.6) 30%,
+        rgba(15, 23, 42, 0.85) 60%, 
+        rgba(15, 23, 42, 0.95) 80%,
+        #0f172a 100%);
+}
+
+body.dark-theme .planner-block {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+body.dark-theme .planner-block:hover {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+body.dark-theme .planner-title {
+    color: #e2e8f0;
+}
+
+body.dark-theme .planner-block .form-group input[type="text"] {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid #374151;
+    color: #e2e8f0;
+}
+
+/* Dark mode - Sections horaires */
+body.dark-theme .search-priority-section {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .search-prominent input {
+    background: var(--bg-secondary);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .search-prominent input:focus {
+    border-color: var(--pm-green);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
+/* Dark mode - État vide */
+body.dark-theme .empty-state .check-icon {
+    color: var(--pm-cyan);
+}
+
+body.dark-theme .empty-state h4 {
+    color: var(--text-primary);
+}
+
+body.dark-theme .planner-block .form-group input[type="text"]::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+body.dark-theme .planner-block .form-group input[type="text"]:focus {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: #2a9d8f;
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.2);
+}
+
+body.dark-theme .btn-when {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+    color: #e2e8f0;
+}
+
+body.dark-theme .swap-line {
+    background: #374151;
+}
+
+body.dark-theme .btn-swap-direction {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: #374151;
+    color: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .btn-swap-direction:hover {
+    background: rgba(42, 157, 143, 0.2);
+    border-color: #2a9d8f;
+    color: #2a9d8f;
+}
+
+body.dark-theme .input-with-icon .input-icon {
+    color: rgba(255,255,255,0.5);
+}
+
+body.dark-theme .btn-geolocate {
+    color: rgba(255,255,255,0.6);
+    background: transparent;
+}
+
+body.dark-theme .btn-geolocate:hover:not(:disabled) {
+    background: rgba(42, 157, 143, 0.2);
+    color: #e2e8f0;
+}
+
+/* Network delays widget */
+.network-delays-widget {
+    margin-top: 1.5rem;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+}
+
+.network-delays-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 0.75rem;
+}
+
+/* =========================================
+ * HALL - ACCÈS DIRECT LIGNES (A/B/C/D)
+ * Sous le bandeau Actualités/État réseau
+ * ========================================= */
+.hall-line-shortcuts {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px; /* Aligné avec le bandeau Actualités */
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10; /* V439: Sous le planner-block (z-index:100) */
+    pointer-events: auto;
+    width: 100%;
+}
+
+body.dark-theme .hall-line-shortcuts {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+.hall-line-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    display: grid;
+    place-items: center;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid rgba(0,0,0,0.08);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.hall-line-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.hall-line-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Couleurs identiques aux landing pages */
+.hall-line-btn.line-a { background: #fdd003; color: #000; }
+.hall-line-btn.line-b { background: #1e91ff; color: #000; }
+.hall-line-btn.line-c { background: #dd1b75; color: #fff; }
+.hall-line-btn.line-d { background: #41ae18; color: #fff; }
+
+/* =========================================
+ * HALL - HORAIRES EXPRESS (mobile-first)
+ * ========================================= */
+.hall-express {
+    margin-top: 12px; /* Aligné avec les autres blocs hall */
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10; /* V439: Sous le planner-block (z-index:100) */
+    pointer-events: auto;
+    width: 100%;
+}
+
+/* Desktop overrides : espacement uniforme entre les blocs de la vue Hall */
+@media (min-width: 1024px) {
+    .planner-section {
+        padding-bottom: 0; /* Laisse le contrôle au margin-top des blocs suivants */
+    }
+    .planner-block {
+        margin-bottom: 0; /* On gère l'espacement via les blocs suivants */
+    }
+    .quick-actions-section {
+        margin-top: 16px;
+    }
+    .news-banner,
+    .hall-line-shortcuts,
+    .hall-express {
+        margin-top: 16px;
+    }
+}
+
+body.dark-theme .hall-express {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.hall-express-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.hall-express-title {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #1e3a5f;
+}
+
+body.dark-theme .hall-express-title {
+    color: #e2e8f0;
+}
+
+.hall-express-all {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2a9d8f;
+    text-decoration: none;
+}
+
+.hall-express-all:hover {
+    text-decoration: underline;
+}
+
+.hall-express-chips {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.hall-express-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.express-chip {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    border-radius: 9999px;
+    background: rgba(42, 157, 143, 0.10);
+    border: 1px solid rgba(42, 157, 143, 0.25);
+    color: #1e3a5f;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-decoration: none;
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+body.dark-theme .express-chip {
+    background: rgba(42, 157, 143, 0.18);
+    border-color: rgba(42, 157, 143, 0.28);
+    color: #e2e8f0;
+}
+
+.express-chip:hover {
+    transform: translateY(-1px);
+}
+
+/* Chips personnalisées basées sur l'historique utilisateur */
+.express-chip.personalized {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(0, 200, 255, 0.12) 100%);
+    border-color: rgba(34, 197, 94, 0.35);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1);
+}
+
+body.dark-theme .express-chip.personalized {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(0, 200, 255, 0.15) 100%);
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.hall-express-chips[data-personalized="true"]::before {
+    content: '⭐';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* Desktop: harmoniser la largeur des 2 bandeaux */
+@media (min-width: 1024px) {
+    .hall-line-shortcuts,
+    .hall-express {
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/**
+ * Legacy Planner Grid + Condensed Nav (results)
+ *
+ * Extracted from public/style.css (legacy planner grid + condensed nav + bottom content).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 3135-3337
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * ANCIEN PLANNER (GRID) - CONSERVÉ POUR RÉSULTATS
+ * ========================================= */
+.planner-inputs {
+    --swap-col-width: 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--swap-col-width) minmax(0, 1fr);
+    flex: 1;
+    gap: 1rem;
+    align-items: stretch;
+    padding-left: 0;
+    padding-right: 0;
+    position: relative;
+}
+.planner-inputs .form-group {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.planner-inputs .form-group .input-with-action {
+    flex: 1;
+}
+
+.planner-inputs .swap-button-slot {
+    width: var(--swap-col-width);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+.planner-inputs .swap-button-slot .btn-swap-direction {
+    justify-self: center;
+    align-self: center;
+}
+
+/* Note: Le style .planner-search-btn principal est défini plus haut avec le vert teal #2a9d8f */
+
+.main-nav-buttons-condensed {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2.5rem; 
+    max-width: 900px; 
+    margin-left: auto;
+    margin-right: auto;
+    position: relative; 
+    z-index: 1; /* Inférieur au planificateur */
+}
+
+/* Forcer les blocs bas (ex: cartes 'Notre réseau en chiffres') sous le planificateur */
+.bottom-content-wrapper {
+    position: relative;
+    z-index: 1; /* Doit rester en dessous du bouton Rechercher (100) et du popover (1000) */
+}
+
+.nav-button-condensed {
+    background: rgba(0, 90, 156, 0.75); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    box-shadow: var(--elevation-1);
+    transition: all var(--transition-normal), transform var(--transition-bounce);
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    overflow: hidden;
+}
+.nav-button-condensed::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+.nav-button-condensed:hover {
+    background: rgba(0, 74, 128, 0.9); 
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 30px -5px rgba(0, 90, 156, 0.4); 
+}
+.nav-button-condensed:hover::before {
+    opacity: 1;
+}
+.nav-button-condensed:active {
+    transform: translateY(-2px) scale(0.98);
+    transition: transform 0.1s ease;
+}
+.nav-button-condensed svg {
+    width: 28px;
+    height: 28px;
+    transition: transform var(--transition-normal);
+}
+.nav-button-condensed:hover svg {
+    transform: scale(1.15);
+}
+.nav-button-condensed .notification-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+.nav-button-condensed[data-view="horaires"] {
+    background: rgba(40, 167, 69, 0.75); 
+}
+.nav-button-condensed[data-view="horaires"]:hover {
+    background: rgba(35, 139, 58, 0.9); 
+    box-shadow: 0 15px 30px -5px rgba(40, 167, 69, 0.5); 
+}
+.nav-button-condensed[data-view="info-trafic"] {
+    background: rgba(253, 126, 20, 0.75); 
+}
+.nav-button-condensed[data-view="info-trafic"]:hover {
+    background: rgba(228, 113, 18, 0.9); 
+    box-shadow: 0 15px 30px -5px rgba(253, 126, 20, 0.5); 
+}
+
+.bottom-content-wrapper {
+    margin-top: 2.5rem; 
+    margin-bottom: 2rem; 
+    max-width: 900px; 
+    margin-left: auto;
+    margin-right: auto;
+}
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.bottom-grid .card {
+    display: flex; 
+    flex-direction: column;
+}
+.bottom-grid .card h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.bottom-grid .card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    flex: 1 0 auto; 
+}
+
+.key-figures-card p {
+    margin-bottom: 1.5rem;
+}
+.key-figures-grid {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    gap: 1rem;
+}
+.key-figure-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.key-figure-number {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1.1;
+}
+.key-figure-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.btn-block-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 1.5rem; 
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+}
+.btn-block-link svg {
+    transition: transform 0.2s ease;
+}
+.btn-block-link:hover svg {
+    transform: translateY(3px);
+}
+
+/**
+ * Internal Views and Transitions (dashboard hall)
+ *
+ * Extracted from public/style.css (internal views + transitions).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 3339-3411
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * VUES INTERNES & TRANSITIONS (V348 - TRANSITIONS DOUCES)
+ * ========================================= */
+#dashboard-hall {
+    visibility: visible;
+    overflow-y: visible; /* V59: Permettre le scroll */
+    overscroll-behavior: none; /* V455: Empêche pull-to-refresh */
+    -webkit-overflow-scrolling: touch;
+    /* V348: Transition douce pour le fade */
+    opacity: 1;
+    transition: opacity 0.15s ease-out;
+}
+#dashboard-hall.view-is-active {
+    animation: pm-view-enter 0.24s ease-out both;
+    will-change: opacity, transform;
+}
+#dashboard-hall:not(.view-is-active) {
+    display: none; /* V48 - Remplacement immédiat */
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    opacity: 0;
+}
+
+#dashboard-content-view {
+    display: none; /* V48 - Remplacement immédiat */
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    overscroll-behavior: none; /* V455: Empêche pull-to-refresh */
+    -webkit-overflow-scrolling: touch;
+    /* V348: Transition douce */
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+#dashboard-content-view.view-is-active {
+    display: block; /* V48 - Remplacement immédiat */
+    pointer-events: auto;
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    /* V352: Padding pour le header avec bouton retour */
+    padding-top: 0.75rem;
+    animation: pm-view-enter 0.24s ease-out both;
+    will-change: opacity, transform;
+}
+
+/* V352: Bouton retour dans dashboard-content-view positionné uniformément */
+#dashboard-content-view #btn-back-to-hall {
+    margin: 0 1rem 1rem 1rem;
+}
+
+#btn-back-to-hall:not(.app-back-btn) {
+    margin-bottom: 1.5rem;
+    background: var(--bg-secondary);
+    border-color: var(--border);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding-left: 0.75rem;
+}
+/* V439: Dissociation explicite des vues - planner-block seulement en hall */
+#dashboard-hall .planner-section {
+    pointer-events: auto;
+    z-index: 100;
+}
+
+#dashboard-content-view .planner-section {
+    display: none;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#btn-back-to-hall:not(.app-back-btn) svg {
+    margin-right: 0.5rem;
+    color: var(--text-secondary);
+}
+
+@keyframes pm-view-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pm-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/**
+ * Back Buttons and Internal Cards (shared)
+ *
+ * Extracted from public/style.css (back buttons + internal cards + form shell).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 3412-3674
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * BOUTONS RETOUR - STYLE UNIQUE (aligné sur la vue carte)
+ * V352: Taille et position uniformes sur toutes les vues
+ * ========================================= */
+.app-back-btn {
+    cursor: pointer;
+    border: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1a1a2e !important;
+    /* V352: Taille uniforme */
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    height: 36px !important;
+    padding: 0 14px !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.app-back-btn svg {
+    color: #22c55e;
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+}
+
+.app-back-btn span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.app-back-btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.app-back-btn:active {
+    transform: translateY(0);
+}
+
+body.dark-theme .app-back-btn {
+    background: rgba(20, 25, 38, 0.95) !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+body.dark-theme .app-back-btn svg {
+    color: #4ade80;
+}
+
+/* Force back button to be on top and clickable on desktop */
+#btn-back-to-hall,
+#btn-back-to-dashboard-from-map,
+#btn-back-to-dashboard-from-results,
+#btn-back-to-hall-tarifs,
+#btn-back-to-results {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 3000 !important;
+}
+
+.content-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 900px; 
+    margin: 0 auto;
+    gap: 1.5rem;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    box-shadow: var(--elevation-1);
+    transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--elevation-3);
+}
+#dashboard-hall .card {
+    /* SUPPRIMÉ (V48): opacity, transform */
+    max-height: 2000px;
+    padding: 1.5rem;
+}
+
+/* V48: Règle séparée pour cacher/montrer les cartes internes */
+#dashboard-content-view .card {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 1.5rem;
+    display: none; /* V48: Caché par défaut */
+    /* V348: Transition douce */
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+#dashboard-content-view .card.view-active {
+    display: block; /* V48: Affiché si actif */
+    max-height: none; 
+    overflow: visible;
+    padding: 1.5rem;
+    opacity: 1;
+    animation: pm-card-enter 0.22s ease-out both;
+    will-change: opacity, transform;
+    /* V434: Uniformiser la largeur avec le hero */
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* V434 + V504: Styles spécifiques pour chaque card - Anti zones grises */
+#horaires.view-active,
+#info-trafic.view-active {
+    max-width: var(--container-hero);
+    margin-left: auto;
+    margin-right: auto;
+    /* V504: Anti zones grises Chrome - triple protection */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    /* V504: Fond solide pour éviter zones grises au scroll */
+    background-color: var(--bg-page, #f8fafc);
+}
+
+body.dark-theme #horaires.view-active,
+body.dark-theme #info-trafic.view-active {
+    background-color: #0b1220;
+}
+
+/* Largeur responsive pour la carte horaires */
+#horaires.view-active {
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce), (update: slow) {
+    #dashboard-hall,
+    #dashboard-content-view,
+    #dashboard-content-view .card {
+        transition: none;
+    }
+
+    #dashboard-hall.view-is-active,
+    #dashboard-content-view.view-is-active,
+    #dashboard-content-view .card.view-active {
+        animation: none;
+        transform: none;
+    }
+}
+
+#fiche-horaire-container {
+    margin-bottom: 3rem; /* Espace pour ne pas cacher le footer */
+}
+.search-priority-section {
+    margin-bottom: var(--spacing-8);
+    padding-bottom: var(--spacing-6);
+    border-bottom: 2px solid var(--border);
+}
+
+.search-priority-section h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+.schedule-sheets-section {
+    margin-top: var(--spacing-6);
+}
+
+.schedule-sheets-section h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-4);
+}
+
+/* Search bar proéminente */
+.search-prominent {
+    position: relative;
+    margin-bottom: var(--spacing-4);
+}
+
+.search-prominent input {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-4) var(--spacing-4) var(--spacing-4) var(--spacing-12);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-normal);
+}
+
+.search-prominent input:focus {
+    border-color: var(--pm-green);
+    box-shadow: var(--elevation-2);
+}
+
+.search-prominent svg {
+    position: absolute;
+    left: var(--spacing-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* État vide positif */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-10) var(--spacing-6);
+    color: var(--text-secondary);
+}
+
+.empty-state .check-icon {
+    color: var(--pm-green);
+    margin: 0 auto var(--spacing-4);
+    display: block;
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+    position: relative;
+}
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+.input-with-action {
+    position: relative;
+    width: 100%;
+}
+.form-group input[type="text"] {
+    width: 100%;
+    box-sizing: border-box; /* ensure padding doesn't change visual width */
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform 0.15s ease;
+    background: var(--bg-main); 
+}
+.form-group.has-geolocate input[type="text"] {
+    padding-right: 3.25rem;
+}
+.form-group input[type="text"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(37, 99, 235, 0.1);
+    outline: none;
+    transform: scale(1.01);
+}

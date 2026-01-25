@@ -65,6 +65,10 @@ import {
     parseGoogleDuration
 } from './utils/formatters.js';
 
+// === Mock Routes pour testing ===
+import { setupConsoleHelpers } from './mocks/mockRoutes.js';
+import { setupSimpleConsoleHelpers } from './mocks/simpleMockRoutes.js';
+
 import { getCategoryForRoute, LINE_CATEGORIES, PDF_FILENAME_MAP, ROUTE_LONG_NAME_MAP } from './config/routes.js';
 import { ICONS, getManeuverIcon, getAlertBannerIcon } from './config/icons.js';
 import { updateNewsBanner, renderInfoTraficCard as renderInfoTraficCardFromModule } from './ui/trafficInfo.js';
@@ -116,15 +120,15 @@ import { deduplicateItineraries, rankArrivalItineraries, rankDepartureItinerarie
 import { normalizeStopNameForLookup, resolveStopCoordinates } from './utils/geo.js';
 import { createResultsRenderer } from './ui/resultsRenderer.js';
 const BOTTOM_SHEET_DEFAULT_INDEX = 0;
-const BOTTOM_SHEET_DRAG_ZONE_PX = 110;
+const BOTTOM_SHEET_DRAG_ZONE_PX = 300;
 const APP_CONFIG = getAppConfig();
 const GOOGLE_API_KEY = APP_CONFIG.googleApiKey; // dynamique (config.js), jamais hardcodé ici
 ARRIVAL_PAGE_SIZE = APP_CONFIG.arrivalPageSize || ARRIVAL_PAGE_SIZE; // surcharge si fourni
-const BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD = 4; // px tolerance before locking drag
+const BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD = 64; // px tolerance before locking drag
 const BOTTOM_SHEET_EXPANDED_LEVEL_INDEX = 2; // V266: Index du niveau expanded (80%) = index 2
 const BOTTOM_SHEET_VELOCITY_THRESHOLD = 0.35; // px per ms
 const BOTTOM_SHEET_MIN_DRAG_DISTANCE_PX = 45; // px delta before forcing next snap
-const BOTTOM_SHEET_DRAG_BUFFER_PX = 20; // Zone au-dessus du sheet où on peut commencer le drag
+const BOTTOM_SHEET_DRAG_BUFFER_PX = 56; // Zone au-dessus du sheet où on peut commencer le drag
 let currentBottomSheetLevelIndex = BOTTOM_SHEET_DEFAULT_INDEX;
 let bottomSheetDragState = null;
 let bottomSheetControlsInitialized = false;
@@ -224,6 +228,18 @@ function onSelectItinerary(itinerary, cardEl) {
     stateManager.setState({
         map: { selectedRoute: itinerary }
     }, 'map:route-selected');
+
+    // Rafraîchir le cache "Vos trajets" avec l'itinéraire réellement sélectionné
+    try {
+        const fromName = document.getElementById('results-planner-from')?.value || document.getElementById('hall-planner-from')?.value;
+        const toName = document.getElementById('results-planner-to')?.value || document.getElementById('hall-planner-to')?.value;
+        if (fromName && toName) {
+            const depLabel = itinerary.departureTime || (lastSearchTime ? `${lastSearchTime.hour}:${String(lastSearchTime.minute).padStart(2, '0')}` : 'Maintenant');
+            addRecentJourney(fromName, toName, depLabel, itinerary, allFetchedItineraries, lastSearchTime);
+        }
+    } catch (err) {
+        logger.warn('Recent journey refresh failed after selection', err);
+    }
 
     // V59: Sur mobile, on affiche la vue détail overlay
     if (isMobileDetailViewport()) {
@@ -816,9 +832,54 @@ function initializeDomElements() {
     bottomNav = document.getElementById('bottom-nav');
 }
 
+// Sécurité: débloque le scroll si aucune vue ou modal ne doit le verrouiller
+function unlockBodyScrollIfStuck() {
+    try {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuVisible = mobileMenu && !mobileMenu.classList.contains('hidden');
+        const detailOpen = itineraryDetailContainer?.classList?.contains('is-active');
+        const blockingModal = document.querySelector('#line-detail-modal.active, #banner-detail-modal.active, #delay-stats-panel.open');
+        const activeScreen = typeof getVisibleAppScreen === 'function' ? getVisibleAppScreen() : null;
+        const isDashboardVisible = !activeScreen || activeScreen === dashboardContainer;
+        // Forcer la sortie des états de verrou si les écrans correspondants sont cachés
+        if (mapContainer?.classList?.contains('hidden')) {
+            document.body.classList.remove('view-map-locked', 'view-is-locked');
+        }
+        if (itineraryResultsContainer?.classList?.contains('hidden')) {
+            document.body.classList.remove('itinerary-view-active');
+        }
+        if (itineraryDetailContainer?.classList?.contains('hidden')) {
+            document.body.classList.remove('detail-view-open');
+        }
+        if (!mobileMenuVisible) {
+            document.body.classList.remove('mobile-menu-open');
+        }
+        if (!mobileMenuVisible && !detailOpen && !blockingModal && isDashboardVisible) {
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.height = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.width = '';
+            document.body.classList.remove('mobile-menu-open', 'install-tip-open');
+        }
+    } catch (_) {
+        // ignore best-effort unlock
+    }
+}
+
 async function initializeApp() {
     // Initialise les références DOM
     initializeDomElements();
+    unlockBodyScrollIfStuck();
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) unlockBodyScrollIfStuck();
+    });
+    window.addEventListener('wheel', unlockBodyScrollIfStuck, { passive: true });
+    window.addEventListener('touchstart', unlockBodyScrollIfStuck, { passive: true });
+    // Filets de sécurité périodiques pour corriger un overflow bloqué laissé par un modal
+    setInterval(unlockBodyScrollIfStuck, 1200);
 
     // UX: skeleton sur les fiches horaires pendant le chargement GTFS
     if (ficheHoraireContainer && (!dataManager || !dataManager.isLoaded)) {
@@ -946,6 +1007,10 @@ async function initializeApp() {
         currentResultsMarkerLayer = L.layerGroup().addTo(resultsMapRenderer.map);
         resultsMapRenderer.addLocateControl(locateSuccess, locateError);
 
+        // Initialize mock console helpers for testing
+        setupConsoleHelpers(eventBus);
+        setupSimpleConsoleHelpers(eventBus);
+
         // Wire theme toggles now that fragments sont chargés, puis applique le thème initial
         wireThemeToggles();
         initTheme();
@@ -975,6 +1040,12 @@ async function initializeApp() {
         dataExporterUI.init();
         window.dataExporterUI = dataExporterUI;
         window.DataExporter = DataExporter;
+        
+        // Exposer pour le mock système (testing)
+        window.allFetchedItineraries = allFetchedItineraries;
+        window.resultsRenderer = resultsRenderer;
+        window.showResultsView = showResultsView;
+        window.setupResultTabs = setupResultTabs;
         
         initializeRouteFilter();
 
@@ -1342,18 +1413,18 @@ function onBottomSheetPointerDown(event) {
     
     const isHandle = Boolean(event.target.closest('.panel-handle'));
     const inDragRegion = isPointerWithinBottomSheetDragRegion(event);
-    const inSheetContent = Boolean(event.target.closest('#detail-panel-wrapper'));
+    const inSheet = Boolean(event.target.closest('#detail-bottom-sheet'));
     const isExpanded = currentBottomSheetLevelIndex >= BOTTOM_SHEET_EXPANDED_LEVEL_INDEX;
     const wrapperScroll = detailPanelWrapper ? detailPanelWrapper.scrollTop : 0;
     
     // V60: Si pas expanded, on peut drag depuis n'importe où sur le sheet
     if (!isExpanded) {
-        // Permettre le drag depuis la handle, la zone de drag, ou le contenu
-        if (!isHandle && !inDragRegion && !inSheetContent) return;
+        // Permettre le drag depuis la handle, la zone de drag, ou le sheet lui-meme
+        if (!isHandle && !inDragRegion && !inSheet) return;
     } else {
         // Si expanded, on ne peut drag que depuis la handle ou si on est au top du scroll
-        const canUseContentDrag = inSheetContent && wrapperScroll <= BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD;
-        if (!isHandle && !inDragRegion && !canUseContentDrag) return;
+        const canDragFromSheet = inSheet && wrapperScroll <= BOTTOM_SHEET_SCROLL_UNLOCK_THRESHOLD;
+        if (!isHandle && !inDragRegion && !canDragFromSheet) return;
     }
     
     event.preventDefault();
@@ -1450,8 +1521,8 @@ function onBottomSheetPointerUp() {
         targetIndex = startIndex;
         
         // V272: Logique SNCF Connect - un seul niveau à la fois
-        // Seuil de distance : 15% du viewport pour changer de niveau
-        const SNAP_THRESHOLD_PERCENT = 15;
+        // Seuil de distance : 12% du viewport pour changer de niveau
+        const SNAP_THRESHOLD_PERCENT = 8;
         // Seuil de vélocité : 0.3% par ms
         const VELOCITY_THRESHOLD = 0.3;
         
@@ -1581,7 +1652,7 @@ function setupStaticEventListeners() {
     
     // V505: Écouter l'événement de chargement d'itinéraire en cache (trajets récents)
     window.addEventListener('perimap:loadCachedItinerary', (e) => {
-        const { from, to, itinerary } = e.detail || {};
+        const { from, to, itinerary, searchTime } = e.detail || {};
         if (!itinerary || !itinerary.length) {
             console.warn('[V505] loadCachedItinerary: itinéraire vide, relance recherche');
             const searchBtn = document.getElementById('results-planner-submit-btn');
@@ -1592,6 +1663,9 @@ function setupStaticEventListeners() {
         
         // Remplir allFetchedItineraries avec les données du cache
         allFetchedItineraries = itinerary;
+        if (searchTime) {
+            lastSearchTime = { ...searchTime };
+        }
         
         // Afficher la vue résultats si pas déjà visible
         showResultsView();
@@ -1629,13 +1703,7 @@ function setupStaticEventListeners() {
     }
 
     if (detailPanelWrapper && itineraryDetailContainer) {
-        let touchStartY = 0;
-        
         // V60: Bloquer le scroll du contenu tant qu'on n'est pas au niveau expanded (80%)
-        detailPanelWrapper.addEventListener('touchstart', (e) => { 
-            touchStartY = e.touches[0].clientY; 
-        }, { passive: true }); 
-        
         detailPanelWrapper.addEventListener('touchmove', (e) => {
             // V60: Si on n'est pas au niveau max, bloquer le scroll et permettre le drag
             if (currentBottomSheetLevelIndex < BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
@@ -1645,19 +1713,6 @@ function setupStaticEventListeners() {
                 }
                 return;
             }
-            
-            const currentTouchY = e.touches[0].clientY;
-            const currentScrollTop = detailPanelWrapper.scrollTop;
-            const deltaY = currentTouchY - touchStartY;
-            if (currentScrollTop === 0 && deltaY > 0 && itineraryDetailContainer.classList.contains('is-scrolled')) {
-                if (e.cancelable) {
-                    e.preventDefault(); 
-                }
-                itineraryDetailContainer.classList.remove('is-scrolled');
-            }
-            if (deltaY < 0 && !itineraryDetailContainer.classList.contains('is-scrolled')) {
-                itineraryDetailContainer.classList.add('is-scrolled');
-            }
         }, { passive: false }); 
         
         detailPanelWrapper.addEventListener('wheel', handleDetailPanelWheel, { passive: false });
@@ -1666,14 +1721,6 @@ function setupStaticEventListeners() {
             // V60: Ne pas gérer le scroll si on n'est pas au niveau max
             if (currentBottomSheetLevelIndex < BOTTOM_SHEET_EXPANDED_LEVEL_INDEX) {
                 detailPanelWrapper.scrollTop = 0;
-                return;
-            }
-            
-            const currentScrollTop = detailPanelWrapper.scrollTop;
-            if (currentScrollTop > 10 && !itineraryDetailContainer.classList.contains('is-scrolled')) {
-                itineraryDetailContainer.classList.add('is-scrolled');
-            } else if (currentScrollTop <= 10 && itineraryDetailContainer.classList.contains('is-scrolled')) {
-                itineraryDetailContainer.classList.remove('is-scrolled');
             }
         });
     }
@@ -1872,6 +1919,7 @@ function setupNavigationDropdowns() {
                 document.body.classList.add('mobile-menu-open');
             } else {
                 document.body.classList.remove('mobile-menu-open');
+                unlockBodyScrollIfStuck();
             }
         });
         
@@ -1915,6 +1963,7 @@ function setupNavigationDropdowns() {
             if (mobileMenuToggle) mobileMenuToggle.classList.remove('is-active');
             if (mobileMenu) mobileMenu.classList.add('hidden');
             document.body.classList.remove('mobile-menu-open');
+            unlockBodyScrollIfStuck();
             handleNavigationAction(action);
         });
     });
@@ -1952,6 +2001,7 @@ function setupNavigationDropdowns() {
                 mobileMenuToggle.classList.remove('is-active');
                 mobileMenu.classList.add('hidden');
                 document.body.classList.remove('mobile-menu-open');
+                unlockBodyScrollIfStuck();
             }
         }
     });
@@ -2336,15 +2386,6 @@ async function executeItinerarySearch(source, sourceElements) {
             }
             logger.info('✅ Backend principal itineraries received', { count: allFetchedItineraries?.length || 0 });
             
-            // V506: Sauvegarder TOUS les itinéraires dans les trajets récents
-            const fromDisplayName = sourceElements?.fromInput?.value;
-            const toDisplayName = sourceElements?.toInput?.value;
-            if (fromDisplayName && toDisplayName && allFetchedItineraries?.length > 0) {
-                const departureTime = `${searchTime.hour}:${String(searchTime.minute).padStart(2,'0')}`;
-                // Passer le premier itinéraire pour les visuels + TOUS les itinéraires pour le replay
-                addRecentJourney(fromDisplayName, toDisplayName, departureTime, allFetchedItineraries[0], allFetchedItineraries);
-            }
-            
             // Fusionner avec GTFS si disponible
             if (hybridItins?.length) {
                 for (const gtfsIt of hybridItins) {
@@ -2456,6 +2497,17 @@ async function executeItinerarySearch(source, sourceElements) {
                 arr: it.arrivalTime,
                 dur: it.duration
             })));
+
+        // Sauvegarder les trajets avec toutes les données enrichies (polylines, étapes, etc.)
+        if (sourceElements?.fromInput && sourceElements?.toInput && allFetchedItineraries?.length) {
+            const fromDisplayName = sourceElements.fromInput.value;
+            const toDisplayName = sourceElements.toInput.value;
+            if (fromDisplayName && toDisplayName) {
+                const departureTimeLabel = allFetchedItineraries[0]?.departureTime || `${searchTime.hour}:${String(searchTime.minute).padStart(2, '0')}`;
+                const cacheSearchTime = lastSearchTime || searchTime || null;
+                addRecentJourney(fromDisplayName, toDisplayName, departureTimeLabel, allFetchedItineraries[0], allFetchedItineraries, cacheSearchTime);
+            }
+        }
         
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
@@ -5419,6 +5471,7 @@ function hideDetailView() {
     
     // 3. Débloquer le scroll IMMÉDIATEMENT (pas d'attente)
     document.body.classList.remove('detail-view-open');
+    unlockBodyScrollIfStuck();
     
     // 4. Attendre la transition CSS AVANT de nettoyer le contenu
     setTimeout(() => {

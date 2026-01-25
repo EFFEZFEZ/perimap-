@@ -1,0 +1,115 @@
+﻿/**
+ * Hero System - Unified sections
+ *
+ * Extracted from public/style.css (Unified hero system).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 429-536
+ * Updated: 2026-01-24
+ */
+
+/* SYSTÈME DE HERO UNIFIÉ - Toutes les pages utilisent le même style
+   Classes: .pm-hero, .pm-hero-title, .pm-hero-subtitle, .pm-hero-actions
+   ========================================================================== */
+
+/* Conteneur Hero unifié */
+.pm-hero,
+.horaires-hero,
+.trafic-hero,
+.ligne-hero {
+    width: 100%;
+    max-width: var(--container-hero);
+    margin: 0 auto;
+    padding: 1.5rem 1rem 1rem;
+    text-align: center;
+    border-radius: var(--radius-lg);
+}
+
+/* Titre Hero avec gradient PÃ©rimap */
+.pm-hero-title,
+.horaires-hero h1,
+.trafic-hero h1,
+.ligne-hero h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    background: var(--pm-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Sous-titre Hero */
+.pm-hero-subtitle,
+.horaires-hero p,
+.trafic-hero p,
+.ligne-hero p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Actions Hero (boutons) */
+.pm-hero-actions,
+.horaires-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Conteneur de page unifiÃ© */
+.pm-page,
+.horaires-page,
+.trafic-page,
+.ligne-page {
+    max-width: var(--container-content);
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+
+/* Grille de cartes unifiÃ©e */
+.pm-grid,
+.horaires-grid,
+.trafic-grid,
+.ligne-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* Responsive mobile - Hero toujours visible */
+@media (max-width: 767px) {
+    body.itinerary-view-active {
+        background: #111b2b !important;
+    }
+
+    .pm-hero,
+    .horaires-hero,
+    .trafic-hero {
+        background: #111b2b !important;
+    }
+    .ligne-hero {
+        padding: 1rem 0.75rem 0.75rem;
+    }
+    
+    .pm-hero-title,
+    .horaires-hero h1,
+    .trafic-hero h1,
+    .ligne-hero h1 {
+        font-size: clamp(1.4rem, 5vw, 1.8rem);
+    }
+    
+    .pm-hero-subtitle,
+    .horaires-hero p,
+    .trafic-hero p,
+    .ligne-hero p {
+        font-size: 0.9rem;
+    }
+}

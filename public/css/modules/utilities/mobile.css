@@ -1,0 +1,1097 @@
+﻿/**
+ * Mobile Responsive Utilities - Perimap v600
+ *
+ * Extracted from public/style.css sections:
+ * - Responsive mobile friendly
+ * - V90: Ameliorations mobile completes
+ * - V600: Refonte CSS Trajets (mobile)
+ * - Mobile navy unification
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 11678-12596, 13686-13846
+ * Updated: 2026-01-24
+ */
+
+/* =========================================
+ * RESPONSIVE MOBILE FRIENDLY
+ * ========================================= */
+@media (max-width: 768px) {
+    /* Header mobile */
+    #main-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .header-logo-link {
+        font-size: 1.1rem;
+    }
+    
+    .header-logo {
+        width: 28px;
+        height: 28px;
+    }
+    
+    /* Navigation dropdowns mobile */
+    .header-nav {
+        gap: 0.25rem;
+    }
+    
+    .nav-dropdown-toggle {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .nav-dropdown-toggle svg {
+        display: none;
+    }
+    
+    .nav-dropdown-menu {
+        min-width: 180px;
+        right: 0;
+        left: auto;
+    }
+    
+    /* Hero section mobile */
+    .hero-section {
+        min-height: 180px;
+        padding: 1.5rem 1rem 3rem;
+    }
+    
+    .hero-headline {
+        font-size: 1.4rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-headline .hero-subtitle {
+        margin-top: 0.75rem;
+    }
+    
+    .hero-subtext {
+        font-size: 0.9rem;
+    }
+    
+    /* Planner block mobile */
+    .planner-block {
+        padding: 1rem;
+        margin: -1rem 0 1rem;
+    }
+    
+    .planner-block-wrapper {
+        margin-top: 1rem;
+    }
+    
+    .itinerary-inputs {
+        gap: 0.5rem;
+    }
+    
+    .input-group {
+        padding: 0.6rem 0.75rem;
+    }
+    
+    .input-group input {
+        font-size: 0.95rem;
+    }
+    
+    /* Services section mobile */
+    .services-section {
+        padding: 1rem 0.75rem;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .service-card {
+        padding: 1rem;
+    }
+    
+    .service-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+    
+    .service-title {
+        font-size: 0.95rem;
+    }
+    
+    /* Stats section mobile */
+    .stats-section {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .stats-container {
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        min-width: 80px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    /* Promo banner mobile */
+    .promo-banner {
+        margin: 1rem 0.75rem;
+        padding: 1rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .promo-content h3 {
+        font-size: 1rem;
+    }
+    
+    /* Footer mobile - version compacte */
+    #site-footer {
+        padding: 0;
+    }
+    
+    .footer-content {
+        padding: 1rem 0.75rem;
+    }
+    
+    .footer-main {
+        display: none; /* Masquer toute la partie principale sur mobile */
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0;
+        text-align: center;
+    }
+    
+    .footer-independent {
+        background: none;
+        padding: 0;
+        font-size: 0.7rem;
+    }
+    
+    .footer-copyright {
+        font-size: 0.7rem;
+    }
+    
+    /* Tarifs page mobile */
+    .tarifs-page {
+        padding: 1rem 0.75rem;
+    }
+    
+    .tarifs-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .tarifs-card {
+        padding: 1.25rem;
+    }
+    
+    .tarifs-section-title {
+        font-size: 1.15rem;
+    }
+    
+    .tarifs-buy-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .tarifs-feature {
+        flex-direction: column;
+    }
+    
+    .tarifs-download-btn {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .tarifs-info-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tarifs-nav-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tarifs-app-links {
+        flex-direction: column;
+    }
+    
+    .tarifs-app-btn {
+        justify-content: center;
+    }
+    
+    .tarifs-payment-option {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .tarifs-feature-benefits {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    /* Map view mobile */
+    #map-container {
+        height: calc(100vh - 60px);
+    }
+    
+    /* Bottom sheet mobile */
+    .bottom-sheet {
+        max-height: 70vh;
+    }
+    
+    /* General spacing mobile */
+    #dashboard-container {
+        padding-bottom: 0;
+    }
+    
+    .card {
+        padding: 1rem;
+        margin: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Very small screens */
+    .hero-headline {
+        font-size: 1.2rem;
+    }
+    
+    .nav-dropdown-toggle {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .header-logo-link span {
+        display: none;
+    }
+    
+    .planner-block {
+        margin: -1.5rem 0 0.75rem;
+    }
+    
+    .services-section,
+    .stats-section {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .tarifs-card {
+        padding: 1rem;
+    }
+    
+    .tarifs-section-title {
+        font-size: 1.05rem;
+        flex-wrap: wrap;
+    }
+}
+
+
+/* =========================================
+ * V90: AMÃ‰LIORATIONS MOBILE COMPLÃˆTES
+ * ========================================= */
+
+/* === Ã‰CHELLE Z-INDEX COHÃ‰RENTE ===
+ * Base elements: 1-10
+ * Fixed UI: 100-200
+ * Dropdowns/Tooltips: 500-600
+ * Modals/Overlays: 1000-1100
+ * Bottom sheets: 1200-1300
+ * Critical alerts: 1400+
+ */
+
+/* === 1. POPUP ARRÃŠT MOBILE OPTIMISÃ‰ === */
+@media (max-width: 480px) {
+    .stop-schedule-popup .leaflet-popup-content {
+        min-width: 260px;
+        max-width: 300px;
+        max-height: 280px; /* V110: RÃ©duit pour mieux voir sur mobile */
+    }
+    
+    /* V110: RÃ©duire la taille des Ã©lÃ©ments pour gagner de la place */
+    .stop-popup-v105 .popup-line-header {
+        padding: 0.625rem 0.875rem;
+    }
+    
+    .stop-popup-v105 .popup-badge {
+        min-width: 28px;
+        height: 20px;
+        font-size: 0.75rem;
+    }
+    
+    .stop-popup-v105 .popup-stop-name {
+        font-size: 0.8125rem;
+    }
+    
+    .stop-popup-v105 .popup-dest-row {
+        padding: 0.5rem 0.875rem;
+    }
+    
+    .stop-popup-v105 .popup-dest-name {
+        font-size: 0.8125rem;
+        margin-bottom: 0.375rem;
+    }
+    
+    .stop-popup-v105 .popup-time {
+        padding: 0.1875rem 0.375rem;
+        font-size: 0.75rem;
+    }
+    
+    .line-departures-group {
+        padding: 0.625rem;
+    }
+    
+    .line-header .departure-badge {
+        min-width: 28px;
+        padding: 0.15rem 0.35rem;
+        font-size: 0.7rem;
+    }
+    
+    .line-header .departure-dest {
+        font-size: 0.75rem;
+    }
+    
+    .departure-times-list {
+        gap: 0.25rem;
+    }
+    
+    .departure-time-chip {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+        min-width: 44px;
+    }
+    
+    .departure-time-chip small {
+        font-size: 0.6rem;
+    }
+}
+
+/* === 2. ZONES TACTILES AGRANDIES (44px min) === */
+
+/* Bouton gÃ©olocalisation */
+.btn-geolocate {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.btn-geolocate svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* AccordÃ©ons horaires - zone cliquable agrandie */
+.accordion-group summary {
+    min-height: 52px;
+    padding: 1rem 1.25rem;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Feedback tactile sur les accordÃ©ons */
+.accordion-group summary:active {
+    background: var(--bg-tertiary);
+    transform: scale(0.995);
+}
+
+/* Quick actions - feedback tactile */
+.quick-action-card {
+    min-height: 80px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quick-action-card:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Boutons gÃ©nÃ©raux - feedback tactile */
+.btn:active {
+    transform: scale(0.96);
+    transition: transform 0.1s ease;
+}
+
+/* Bouton gÃ©oloc - NE DOIT JAMAIS BOUGER */
+.btn-geolocate,
+.btn-geolocate:hover,
+.btn-geolocate:active,
+.btn-geolocate:focus {
+    transform: translateY(-50%) !important;
+}
+
+/* Onglets (tabs) - zone tactile */
+.tab {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+}
+
+.tab:active {
+    background: var(--bg-tertiary);
+}
+
+/* News banner - zone cliquable */
+.news-banner-link {
+    min-height: 36px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* === 3. AUTOCOMPLÃ‰TION MOBILE OPTIMISÃ‰E === */
+@media (max-width: 768px) {
+    /* V507: S'assurer que le wrapper a position relative pour les suggestions */
+    .route-input-wrapper {
+        position: relative !important;
+        z-index: 100;
+    }
+    
+    .autocomplete-suggestions,
+    #horaires-search-results,
+    #from-suggestions,
+    #to-suggestions,
+    #results-from-suggestions,
+    #results-to-suggestions {
+        max-height: 45vh;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* V507: Suggestions juste en dessous du champ de saisie */
+    #results-from-suggestions,
+    #results-to-suggestions {
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 100% !important;
+        bottom: auto !important;
+        width: 100% !important;
+        max-width: none;
+        transform: none;
+        z-index: 30000 !important;
+        background: var(--bg-surface, #1a2536);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        margin-top: 4px;
+        overflow-y: auto;
+    }
+    
+    body.dark-theme #results-from-suggestions,
+    body.dark-theme #results-to-suggestions {
+        background: #1a2536;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .autocomplete-item,
+    .search-result-item {
+        min-height: 52px;
+        padding: 0.875rem 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .autocomplete-item:active,
+    .search-result-item:active {
+        background: var(--primary);
+        color: white;
+    }
+}
+
+/* === 4. NEWS BANNER MOBILE - V116: DÃ©filement LED sur mobile === */
+@media (max-width: 480px) {
+    .news-banner {
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .news-banner-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+    }
+    
+    .news-banner-icon svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .news-banner-content {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+    }
+    
+    .news-banner-label {
+        font-size: 0.65rem;
+    }
+    
+    .news-banner-link {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+    }
+    
+    /* Garder le dÃ©filement actif sur mobile */
+    .news-banner-text {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    
+    /* Animation marquee plus rapide sur mobile */
+    .news-banner-text.marquee-active .marquee-inner {
+        animation-duration: 12s;
+    }
+}
+
+/* === 5. BOTTOM SHEET APPLE-STYLE COMPLET === */
+
+/* Backdrop plein opaque sans transparence */
+#itinerary-detail-backdrop {
+    background: rgb(0, 0, 0);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: opacity 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Bottom sheet principal - Apple-style */
+@media (max-width: 768px) {
+    #detail-bottom-sheet {
+        border-radius: 16px 16px 0 0;
+        box-shadow: 
+            0 -8px 32px rgba(0, 0, 0, 0.12),
+            0 -2px 8px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        transition: 
+            transform 0.4s cubic-bezier(0.32, 0.72, 0, 1),
+            height 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+        will-change: transform, height;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Handle Apple-style - MASQUÃ‰ */
+    #detail-bottom-sheet .panel-handle {
+        display: none;
+    }
+    
+    /* Pendant le drag - pas de transition */
+    #detail-bottom-sheet.is-dragging {
+        transition: none !important;
+        will-change: transform;
+    }
+    
+    /* V270: Animation d'entrÃ©e SUPPRIMÃ‰E - les classes sheet-level-X gÃ¨rent la position */
+    /* Les classes sheet-level-0/1/2 dans le media query principal contrÃ´lent le transform */
+    
+    /* Ã‰tat expanded - scroll activÃ© */
+    #detail-bottom-sheet.is-expanded {
+        border-radius: 12px 12px 0 0;
+    }
+    
+    #detail-bottom-sheet.is-expanded .panel-handle {
+        background: rgba(0, 0, 0, 0.12);
+        background-clip: content-box;
+    }
+    
+    /* Supprime le texte "Glissez vers le haut" - indicateur handle suffit */
+    #detail-bottom-sheet:not(.is-expanded)::after {
+        display: none;
+    }
+    
+    /* Panel wrapper avec scroll smooth */
+    #detail-panel-wrapper {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+    }
+    
+    /* Indicateur de scroll en haut quand scrollÃ© */
+    #itinerary-detail-container.is-scrolled #detail-bottom-sheet::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border);
+        opacity: 0.5;
+    }
+}
+
+@keyframes bottomSheetSlideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0.8;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* === 6. DARK MODE COMPLET POUR BOTTOM SHEET === */
+body.dark-theme #itinerary-detail-backdrop {
+    background: rgb(0, 0, 0);
+}
+
+body.dark-theme #detail-bottom-sheet {
+    background: #0f172a;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme #detail-bottom-sheet::before {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* V265: Extension infinie du fond dark mode */
+body.dark-theme #detail-bottom-sheet::after {
+    background: #0f172a;
+}
+
+body.dark-theme #detail-panel-content {
+    background: #0f172a;
+}
+
+/* === 7. DARK MODE - COMPOSANTS MANQUANTS === */
+
+/* AccordÃ©ons horaires */
+body.dark-theme .accordion-group summary {
+    background: var(--bg-secondary);
+}
+
+body.dark-theme .accordion-group summary:hover,
+body.dark-theme .accordion-group summary:active {
+    background: var(--bg-tertiary);
+}
+
+body.dark-theme .accordion-group details[open] summary {
+    background: var(--bg-main);
+}
+
+body.dark-theme .accordion-content {
+    background: var(--bg-main);
+}
+
+/* News banner dark */
+body.dark-theme .news-banner {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .news-banner-icon {
+    background: rgba(42, 157, 143, 0.15);
+}
+
+body.dark-theme .news-banner-text {
+    color: var(--text-primary);
+}
+
+/* AutocomplÃ©tion dark */
+body.dark-theme .autocomplete-suggestions,
+body.dark-theme #horaires-search-results {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme .autocomplete-item:hover,
+body.dark-theme .search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .autocomplete-item:active,
+body.dark-theme .search-result-item:active {
+    background: var(--primary);
+}
+
+/* Planner block dark */
+body.dark-theme .planner-block {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-theme .planner-block input[type="text"] {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .planner-block input[type="text"]:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+}
+
+body.dark-theme .planner-title {
+    color: var(--text-primary);
+}
+
+body.dark-theme .btn-swap-direction {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+body.dark-theme .btn-swap-direction:hover {
+    background: rgba(42, 157, 143, 0.15);
+    border-color: #2a9d8f;
+    color: #2a9d8f;
+}
+
+body.dark-theme .swap-line {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Bouton "Partir maintenant" dark */
+body.dark-theme .btn-when {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+body.dark-theme .btn-when:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Popover options dark */
+body.dark-theme #planner-options-popover,
+body.dark-theme #results-planner-options-popover {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme .popover-tab {
+    color: var(--text-secondary);
+}
+
+body.dark-theme .popover-tab.active {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+body.dark-theme .real-select {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* Ã‰tapes itinÃ©raire dark */
+body.dark-theme .step-detail {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .step-icon {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .step-walk-icon,
+body.dark-theme .step-destination-icon {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+}
+
+/* Route cards dark */
+body.dark-theme .route-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .route-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .route-card.is-selected {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary);
+}
+
+/* Filter panel dark mobile */
+@media (max-width: 768px) {
+    body.dark-theme #route-filter-panel {
+        background: #0a0f18;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* Results side panel dark */
+body.dark-theme #results-side-panel {
+    background: #0f172a;
+}
+
+body.dark-theme .itinerary-edit-header {
+    border-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .itinerary-edit-header h2 {
+    color: var(--text-primary);
+}
+
+/* Mode tabs dark */
+body.dark-theme .mode-tab {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+}
+
+body.dark-theme .mode-tab:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .mode-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* === 8. CORRECTIONS PLANNER MOBILE === */
+@media (max-width: 768px) {
+    .planner-block {
+        margin: 0 0 1rem;
+        border-radius: var(--radius-lg);
+    }
+    
+    .planner-block .form-group input[type="text"] {
+        min-height: 52px;
+        font-size: 1rem;
+    }
+    
+    /* Bouton rechercher plus grand sur mobile */
+    #planner-submit-btn,
+    #results-planner-submit-btn {
+        min-height: 52px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+}
+
+/* === 9. AMÃ‰LIORATION SCROLLBAR GLOBALE === */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme * {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+body.dark-theme *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-theme *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* === 10. SAFE AREA IMPROVEMENTS === */
+@supports (padding: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        #detail-bottom-sheet {
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+        
+        #route-filter-panel {
+            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+        }
+        
+        .results-list {
+            padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+        }
+        
+        .autocomplete-suggestions {
+            max-height: calc(45vh - env(safe-area-inset-bottom));
+        }
+    }
+}
+
+
+
+/* =====================================================
+ * V600: Refonte CSS Trajets (mobile) - layout propre
+ * Le panneau remplit tout l'Ã©cran entre header et bottom nav
+ * ===================================================== */
+@media (max-width: 768px) {
+    /* Body et root : fond unifiÃ© */
+    body.itinerary-view-active {
+        background: #111b2b !important;
+    }
+
+    body.itinerary-view-active #app-view-root {
+        background: #111b2b !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Conteneur principal : remplit tout l'espace disponible */
+    body.itinerary-view-active #itinerary-results-container {
+        position: fixed !important;
+        top: 56px !important; /* Sous le header */
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 66px !important; /* Au-dessus de la bottom nav */
+        width: 100% !important;
+        height: calc(100vh - 56px - 66px) !important;
+        min-height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        background: #111b2b !important;
+        z-index: 100 !important;
+    }
+
+    /* Le panneau latÃ©ral remplit le conteneur */
+    body.itinerary-view-active #results-side-panel {
+        width: 100% !important;
+        max-width: 520px !important;
+        margin: 0 auto !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: visible !important;
+        background: #111b2b !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* Cacher les onglets de mode (pas utilisÃ©s en vue initiale) */
+    body.itinerary-view-active #results-mode-tabs {
+        display: none !important;
+    }
+
+    /* Cacher la carte sur mobile en vue liste */
+    body.itinerary-view-active #results-map {
+        display: none !important;
+    }
+
+    /* Wrapper rÃ©sultats : s'Ã©tire pour remplir l'espace */
+    body.itinerary-view-active .results-list-wrapper {
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: visible !important;
+        padding: 0.75rem 0.75rem calc(1.25rem + env(safe-area-inset-bottom)) !important;
+        box-sizing: border-box !important;
+        background: transparent !important;
+    }
+
+    /* Liste vide : pas de padding */
+    body.itinerary-view-active .results-list {
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    /* Section trajets rÃ©cents : compacte en haut */
+    body.itinerary-view-active .recent-journeys-section {
+        display: flex !important;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 0 1 auto !important;
+        padding: 0 !important;
+    }
+
+    body.itinerary-view-active .recent-journeys-empty {
+        flex: 0 1 auto !important;
+        padding: 0.75rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Header itinÃ©raire : style cohÃ©rent */
+    body.itinerary-view-active .itinerary-top-bar {
+        background: transparent !important;
+        border: none !important;
+        padding: 0.75rem 1rem 0.5rem !important;
+    }
+
+    body.itinerary-view-active #itinerary-edit-panel {
+        background: #111b2b !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        margin: 0 0.75rem 1rem !important;
+        padding: 0.9rem !important;
+    }
+
+    /* Conteneur trajets rÃ©cents stylisÃ© */
+    body.itinerary-view-active #recent-journeys-container {
+        background: #111b2b !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 0.5rem !important;
+    }
+}
+
+/* =====================================================
+ * Unification des couleurs - Navy #111B2B sur tout le site
+ * Trajets, Horaires, Trafic et tous les blocs
+ * ===================================================== */
+@media (max-width: 768px) {
+    /* Horaires view */
+    body.horaires-view-active {
+        background: #111b2b !important;
+    }
+
+    .horaires-hero,
+    #horaires-container,
+    .horaire-card,
+    .horaire-item,
+    .departure-item {
+        background: #111b2b !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Trafic view */
+    body.trafic-view-active {
+        background: #111b2b !important;
+    }
+
+    .trafic-hero,
+    #trafic-container,
+    .trafic-card,
+    .alert-item,
+    .disruption-card {
+        background: #111b2b !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Cartes */
+    #map-container,
+    #map,
+    .leaflet-container {
+        background: #111b2b !important;
+    }
+
+    /* Tous les blocs principaux */
+    .route-option,
+    .result-item,
+    .list-item {
+        background: #111b2b !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+}

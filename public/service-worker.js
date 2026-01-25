@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v508 - Mobile Trajets flex layout fixes + color unification
+ * Service Worker v509 - CSS module index precache
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v508';
+const CACHE_VERSION = 'v511';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -21,6 +21,32 @@ const PRECACHE = [
   '/css/components/itinerary.css',
   '/css/components/timepicker.css',
   '/style.css',
+  '/style.modules.css',
+  '/css/modules/base/variables.css',
+  '/css/modules/base/reset.css',
+  '/css/modules/base/animations.css',
+  '/css/modules/themes/dark.css',
+  '/css/modules/utilities/performance.css',
+  '/css/modules/utilities/accessibility.css',
+  '/css/modules/utilities/stacking.css',
+  '/css/modules/utilities/mobile.css',
+  '/css/modules/layout/navigation.css',
+  '/css/modules/layout/header.css',
+  '/css/modules/components/hero.css',
+  '/css/modules/components/offline.css',
+  '/css/modules/components/banners.css',
+  '/css/modules/components/banners.alert.css',
+  '/css/modules/components/cards.css',
+  '/css/modules/components/common.css',
+  '/css/modules/components/leaflet.css',
+  '/css/modules/components/popups.css',
+  '/css/modules/components/forms.css',
+  '/css/modules/components/modals.css',
+  '/css/modules/pages/home.css',
+  '/css/modules/pages/map.css',
+  '/css/modules/pages/traffic.css',
+  '/css/modules/pages/schedules.css',
+  '/css/modules/pages/itinerary.css',
   '/js/main.js',
   '/js/EventBus.js',
   '/js/StateManager.js',

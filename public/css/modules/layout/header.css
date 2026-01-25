@@ -1,49 +1,58 @@
-/**
- * Header Styles - Périmap v432
- * 
- * Styles de l'en-tête principal
- * Source: style.css lignes 1937-2034
+﻿/**
+ * Header and Navigation - Perimap v504
+ *
+ * Extracted from public/style.css section 12 (Header & navigation).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 2004-2107
+ * Updated: 2026-01-24
  */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   EN-TÊTE PRINCIPAL - Effet "Liquid Glass"
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* =========================================
+ * NOUVELLE EN-TÊTE (Effet "Liquid Glass")
+ * ========================================= */
 #main-header {
     background: var(--bg-page);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px); 
     border-bottom: 1px solid var(--border);
     padding: 0 1.5rem;
-    position: sticky;
+    position: sticky; /* Reste sticky pour le dashboard */
     top: 0;
     z-index: 1050;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Ne doit pas rétrécir */
+    /* V491: Empêche le scroll quand on touche le header */
+    touch-action: manipulation;
+    overscroll-behavior: none;
 }
 
 @supports not (backdrop-filter: blur(10px)) {
+    .hero-section .planner-block,
+    .instruction-content,
     #main-header {
         background: var(--bg-page);
     }
 }
 
-/* Header fixé en mode carte plein écran */
-body.view-map-locked #main-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 2500;
-}
-
-/* Cache le header sur les vues plein écran */
+/* *** CORRECTION V30 *** */
+/* Cache le header principal sur les vues plein Ã©cran */
 body.view-is-locked #main-header {
     display: none;
 }
+body.view-is-locked #legal-strip {
+    display: none;
+}
 
-/* ═══════════════════════════════════════════════════════════════════════
-   CONTENU HEADER
-   ═══════════════════════════════════════════════════════════════════════ */
+/* V135+: Plein Ã©cran carte : garder l'en-tÃªte PÃ©riMap, cacher seulement le bas */
+body.view-map-locked #site-footer,
+body.view-map-locked #legal-strip {
+    display: none !important;
+}
+
+/* V67: Uniformisation : garder l'en-tÃªte PÃ©riMap sur la vue itinÃ©raire, cacher seulement le bas */
+body.itinerary-view-active #site-footer,
+body.itinerary-view-active #legal-strip {
+    display: none !important;
+}
 
 .header-content {
     display: flex;
@@ -54,10 +63,6 @@ body.view-is-locked #main-header {
     margin: 0 auto;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   LOGO
-   ═══════════════════════════════════════════════════════════════════════ */
-
 .logo {
     display: flex;
     align-items: center;
@@ -67,24 +72,22 @@ body.view-is-locked #main-header {
 }
 
 .header-logo-img {
-    height: 52px;
-    max-width: 170px;
+    height: 40px;
+    max-width: 140px;
     width: auto;
     object-fit: contain;
     display: block;
 }
 
-/* Logo en mode clair: inverser les couleurs pour visibilité */
+/* Logo en mode clair: inverser les couleurs pour visibilitÃ© */
 body:not(.dark-theme) .header-logo-img {
     filter: brightness(0) saturate(100%);
 }
-
 .header-title-group {
     display: flex;
     flex-direction: column;
     line-height: 1.05;
 }
-
 .brand-name {
     font-size: 1.4rem;
     font-weight: 800;
@@ -94,75 +97,16 @@ body:not(.dark-theme) .header-logo-img {
     background-clip: text;
     color: transparent;
 }
-
 .brand-sub {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
 }
-
 .header-logo-icon {
     color: var(--primary);
 }
-
 .header-nav {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   DARK THEME
-   ═══════════════════════════════════════════════════════════════════════ */
-
-body.dark-theme #main-header {
-    background: var(--bg-page);
-    border-bottom-color: rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   HEADER ABOUT PAGE
-   ═══════════════════════════════════════════════════════════════════════ */
-
-#main-header.about-header {
-    position: sticky;
-    top: 0;
-    margin: 0;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-    z-index: 10;
-    padding: 0 1.5rem;
-}
-
-.about-header-content {
-    gap: 1rem;
-}
-
-.about-back-row {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 0.75rem;
-}
-
-.about-page .about-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.about-page #main-header {
-    padding: 0 1.5rem;
-}
-
-.about-page .about-header-content {
-    align-items: center;
-    min-height: 64px;
-}
-
-.about-page .about-back-btn {
-    padding: 0.55rem 0.9rem;
 }

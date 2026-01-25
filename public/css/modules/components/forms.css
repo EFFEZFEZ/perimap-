@@ -310,3 +310,643 @@ body.dark-theme textarea::placeholder {
     justify-self: center;
     align-self: center;
 }
+
+/**
+ * Planner General Styles
+ *
+ * Extracted from public/style.css (STYLES PLANIFICATEUR GENERAL).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 6470-6597
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * STYLES PLANIFICATEUR (GÉNÉRAL)
+ * ========================================= */
+.planner-block .form-group label,
+.itinerary-edit-form .form-group label {
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    color: var(--text-secondary); 
+    text-transform: uppercase; 
+    margin-bottom: 0.375rem;
+}
+
+/* Champs avec icône intégrée */
+.input-with-icon {
+    position: relative;
+}
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    z-index: 1;
+    pointer-events: none;
+}
+.input-with-icon input[type="text"] {
+    padding-left: 3rem;
+}
+
+/* Champs du planner avec fond gris clair */
+.planner-block .form-group input[type="text"] {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+.planner-block .form-group input[type="text"]::placeholder {
+    color: #9ca3af;
+}
+.planner-block .form-group input[type="text"]:focus {
+    background: #ffffff;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.form-group.has-geolocate {
+    position: relative;
+}
+.btn-geolocate {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #10b981;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all var(--transition-fast);
+}
+.btn-geolocate:hover:not(:disabled) {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #10b981;
+}
+.btn-geolocate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.btn-geolocate svg {
+    width: 16px;
+    height: 16px;
+}
+
+@media (min-width: 901px) {
+    #itinerary-results-container .form-group.has-geolocate .btn-geolocate {
+        transform: translateY(-50%) !important;
+    }
+}
+
+/* ✅ V57: NOUVEAU - Spinner pour le bouton géoloc */
+.btn-geolocate .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+.btn-swap-direction {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    flex-shrink: 0;
+    margin: 0;
+    align-self: center;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.25s ease;
+}
+.btn-swap-direction:hover {
+    background: #ecfdf5;
+    color: #10b981;
+    border-color: #10b981;
+    transform: rotate(180deg);
+}
+
+/**
+ * Planner Popover and Z-Index Fixes
+ *
+ * Extracted from public/style.css (CORRECTIF Z-INDEX + PLANNER POPOVERS).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 6598-7094
+ * Updated: 2026-01-24
+ */
+/* =========================================
+ * CORRECTIF Z-INDEX (PLACEZ CECI AVANT .btn-when)
+ * ========================================= */
+
+.form-group-when {
+    position: relative; 
+    flex-shrink: 0;
+    margin-bottom: 0; 
+    /* C'est ICI la correction magique : on force ce bloc à être au-dessus 
+       du bouton "Rechercher" qui le suit dans le HTML */
+    z-index: 50; 
+}
+
+/* ... Le reste de vos styles (.btn-when, etc.) ... */
+.btn-when {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: auto; 
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #f3f4f6;
+    cursor: pointer;
+    text-align: left;
+    color: #1f2937;
+}
+.btn-when > svg:first-child {
+    color: #10b981;
+    flex-shrink: 0;
+}
+.btn-when > span {
+    flex: 1;
+}
+.btn-when:hover {
+    border-color: #10b981;
+    background: #ffffff;
+}
+.btn-when > svg:last-child {
+    color: #9ca3af;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+.btn-when.popover-active > svg:last-child {
+    transform: rotate(180deg);
+}
+
+/* Style pour le bouton "Quand" dans le formulaire des résultats */
+.btn-when-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0.875rem; /* COMPACT: Réduction du padding */
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem; /* COMPACT: Réduction de la taille */
+    font-family: inherit;
+    background: var(--bg-main);
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-primary);
+}
+.btn-when-inline:hover {
+    border-color: var(--primary);
+}
+.btn-when-inline svg {
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+.btn-when-inline.popover-active svg {
+    transform: rotate(180deg);
+}
+
+
+/* Popover Accueil et Trajets - EN DESSOUS du bouton "Partir maintenant" */
+#planner-options-popover,
+#results-planner-options-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-main);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    z-index: 99999; /* AU-DESSUS de la bottom-nav */
+    overflow: visible;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    margin-bottom: 200px; /* Espace élargi pour permettre le scroll (Accueil + Trajets) */
+    padding: 0; /* pour laisser les tabs arrondis collés */
+}
+
+#planner-options-popover.hidden,
+#results-planner-options-popover.hidden {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.popover-tabs {
+    display: flex;
+    background: var(--bg-secondary);
+    border-radius: 14px 14px 0 0; /* angles arrondis en haut */
+    overflow: hidden;
+}
+.popover-tab {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+.popover-tab:hover {
+    color: var(--text-primary);
+}
+.popover-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.popover-content {
+    padding: 1.25rem;
+    overflow: visible;
+    border-radius: 0 0 14px 14px; /* angles arrondis en bas du popover */
+}
+#planner-options-popover > .popover-content,
+#results-planner-options-popover > .popover-content {
+    overflow: visible;
+    border-radius: 0 0 14px 14px;
+}
+.popover-time-inputs {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+}
+.popover-time-inputs .form-group {
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
+    position: relative;
+}
+.popover-time-inputs .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-secondary);
+}
+.popover-time-inputs .real-select {
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    font-variant-numeric: tabular-nums;
+    padding-left: 1.5rem;
+    padding-right: 2.75rem;
+    background-position: calc(100% - 0.75rem) center;
+}
+
+.real-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px; /* angles arrondis pour les sélecteurs horaires */
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    cursor: pointer;
+    padding-right: 2.5rem;
+}
+.real-select option {
+    color: var(--text-primary);
+    background-color: var(--bg-main);
+}
+body.dark-theme .real-select option {
+    background-color: #0f1724;
+    color: var(--text-primary);
+}
+.real-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: none;
+}
+
+.time-select-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+}
+.time-select-native {
+    position: absolute;
+    inset: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.time-select-display {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: var(--bg-main);
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+    position: relative;
+}
+.time-select-display::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    width: 0.65rem;
+    height: 0.35rem;
+    border-left: 2px solid var(--text-secondary);
+    border-bottom: 2px solid var(--text-secondary);
+    transform: translateY(-60%) rotate(-45deg);
+    transition: transform 0.2s ease;
+}
+.time-select-wrapper.is-open .time-select-display {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+.time-select-wrapper.is-open .time-select-display::after {
+    transform: translateY(-40%) rotate(135deg);
+}
+
+/* Menu temps - s'ouvre vers le HAUT */
+.time-select-menu {
+    position: absolute;
+    left: 0;
+    right: auto;
+    bottom: calc(100% + 8px);
+    top: auto;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elevation-3);
+    padding: var(--spacing-2) 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity var(--transition-quick), transform var(--transition-quick);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    max-height: min(320px, 50vh);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.time-select-wrapper-minute .time-select-menu,
+.time-select-wrapper-hour .time-select-menu {
+    border-radius: 12px;
+}
+.time-select-menu::-webkit-scrollbar {
+    width: 6px;
+}
+.time-select-menu::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.25);
+    border-radius: 999px;
+}
+.time-select-wrapper.is-open .time-select-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.time-select-option {
+    width: 100%;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background 0.1s ease;
+    text-align: center;
+    border-radius: 0;
+}
+.time-select-option:hover,
+.time-select-option:focus {
+    background: var(--bg-secondary);
+    color: var(--primary);
+}
+.time-select-option.is-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    font-weight: 700;
+}
+.time-select-option[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* V160: Mobile - menu temps optimisé */
+@media (max-width: 640px) {
+    .time-select-menu {
+        width: 90px;
+        max-height: min(280px, 45vh);
+        padding: 6px 0;
+        border-radius: 10px;
+    }
+    .time-select-option {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
+.btn-popover-submit {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    justify-content: center;
+}
+
+.autocomplete-suggestions {
+    /* default fallback; JS will set to fixed to escape stacking contexts */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    /* Doit être opaque et capter les clics (pas de click-through) */
+    background: var(--bg-main) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    box-shadow: var(--elevation-2);
+    /* Doit passer AU-DESSUS des contrôles du planner (popover/when button) */
+    /* Must be above planner popover (which uses z-index:16000) */
+    z-index: 20000 !important;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    animation: fadeInDown var(--transition-normal);
+}
+
+.suggestion-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+.suggestion-item:last-child {
+    border-bottom: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.suggestion-item:hover {
+    background: var(--bg-secondary);
+    padding-left: 1.25rem;
+}
+.suggestion-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    transform: scaleY(0);
+    transition: transform var(--transition-fast);
+}
+.suggestion-item:hover::before {
+    transform: scaleY(1);
+}
+.suggestion-item strong {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+
+@media (max-width: 900px) { 
+    /* 1. On nettoie le layout du formulaire */
+    .planner-form {
+        flex-direction: column;
+        align-items: stretch;
+        /* Isolation pour éviter les mélanges bizarres */
+        isolation: isolate; 
+    }
+    .planner-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; 
+        align-items: stretch;
+        width: 100%;
+    }
+    .planner-inputs .form-group,
+    .form-group-when {
+        width: 100%;
+    }
+    .planner-inputs .swap-button-slot,
+    .results-planner-inputs .swap-button-slot {
+        order: 2;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .planner-inputs .swap-button-slot .btn-swap-direction,
+    .results-planner-inputs .swap-button-slot .btn-swap-direction {
+        display: inline-flex;
+        margin: 0 auto;
+        width: 44px;
+        height: 44px;
+    }
+    .btn-when { width: 100%; }
+
+    /* 2. LE PARENT DU MENU (L'Ancre) */
+    .form-group-when {
+        position: relative; 
+        margin-bottom: 0;
+        /* CRUCIAL : Il doit être devant le bouton Rechercher */
+        z-index: 500; 
+    }
+
+    /* 3. LE MENU LUI-MÊME - En dessous du bouton */
+    #planner-options-popover {
+        position: absolute !important;
+        top: calc(100% + 8px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        overflow: visible;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+        z-index: 99999 !important;
+        pointer-events: auto;
+    }
+
+    /* 4. Cacher proprement quand c'est fermé */
+    #planner-options-popover.hidden {
+        opacity: 0;
+        transform: translateY(-8px) !important;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    /* 5. LE BOUTON RECHERCHER */
+    .planner-search-btn {
+        position: relative;
+        /* Z-Index plus bas que le menu */
+        z-index: 1; 
+        margin-top: 0;
+    }
+
+    /* 6. NETTOYAGE : Suppression totale des "écrans gris" (backdrops) */
+    #planner-options-popover::before,
+    #planner-options-popover:not(.hidden)::before {
+        display: none !important;
+        content: none !important;
+    }
+
+    .results-planner-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .results-planner-inputs .btn-swap-direction {
+        order: 0;
+        margin: 0 auto;
+    }
+}

@@ -1,22 +1,18 @@
 /**
- * Animations CSS - Périmap v432
- * 
- * Keyframes et classes d'animation
- * Source: style.css lignes 750-933
+ * Animations CSS - Perimap v504
+ *
+ * Extracted from public/style.css section 7 (Animations & keyframes).
+ * No rule changes; order preserved.
+ * Source: public/style.css lines 767-1030
+ * Updated: 2026-01-24
  */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   KEYFRAMES PRINCIPAUX
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* =========================================
+ * ANIMATIONS & KEYFRAMES
+ * ========================================= */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
 }
 
 @keyframes fadeInUp {
@@ -63,51 +59,12 @@
     }
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes scaleIn {
     from {
         opacity: 0;
         transform: scale(0.9);
     }
     to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes bounceIn {
-    0% {
-        opacity: 0;
-        transform: scale(0.3);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    70% {
-        transform: scale(0.9);
-    }
-    100% {
         opacity: 1;
         transform: scale(1);
     }
@@ -131,34 +88,35 @@
     }
 }
 
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-@keyframes notificationPop {
+@keyframes bounceIn {
     0% {
-        transform: scale(0);
         opacity: 0;
+        transform: scale(0.3);
     }
     50% {
-        transform: scale(1.2);
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
     }
     100% {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1);
     }
 }
 
-@keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CLASSES UTILITAIRES D'ANIMATION
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* Animation utility classes */
 .animate-fade-in {
     animation: fadeIn var(--transition-normal) ease-out forwards;
 }
@@ -187,7 +145,7 @@
     animation: bounceIn var(--transition-bounce) ease-out forwards;
 }
 
-/* Délais échelonnés pour les listes */
+/* Staggered animation delays for lists */
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.1s; }
 .stagger-3 { animation-delay: 0.15s; }
@@ -195,36 +153,46 @@
 .stagger-5 { animation-delay: 0.25s; }
 .stagger-6 { animation-delay: 0.3s; }
 
-/* Badge notification */
+/* Notification badge animation */
 .notification-badge {
     animation: pulse 2s ease-in-out infinite;
 }
 
-/* Transitions de page */
+@keyframes notificationPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Page transition wrapper */
 .page-transition-enter {
     opacity: 0;
     transform: translateY(10px);
 }
-
 .page-transition-enter-active {
     opacity: 1;
     transform: translateY(0);
     transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
-
 .page-transition-exit {
     opacity: 1;
 }
-
 .page-transition-exit-active {
     opacity: 0;
-    transition: opacity 150ms ease-out;
+    transition: opacity var(--transition-fast);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   MICRO-INTERACTIONS
-   ═══════════════════════════════════════════════════════════════════════ */
-
+/* =========================================
+ * Micro-interactions (short, functional)
+ * ========================================= */
 .pm-ripple-host {
     position: relative;
     overflow: hidden;
@@ -252,7 +220,6 @@ body.dark-theme .pm-ripple {
     }
 }
 
-/* Transitions par défaut sur éléments interactifs */
 :where(.btn, .btn-icon-round, .quick-action-card, .nav-dropdown-item, .mobile-menu-item, .bottom-nav-item, .route-option) {
     transition: transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
@@ -261,7 +228,16 @@ body.dark-theme .pm-ripple {
     transform: translateZ(0) scale(0.985);
 }
 
-/* Skeleton loading */
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 .skeleton {
     background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-light) 50%, var(--bg-secondary) 75%);
     background-size: 200% 100%;
@@ -275,7 +251,7 @@ body.dark-theme .pm-ripple {
 }
 
 .pm-skeleton-card {
-    padding: 12px;
+    padding: 12px 12px;
     border-radius: 14px;
     background: var(--bg-secondary);
     border: 1px solid rgba(15, 23, 42, 0.06);
@@ -284,3 +260,14 @@ body.dark-theme .pm-ripple {
 body.dark-theme .pm-skeleton-card {
     border-color: rgba(255, 255, 255, 0.06);
 }
+
+.realtime-badge--loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.10);
+    border: 1px solid rgba(34, 197, 94, 0.18);
+}
+
