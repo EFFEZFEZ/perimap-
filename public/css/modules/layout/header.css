@@ -23,6 +23,7 @@
     /* V491: Empêche le scroll quand on touche le header */
     touch-action: manipulation;
 	overscroll-behavior: contain;
+}
 
 /* Correction mobile : header toujours fixe sur la vue trajets */
 @media (max-width: 900px) {
