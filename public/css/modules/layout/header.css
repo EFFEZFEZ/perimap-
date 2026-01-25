@@ -22,7 +22,7 @@
     flex-shrink: 0; /* Ne doit pas rétrécir */
     /* V491: Empêche le scroll quand on touche le header */
     touch-action: manipulation;
-}
+	overscroll-behavior: contain;
 
 /* Correction mobile : header toujours fixe sur la vue trajets */
 @media (max-width: 900px) {
@@ -38,8 +38,6 @@
         border-bottom: 1px solid var(--border, #e5e7eb);
         padding-top: env(safe-area-inset-top, 0px);
     }
-}
-    overscroll-behavior: none;
 }
 
 @supports not (backdrop-filter: blur(10px)) {
