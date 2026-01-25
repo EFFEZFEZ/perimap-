@@ -24,6 +24,14 @@
     z-index: 100;
 }
 
+/* Correction mobile : compense le header fixe pour rendre la top bar visible */
+@media (max-width: 900px) {
+    #itinerary-results-container {
+        padding-top: calc(64px + env(safe-area-inset-top, 0px));
+    }
+}
+}
+
 /* Isoler le conteneur itinéraire quand caché */
 #itinerary-results-container.hidden {
     display: none !important;
@@ -797,6 +805,7 @@ body.dark-theme .indicator-dot.destination {
         flex-direction: column; /* Stack panel + map */
         overflow-y: auto; /* Permettre le scroll interne (body locké) */
         -webkit-overflow-scrolling: touch;
+        padding-top: calc(64px + env(safe-area-inset-top, 0px)); /* Compenser le header fixe */
     }
 
     #results-side-panel {
@@ -820,6 +829,7 @@ body.dark-theme .indicator-dot.destination {
         background: transparent;
         border: none;
         padding: 0.75rem 1rem 0.5rem;
+        top: calc(64px + env(safe-area-inset-top, 0px)); /* V511: Sticky sous le header fixe */
     }
 
     .itinerary-top-bar h2 {
@@ -4909,4 +4919,3 @@ body.dark-theme #results-planner-to:focus {
         display: flex;
     }
 }
-
