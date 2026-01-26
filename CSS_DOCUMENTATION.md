@@ -108,6 +108,29 @@ z-index: auto;
 
 **Statut :** Modification (v2026-01-26)
 
+## [2026-01-26] Global Overscroll Fix (Anti-Gray Zones)
+
+**Fichiers :**
+- public/css/modules/base/reset.css
+- public/css/modules/utilities/mobile.css
+
+**Sélecteurs concernés :**
+- body
+- body.horaires-view-active
+- body.trafic-view-active
+- #itinerary-results-container
+
+**Règle modifiée :**
+```css
+overscroll-behavior: none;
+```
+
+**Pourquoi ?**
+- Empêche l'effet de rebond (rubber-banding) sur Chrome/Safari mobile qui révèle le fond gris/blanc du navigateur.
+- Garantit une expérience "app-like" immersive, surtout sur les vues à fond sombre (Navy).
+
+**Statut :** Modification globale (v2026-01-26)
+
 This document is the single source of truth for the CSS split. It tracks the
 current monolithic file, the planned module layout, and the validation status
 for each block. It will be updated after each block extraction.
