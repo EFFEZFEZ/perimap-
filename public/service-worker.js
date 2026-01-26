@@ -109,6 +109,7 @@ self.addEventListener('activate', (event) => {
       ))
       .then(() => self.clients.claim())
       .catch(() => self.clients.claim())
+      .then(() => self.skipWaiting())
   );
 });
 
