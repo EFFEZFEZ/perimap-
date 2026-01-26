@@ -77,9 +77,9 @@ body.itinerary-view-active #itinerary-results-container {
     padding: 0.75rem 1rem;
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
 }
 
 .itinerary-top-bar .app-back-btn {
@@ -456,9 +456,9 @@ body.itinerary-view-active #itinerary-results-container {
     padding: 1rem 1.25rem;
     background: var(--bg-main);
     border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -467,7 +467,7 @@ body.itinerary-view-active #itinerary-results-container {
 .itinerary-top-bar .app-back-btn {
     height: 36px;
     padding: 0 14px;
-    border-radius: 10px;
+    border-radius: 20px;
     font-size: 0.875rem;
     background: transparent;
     border: none;
@@ -828,7 +828,9 @@ body.dark-theme .indicator-dot.destination {
         background: transparent;
         border: none;
         padding: 0.75rem 1rem 0.5rem;
-        top: calc(64px + env(safe-area-inset-top, 0px)); /* V511: Sticky sous le header fixe */
+        position: static !important;
+        top: auto !important;
+        z-index: auto !important;
     }
 
     .itinerary-top-bar h2 {
@@ -968,6 +970,13 @@ body.dark-theme .indicator-dot.destination {
         display: flex;
         flex-direction: column;
         gap: var(--spacing-4);
+    }
+
+    @media (max-width: 600px) {
+        .recent-journeys-section {
+            margin-bottom: var(--spacing-6);
+            padding-bottom: 72px; /* Espace pour la bottom nav, ajustable selon la hauteur réelle */
+        }
     }
     .recent-journeys-section h3 {
         font-size: var(--font-size-lg);

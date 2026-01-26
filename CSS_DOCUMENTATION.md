@@ -1,5 +1,113 @@
 # Perimap CSS Documentation
 
+## [2026-01-26] Marge inférieure mobile pour la section "Vos trajets"
+
+**Fichier :** public/css/modules/pages/itinerary.css
+
+**Sélecteur concerné :**
+- .recent-journeys-section (section Vos trajets)
+
+**Règle ajoutée :**
+```css
+@media (max-width: 600px) {
+  .recent-journeys-section {
+    margin-bottom: var(--spacing-6);
+    padding-bottom: 72px; /* Espace pour la bottom nav, ajustable selon la hauteur réelle */
+  }
+}
+```
+
+**Pages concernées :**
+- Page itinéraire (itineraire.html)
+
+**Pourquoi ?**
+- Garantit une aération visuelle entre le bloc "Vos trajets" et le bas de l’écran, même sur petit écran ou lors du scroll, pour éviter que le bloc ne soit collé au bord.
+- Cohérence avec les autres vues de l’application.
+
+- Le padding-bottom assure que le contenu ne soit jamais masqué ou collé à la barre de navigation fixe en bas de l’écran sur mobile.
+
+**Statut :** Nouvelle règle (v2026-01-26)
+
+**Effet visuel :**
+- Sur mobile, la section "Vos trajets" garde toujours une marge avec le bas du viewport.
+
+**Risques :**
+- Aucun risque identifié, la règle ne s’applique que sur petit écran.
+
+## [2026-01-26] Correction padding "Vos trajets" (Mobile Override)
+
+**Fichier :** public/css/modules/utilities/mobile.css
+
+**Sélecteur concerné :**
+- body.itinerary-view-active .recent-journeys-section
+
+**Règle modifiée :**
+```css
+padding: 0 0 80px 0 !important; /* V601: Espace pour le scroll mobile */
+```
+
+**Pourquoi ?**
+- Le fichier `mobile.css` forçait `padding: 0 !important`, annulant la marge définie dans `itinerary.css`.
+- Ajout d'un padding-bottom de 80px pour garantir que le contenu n'est pas masqué par la barre de navigation fixe.
+
+**Statut :** Correction (v2026-01-26)
+
+**Effet visuel :**
+- La liste des trajets récents a maintenant un espace de respiration en bas de page sur mobile.
+
+## [2026-01-26] Surcharge top: 10px pour éléments fixes carte
+
+**Fichier :** public/css/modules/pages/map.css
+
+**Sélecteurs concernés :**
+- #btn-back-to-dashboard-from-map
+- #clock
+- #top-right-controls
+
+**Règle ajoutée :**
+```css
+#btn-back-to-dashboard-from-map,
+#clock,
+#top-right-controls {
+  top: 10px !important;
+}
+```
+
+**Pages concernées :**
+- Page carte (carte.html, views/carte.html)
+
+**Pourquoi ?**
+- Permet de rapprocher les éléments fixes du haut de la fenêtre, sur demande utilisateur, pour une meilleure visibilité et un gain d’espace vertical.
+- La règle !important garantit la priorité sur les valeurs calculées précédentes (ex : calc(64px + 12px + env(safe-area-inset-top))).
+
+**Statut :** Nouvelle règle (v2026-01-26)
+
+**Effet visuel :**
+- Les trois éléments sont désormais positionnés à 10px du haut du viewport, quel que soit le contexte précédent.
+
+**Risques :**
+- Si d’autres règles très spécifiques existent, il peut rester des conflits. Surveiller le rendu sur mobile et desktop.
+
+## [2026-01-26] Itinerary Top Bar Static Positioning
+
+**Fichier :** public/css/modules/pages/itinerary.css
+
+**Sélecteur concerné :**
+- .itinerary-top-bar
+
+**Règle modifiée :**
+```css
+position: static;
+top: auto;
+z-index: auto;
+```
+
+**Pourquoi ?**
+- Pour permettre à la barre supérieure de l'itinéraire de défiler avec le contenu et de passer sous les éléments fixes (comme le header principal) lors du défilement.
+- Supprime le comportement `sticky` précédent.
+
+**Statut :** Modification (v2026-01-26)
+
 This document is the single source of truth for the CSS split. It tracks the
 current monolithic file, the planned module layout, and the validation status
 for each block. It will be updated after each block extraction.
