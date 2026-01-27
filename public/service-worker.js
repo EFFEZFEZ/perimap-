@@ -94,6 +94,7 @@ self.addEventListener('install', (event) => {
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())
   );
+});
 
 /**
  * Notifications Push : Affichage et interaction
