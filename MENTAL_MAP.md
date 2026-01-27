@@ -1,3 +1,4 @@
+**Offline-ready** : Service Worker v519 (cache versionné, purge, stratégies cache-first/stale-revalidate/network-first, gestion messages) + GTFS local
 # 📊 CARTE MENTALE COMPLÈTE - PériMap v2.6.0
 
 **Dernière mise à jour** : 24 janvier 2026  
@@ -360,6 +361,7 @@ project/
 ├── 📄 public/                          (Frontend)
 │   ├── index.html                      (Entry point SEO, v505)
 │   ├── service-worker.js (v508)        (Offline, cache, precache)
+│   ├── service-worker.js (v519)        (Offline, cache versionné, purge, stratégies cache-first/stale-revalidate/network-first, gestion messages)
 │   ├── manifest.json                   (PWA config)
 │   ├── style.css                       (Styles CSS)
 │   │
