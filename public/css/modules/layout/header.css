@@ -38,6 +38,11 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         border-bottom: 1px solid var(--border, #e5e7eb);
         padding-top: env(safe-area-inset-top, 0px);
+        overscroll-behavior: none;
+    }
+    body, #app-view-root, .main-container {
+        padding-top: env(safe-area-inset-top, 0px);
+        overscroll-behavior: none;
     }
 }
 

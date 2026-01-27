@@ -19,8 +19,10 @@
 }
 
 @media (max-width: 768px) {
-    #app-view-root {
-        padding-bottom: var(--bottom-nav-height); /* V366: Pas besoin de safe-area car bottom-nav le gère */
+
+    #app-view-root, .main-container, body {
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+        overscroll-behavior: none;
     }
 
     body.itinerary-view-active #app-view-root {

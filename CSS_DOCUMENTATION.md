@@ -174,25 +174,6 @@ extraction.
 | 9. Dark theme top bar | top bar theme rules | public/css/modules/themes/dark.css |
 | 10. Planner form | origin/destination inputs, swap/clear | public/css/modules/components/forms.css |
 | 11. Itinerary results | route cards, badges, durations | public/css/modules/pages/itinerary.css |
-| 12. Header mobile fixe | header principal toujours visible sur mobile, compensation zones grises Chrome | public/css/modules/layout/header.css |
-
-### Section : Header mobile fixe (ajout 2026-01-25)
-
-**Rôle** :
-- Rend le header principal (#main-header) toujours visible en haut de l’écran sur mobile (≤900px).
-- Empêche le header de sortir de l’écran pendant le scroll.
-- Compense les zones grises Chrome (barres système) avec `env(safe-area-inset-top)`.
-- Applique un z-index élevé et une largeur 100vw pour garantir la visibilité.
-- Améliore l’expérience utilisateur sur la vue itinéraires et toutes les pages mobiles.
-
-**Pages concernées** :
-- Principalement `itineraire.html`, mais impacte toutes les vues utilisant #main-header sur mobile.
-
-**Pourquoi ?**
-- Sur mobile, le header disparaissait au scroll, rendant la navigation désagréable.
-- Les zones grises Chrome n’étaient pas compensées, gênant le scroll.
-
-**Statut** : Nouvelle règle (v506, 2026-01-25, module layout/header.css)
 | 12. Header & nav | site header, hamburger, dropdown | public/css/modules/layout/header.css |
 | 13. Home hero | home page hero | public/css/modules/pages/home.css |
 | 14. Quick actions | home shortcuts cards | public/css/modules/components/cards.css |
@@ -1476,7 +1457,7 @@ used in the UI.
   map-container, planner-options-popover, planner-submit-btn,
   recent-journeys-container, results-from-suggestions, results-map,
   results-mode-tabs, results-planner-options-popover, results-planner-submit-btn,
-  results-side-panel, results-to-suggestions, route-filter-panel, site-footer,
+  results-planner-to, results-side-panel, results-to-suggestions, route-filter-panel, site-footer,
   to-suggestions, trafic-container
 
 ## Section 24 - Itinerary V91/V93 premium redesign

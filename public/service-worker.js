@@ -9,7 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-const CACHE_VERSION = 'v518';
+// v519 - 2026-01-27 : Synchronisation safe-area/overscroll mobile (header, nav, mobile.css)
+const CACHE_VERSION = 'v519';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
@@ -22,6 +23,11 @@ const PRECACHE = [
   '/css/components/timepicker.css',
   '/style.css',
   '/style.modules.css',
+  // Synchronisation safe-area/overscroll mobile (header, nav, mobile.css)
+  '/css/modules/layout/header.css',
+  '/css/modules/layout/navigation.css',
+  '/css/modules/utilities/mobile.css',
+  // Modules de base
   '/css/modules/base/variables.css',
   '/css/modules/base/reset.css',
   '/css/modules/base/animations.css',
@@ -29,9 +35,6 @@ const PRECACHE = [
   '/css/modules/utilities/performance.css',
   '/css/modules/utilities/accessibility.css',
   '/css/modules/utilities/stacking.css',
-  '/css/modules/utilities/mobile.css',
-  '/css/modules/layout/navigation.css',
-  '/css/modules/layout/header.css',
   '/css/modules/components/hero.css',
   '/css/modules/components/offline.css',
   '/css/modules/components/banners.css',

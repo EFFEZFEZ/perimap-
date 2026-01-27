@@ -15,6 +15,11 @@
  * RESPONSIVE MOBILE FRIENDLY
  * ========================================= */
 @media (max-width: 768px) {
+    body, #app-view-root, .main-container {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        overscroll-behavior: none;
+    }
     /* Header mobile */
     #main-header {
         padding: 0.5rem 0.75rem;
