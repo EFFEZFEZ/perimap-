@@ -1,4 +1,4 @@
-**Offline-ready** : Service Worker v519 (cache versionné, purge, stratégies cache-first/stale-revalidate/network-first, gestion messages, enregistrement global sur toutes les pages principales) + GTFS local
+**Offline-ready** : Service Worker v519 (cache versionné, purge, stratégies cache-first/stale-revalidate/network-first, gestion messages, enregistrement centralisé via app.js) + GTFS local
 # 📊 CARTE MENTALE COMPLÈTE - PériMap v2.6.0
 
 **Dernière mise à jour** : 24 janvier 2026  
