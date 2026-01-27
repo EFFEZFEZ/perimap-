@@ -134,18 +134,16 @@ function configureDynamicSeo() {
 async function registerServiceWorker() {
     // Disable SW in local dev to avoid stale caches interfering with Vite HMR
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    
-    try {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const reg of regs) {
-            await reg.unregister();
-        }
-        console.log('[App] 🚫 SW désactivé, toutes les registrations ont été supprimées');
-    } catch (e) {
-        console.warn('[App] Impossible de désenregistrer le SW:', e);
-    }
-
     if (isLocalhost) {
+        try {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const reg of regs) {
+                await reg.unregister();
+            }
+            console.log('[App] 🚫 SW désactivé en local, toutes les registrations ont été supprimées');
+        } catch (e) {
+            console.warn('[App] Impossible de désenregistrer le SW en local:', e);
+        }
         return;
     }
 
