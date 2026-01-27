@@ -24,7 +24,7 @@ html {
     min-height: 100%;
     width: 100%;
     overflow-x: hidden;
-    overflow-y: auto !important;
+    overflow-y: auto;
     /* V491: Fond solide sur html pour éviter les zones grises Chrome */
     background-color: #f8fafc; /* Fallback clair si var non définie */
     background-color: var(--bg-page, #f8fafc);
@@ -56,7 +56,7 @@ body {
     /* Par défaut, le scroll est porté par html (body reste non scrollable). */
     overflow-y: visible !important;
     -webkit-overflow-scrolling: touch; /* V59: Smooth scroll iOS */
-    overscroll-behavior: auto;
+    overscroll-behavior: none;
     touch-action: pan-y; /* V455: Scroll vertical uniquement, pas de zoom */
 }
 

@@ -51,8 +51,8 @@
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         /* V491: Empêche le scroll quand on touche la barre de navigation */
-        touch-action: none;
-        overscroll-behavior: none;
+        touch-action: pan-y;
+        overscroll-behavior: contain;
     }
 
     body.dark-theme .bottom-nav {
@@ -122,4 +122,3 @@ body.dark-theme #results-map,
 body.dark-theme #detail-map {
     background: #050c15;
 }
-

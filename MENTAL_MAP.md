@@ -689,8 +689,24 @@ Pour garantir le suivi statistique et l’analyse d’audience, le code Google T
 ---
 ## 📅 HISTORIQUE MISES À JOUR
 
+
+---
+
+## 🔄 LOGIQUE DE COPIE DES FICHIERS RACINE (BUILD VITE)
+
+**Depuis janvier 2026, la logique de build (vite.config.js) inclut une liste explicite de fichiers racine à copier de public/ vers dist/ pour garantir leur présence en production (Vercel).**
+
+- Fichiers explicitement copiés : service-worker.js, manifest.json, robots.txt, sitemap.xml, google66fb00a1cc526ca0.html, style.modules.css, og-generator.html, browserconfig.xml
+- Tout ajout de fichier racine nécessaire à la prod doit être ajouté à cette liste (rootFiles dans vite.config.js)
+- Si un fichier racine est absent en ligne, vérifier d’abord cette liste
+
+**À synchroniser avec les besoins réels du projet et la documentation.**
+
+---
+
 | Date | Version | Changement |
 |------|---------|-----------|
+| 27 janv 2026 | 2.6.1 | Ajout de la documentation sur la logique de copie des fichiers racine (vite.config.js) |
 | 24 janv 2026 | 2.6.0 | Création MENTAL_MAP.md complète |
 | 24 janv 2026 | 2.6.0 | Intégration optimisation heures creuses |
 | - | - | - |

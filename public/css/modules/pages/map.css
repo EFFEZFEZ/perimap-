@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * Map Page Styles - PÃ©rimap v432
  * 
  * Styles spÃ©cifiques Ã  la page carte
@@ -1225,7 +1225,7 @@ body.dark-theme .map-theme-toggle:hover {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border-radius: 18px;
+        border-radius: 20px;
         font-size: var(--font-size-xs);
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.04);
@@ -1235,7 +1235,8 @@ body.dark-theme .map-theme-toggle:hover {
     
     /* Bouton Retour - gauche (remis Ã  sa position d'avant, proche du haut) */
     #map-container #map-view #top-bar > #btn-back-to-dashboard-from-map {
-        top: calc(12px + env(safe-area-inset-top));
+        /* V512: Ajustement pour passer sous le header fixe (64px) */
+        top: calc(64px + 12px + env(safe-area-inset-top));
         left: 12px;
         display: inline-flex !important;
         align-items: center;
@@ -1254,7 +1255,7 @@ body.dark-theme .map-theme-toggle:hover {
     #map-container #map-view #top-bar > #clock {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 12px + env(safe-area-inset-top));
         left: 50%;
         transform: translateX(-50%);
         gap: 6px;
@@ -1271,7 +1272,7 @@ body.dark-theme .map-theme-toggle:hover {
     #map-container #map-view #top-bar > #status-info {
         display: inline-flex !important; 
         align-items: center;
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 12px + env(safe-area-inset-top));
         right: 12px;
         left: auto;
         margin-left: 0;
@@ -1285,7 +1286,7 @@ body.dark-theme .map-theme-toggle:hover {
     /* Groupe droite : status + toggle thÃ¨me (compact mobile) */
     #top-right-controls {
         position: fixed;
-        top: calc(12px + env(safe-area-inset-top));
+        top: calc(64px + 12px + env(safe-area-inset-top));
         right: var(--spacing-3);
         display: inline-flex;
         align-items: center;
@@ -1534,4 +1535,11 @@ body.dark-theme .map-theme-toggle:hover {
 }
 .btn-load-more:hover svg {
     transform: rotate(90deg);
+}
+
+/* V2026-01: Surcharge position top pour 3 éléments fixes (demande utilisateur) */
+#btn-back-to-dashboard-from-map,
+#clock,
+#top-right-controls {
+    top: 10px !important;
 }

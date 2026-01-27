@@ -960,6 +960,13 @@ body.dark-theme .express-chip.personalized {
     will-change: opacity, transform;
 }
 
+/* Correction mobile : compenser le header fixe pour éviter que le contenu soit coupé */
+@media (max-width: 900px) {
+    #dashboard-content-view.view-is-active {
+        padding-top: calc(64px + 0.75rem + env(safe-area-inset-top, 0px));
+    }
+}
+
 /* V352: Bouton retour dans dashboard-content-view positionné uniformément */
 #dashboard-content-view #btn-back-to-hall {
     margin: 0 1rem 1rem 1rem;
@@ -1084,7 +1091,8 @@ body.dark-theme .app-back-btn svg {
 #btn-back-to-results {
     pointer-events: auto !important;
     position: relative;
-    z-index: 3000 !important;
+    /* V512: Z-index réduit pour passer SOUS le header (1050) au scroll */
+    z-index: 100 !important;
 }
 
 .content-cards {

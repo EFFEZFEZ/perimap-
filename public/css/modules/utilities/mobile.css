@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * Mobile Responsive Utilities - Perimap v600
  *
  * Extracted from public/style.css sections:
@@ -976,6 +976,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         display: flex !important;
         flex-direction: column !important;
         overflow-y: auto !important;
+        overscroll-behavior: none !important;
         background: #111b2b !important;
         z-index: 100 !important;
     }
@@ -1029,7 +1030,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         flex-direction: column;
         gap: 0.5rem;
         flex: 0 1 auto !important;
-        padding: 0 !important;
+        padding: 0 0 80px 0 !important;
     }
 
     body.itinerary-view-active .recent-journeys-empty {
@@ -1044,7 +1045,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
     body.itinerary-view-active .itinerary-top-bar {
         background: transparent !important;
         border: none !important;
-        padding: 0.75rem 1rem 0.5rem !important;
+        padding: 0 !important;
     }
 
     body.itinerary-view-active #itinerary-edit-panel {
@@ -1072,6 +1073,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
     /* Horaires view */
     body.horaires-view-active {
         background: #111b2b !important;
+        overscroll-behavior: none !important;
     }
 
     .horaires-hero,
@@ -1086,6 +1088,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
     /* Trafic view */
     body.trafic-view-active {
         background: #111b2b !important;
+        overscroll-behavior: none !important;
     }
 
     .trafic-hero,
