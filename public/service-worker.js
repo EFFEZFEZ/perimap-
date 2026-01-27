@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v519 - 2026-01-27 : Synchronisation safe-area/overscroll mobile (header, nav, mobile.css)
-const CACHE_VERSION = 'v519';
+// v520 - 2026-01-28 : Forçage refresh SW (suppression legal-clarif, vérif nav)
+const CACHE_VERSION = 'v520';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
