@@ -28,11 +28,11 @@
 /* Correction mobile : header toujours fixe sur la vue trajets */
 @media (max-width: 900px) {
     #main-header {
-        position: fixed;
+        position: sticky;
         top: 0;
         left: 0;
         right: 0;
-        width: 100vw;
+        width: 100%;
         z-index: 2000;
         background: var(--bg-page, #fff);
         box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -41,7 +41,6 @@
         overscroll-behavior: none;
     }
     body, #app-view-root, .main-container {
-        padding-top: env(safe-area-inset-top, 0px);
         overscroll-behavior: none;
     }
 }

@@ -90,7 +90,7 @@
     opacity: 0;
     transform: translateY(-6px);
     transition: max-height var(--transition-smooth), opacity var(--transition-normal), transform var(--transition-normal);
-    overscroll-behavior: auto;
+    
     -webkit-overflow-scrolling: touch;
 }
 
@@ -282,7 +282,7 @@ body.dark-theme .hall-line-shortcuts-title {
     overflow-y: auto;
     z-index: var(--z-dropdown);
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: auto;
+    
 }
 .search-result-item {
     padding: var(--spacing-3) var(--spacing-4);
@@ -364,7 +364,7 @@ body.dark-theme .hall-line-shortcuts-title {
     opacity: 0;
     transform: translateY(-6px);
     transition: max-height var(--transition-smooth), opacity var(--transition-normal), transform var(--transition-normal);
-    overscroll-behavior: auto;
+    
     -webkit-overflow-scrolling: touch;
 }
 details[open] .accordion-content {

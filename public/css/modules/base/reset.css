@@ -629,9 +629,9 @@ body.itinerary-view-active {
     left: auto !important;
     background-color: var(--bg-page, #f8fafc) !important;
     /* V504: Anti zones grises renforcé */
-    overscroll-behavior: auto !important;
-    overscroll-behavior-x: auto !important;
-    overscroll-behavior-y: auto !important;
+    overscroll-behavior: none !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: none !important;
 }
 
 body.dark-theme.itinerary-view-active {

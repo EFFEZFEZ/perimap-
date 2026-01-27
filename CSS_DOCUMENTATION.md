@@ -1,3 +1,45 @@
+# [2026-01-27] Compatibilité viewport mobile (100dvh, sticky, overscroll)
+
+**Fichiers concernés :**
+- public/css/components/itinerary.css
+- public/css/delay-stats.css
+- public/css/line-pages.css
+- public/css/modules/base/reset.css
+- public/css/modules/layout/grid.css
+- public/css/modules/layout/header.css
+- public/css/modules/layout/navigation.css
+- public/css/modules/pages/home.css
+- public/css/modules/pages/itinerary.css
+- public/css/modules/pages/map.css
+- public/css/modules/pages/schedules.css
+- public/css/modules/pages/traffic.css
+- public/css/modules/utilities/display.css
+
+**Principaux changements :**
+- Adoption de `100dvh` (viewport dynamique) en complément de `100vh` pour height, min-height, max-height sur de nombreux conteneurs (pages, overlays, cartes, panneaux, etc.)
+- Passage de certains éléments de `position: fixed` à `position: sticky` (header, bottom-nav) pour une meilleure compatibilité mobile et gestion du safe-area.
+- Désactivation d’`overscroll-behavior` sur plusieurs conteneurs pour éviter les effets de rebond et les zones grises sur mobile.
+- Ajustements de width (header, navigation) pour garantir le plein écran sans débordement ni scroll horizontal.
+- Harmonisation des utilitaires `.h-screen`, `.min-h-screen` pour supporter à la fois 100vh et 100dvh.
+
+**Pages concernées :**
+- Toutes les pages principales (index, carte, itinéraire, horaires, trafic)
+
+**Pourquoi ?**
+- Garantir une expérience visuelle cohérente sur tous les appareils, notamment sur mobile où le viewport dynamique (100dvh) gère mieux l’apparition/disparition des barres système.
+- Corriger les problèmes de scroll, de zones grises, et de masquage de contenu par les barres de navigation ou d’état.
+- Améliorer la stabilité du header et de la navigation en bas d’écran lors du scroll ou du changement d’orientation.
+
+**Statut :** Modifications globales (v2026-01-27)
+
+**Effet visuel :**
+- Les éléments principaux occupent toujours la totalité de l’écran visible, même lors de l’apparition/disparition des barres système sur mobile.
+- Le header et la navigation restent visibles et stables sans masquer le contenu ni provoquer de scroll inattendu.
+- Les effets de rebond sont supprimés sur toutes les vues critiques.
+
+**Risques :**
+- Certains navigateurs anciens ne supportent pas 100dvh : le fallback 100vh reste présent.
+- Surveiller le comportement sur iOS et Android récents, notamment lors du passage en mode paysage ou avec clavier virtuel affiché.
 # Perimap CSS Documentation
 
 ## [2026-01-26] Marge inférieure mobile pour la section "Vos trajets"

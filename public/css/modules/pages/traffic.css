@@ -64,7 +64,7 @@
 .tab-content {
     max-height: 450px;
     overflow-y: auto;
-    overscroll-behavior: auto;
+    
     -webkit-overflow-scrolling: touch;
 }
 
@@ -264,7 +264,7 @@
 .tab-content {
     max-height: 450px;
     overflow-y: auto;
-    overscroll-behavior: auto;
+    
     -webkit-overflow-scrolling: touch;
 }
 

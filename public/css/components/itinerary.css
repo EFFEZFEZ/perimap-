@@ -95,6 +95,7 @@ body.dark-theme .indicator-dot.origin, body.dark-theme .indicator-dot.destinatio
     bottom: auto;
     height: auto;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 
   /* Déverrouille le scroll pour la vue Itinéraires en mobile */
@@ -113,6 +114,7 @@ body.dark-theme .indicator-dot.origin, body.dark-theme .indicator-dot.destinatio
                var(--pm-navy, #0b1220);
     color: #e8f3ff;
     min-height: 100vh;
+    min-height: 100dvh;
     height: auto;
     position: static;
     top: auto;

@@ -33,6 +33,7 @@
     bottom: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     /* V491: Dégradé placeholder immédiat pendant le chargement de l'image */
     background: 
         linear-gradient(135deg, 

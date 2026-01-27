@@ -42,6 +42,7 @@
     right: -420px;
     width: 400px;
     height: 100vh;
+    height: 100dvh;
     background: white;
     box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
     z-index: 10000;

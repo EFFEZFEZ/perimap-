@@ -33,10 +33,9 @@
     .bottom-nav {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        position: fixed;
-        left: 0; /* V366: Collé au bord gauche */
-        right: 0; /* V366: Collé au bord droit */
-        bottom: 0; /* V366: Collé en bas, stable et prévisible */
+        position: sticky;
+        bottom: 0;
+        width: 100%;
         height: var(--bottom-nav-height);
         padding: 0;
         padding-bottom: env(safe-area-inset-bottom); /* V366: Safe area gérée en padding interne */

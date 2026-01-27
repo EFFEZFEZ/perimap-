@@ -20,6 +20,7 @@
     bottom: auto;
     width: 100%;
     min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
     height: auto;
     z-index: 100;
 }
@@ -43,6 +44,7 @@
 body.itinerary-view-active #itinerary-results-container {
     top: auto;
     min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
     height: auto;
 }
 
@@ -327,6 +329,7 @@ body.dark-theme #detail-map-header #btn-back-to-results {
     body.itinerary-view-active #itinerary-results-container {
         top: auto;
         min-height: calc(100vh - 56px);
+        min-height: calc(100dvh - 56px);
         height: auto;
     }
 
@@ -390,6 +393,7 @@ body.dark-theme #detail-map-header #btn-back-to-results {
     bottom: auto;
     width: 100%;
     min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
     height: auto;
     z-index: 100;
 }
@@ -399,6 +403,7 @@ body.dark-theme #detail-map-header #btn-back-to-results {
 body.itinerary-view-active #itinerary-results-container {
     top: auto;
     min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
     height: auto;
 }
 
@@ -406,6 +411,7 @@ body.itinerary-view-active #itinerary-results-container {
     body.itinerary-view-active #itinerary-results-container {
         top: auto;
         min-height: calc(100vh - 56px);
+        min-height: calc(100dvh - 56px);
         height: auto;
     }
 
@@ -2308,6 +2314,7 @@ body.dark-theme .route-next-departures {
         left: 0;
         right: 0;
         height: 100vh;
+        height: 100dvh;
         background: var(--bg-main);
         z-index: -1;
         pointer-events: none;
