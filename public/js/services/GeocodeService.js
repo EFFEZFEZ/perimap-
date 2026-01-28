@@ -25,9 +25,13 @@ export class GeocodeService {
         this.placeAliases = {
             'campus': {
                 canonicalName: 'Campus Universitaire, Périgueux',
-                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'iut', 'grenadière', 'pole universitaire', 'pôle universitaire'],
+                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'université périgueux', 'iut', 'iut périgueux', 'grenadière', 'pole universitaire', 'pôle universitaire', 'la grenadière'],
                 coordinates: { lat: 45.1958, lng: 0.7192 },
                 description: 'Campus universitaire (arrêts Campus + Pôle Grenadière)',
+                gtfsStops: [
+                    { stopId: 'MOBIITI:StopPlace:77309', name: 'Campus', lat: 45.197113, lng: 0.718130 },
+                    { stopId: 'MOBIITI:StopPlace:77314', name: 'Pôle Universitaire Grenadière', lat: 45.194477, lng: 0.720215 }
+                ],
                 searchRadius: 400
             }
         };
@@ -75,6 +79,22 @@ export class GeocodeService {
      */
     async _resolvePlaceId(placeId) {
         logger.debug('GeocodeService._resolvePlaceId', { placeId });
+        
+        // Check if it's an alias (format: ALIAS_CAMPUS)
+        if (placeId && typeof placeId === 'string' && placeId.startsWith('ALIAS_')) {
+            const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
+            const aliasData = this.placeAliases[aliasKey];
+            if (aliasData && aliasData.coordinates) {
+                logger.debug('GeocodeService alias resolved', { placeId, alias: aliasData.canonicalName });
+                return {
+                    lat: aliasData.coordinates.lat,
+                    lng: aliasData.coordinates.lng,
+                    gtfsStops: aliasData.gtfsStops || null,
+                    searchRadius: aliasData.searchRadius || 300,
+                    isMultiStop: Array.isArray(aliasData.gtfsStops) && aliasData.gtfsStops.length > 1
+                };
+            }
+        }
         
         try {
             const response = await fetch(`${this.apiEndpoints.places}`, {
@@ -170,7 +190,14 @@ export class GeocodeService {
         const alias = this._checkPlaceAlias(input);
         if (alias) {
             logger.debug('GeocodeService alias matched', { alias: alias.canonicalName });
-            return alias.coordinates;
+            // Return complete alias data including gtfsStops for multimodal poles
+            return {
+                lat: alias.coordinates.lat,
+                lng: alias.coordinates.lng,
+                gtfsStops: alias.gtfsStops || null,
+                searchRadius: alias.searchRadius || 300,
+                isMultiStop: Array.isArray(alias.gtfsStops) && alias.gtfsStops.length > 1
+            };
         }
 
         // Otherwise resolve as place ID

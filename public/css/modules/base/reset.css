@@ -548,8 +548,30 @@ body.dark-theme .install-helper {
 
 .fade-in:nth-of-type(2) { animation-delay: 0.1s; }
 .fade-in:nth-of-type(3) { animation-delay: 0.2s; }
-
-/* Verrouille le scroll UNIQUEMENT pour les vues plein ├®cran */
+/* ============================================================================
+ * ⚠️ DEPRECATED SCROLL LOCK CLASS (V627 - 2026-01-28)
+ * 
+ * WARNING: This class is DEPRECATED for scroll control.
+ * 
+ * HISTORY:
+ *   - Previously used to lock scroll on fullscreen views
+ *   - Mixed layout control (hiding header/footer) with scroll locking
+ * 
+ * MIGRATION:
+ *   - For scroll locking → Use: html.scroll-locked (scroll-lock.css)
+ *   - For layout control → Keep view-specific classes (e.g., body.view-map-locked)
+ * 
+ * WHY DEPRECATED:
+ *   - Mixes concerns (scroll + layout visibility)
+ *   - Conflicts with modern scroll-lock.css architecture
+ *   - Hard to predict behavior in complex views
+ * 
+ * CURRENT USAGE:
+ *   - Still used in legacy code (see JavaScript audit)
+ *   - Will be phased out gradually
+ * 
+ * DO NOT USE IN NEW CODE.
+ * ============================================================================ *//* Verrouille le scroll UNIQUEMENT pour les vues plein ├®cran */
 body.view-is-locked {
     position: relative;
     inset: auto;
@@ -651,6 +673,31 @@ body.detail-view-open #legal-strip {
     -webkit-overflow-scrolling: touch;
 }
 
+/* ============================================================================
+ * ⚠️ PARTIALLY DEPRECATED CLASS (V627 - 2026-01-28)
+ * 
+ * WARNING: This class should NOT be used for scroll locking.
+ * 
+ * PURPOSE:
+ *   ✅ Layout control → Positions map container, hides footer/header elements
+ *   ❌ Scroll control → DO NOT rely on overflow properties for scroll locking
+ * 
+ * CORRECT USAGE:
+ *   body.view-map-locked → Layout/positioning/visibility ONLY
+ *   html.scroll-locked → Scroll control (when needed)
+ * 
+ * CURRENT BEHAVIOR:
+ *   - Sets overflow-y: visible (allows scroll to pass through)
+ *   - Controls map container positioning
+ *   - Hides footer and legal strip
+ * 
+ * MIGRATION NOTE:
+ *   - Keep this class for layout control
+ *   - If scroll lock needed, add html.scroll-locked separately
+ *   - Do NOT add overflow: hidden here
+ * 
+ * SEE: CSS_SCROLL_ARCHITECTURE.md, SCROLL_STABILIZATION_PLAN.md
+ * ============================================================================ */
 /* V66 + V490: Bloquer le scroll du body UNIQUEMENT pour la vue carte */
 body.view-map-locked {
     overflow-x: hidden !important;

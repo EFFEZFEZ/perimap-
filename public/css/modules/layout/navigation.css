@@ -26,6 +26,7 @@
     }
 
     body.itinerary-view-active #app-view-root {
+        /* PADDING DANGER ZONE - Mobile itinerary view must zero bottom padding to avoid double spacing with bottom-nav. See PADDING_STABILIZATION_PLAN.md */
         padding-bottom: 0 !important;
         background: #111b2b !important;
     }
@@ -33,6 +34,7 @@
     /* V612: Horaires et Trafic views - padding-bottom minimal */
     body.horaires-view-active,
     body.trafic-view-active {
+        /* PADDING SAFE-AREA - Uses !important to ensure safe-area-inset applies on iOS/Android notched devices. Justified override. See PADDING_DANGER_ZONES.md */
         padding-bottom: env(safe-area-inset-bottom, 0px) !important;
     }
 
@@ -40,6 +42,7 @@
     body.horaires-view-active .main-container,
     body.trafic-view-active #app-view-root,
     body.trafic-view-active .main-container {
+        /* PADDING SAFE-AREA - Uses !important to ensure safe-area-inset applies on iOS/Android notched devices. Justified override. See PADDING_DANGER_ZONES.md */
         padding-bottom: env(safe-area-inset-bottom, 0px) !important;
     }
 

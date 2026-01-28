@@ -88,6 +88,13 @@
     transform: rotate(45deg);
 }
 
+/*
+  SCROLL FIX — ACCORDION CONTENT
+  Increased max-height (1000px → 2500px) and added overflow-y: auto
+  to avoid content clipping inside accordion panels on the schedules page.
+  Visual behavior should remain unchanged.
+  Phase 2 — Scroll Stabilization (2026-01-28)
+*/
 .accordion-content {
     background: var(--bg-main);
     padding: 0 var(--spacing-5);
@@ -101,9 +108,10 @@
 }
 
 details[open] .accordion-content {
-    max-height: 1000px;
+    max-height: 2500px;
     opacity: 1;
     transform: translateY(0);
+    overflow-y: auto;
 }
 
 .accordion-content-inner {

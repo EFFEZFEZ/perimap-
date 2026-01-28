@@ -1282,6 +1282,30 @@ body.dark-theme #results-planner-to:focus {
     border-radius: 0;
 }
 
+/* ============================================================================
+ * ⚠️ DEPRECATED SCROLL LOCK CLASS (V627 - 2026-01-28)
+ * 
+ * WARNING: This class is DEPRECATED for scroll control.
+ * 
+ * ORIGINAL PURPOSE:
+ *   - Hide "Vos trajets" section when itinerary search is active
+ *   - Previously also used to lock scroll (now deprecated)
+ * 
+ * CURRENT USAGE:
+ *   ✅ Hiding .recent-journeys-section (display: none) → KEEP
+ *   ❌ Scroll locking → Use html.scroll-locked instead
+ * 
+ * MIGRATION:
+ *   - Keep this rule for hiding the section
+ *   - Do NOT add overflow: hidden or position: fixed here
+ *   - Use html.scroll-locked for scroll control
+ * 
+ * JAVASCRIPT:
+ *   - public/js/main.js line 2263: document.body.classList.add('has-search')
+ *   - public/js/main.js line 5384: classList.add/remove('has-search')
+ * 
+ * SEE: SCROLL_STABILIZATION_PLAN.md Phase 3 (JavaScript migration)
+ * ============================================================================ */
 body.has-search .recent-journeys-section {
     display: none !important;
 }
@@ -2022,6 +2046,7 @@ body.dark-theme .route-next-departures {
         display: block;
         overflow: visible;
         width: 100%;
+        /* PADDING DANGER ZONE - Mobile itinerary wrapper needs forced padding to prevent mobile.css override. See PADDING_STABILIZATION_PLAN.md */
         padding: 0.75rem 1rem 1.25rem 1rem !important;
     }
     .results-list {
@@ -2039,6 +2064,7 @@ body.dark-theme .route-next-departures {
         flex-direction: column;
         gap: var(--spacing-4);
         flex: 0 1 auto !important;
+        /* PADDING DANGER ZONE - Recent journeys padding zeroed to manage spacing internally. See PADDING_STABILIZATION_PLAN.md */
         padding: 0 !important;
         margin-top: var(--spacing-6);
         background: transparent !important;
@@ -2055,6 +2081,7 @@ body.dark-theme .route-next-departures {
         flex-direction: column;
         gap: var(--spacing-4);
         flex: 0 1 auto !important;
+        /* PADDING DANGER ZONE - Recent journeys padding zeroed to manage spacing internally. See PADDING_STABILIZATION_PLAN.md */
         padding: 0 !important;
         margin-top: var(--spacing-6);
         background: transparent !important;
@@ -3605,6 +3632,7 @@ body.view-is-locked #site-footer {
 }
 
 .footer-social-column h4 {
+    /* PADDING DANGER ZONE - Footer heading spacing forced for visual consistency. See PADDING_STABILIZATION_PLAN.md */
     margin-bottom: 0.75rem !important;
 }
 

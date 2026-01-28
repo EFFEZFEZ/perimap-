@@ -1019,6 +1019,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
 
     body.itinerary-view-active #app-view-root {
         background: #111b2b !important;
+        /* PADDING DANGER ZONE - Mobile itinerary view must zero bottom padding to avoid double spacing with bottom-nav. See PADDING_STABILIZATION_PLAN.md */
         padding-bottom: 0 !important;
     }
 

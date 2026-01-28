@@ -30,9 +30,13 @@ export class AutocompleteService {
         this.placeAliases = {
             'campus': {
                 canonicalName: 'Campus Universitaire, Périgueux',
-                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'iut', 'grenadière', 'pole universitaire', 'pôle universitaire'],
+                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'université périgueux', 'iut', 'iut périgueux', 'grenadière', 'pole universitaire', 'pôle universitaire', 'la grenadière'],
                 coordinates: { lat: 45.1958, lng: 0.7192 },
                 description: 'Campus universitaire (arrêts Campus + Pôle Grenadière)',
+                gtfsStops: [
+                    { stopId: 'MOBIITI:StopPlace:77309', name: 'Campus', lat: 45.197113, lng: 0.718130 },
+                    { stopId: 'MOBIITI:StopPlace:77314', name: 'Pôle Universitaire Grenadière', lat: 45.194477, lng: 0.720215 }
+                ],
                 searchRadius: 400
             }
         };
@@ -176,7 +180,7 @@ export class AutocompleteService {
             )) {
                 logger.debug('AutocompleteService alias found', { key: aliasKey });
                 return {
-                    placeId: 'ALIAS:' + aliasKey,
+                    placeId: 'ALIAS_' + aliasKey.toUpperCase(),
                     description: aliasData.canonicalName,
                     mainText: aliasData.canonicalName,
                     secondaryText: aliasData.description,

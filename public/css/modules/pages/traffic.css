@@ -749,6 +749,7 @@ body.dark-theme .tarifs-mediation {
 }
 
 .tarifs-cta-text {
+    /* PADDING DANGER ZONE - CTA text spacing forced for emphasis. See PADDING_STABILIZATION_PLAN.md */
     margin-bottom: 1rem !important;
     font-weight: 500;
 }
@@ -802,11 +803,13 @@ body.dark-theme .tarifs-mediation {
 /* Liste compacte */
 .tarifs-list-compact {
     list-style: none !important;
+    /* PADDING DANGER ZONE - Complete reset for custom list styling. See PADDING_DANGER_ZONES.md */
     padding: 0 !important;
     margin: 0.5rem 0 0 0 !important;
 }
 
 .tarifs-list-compact li {
+    /* PADDING DANGER ZONE - Custom list item padding for visual hierarchy. See PADDING_STABILIZATION_PLAN.md */
     padding: 0.25rem 0 0.25rem 1rem !important;
     position: relative;
     font-size: 0.9rem;
@@ -906,6 +909,7 @@ body.dark-theme .tarifs-mediation {
 /* Liste locations billettique */
 .tarifs-list-locations {
     list-style: none !important;
+    /* PADDING DANGER ZONE - Complete reset for custom locations list styling. See PADDING_DANGER_ZONES.md */
     padding: 0 !important;
     margin: 1rem 0 !important;
 }
@@ -913,6 +917,7 @@ body.dark-theme .tarifs-mediation {
 .tarifs-list-locations li {
     display: flex;
     flex-direction: column;
+    /* PADDING DANGER ZONE - Location card padding for readability. See PADDING_STABILIZATION_PLAN.md */
     padding: 0.75rem !important;
     background: var(--bg-secondary);
     border-radius: var(--radius-sm);
@@ -1033,6 +1038,7 @@ body.dark-theme .tarifs-alert--warning {
 .tarifs-address {
     font-style: italic;
     color: var(--text-secondary);
+    /* PADDING DANGER ZONE - Address spacing forced for layout consistency. See PADDING_STABILIZATION_PLAN.md */
     margin-top: 0.5rem !important;
 }
 
@@ -1048,6 +1054,7 @@ body.dark-theme .tarifs-alert--warning {
 .tarifs-mediation-question {
     font-size: 1.1rem;
     text-align: center;
+    /* PADDING DANGER ZONE - Mediation question spacing for emphasis. See PADDING_STABILIZATION_PLAN.md */
     margin-bottom: 1.25rem !important;
 }
 

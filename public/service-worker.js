@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v615 - Style uniforme bloc Vos trajets (arrondi + couleur dark mode)
+ * Service Worker v616 - Alias pôles multimodaux (Campus) avec gtfsStops
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v615 - 2026-01-28 : Style uniforme bloc Vos trajets (arrondi 16px + couleur dark mode)
-const CACHE_VERSION = 'v615';
+// v616 - 2026-01-28 : Alias pôles multimodaux (Campus) avec gtfsStops - AutocompleteService, GeocodeService, apiManager sync
+const CACHE_VERSION = 'v616';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

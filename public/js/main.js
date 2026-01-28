@@ -843,7 +843,8 @@ function unlockBodyScrollIfStuck() {
         const isDashboardVisible = !activeScreen || activeScreen === dashboardContainer;
         // Forcer la sortie des états de verrou si les écrans correspondants sont cachés
         if (mapContainer?.classList?.contains('hidden')) {
-            document.body.classList.remove('view-map-locked', 'view-is-locked');
+            document.body.classList.remove('view-map-locked'); // Layout only (Phase 3 - kept)
+            // Removed deprecated .view-is-locked (Phase 3 migration)
         }
         if (itineraryResultsContainer?.classList?.contains('hidden')) {
             document.body.classList.remove('itinerary-view-active');
@@ -867,6 +868,28 @@ function unlockBodyScrollIfStuck() {
     } catch (_) {
         // ignore best-effort unlock
     }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCROLL LOCK PATTERN (Phase 3 - Official Implementation)
+// ═══════════════════════════════════════════════════════════════════════════
+// This is the canonical way to lock/unlock page scroll in PériMap.
+// Do NOT use deprecated view-specific classes (.view-is-locked, .has-search)
+// to control scroll behavior.
+//
+// See: SCROLL_LOCK_PATTERN.md for complete documentation
+//
+// Usage:
+//   lockPageScroll()   → prevents html/body from scrolling
+//   unlockPageScroll() → restores normal scroll behavior
+// ═══════════════════════════════════════════════════════════════════════════
+
+function lockPageScroll() {
+    document.documentElement.classList.add('scroll-locked');
+}
+
+function unlockPageScroll() {
+    document.documentElement.classList.remove('scroll-locked');
 }
 
 async function initializeApp() {
@@ -2182,8 +2205,8 @@ async function reloadDashboardFromTarifs() {
             dashboardContentView.classList.remove('view-is-active');
         }
         
-        document.body.classList.remove('view-map-locked');
-        document.body.classList.remove('view-is-locked');
+        document.body.classList.remove('view-map-locked'); // Layout only (Phase 3 - kept)
+        // Removed deprecated .view-is-locked (Phase 3 migration)
         
         // Réafficher les alertes et infos trafic
         if (dataManager) {
@@ -2260,7 +2283,9 @@ async function executeItinerarySearch(source, sourceElements) {
         source
     });
 
+    // Phase 3: .has-search kept for hiding "Vos trajets" section + scroll lock added
     document.body.classList.add('has-search');
+    lockPageScroll(); // Official scroll lock (Phase 3)
     
     stateManager.setState({
         search: {
@@ -5342,7 +5367,8 @@ function showDashboardHall() {
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         if (dashboardContainer) dashboardContainer.classList.remove('hidden');
-        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active', 'content-view-active');
+        // Phase 3: Removed deprecated .view-is-locked, kept layout classes
+        document.body.classList.remove('view-map-locked', 'itinerary-view-active', 'content-view-active');
         
         // Reset cartes en batch
         document.querySelectorAll('#dashboard-content-view .card').forEach(c => c.classList.remove('view-active'));
@@ -5378,12 +5404,16 @@ function showResultsView({ hasSearch = false } = {}) {
         animateScreenSwap(fromScreen, itineraryResultsContainer);
         // V67: Cacher header/footer Perimap sur la vue itinéraire
         // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
-        document.body.classList.remove('view-map-locked', 'view-is-locked');
+        // Phase 3: Removed deprecated .view-is-locked, kept layout classes
+        document.body.classList.remove('view-map-locked');
         document.body.classList.add('itinerary-view-active');
         if (hasSearch) {
+            // Phase 3: .has-search kept for layout + scroll lock added
             document.body.classList.add('has-search');
+            lockPageScroll(); // Official scroll lock (Phase 3)
         } else {
             document.body.classList.remove('has-search');
+            unlockPageScroll(); // Ensure scroll unlocked (Phase 3)
             // V612: Re-rendre les trajets récents du cache localStorage
             console.log('[Main] showResultsView - va appeler renderRecentJourneys dans 250ms');
             setTimeout(() => {
@@ -5497,7 +5527,9 @@ function hideDetailView() {
     unlockBodyScrollIfStuck();
     
     // ✅ IMPORTANT: Retirer la classe 'has-search' et re-afficher "Vos trajets"
+    // Phase 3: Remove layout class + unlock scroll
     document.body.classList.remove('has-search');
+    unlockPageScroll(); // Official scroll unlock (Phase 3)
     if (typeof renderRecentJourneys === 'function') {
         renderRecentJourneys();
     }
@@ -5582,7 +5614,8 @@ function showDashboardView(viewName) {
         
         if (dashboardContentView) dashboardContentView.scrollTop = 0;
         
-        document.body.classList.remove('view-map-locked', 'view-is-locked', 'itinerary-view-active');
+        // Phase 3: Removed deprecated .view-is-locked, kept layout classes
+        document.body.classList.remove('view-map-locked', 'itinerary-view-active');
         
         if (alertBanner) alertBanner.classList.add('hidden');
 

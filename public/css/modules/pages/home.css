@@ -301,6 +301,7 @@
 /* Bouton Rechercher style P├®riMap (vert teal/canard) */
 .planner-search-btn,
 #planner-submit-btn {
+    /* PADDING DANGER ZONE - Forced button padding for visual consistency. See PADDING_STABILIZATION_PLAN.md */
     padding: 0.875rem 2rem !important;
     font-size: 0.9rem !important;
     font-weight: 700 !important;
@@ -930,6 +931,7 @@ body.dark-theme .express-chip.personalized {
     pointer-events: none;
     max-height: 0;
     overflow: hidden;
+    /* PADDING DANGER ZONE - Complete spacing reset for hidden cards. All 4 rules work together to prevent layout shift. See PADDING_DANGER_ZONES.md */
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     margin-top: 0 !important;
@@ -964,6 +966,7 @@ body.dark-theme .express-chip.personalized {
 @media (max-width: 900px) {
     #dashboard-content-view.view-is-active {
         /* Header ~70px + safe-area, padding serré */
+        /* PADDING SAFE-AREA - Uses !important to override view defaults. Ensures header clearance on notched devices. See PADDING_DANGER_ZONES.md */
         padding-top: calc(66px + env(safe-area-inset-top, 0px)) !important;
         padding-left: 0.75rem;
         padding-right: 0.75rem;
@@ -976,6 +979,7 @@ body.dark-theme .express-chip.personalized {
         opacity: 1 !important;
         position: relative !important;
         z-index: 500 !important;
+        /* PADDING DANGER ZONE - Forced margin for back button spacing. Must override mobile.css. See PADDING_STABILIZATION_PLAN.md */
         margin: 0.25rem 0 0.75rem 0 !important;
     }
 }
@@ -1054,6 +1058,7 @@ body.dark-theme .express-chip.personalized {
     align-items: center;
     gap: 6px;
     height: 36px !important;
+    /* PADDING DANGER ZONE - Fixed padding for button consistency. See PADDING_STABILIZATION_PLAN.md */
     padding: 0 14px !important;
     border-radius: 20px !important;
     font-size: 13px !important;
