@@ -46,12 +46,12 @@ export class ApiManager {
         this.backendMode = config.backendMode || 'vercel';
         this.apiEndpoints = config.apiEndpoints || getApiEndpoints();
 
-        // Zone du Grand Périgueux / Dordogne
+        // Zone Dordogne (département 24) pour l'autocomplete
         this.perigueuxBounds = {
-            south: 45.10,  // Sud du Grand Périgueux
-            west: 0.60,    // Ouest
-            north: 45.30,  // Nord
-            east: 0.85     // Est
+            south: 44.69,
+            west: 0.01,
+            north: 45.68,
+            east: 1.54
         };
         
         this.perigueuxCenter = { lat: 45.184029, lng: 0.7211149 };

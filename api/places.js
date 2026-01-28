@@ -80,13 +80,20 @@ const LOCAL_COMMUNES = {
 };
 
 // ===========================================
-// Zone géographique du Grand Périgueux
+// Zones géographiques (Grand Périgueux + Dordogne)
 // ===========================================
 const GRAND_PERIGUEUX_BOUNDS = {
   south: 45.10,
   west: 0.50,
   north: 45.28,
   east: 0.90
+};
+
+const DORDOGNE_BOUNDS = {
+  south: 44.69,
+  west: 0.01,
+  north: 45.68,
+  east: 1.54
 };
 
 const CENTER = { lat: 45.1846, lng: 0.7214 };
@@ -272,8 +279,8 @@ export default async function handler(req) {
         regionCode: 'FR',
         locationRestriction: {
           rectangle: {
-            low: { latitude: GRAND_PERIGUEUX_BOUNDS.south, longitude: GRAND_PERIGUEUX_BOUNDS.west },
-            high: { latitude: GRAND_PERIGUEUX_BOUNDS.north, longitude: GRAND_PERIGUEUX_BOUNDS.east }
+            low: { latitude: DORDOGNE_BOUNDS.south, longitude: DORDOGNE_BOUNDS.west },
+            high: { latitude: DORDOGNE_BOUNDS.north, longitude: DORDOGNE_BOUNDS.east }
           }
         }
       };

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v620 - Suppression alias pôles multimodaux (Campus)
+ * Service Worker v621 - Autocomplete restreint à la Dordogne
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v620 - 2026-01-28 : Suppression alias locaux (Campus) - AutocompleteService, GeocodeService, apiManager
-const CACHE_VERSION = 'v620';
+// v621 - 2026-01-28 : Autocomplete Places (New) restreint à la Dordogne
+const CACHE_VERSION = 'v621';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
