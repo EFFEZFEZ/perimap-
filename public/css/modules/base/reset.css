@@ -525,43 +525,46 @@ body.detail-view-open #legal-strip {
 }
 
 @media (max-width: 768px) {
-    /* Laisser le scroll naturel sur mobile (les verrous sp├®cifiques restent sur .view-map-locked / .itinerary-view-active) */
+    /* Laisser le scroll naturel sur mobile (les verrous spécifiques restent sur .view-map-locked / .itinerary-view-active) */
     body {
         position: relative;
         overflow-x: hidden;
-        overflow-y: visible;
+        overflow-y: auto;
         min-height: 100vh;
         height: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Scroll natif dans la vue racine */
     #app-view-root {
-        overflow-y: visible;
+        overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         min-height: 100vh;
         height: auto;
     }
     
     body.view-is-locked {
-        position: relative; /* Laisse les sous-vues g├®rer leur propre scroll */
+        position: relative; /* Laisse les sous-vues gérer leur propre scroll */
         inset: auto;
         height: auto; /* Laisse le body grandir selon son contenu */
         min-height: 100vh;
-        overflow-y: visible; /* R├®active le scroll quand le contenu d├®passe */
+        overflow-y: auto; /* Réactive le scroll quand le contenu dépasse */
         overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
 
     body.view-is-locked #app-view-root {
         min-height: 100vh; /* Garantit un conteneur flex plein ├®cran */
     }
     
-    /* Sur mobile, quand la vue d├®tail est ouverte */
+    /* Sur mobile, quand la vue détail est ouverte */
     body.detail-view-open {
         position: relative !important;
         inset: auto !important;
         overflow-x: hidden !important;
-        overflow-y: visible !important;
+        overflow-y: auto !important;
         touch-action: pan-y !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 }
 
