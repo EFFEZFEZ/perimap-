@@ -2072,7 +2072,7 @@ async function handleNavigationAction(action) {
             case 'itineraire':
                 logger.info('Navigating to itinerary search');
                 // Aller à la vue résultats d'itinéraire (sans recherche préalable)
-                showResultsView();
+                showResultsView({ hasSearch: false });
                 break;
             case 'horaires':
                 logger.info('Navigating to schedule view');

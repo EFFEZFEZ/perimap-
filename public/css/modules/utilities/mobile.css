@@ -1083,7 +1083,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         background: transparent !important;
     }
 
-    /* Section trajets rÃ©cents : compacte en haut */
+    /* Section trajets récents : compacte en haut */
     body.itinerary-view-active .recent-journeys-section {
         display: flex !important;
         flex-direction: column;
@@ -1092,7 +1092,12 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         padding: 0 0 80px 0 !important;
     }
 
-    /* Header itinÃ©raire : style cohÃ©rent */
+    /* CRITIQUE: Masquer la section quand recherche active (surcharge la règle précédente) */
+    body.itinerary-view-active.has-search .recent-journeys-section {
+        display: none !important;
+    }
+
+    /* Header itinéraire : style cohérent */
     body.itinerary-view-active .itinerary-top-bar {
         background: transparent !important;
         border: none !important;

@@ -2059,6 +2059,11 @@ body.dark-theme .route-next-departures {
         border-radius: 0;
     }
 
+    /* CRITIQUE: Masquer la section quand recherche active */
+    body.itinerary-view-active.has-search .recent-journeys-section {
+        display: none !important;
+    }
+
     body.itinerary-view-active .results-list-wrapper {
         padding-bottom: 0;
     }

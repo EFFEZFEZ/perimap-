@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v610 - Itinéraire: section Vos trajets logique (2026-01-28)
+ * Service Worker v611 - Fix cascade CSS has-search (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v610 - 2026-01-28 : Vos trajets = section logique, pas de bloc visuel
-const CACHE_VERSION = 'v610';
+// v611 - 2026-01-28 : Correction cascade CSS has-search (mobile.css écrasait itinerary.css)
+const CACHE_VERSION = 'v611';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
