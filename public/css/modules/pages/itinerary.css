@@ -2334,7 +2334,7 @@ body.dark-theme .route-next-departures {
         top: calc(env(safe-area-inset-top) + 12px);
         left: 0;
         right: 0;
-        z-index: 1100;
+        z-index: 1250; /* V604: Au-dessus du bottom-sheet (z-index 1200) */
         padding: 0 0.75rem;
         display: flex;
         align-items: center;

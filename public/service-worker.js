@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v603 - Fix étoile UTF-8 + zones grises toutes vues (2026-01-28)
+ * Service Worker v604 - Fix boutons trajets (z-index) (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v603 - 2026-01-28 : Fix étoile "Horaires express" (UTF-8) + extension zones grises Chrome mobile (carte, dashboard)
-const CACHE_VERSION = 'v603';
+// v604 - 2026-01-28 : Fix boutons header trajets (retour + horaires) masqués par bottom-sheet
+const CACHE_VERSION = 'v604';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
