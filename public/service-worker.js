@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v608 - Trajets récents: ouverture directe vue détail (2026-01-28)
+ * Service Worker v609 - Itinéraire: viewport stable + état has-search (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v608 - 2026-01-28 : Clic trajet récent ouvre directement la vue détail (mobile)
-const CACHE_VERSION = 'v608';
+// v609 - 2026-01-28 : Viewport stable + état UI has-search pour itinéraires
+const CACHE_VERSION = 'v609';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

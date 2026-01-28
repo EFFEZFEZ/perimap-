@@ -1614,7 +1614,7 @@ function setupStaticEventListeners() {
             switch(hash) {
                 case 'itineraire':
                     // Ouvrir la vue itinéraire (sans recherche préalable)
-                    showResultsView();
+                    showResultsView({ hasSearch: false });
                     break;
                 case 'horaires':
                     showDashboardView('horaires');
@@ -1678,7 +1678,7 @@ function setupStaticEventListeners() {
         if (resultsToInput) resultsToInput.value = to || '';
         
         // Afficher la vue résultats
-        showResultsView();
+        showResultsView({ hasSearch: true });
         
         // Configurer et afficher les onglets et résultats
         setupResultTabs(allFetchedItineraries);
@@ -2261,6 +2261,8 @@ async function executeItinerarySearch(source, sourceElements) {
         time: searchTime,
         source
     });
+
+    document.body.classList.add('has-search');
     
     stateManager.setState({
         search: {
@@ -2304,7 +2306,7 @@ async function executeItinerarySearch(source, sourceElements) {
     logger.info(`Recherche itinéraire (backend ${apiManager.backendMode || 'unknown'})`, { from: fromPlaceId, to: toPlaceId, time: searchTime });
     
     if (source === 'hall') {
-        showResultsView(); 
+        showResultsView({ hasSearch: true });
     }
     
     // V220: Afficher des skeleton loaders pendant le chargement (plus joli qu'un texte)
@@ -5363,7 +5365,7 @@ function showDashboardHall() {
     });
 }
 
-function showResultsView() {
+function showResultsView({ hasSearch = false } = {}) {
     const fromScreen = getVisibleAppScreen();
     
     // V355: Optimisation avec RAF pour fluidité
@@ -5380,6 +5382,11 @@ function showResultsView() {
         // IMPORTANT: sortir du mode carte (body fixed/overflow hidden)
         document.body.classList.remove('view-map-locked', 'view-is-locked');
         document.body.classList.add('itinerary-view-active');
+        if (hasSearch) {
+            document.body.classList.add('has-search');
+        } else {
+            document.body.classList.remove('has-search');
+        }
         // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
         setBottomNavActive('itineraire');
@@ -5394,12 +5401,6 @@ function showResultsView() {
 
         if (resultsListContainer) {
             resultsListContainer.innerHTML = '';
-        }
-        
-        // V496: Réafficher "Vos trajets" quand on entre dans la vue (pas de résultats encore)
-        const recentJourneysSection = document.getElementById('recent-journeys-section');
-        if (recentJourneysSection) {
-            recentJourneysSection.style.display = '';
         }
         
         // V355: Invalider la carte avec RAF pour synchronisation optimale

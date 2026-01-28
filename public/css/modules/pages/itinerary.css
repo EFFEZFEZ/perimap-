@@ -5,6 +5,16 @@
  * Source: style.css
  */
 
+:root {
+    --app-view-height: 100vh;
+}
+
+@supports (height: 100svh) {
+    :root {
+        --app-view-height: 100svh;
+    }
+}
+
 /* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
    CONTAINER PRINCIPAL
    ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */
@@ -19,7 +29,7 @@
     right: 0;
     bottom: auto;
     width: 100%;
-    min-height: calc(100vh - 64px);
+    min-height: calc(var(--app-view-height) - 64px);
     height: auto;
     z-index: 100;
 }
@@ -42,7 +52,7 @@
 
 body.itinerary-view-active #itinerary-results-container {
     top: auto;
-    min-height: calc(100vh - 64px);
+    min-height: calc(var(--app-view-height) - 64px);
     height: auto;
 }
 
@@ -326,7 +336,7 @@ body.dark-theme #detail-map-header #btn-back-to-results {
 @media (max-width: 768px) {
     body.itinerary-view-active #itinerary-results-container {
         top: auto;
-        min-height: calc(100vh - 56px);
+        min-height: calc(var(--app-view-height) - 56px);
         height: auto;
     }
 
@@ -389,7 +399,7 @@ body.dark-theme #detail-map-header #btn-back-to-results {
     right: 0;
     bottom: auto;
     width: 100%;
-    min-height: calc(100vh - 64px);
+    min-height: calc(var(--app-view-height) - 64px);
     height: auto;
     z-index: 100;
 }
@@ -398,14 +408,14 @@ body.dark-theme #detail-map-header #btn-back-to-results {
    donc on la d├®cale sous l'en-t├¬te P├®riMap pour ├®viter le chevauchement. */
 body.itinerary-view-active #itinerary-results-container {
     top: auto;
-    min-height: calc(100vh - 64px);
+    min-height: calc(var(--app-view-height) - 64px);
     height: auto;
 }
 
 @media (max-width: 768px) {
     body.itinerary-view-active #itinerary-results-container {
         top: auto;
-        min-height: calc(100vh - 56px);
+        min-height: calc(var(--app-view-height) - 56px);
         height: auto;
     }
 
@@ -1268,13 +1278,20 @@ body.dark-theme #results-planner-to:focus {
  * ========================================= */
 .recent-journeys-section {
     display: flex !important;
-    padding: 0;
+    padding: var(--spacing-4);
     margin-top: var(--spacing-6);
     flex: 0 1 auto;
     flex-direction: column;
     gap: var(--spacing-4);
     width: 100%;
     box-sizing: border-box;
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+body.has-search .recent-journeys-section {
+    display: none !important;
 }
 
 .recent-journeys-section h3 {
@@ -1285,10 +1302,10 @@ body.dark-theme #results-planner-to:focus {
 }
 
 #recent-journeys-container {
-    background: var(--bg-main);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-4);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
     width: 100%;
     box-sizing: border-box;
 }
@@ -2042,8 +2059,11 @@ body.dark-theme .route-next-departures {
         flex-direction: column;
         gap: var(--spacing-4);
         flex: 0 1 auto !important;
-        padding: 0 !important;
+        padding: var(--spacing-4) !important;
         margin-top: var(--spacing-6);
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
     }
 
     .recent-journeys-empty {
@@ -2059,11 +2079,11 @@ body.dark-theme .route-next-departures {
         flex-direction: column;
         gap: var(--spacing-4);
         flex: 0 1 auto !important;
-        padding: 0 !important;
+        padding: var(--spacing-4) !important;
         margin-top: var(--spacing-6);
-        background: transparent;
-        border: none;
-        border-radius: 0;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
     }
 
     body.itinerary-view-active .recent-journeys-empty {
@@ -2304,10 +2324,10 @@ body.dark-theme .route-next-departures {
     #detail-bottom-sheet::after {
         content: '';
         position: absolute;
-        bottom: -100vh;
+        bottom: calc(-1 * var(--app-view-height));
         left: 0;
         right: 0;
-        height: 100vh;
+        height: var(--app-view-height);
         background: var(--bg-main);
         z-index: -1;
         pointer-events: none;
