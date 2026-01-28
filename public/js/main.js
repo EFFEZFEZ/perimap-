@@ -2422,7 +2422,8 @@ async function executeItinerarySearch(source, sourceElements) {
                 allFetchedItineraries = processGoogleRoutesResponse({ routes });
             } else if (intelligentResults.recommendations) {
                 // Ancien format: utiliser processIntelligentResults
-                allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime);
+                const destinationLabel = toInput?.value || '';
+                allFetchedItineraries = processIntelligentResults(intelligentResults, searchTime, destinationLabel);
             } else {
                 logger.warn('Format de résultat inconnu', intelligentResults);
                 allFetchedItineraries = [];
@@ -2704,7 +2705,8 @@ async function loadMoreDepartures() {
                 const routes = intelligentResults.routes || intelligentResults.itineraries || [];
                 newItineraries = processGoogleRoutesResponse({ routes });
             } else if (intelligentResults.recommendations) {
-                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+                const destinationLabel = toInput?.value || '';
+                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime, destinationLabel);
             }
         }
         
@@ -2935,7 +2937,8 @@ async function loadMoreArrivals() {
                 const routes = intelligentResults.routes || intelligentResults.itineraries || [];
                 newItineraries = processGoogleRoutesResponse({ routes });
             } else if (intelligentResults.recommendations) {
-                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime);
+                const destinationLabel = toInput?.value || '';
+                newItineraries = processIntelligentResults(intelligentResults, offsetSearchTime, destinationLabel);
             }
         }
         
@@ -3441,10 +3444,15 @@ function processGoogleRoutesResponse(data) {
 
 // (Déduplication déplacée vers itinerary/ranking.js)
 
-function processIntelligentResults(intelligentResults, searchTime) {
+function processIntelligentResults(intelligentResults, searchTime, destinationLabel = '') {
     console.log("=== DÉBUT PROCESS INTELLIGENT RESULTS ===");
     console.log("📥 Mode de recherche:", searchTime?.type || 'partir');
     console.log("📥 Heure demandée:", `${searchTime?.hour}:${String(searchTime?.minute || 0).padStart(2,'0')}`);
+    console.log("📥 Destination attendue:", destinationLabel);
+    
+    // V617: Normaliser la destination pour validation stricte
+    const normalize = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const destNorm = normalize(destinationLabel);
     
     const itineraries = [];
     const sortedRecommendations = [...intelligentResults.recommendations].sort((a, b) => b.score - a.score);
@@ -3471,6 +3479,20 @@ function processIntelligentResults(intelligentResults, searchTime) {
                     busItineraries.forEach((itin, index) => {
                         itin.score = rec.score - index;
                         if (!itin.type) itin.type = 'BUS';
+                        
+                        // V617: Vérifier si l'arrêt final correspond à la destination demandée
+                        if (destNorm && itin.steps) {
+                            const lastBusStep = [...itin.steps].reverse().find(s => s.type === 'BUS');
+                            if (lastBusStep && lastBusStep.arrivalStop) {
+                                const lastStopNorm = normalize(lastBusStep.arrivalStop);
+                                // Si l'arrêt final NE correspond PAS à la destination, pénaliser fortement
+                                if (!lastStopNorm.includes(destNorm) && !destNorm.includes(lastStopNorm)) {
+                                    console.warn(`⚠️ V617: Itinéraire aboutit à "${lastBusStep.arrivalStop}", pas à "${destinationLabel}" → pénalité -10`);
+                                    itin.score = Math.max(0, itin.score - 10);
+                                    itin._destinationMismatch = true;
+                                }
+                            }
+                        }
                     });
                 }
                 itineraries.push(...busItineraries);
