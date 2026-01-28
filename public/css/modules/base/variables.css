@@ -90,6 +90,9 @@
     --radius-xl: 24px;
     --radius-full: 9999px;
     
+    /* V628: Arrondi standard pour cartes/blocs - Identité visuelle PeriMap */
+    --radius-card: 16px;
+    
     /* ═══════════════════════════════════════════════════════════════════════
        ESPACEMENT (système 4px/8px)
        ═══════════════════════════════════════════════════════════════════════ */
@@ -173,5 +176,29 @@
        COMPOSANTS SPÉCIFIQUES
        ═══════════════════════════════════════════════════════════════════════ */
     
+    /* Header et navigation */
+    --header-height: 56px;
     --bottom-nav-height: 66px;
+    
+    /* Viewport mobile (espace disponible entre header et nav) */
+    --mobile-viewport-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
+    
+    /* ═══════════════════════════════════════════════════════════════════════
+       ÉTATS D'INTERFACE
+       ═══════════════════════════════════════════════════════════════════════ */
+    
+    /* États de fond - dark theme navy */
+    --bg-navy-dark: #0b1220;
+    --bg-navy-medium: #111b2b;
+    --bg-navy-light: #1a2536;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VIEWPORT STABLE (100svh quand supporté)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@supports (height: 100svh) {
+    :root {
+        --mobile-viewport-height: calc(100svh - var(--header-height) - var(--bottom-nav-height));
+    }
 }

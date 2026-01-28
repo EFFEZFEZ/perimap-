@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v614 - Fix padding scroll trajets récents mobile (2026-01-28)
+ * Service Worker v615 - Style uniforme bloc Vos trajets (arrondi + couleur dark mode)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v614 - 2026-01-28 : Fix padding scroll trajets récents mobile (80px pour voir tous les trajets)
-const CACHE_VERSION = 'v614';
+// v615 - 2026-01-28 : Style uniforme bloc Vos trajets (arrondi 16px + couleur dark mode)
+const CACHE_VERSION = 'v615';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

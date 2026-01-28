@@ -960,10 +960,23 @@ body.dark-theme .express-chip.personalized {
     will-change: opacity, transform;
 }
 
-/* Correction mobile : compenser le header fixe pour ├®viter que le contenu soit coup├® */
+/* V626: Padding réduit - bouton retour proche du header comme vue carte */
 @media (max-width: 900px) {
     #dashboard-content-view.view-is-active {
-        padding-top: calc(64px + 0.75rem + env(safe-area-inset-top, 0px));
+        /* Header ~70px + safe-area, padding serré */
+        padding-top: calc(66px + env(safe-area-inset-top, 0px)) !important;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        padding-bottom: 0.5rem;
+    }
+    /* V626: Bouton retour visible et proche du header */
+    #dashboard-content-view.view-is-active > #btn-back-to-hall {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        z-index: 500 !important;
+        margin: 0.25rem 0 0.75rem 0 !important;
     }
 }
 
@@ -1108,7 +1121,7 @@ body.dark-theme .app-back-btn svg {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-card, 16px);
     padding: var(--spacing-6);
     box-shadow: var(--elevation-1);
     transition: box-shadow var(--transition-normal), transform var(--transition-normal);
@@ -1165,7 +1178,14 @@ body.dark-theme .app-back-btn svg {
 
 body.dark-theme #horaires.view-active,
 body.dark-theme #info-trafic.view-active {
-    background-color: #0b1220;
+    /* V628: Style uniforme dark mode - même que les blocs de l'accueil */
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: var(--radius-card, 16px) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 /* Largeur responsive pour la carte horaires */

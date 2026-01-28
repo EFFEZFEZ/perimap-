@@ -84,11 +84,30 @@ body.dark-theme #main-header {
     -webkit-backdrop-filter: blur(12px);
 }
 
-body.dark-theme .card, body.dark-theme .instruction-content {
-    background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(255,255,255,0.08);
+/* V628: IDENTITÉ VISUELLE - Style uniforme pour tous les blocs en dark mode */
+body.dark-theme .card,
+body.dark-theme .instruction-content,
+body.dark-theme #horaires.view-active,
+body.dark-theme #info-trafic.view-active,
+body.dark-theme .itinerary-card,
+body.dark-theme .result-card,
+body.dark-theme #itinerary-edit-panel,
+body.dark-theme .accordion-group,
+body.dark-theme #fiche-horaire-container,
+body.dark-theme .search-container,
+body.dark-theme .search-prominent,
+body.dark-theme .trafic-card,
+body.dark-theme .stop-selector,
+body.dark-theme .departures,
+body.dark-theme .faq-card {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: var(--radius-card, 16px) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 body.dark-theme .leaflet-popup-content-wrapper {

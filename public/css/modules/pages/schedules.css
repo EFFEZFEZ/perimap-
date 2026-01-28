@@ -11,10 +11,16 @@
 
 #fiche-horaire-container {
     border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card, 16px);
     overflow: hidden;
     background: var(--bg-main);
     margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+    body.horaires-view-active #fiche-horaire-container {
+        margin-bottom: 1rem;
+    }
 }
 
 .fiche-horaire-title {
@@ -121,6 +127,7 @@ details[open] .accordion-content {
     text-decoration: underline;
 }
 
+
 /* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
    HORAIRES SEARCH SHORTCUT
    ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ */
@@ -142,6 +149,19 @@ details[open] .accordion-content {
     font-weight: 600;
     padding-left: 1.25rem;
     padding-right: 1.25rem;
+}
+
+@media (max-width: 768px) {
+    #horaires-search-shortcut {
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.75rem;
+    }
+
+    #horaires-search-shortcut p {
+        margin-bottom: 1.25rem;
+    }
 }
 
 /* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
@@ -404,6 +424,34 @@ details[open] .accordion-content {
 
     .accordion-content {
         opacity: 1;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   V616: MOBILE - PADDING RÉDUIT
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+    .accordion-group summary {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .accordion-content {
+        padding: 0 0.75rem;
+    }
+    
+    .accordion-content-inner {
+        padding: 0.75rem 0;
+    }
+    
+    .accordion-content-inner a {
+        padding: 0.6rem 0;
+    }
+    
+    #horaires-search-shortcut {
+        margin-top: 1.25rem;
+        padding-top: 1rem;
     }
 }
 

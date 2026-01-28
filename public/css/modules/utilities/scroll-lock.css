@@ -1,0 +1,141 @@
+/**
+ * Scroll Lock Utilities - PériMap v614
+ * 
+ * Classe centralisée pour verrouiller/déverrouiller le scroll.
+ * Remplace progressivement les multiples classes de verrouillage dispersées.
+ * 
+ * USAGE:
+ *   document.documentElement.classList.add('scroll-locked');    // Verrouiller
+ *   document.documentElement.classList.remove('scroll-locked'); // Déverrouiller
+ * 
+ * Voir CSS_SCROLL_ARCHITECTURE.md pour la documentation complète.
+ * 
+ * Date: 2026-01-28
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VERROUILLAGE PRINCIPAL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Classe principale de verrouillage du scroll.
+ * À appliquer sur <html> pour bloquer tout défilement.
+ * 
+ * Note: Le !important est nécessaire ici car cette classe doit
+ * surcharger TOUTES les autres règles de scroll (c'est son but).
+ */
+html.scroll-locked {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    /* Empêche le scroll momentum sur iOS */
+    -webkit-overflow-scrolling: auto;
+    /* Empêche le bounce et pull-to-refresh */
+    overscroll-behavior: none;
+}
+
+html.scroll-locked body {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   VARIANTES CONTEXTUELLES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Verrouillage avec préservation de la position de scroll.
+ * Utile pour les modales : on mémorise scrollY avant d'ajouter la classe,
+ * puis on restaure après suppression.
+ * 
+ * JS Example:
+ *   const scrollY = window.scrollY;
+ *   document.documentElement.classList.add('scroll-locked-preserve');
+ *   document.body.style.top = `-${scrollY}px`;
+ *   // ... modal ouverte ...
+ *   document.documentElement.classList.remove('scroll-locked-preserve');
+ *   document.body.style.top = '';
+ *   window.scrollTo(0, scrollY);
+ */
+html.scroll-locked-preserve {
+    overflow: hidden !important;
+}
+
+html.scroll-locked-preserve body {
+    overflow: hidden !important;
+    position: fixed;
+    width: 100%;
+    /* top sera défini dynamiquement en JS */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCROLL CONTENU (pour éléments internes)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Classe utilitaire pour activer le scroll sur un conteneur spécifique.
+ * Utile quand le scroll global est verrouillé mais qu'un panel doit scroller.
+ */
+.scroll-enabled {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* Ne propage pas au parent */
+}
+
+/**
+ * Scroll horizontal uniquement.
+ */
+.scroll-x-enabled {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+/**
+ * Désactivation explicite du scroll sur un élément.
+ */
+.scroll-disabled {
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HELPERS MOBILE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Empêche le pull-to-refresh sur mobile.
+ * À ajouter sur les éléments scrollables qui ne doivent pas déclencher
+ * le rafraîchissement de la page.
+ */
+.no-pull-to-refresh {
+    overscroll-behavior-y: none;
+}
+
+/**
+ * Empêche le scroll chain (propagation au parent quand on atteint la limite).
+ */
+.scroll-contain {
+    overscroll-behavior: contain;
+}
+
+/**
+ * Autorise uniquement le scroll vertical tactile (pas de zoom/pinch).
+ * Utile pour les listes sur mobile.
+ */
+.touch-pan-y {
+    touch-action: pan-y;
+}
+
+/**
+ * Autorise uniquement le scroll horizontal tactile.
+ */
+.touch-pan-x {
+    touch-action: pan-x;
+}

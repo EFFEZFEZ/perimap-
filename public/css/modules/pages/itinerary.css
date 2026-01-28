@@ -1294,10 +1294,12 @@ body.has-search .recent-journeys-section {
 }
 
 #recent-journeys-container {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 0;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-card, 16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 1rem;
     width: 100%;
     box-sizing: border-box;
 }
@@ -2039,9 +2041,9 @@ body.dark-theme .route-next-departures {
         flex: 0 1 auto !important;
         padding: 0 !important;
         margin-top: var(--spacing-6);
-        background: transparent;
-        border: none;
-        border-radius: 0;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
     }
 
     body.itinerary-view-active .results-list {
@@ -2055,9 +2057,9 @@ body.dark-theme .route-next-departures {
         flex: 0 1 auto !important;
         padding: 0 !important;
         margin-top: var(--spacing-6);
-        background: transparent;
-        border: none;
-        border-radius: 0;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
     }
 
     /* CRITIQUE: Masquer la section quand recherche active */

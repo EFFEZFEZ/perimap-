@@ -16,6 +16,30 @@
     box-sizing: border-box;
 }
 
+/* V628: IDENTITÉ VISUELLE - Arrondis uniformes sur tous les blocs et formulaires */
+.card,
+.planner-block,
+.search-container,
+.search-prominent,
+#fiche-horaire-container,
+.accordion-group,
+.trafic-card,
+.info-trafic-item,
+.form-group input,
+.input-group,
+.itinerary-card,
+.result-card,
+#itinerary-edit-panel,
+.stop-selector,
+.departures,
+.faq-card,
+.map-container,
+.btn,
+.btn-primary,
+.btn-secondary {
+    border-radius: var(--radius-card, 16px) !important;
+}
+
 /* *** CORRECTION V28 + V59 + V347 + V455 + V490 + V491 + V601 + V602 SCROLL FIX *** */
 html {
     margin: 0;

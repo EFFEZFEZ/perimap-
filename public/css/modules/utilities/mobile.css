@@ -1107,11 +1107,21 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
     }
 
     body.itinerary-view-active #itinerary-edit-panel {
-        background: #111b2b !important;
+        background: rgba(15, 23, 42, 0.95) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 16px !important;
+        border-radius: var(--radius-card, 16px) !important;
         margin: 1rem 0.75rem 1rem !important;
         padding: 0.9rem !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        width: calc(100% - 1.5rem) !important;
+        max-width: calc(100% - 1.5rem) !important;
+    }
+
+    /* V628: Style uniforme pour les inputs dans la vue trajets */
+    body.itinerary-view-active .route-input,
+    body.itinerary-view-active input[type="text"] {
+        border-radius: var(--radius-card, 16px) !important;
     }
 
 }
@@ -1161,13 +1171,85 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
     /* Horaires view */
     body.horaires-view-active {
         background: #111b2b !important;
-        overscroll-behavior: none !important;
+        overscroll-behavior: auto !important;
     }
 
     /* V612: Supprimer min-height pour vues horaires/trafic - évite l'espace vide en bas */
     body.horaires-view-active #app-view-root,
     body.trafic-view-active #app-view-root {
         min-height: auto !important;
+    }
+
+    /* V617: Padding pour horaires et trafic mobile */
+    #horaires.view-active {
+        padding: 0.75rem !important;
+    }
+
+    #info-trafic.view-active {
+        padding: 0.75rem !important;
+    }
+
+    /* V628: Style uniforme pour les cards horaires/trafic - avec espacement */
+    body.horaires-view-active .card,
+    body.trafic-view-active .card {
+        margin: 0 !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: var(--radius-card, 16px) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* V626: Réduire l'espace sous le contenu avant la bottom nav */
+    body.horaires-view-active #dashboard-content-view,
+    body.trafic-view-active #dashboard-content-view {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* V627: Supprimer tout espace vide sous la carte horaires */
+    body.horaires-view-active .content-cards,
+    body.trafic-view-active .content-cards {
+        gap: 0 !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    body.horaires-view-active #horaires.view-active,
+    body.trafic-view-active #info-trafic.view-active {
+        margin-bottom: 0 !important;
+        padding: 1rem !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: var(--radius-card, 16px) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    body.horaires-view-active #dashboard-container,
+    body.trafic-view-active #dashboard-container {
+        min-height: auto !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* V616: Accordions plus compacts */
+    body.horaires-view-active .accordion-group summary {
+        padding: 0.75rem 1rem;
+    }
+
+    body.horaires-view-active .accordion-content {
+        padding: 0 var(--spacing-3);
+    }
+
+    /* V616: Cards plus compactes */
+    body.horaires-view-active .service-card,
+    body.trafic-view-active .trafic-card {
+        padding: 0.75rem;
+    }
+
+    /* V616: Grille horaires plus serrée */
+    body.horaires-view-active .horaires-grid {
+        gap: 8px;
     }
 
     .horaires-hero,

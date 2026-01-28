@@ -1,20 +1,80 @@
 ﻿/*
  * Perimap CSS module index
  *
- * Import order follows the original style.css sequence as closely as possible.
- * Updated: 2026-01-24
+ * Import order:
+ *   1. Base (reset, variables) — fondations, pas de dépendances
+ *   2. Utilities — classes réutilisables
+ *   3. Layout — structure globale (header, nav, grid)
+ *   4. Components — éléments UI réutilisables
+ *   5. Pages — styles spécifiques par page
+ *   6. Themes — dark mode et variations (en dernier pour surcharger)
+ *   7. Mobile — overrides responsives (en dernier)
+ *
+ * Updated: 2026-01-28
  */
-@import "css/modules/pages/map.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. BASE — Fondations CSS
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/base/reset.css";
 @import "css/modules/base/variables.css";
-@import "css/modules/components/hero.css";
+@import "css/modules/base/typography.css";
+@import "css/modules/base/animations.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   2. UTILITIES — Classes utilitaires
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/utilities/scroll-lock.css";
+@import "css/modules/utilities/mobile-overlays.css";
+@import "css/modules/utilities/spacing.css";
+@import "css/modules/utilities/display.css";
+@import "css/modules/utilities/stacking.css";
 @import "css/modules/utilities/performance.css";
 @import "css/modules/utilities/accessibility.css";
-@import "css/modules/components/offline.css";
-@import "css/modules/base/animations.css";
-@import "css/modules/layout/navigation.css";
-@import "css/modules/themes/dark.css";
-@import "css/modules/base/reset.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. LAYOUT — Structure globale
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/layout/grid.css";
 @import "css/modules/layout/header.css";
+@import "css/modules/layout/header.dropdown.css";
+@import "css/modules/layout/navigation.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   4. COMPONENTS — Éléments UI réutilisables
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/components/buttons.css";
+@import "css/modules/components/forms.css";
+@import "css/modules/components/cards.css";
+@import "css/modules/components/badges.css";
+@import "css/modules/components/modals.css";
+@import "css/modules/components/popups.css";
+@import "css/modules/components/banners.css";
+@import "css/modules/components/banners.alert.css";
+@import "css/modules/components/hero.css";
+@import "css/modules/components/loading.css";
+@import "css/modules/components/offline.css";
+@import "css/modules/components/common.css";
+@import "css/modules/components/leaflet.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   5. PAGES — Styles spécifiques par page
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/pages/home.css";
+@import "css/modules/pages/map.css";
+@import "css/modules/pages/schedules.css";
+@import "css/modules/pages/traffic.css";
+@import "css/modules/pages/itinerary.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   6. THEMES — Dark mode et variations
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/themes/dark.css";
+
+/* ═══════════════════════════════════════════════════════════════════════
+   7. MOBILE — Overrides responsives (TOUJOURS EN DERNIER)
+   ═══════════════════════════════════════════════════════════════════════ */
+@import "css/modules/utilities/mobile.css";
 @import "css/modules/components/banners.alert.css";
 @import "css/modules/components/banners.css";
 @import "css/modules/pages/home.css";

@@ -168,7 +168,8 @@
         }
         .page-wrapper {
             height: 100%;
-            padding-top: 104px;
+            padding-top: 112px;
+            padding-top: calc(112px + env(safe-area-inset-top, 0px));
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: none;
