@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v609 - Itinéraire: viewport stable + état has-search (2026-01-28)
+ * Service Worker v610 - Itinéraire: section Vos trajets logique (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v609 - 2026-01-28 : Viewport stable + état UI has-search pour itinéraires
-const CACHE_VERSION = 'v609';
+// v610 - 2026-01-28 : Vos trajets = section logique, pas de bloc visuel
+const CACHE_VERSION = 'v610';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

@@ -266,21 +266,17 @@ compactObject(obj) {
     renderRecentJourneys() {
         const section = document.getElementById('recent-journeys-section');
         const container = document.getElementById('recent-journeys-container');
-        const emptyState = document.getElementById('recent-journeys-empty');
         const list = document.getElementById('recent-journeys-list');
 
-        if (!section || !container || !list || !emptyState) return;
+        if (!section || !container || !list) return;
 
         if (this.journeys.length === 0) {
-            section.classList.remove('hidden');
-            container.classList.add('hidden');
-            emptyState.classList.remove('hidden');
+            section.classList.add('hidden');
             return;
         }
 
         section.classList.remove('hidden');
         container.classList.remove('hidden');
-        emptyState.classList.add('hidden');
         list.innerHTML = '';
 
         this.journeys.forEach(journey => {
