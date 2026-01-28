@@ -26,21 +26,6 @@ export class AutocompleteService {
             south: 45.10, west: 0.60, north: 45.30, east: 0.85
         };
         
-        // Place aliases
-        this.placeAliases = {
-            'campus': {
-                canonicalName: 'Campus Universitaire, Périgueux',
-                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'université périgueux', 'iut', 'iut périgueux', 'grenadière', 'pole universitaire', 'pôle universitaire', 'la grenadière'],
-                coordinates: { lat: 45.1958, lng: 0.7192 },
-                description: 'Campus universitaire (arrêts Campus + Pôle Grenadière)',
-                gtfsStops: [
-                    { stopId: 'MOBIITI:StopPlace:77309', name: 'Campus', lat: 45.197113, lng: 0.718130 },
-                    { stopId: 'MOBIITI:StopPlace:77314', name: 'Pôle Universitaire Grenadière', lat: 45.194477, lng: 0.720215 }
-                ],
-                searchRadius: 400
-            }
-        };
-        
         logger.info('AutocompleteService initialized', { backendMode: this.backendMode });
     }
 
@@ -62,15 +47,6 @@ export class AutocompleteService {
             if (cached) {
                 logger.debug('AutocompleteService predictions cache HIT');
                 return cached;
-            }
-
-            // Check for alias first
-            const aliasResult = this._checkPlaceAlias(inputString);
-            if (aliasResult) {
-                logger.debug('AutocompleteService alias matched');
-                const result = { predictions: [aliasResult], status: 'OK' };
-                this._setCache(cacheKey, result);
-                return result;
             }
 
             // Fetch from Google Places API
@@ -164,33 +140,6 @@ export class AutocompleteService {
             logger.error('AutocompleteService.getPredictionDetails failed', { error: error.message });
             throw error;
         }
-    }
-
-    /**
-     * Check if input matches a place alias
-     */
-    _checkPlaceAlias(inputString) {
-        logger.debug('AutocompleteService._checkPlaceAlias', { input: inputString });
-        
-        const normalized = (inputString || '').toLowerCase().trim();
-
-        for (const [aliasKey, aliasData] of Object.entries(this.placeAliases)) {
-            if (aliasData.aliases.some(alias => 
-                normalized.includes(alias) || alias.includes(normalized)
-            )) {
-                logger.debug('AutocompleteService alias found', { key: aliasKey });
-                return {
-                    placeId: 'ALIAS_' + aliasKey.toUpperCase(),
-                    description: aliasData.canonicalName,
-                    mainText: aliasData.canonicalName,
-                    secondaryText: aliasData.description,
-                    types: ['place_of_interest'],
-                    isAlias: true
-                };
-            }
-        }
-
-        return null;
     }
 
     /**

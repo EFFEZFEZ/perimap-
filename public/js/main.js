@@ -2344,6 +2344,7 @@ async function executeItinerarySearch(source, sourceElements) {
         let toCoords = null;
         let fromGtfsStops = null; // V49: Arrêts GTFS forcés pour les pôles multimodaux (tableau de stop_id)
         let toGtfsStops = null;
+        let toGtfsStopNames = null;
         
         // 🚀 V60: Résolution des coordonnées EN PARALLÈLE (PHASE 2c: Using new service)
         const coordsStart = performance.now();
@@ -2364,6 +2365,7 @@ async function executeItinerarySearch(source, sourceElements) {
             toCoords = { lat: toResult.lat, lng: toResult.lng };
             if (toResult.isMultiStop && toResult.gtfsStops) {
                 toGtfsStops = toResult.gtfsStops.map(s => s.stopId);
+                toGtfsStopNames = toResult.gtfsStops.map(s => s.name).filter(Boolean);
                 logger.debug(`🎓 Pôle multimodal destination: ${toGtfsStops.length} arrêts`);
             }
         }
@@ -2495,7 +2497,7 @@ async function executeItinerarySearch(source, sourceElements) {
         }
 
         // V618: Validation destination globale (Google + GTFS)
-        markDestinationMismatch(allFetchedItineraries, toLabel, toGtfsStops);
+        markDestinationMismatch(allFetchedItineraries, toLabel, toGtfsStops, toGtfsStopNames);
 
         // TOUJOURS filtrer les trajets dont le départ est passé (même en mode "arriver")
         // Mais seulement si la recherche est pour aujourd'hui
@@ -3448,21 +3450,30 @@ function processGoogleRoutesResponse(data) {
 // (Déduplication déplacée vers itinerary/ranking.js)
 
 // V618: Validation globale de la destination (Google + GTFS)
-function markDestinationMismatch(itineraries, destinationLabel = '', destinationStopIds = null) {
+function markDestinationMismatch(itineraries, destinationLabel = '', destinationStopIds = null, destinationStopNames = null) {
     if (!Array.isArray(itineraries) || itineraries.length === 0) return;
 
     const normalize = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     const destNorm = normalize(destinationLabel);
+    const nameCandidates = [destinationLabel, ...(destinationStopNames || [])].filter(Boolean);
+    const destNameSet = new Set(nameCandidates.map(normalize).filter(Boolean));
     const destIdSet = Array.isArray(destinationStopIds) && destinationStopIds.length
         ? new Set(destinationStopIds)
         : null;
 
     const matchesByName = (stopName) => {
-        if (!destNorm) return true;
+        if (!destNorm && destNameSet.size === 0) return true;
         if (!stopName) return true;
         const stopNorm = normalize(stopName);
         if (!stopNorm) return true;
-        return stopNorm.includes(destNorm) || destNorm.includes(stopNorm);
+        if (destNameSet.size === 0) {
+            return stopNorm.includes(destNorm) || destNorm.includes(stopNorm);
+        }
+        for (const candidate of destNameSet) {
+            if (!candidate) continue;
+            if (stopNorm.includes(candidate) || candidate.includes(stopNorm)) return true;
+        }
+        return false;
     };
 
     itineraries.forEach(it => {

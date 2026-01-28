@@ -72,27 +72,6 @@ export class ApiManager {
         this._itineraryCacheTtlMs = 2 * 60 * 1000; // 2 minutes
         this._itineraryCacheMaxEntries = 50;
         
-        // ✅ V49: Alias de lieux - Fusion d'arrêts équivalents (pôles multimodaux)
-        // Quand l'utilisateur cherche un de ces termes, on lui propose le lieu canonique
-        // ET le routeur considère TOUS les arrêts du pôle comme équivalents
-        this.placeAliases = {
-            // Campus universitaire de Périgueux - PÔLE MULTIMODAL
-            // Regroupe l'arrêt "Campus" (K1A) et "Pôle Universitaire Grenadière" (K1B)
-            'campus': {
-                canonicalName: 'Campus Universitaire, Périgueux',
-                aliases: ['campus', 'campus périgueux', 'fac', 'fac périgueux', 'université', 'université périgueux', 'iut', 'iut périgueux', 'grenadière', 'pole universitaire', 'pôle universitaire', 'la grenadière'],
-                // Coordonnées centrales (entre les deux arrêts)
-                coordinates: { lat: 45.1958, lng: 0.7192 },
-                description: 'Campus universitaire (arrêts Campus + Pôle Grenadière)',
-                // ✅ V49: Liste des arrêts GTFS qui desservent ce pôle
-                gtfsStops: [
-                    { stopId: 'MOBIITI:StopPlace:77309', name: 'Campus', lat: 45.197113, lng: 0.718130 },
-                    { stopId: 'MOBIITI:StopPlace:77314', name: 'Pôle Universitaire Grenadière', lat: 45.194477, lng: 0.720215 }
-                ],
-                // Rayon de recherche autour du centre (en mètres)
-                searchRadius: 400
-            }
-        };
     }
 
     /**
@@ -257,12 +236,8 @@ export class ApiManager {
     /**
      * Récupère les suggestions d'autocomplétion
      * ✅ V181: Utilise le proxy Vercel /api/places en production
-     * ✅ V48: Intègre les alias de lieux (Campus = Pôle Universitaire Grenadière)
      */
     async getPlaceAutocomplete(inputString) {
-        // ✅ V48: Vérifier si l'entrée correspond à un alias
-        const aliasMatch = this._checkPlaceAlias(inputString);
-        
         try {
             let results = [];
             
@@ -324,11 +299,11 @@ export class ApiManager {
                         await this.loadGoogleMapsAPI();
                     } catch (error) {
                         console.error("❌ Impossible d'initialiser le service d'autocomplétion:", error.message);
-                        return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
+                        return [];
                     }
                     if (!this.sessionToken) {
                         console.error("❌ Impossible d'initialiser le service d'autocomplétion");
-                        return aliasMatch ? [this._createAliasResult(aliasMatch)] : [];
+                        return [];
                     }
                 }
                 
@@ -387,89 +362,18 @@ export class ApiManager {
                 }
             }
             
-            // ✅ V48: Injecter l'alias en première position si trouvé
-            if (aliasMatch) {
-                // Vérifier si le résultat n'est pas déjà dans la liste
-                const alreadyInList = results.some(r => 
-                    r.description.toLowerCase().includes('grenadière') || 
-                    r.description.toLowerCase().includes('universitaire')
-                );
-                
-                if (!alreadyInList) {
-                    results.unshift(this._createAliasResult(aliasMatch));
-                    console.log(`🎓 Alias injecté: ${aliasMatch.canonicalName}`);
-                }
-            }
-            
             return results;
         } catch (error) {
             console.error("❌ Erreur lors de l'autocomplétion:", error);
-            
-            // ✅ V48: Même en cas d'erreur, proposer l'alias si trouvé
-            if (aliasMatch) {
-                return [this._createAliasResult(aliasMatch)];
-            }
-            
             return [];
         }
     }
     
     /**
-     * ✅ V181: Helper pour créer un résultat d'alias
-     * @private
-     */
-    _createAliasResult(aliasMatch) {
-        return {
-            description: `🎓 ${aliasMatch.canonicalName}`,
-            placeId: `ALIAS_CAMPUS`,
-            isAlias: true,
-            coordinates: aliasMatch.coordinates,
-            aliasDescription: aliasMatch.description
-        };
-    }
-    
-    /**
-     * ✅ V48: Vérifie si l'entrée correspond à un alias de lieu
-     * @private
-     */
-    _checkPlaceAlias(inputString) {
-        if (!inputString || inputString.length < 3) return null;
-        
-        const normalizedInput = inputString.toLowerCase().trim();
-        
-        for (const [key, aliasData] of Object.entries(this.placeAliases)) {
-            // Vérifier si l'entrée correspond à un des alias
-            const matchesAlias = aliasData.aliases.some(alias => {
-                // Match exact ou partiel (l'alias commence par l'entrée)
-                return alias.startsWith(normalizedInput) || normalizedInput.startsWith(alias);
-            });
-            
-            if (matchesAlias) {
-                console.log(`🎓 Alias trouvé: "${inputString}" → "${aliasData.canonicalName}"`);
-                return aliasData;
-            }
-        }
-        
-        return null;
-    }
-    
-    /**
-     * ✅ V48: Résout un placeId d'alias en coordonnées
-     * @param {string} placeId - Le placeId (peut être un alias comme ALIAS_CAMPUS)
+     * @param {string} placeId
      * @returns {Promise<{lat:number, lng:number}|null>}
      */
     async resolveAliasOrPlaceId(placeId) {
-        // Vérifier si c'est un alias
-        if (placeId && placeId.startsWith('ALIAS_')) {
-            const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
-            const aliasData = this.placeAliases[aliasKey];
-            if (aliasData && aliasData.coordinates) {
-                console.log(`🎓 Résolution alias: ${placeId} → ${JSON.stringify(aliasData.coordinates)}`);
-                return aliasData.coordinates;
-            }
-        }
-        
-        // Sinon, utiliser le geocoder normal
         return this.getPlaceCoords(placeId);
     }
 
@@ -549,7 +453,6 @@ export class ApiManager {
     /**
      * Récupère les coordonnées {lat,lng} pour un place_id en utilisant le Geocoder
      * ✅ V230: Support OTP - coordonnées directes sans placeId
-     * ✅ V49: Gère les alias avec pôles multimodaux (retourne aussi les arrêts GTFS)
      * ✅ V181: Utilise le proxy Vercel /api/places?placeId=... en production
      * @param {string|object} placeIdOrCoords - placeId Google OU objet {lat, lng/lon}
      * @returns {Promise<{lat:number, lng:number, gtfsStops?:Array, searchRadius?:number}|null>}
@@ -564,23 +467,6 @@ export class ApiManager {
         }
         
         const placeId = placeIdOrCoords;
-        
-        // ✅ V49: Vérifier si c'est un alias avec pôle multimodal
-        if (placeId && typeof placeId === 'string' && placeId.startsWith('ALIAS_')) {
-            const aliasKey = placeId.replace('ALIAS_', '').toLowerCase();
-            const aliasData = this.placeAliases[aliasKey];
-            if (aliasData && aliasData.coordinates) {
-                console.log(`🎓 Résolution alias coords: ${placeId} → ${JSON.stringify(aliasData.coordinates)}`);
-                // Retourner les coordonnées ET les infos du pôle multimodal
-                return {
-                    lat: aliasData.coordinates.lat,
-                    lng: aliasData.coordinates.lng,
-                    gtfsStops: aliasData.gtfsStops || null,
-                    searchRadius: aliasData.searchRadius || 300,
-                    isMultiStop: Array.isArray(aliasData.gtfsStops) && aliasData.gtfsStops.length > 1
-                };
-            }
-        }
         
         // ✅ V230: Mode OTP - pas de placeId Google, utiliser reverse geocode si nécessaire
         if (this.useOtp) {
@@ -683,15 +569,6 @@ export class ApiManager {
             toCoords = toPlaceId;
         }
         
-        // Convertir les alias en coordonnées
-        const fromIsAlias = typeof fromPlaceId === 'string' && fromPlaceId.startsWith('ALIAS_');
-        const toIsAlias = typeof toPlaceId === 'string' && toPlaceId.startsWith('ALIAS_');
-        
-        const aliasPromises = [];
-        if (fromIsAlias) aliasPromises.push(this.getPlaceCoords(fromPlaceId).then(c => { fromCoords = c; }));
-        if (toIsAlias) aliasPromises.push(this.getPlaceCoords(toPlaceId).then(c => { toCoords = c; }));
-        if (aliasPromises.length) await Promise.all(aliasPromises);
-
         const results = {
             bus: null,
             bike: null,
