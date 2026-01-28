@@ -669,7 +669,7 @@ body.dark-theme .express-chip.personalized {
 }
 
 .hall-express-chips[data-personalized="true"]::before {
-    content: 'Ô¡É';
+    content: '★';
     display: flex;
     align-items: center;
     justify-content: center;

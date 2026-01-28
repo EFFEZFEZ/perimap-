@@ -1127,8 +1127,45 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
 /* =====================================================
  * Unification des couleurs - Navy #111B2B sur tout le site
  * Trajets, Horaires, Trafic et tous les blocs
+ * V603: Extension fix zones grises à toutes les vues
  * ===================================================== */
 @media (max-width: 768px) {
+    /* V603: Fond fixe pour la vue carte */
+    body.view-map-locked::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100lvh;
+        background: #111b2b;
+        z-index: -9999;
+        pointer-events: none;
+    }
+
+    /* V603: Fond fixe pour le dashboard général (vue accueil) */
+    body:not(.itinerary-view-active):not(.view-map-locked)::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100lvh;
+        background-color: #f8fafc;
+        background-color: var(--bg-page, #f8fafc);
+        z-index: -9999;
+        pointer-events: none;
+    }
+
+    /* V603: Fond fixe pour le dashboard en mode sombre */
+    body.dark-theme:not(.itinerary-view-active):not(.view-map-locked)::before {
+        background-color: #0b1220 !important;
+    }
+
     /* Horaires view */
     body.horaires-view-active {
         background: #111b2b !important;

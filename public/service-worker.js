@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v602 - Scroll desktop/mobile fix + zones grises Chrome mobile (2026-01-28)
+ * Service Worker v603 - Fix étoile UTF-8 + zones grises toutes vues (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v602 - 2026-01-28 : Fix scroll molette PC + fond fixe anti-zones grises Chrome mobile
-const CACHE_VERSION = 'v602';
+// v603 - 2026-01-28 : Fix étoile "Horaires express" (UTF-8) + extension zones grises Chrome mobile (carte, dashboard)
+const CACHE_VERSION = 'v603';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
