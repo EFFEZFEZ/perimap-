@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v622 - Fallback Text Search pour autocomplete
+ * Service Worker v623 - Autocomplete: query predictions + fallback Text Search
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v622 - 2026-01-28 : Fallback Text Search (New) si autocomplete vide
-const CACHE_VERSION = 'v622';
+// v623 - 2026-01-28 : Query predictions + fallback Text Search (New)
+const CACHE_VERSION = 'v623';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

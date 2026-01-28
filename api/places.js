@@ -277,6 +277,7 @@ export default async function handler(req) {
         input: input,
         languageCode: 'fr',
         regionCode: 'FR',
+        includeQueryPredictions: true,
         locationRestriction: {
           rectangle: {
             low: { latitude: DORDOGNE_BOUNDS.south, longitude: DORDOGNE_BOUNDS.west },
@@ -300,6 +301,7 @@ export default async function handler(req) {
       if (response.ok) {
         const data = await response.json();
         const suggestions = data.suggestions || [];
+        const queryPredictionTexts = [];
         
         let googleCount = 0;
         const googleResults = [];
@@ -307,6 +309,11 @@ export default async function handler(req) {
         for (const suggestion of suggestions) {
           if (googleCount >= googleNeeded) break;
           
+          const queryPrediction = suggestion.queryPrediction;
+          if (queryPrediction?.text?.text) {
+            queryPredictionTexts.push(queryPrediction.text.text);
+          }
+
           const place = suggestion.placePrediction;
           if (!place) continue;
           
@@ -352,6 +359,13 @@ export default async function handler(req) {
         
         if (googleResults.length === 0) {
           try {
+            const searchCandidates = queryPredictionTexts.length
+              ? [...new Set(queryPredictionTexts)]
+              : [input];
+
+            let textSearchFilled = false;
+            for (const candidate of searchCandidates) {
+              if (textSearchFilled || googleCount >= googleNeeded) break;
             const textSearchResponse = await fetch(
               'https://places.googleapis.com/v1/places:searchText',
               {
@@ -362,7 +376,7 @@ export default async function handler(req) {
                   'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location'
                 },
                 body: JSON.stringify({
-                  textQuery: input,
+                  textQuery: candidate,
                   languageCode: 'fr',
                   regionCode: 'FR',
                   locationRestriction: {
@@ -402,6 +416,9 @@ export default async function handler(req) {
                 googleResults.push(item);
                 googleCount++;
                 seenNames.add(normalizedName);
+              }
+              if (googleCount > 0) {
+                textSearchFilled = true;
               }
             }
           } catch (textError) {
