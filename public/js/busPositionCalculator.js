@@ -1,4 +1,4 @@
-﻿/**
+/**
  * busPositionCalculator.js
  * * Calcule les positions géographiques interpolées des bus entre deux arrêts
  * * OPTIMISÉ V419 (Positionnement RT Amélioré):
