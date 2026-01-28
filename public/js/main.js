@@ -1654,6 +1654,7 @@ function setupStaticEventListeners() {
     }
     
     // V505: Écouter l'événement de chargement d'itinéraire en cache (trajets récents)
+    // V608: Ouvre directement la vue détail du premier itinéraire (mobile)
     window.addEventListener('perimap:loadCachedItinerary', (e) => {
         const { from, to, itinerary, searchTime } = e.detail || {};
         if (!itinerary || !itinerary.length) {
@@ -1662,7 +1663,7 @@ function setupStaticEventListeners() {
             if (searchBtn) searchBtn.click();
             return;
         }
-        console.log(`[V505] Chargement ${itinerary.length} itinéraires depuis cache:`, from, '->', to);
+        console.log(`[V608] Chargement ${itinerary.length} itinéraires depuis cache:`, from, '->', to);
         
         // Remplir allFetchedItineraries avec les données du cache
         allFetchedItineraries = itinerary;
@@ -1670,22 +1671,36 @@ function setupStaticEventListeners() {
             lastSearchTime = { ...searchTime };
         }
         
-        // Afficher la vue résultats si pas déjà visible
+        // Remplir les champs de recherche
+        const resultsFromInput = document.getElementById('results-planner-from');
+        const resultsToInput = document.getElementById('results-planner-to');
+        if (resultsFromInput) resultsFromInput.value = from || '';
+        if (resultsToInput) resultsToInput.value = to || '';
+        
+        // Afficher la vue résultats
         showResultsView();
         
         // Configurer et afficher les onglets et résultats
         setupResultTabs(allFetchedItineraries);
         if (resultsRenderer) resultsRenderer.render('ALL');
         
-        // Afficher le premier itinéraire sur la carte
-        if (allFetchedItineraries.length > 0 && resultsMapRenderer && resultsMapRenderer.map) {
+        // V608: Sur mobile, ouvrir DIRECTEMENT la vue détail du premier itinéraire
+        if (isMobileDetailViewport() && allFetchedItineraries.length > 0) {
+            setTimeout(() => {
+                const firstItinerary = allFetchedItineraries[0];
+                const routeLayer = renderItineraryDetail(firstItinerary);
+                showDetailView(routeLayer);
+                console.log('[V608] Vue détail ouverte directement depuis trajet récent');
+            }, 150);
+        } else if (allFetchedItineraries.length > 0 && resultsMapRenderer && resultsMapRenderer.map) {
+            // Desktop : afficher sur la carte résultats
             setTimeout(() => {
                 resultsMapRenderer.map.invalidateSize();
                 drawRouteOnResultsMap(allFetchedItineraries[0]);
             }, 100);
         }
         
-        console.log('[V505] Itinéraires affichés depuis cache');
+        console.log('[V608] Itinéraires chargés depuis cache');
     });
 
     document.querySelectorAll('.service-card[data-view]').forEach(button => {
