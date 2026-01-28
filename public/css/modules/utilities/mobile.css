@@ -1072,7 +1072,8 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         display: flex !important;
         flex-direction: column !important;
         overflow: visible !important;
-        padding: 0.75rem 0.75rem calc(1.25rem + env(safe-area-inset-bottom)) !important;
+        /* V613: padding ajusté - pas de padding-bottom ici car géré par .recent-journeys-section */
+        padding: 0.75rem 0.75rem 0 0.75rem !important;
         box-sizing: border-box !important;
         background: transparent !important;
     }
@@ -1089,7 +1090,8 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         flex-direction: column;
         gap: 0.5rem;
         flex: 0 1 auto !important;
-        padding: 0 0 20px 0 !important;
+        /* V613: padding-bottom augmenté pour scroll complet des trajets */
+        padding: 0 0 80px 0 !important;
     }
 
     /* CRITIQUE: Masquer la section quand recherche active (surcharge la règle précédente) */
