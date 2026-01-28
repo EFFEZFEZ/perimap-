@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v519 - SEO titres optimisés "Péribus" (2026-01-28) - CSS module index precache
+ * Service Worker v602 - Scroll desktop/mobile fix + zones grises Chrome mobile (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v519 - 2026-01-27 : Synchronisation safe-area/overscroll mobile (header, nav, mobile.css)
-const CACHE_VERSION = 'v519';
+// v602 - 2026-01-28 : Fix scroll molette PC + fond fixe anti-zones grises Chrome mobile
+const CACHE_VERSION = 'v602';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

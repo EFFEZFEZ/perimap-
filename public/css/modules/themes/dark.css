@@ -8,6 +8,29 @@
  */
 
 /* =========================================
+ * V602: DARK THEME - Fond fixe anti-zones grises Chrome mobile
+ * ========================================= */
+body.dark-theme {
+    background-color: #0b1220 !important;
+    background-attachment: fixed;
+}
+
+body.dark-theme::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
+    background-color: #0b1220 !important;
+    z-index: -9999;
+    pointer-events: none;
+}
+
+/* =========================================
  * DARK THEME - TOP BAR V156
  * ========================================= */
 body.dark-theme #top-bar {

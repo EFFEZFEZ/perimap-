@@ -914,8 +914,8 @@ body.dark-theme .express-chip.personalized {
  * ========================================= */
 #dashboard-hall {
     visibility: visible;
-    overflow-y: visible; /* V59: Permettre le scroll */
-    overscroll-behavior: none; /* V455: Emp├¬che pull-to-refresh */
+    overflow: visible; /* V601: Laisse passer le scroll au html */
+    overscroll-behavior: none; /* V455: Empêche pull-to-refresh */
     -webkit-overflow-scrolling: touch;
     /* V348: Transition douce pour le fade */
     opacity: 1;

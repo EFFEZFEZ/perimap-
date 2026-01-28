@@ -15,7 +15,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height pour mobile */
-    overflow-y: auto;
+    overflow: visible; /* V601: Laisse passer le scroll au html */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -24,7 +24,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow-y: auto;
+    overflow: visible; /* V601: Laisse passer le scroll au html */
 }
 
 /* ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ

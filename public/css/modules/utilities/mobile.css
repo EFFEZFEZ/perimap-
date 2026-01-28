@@ -935,6 +935,59 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
 }
 
 
+/* =====================================================
+ * V602: Fond fixe anti-zones grises Chrome pour vues Navy mobile
+ * Le pseudo-élément ::before crée un fond qui ne bouge jamais
+ * ===================================================== */
+@media (max-width: 768px) {
+    /* Fond fixe Navy pour vue itinéraire */
+    body.itinerary-view-active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100lvh;
+        background-color: #111b2b !important;
+        z-index: -9999;
+        pointer-events: none;
+    }
+
+    /* Fond fixe Navy pour vue horaires */
+    body.horaires-view-active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100lvh;
+        background-color: #111b2b !important;
+        z-index: -9999;
+        pointer-events: none;
+    }
+
+    /* Fond fixe Navy pour vue trafic */
+    body.trafic-view-active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100lvh;
+        background-color: #111b2b !important;
+        z-index: -9999;
+        pointer-events: none;
+    }
+}
 
 /* =====================================================
  * V600 FIX: Scroll pour vue itinéraire
@@ -949,6 +1002,8 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         position: relative;
         width: 100%;
         -webkit-overflow-scrolling: touch;
+        background-color: #111b2b !important; /* V602: Fond solide en plus du ::before */
+        background-attachment: fixed;
     }
 }
 

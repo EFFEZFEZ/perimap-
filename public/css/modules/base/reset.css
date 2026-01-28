@@ -16,7 +16,7 @@
     box-sizing: border-box;
 }
 
-/* *** CORRECTION V28 + V59 + V347 + V455 + V490 + V491 SCROLL MOBILE *** */
+/* *** CORRECTION V28 + V59 + V347 + V455 + V490 + V491 + V601 + V602 SCROLL FIX *** */
 html {
     margin: 0;
     padding: 0;
@@ -24,26 +24,51 @@ html {
     min-height: 100%;
     width: 100%;
     overflow-x: hidden;
-    overflow-y: auto;
-    /* V491: Fond solide sur html pour ├®viter les zones grises Chrome */
-    background-color: #f8fafc; /* Fallback clair si var non d├®finie */
+    overflow-y: scroll; /* V601: html est le SEUL conteneur de scroll principal */
+    /* V602: Fond FIXE sur html pour éliminer zones grises Chrome mobile */
+    background-color: #f8fafc; /* Fallback clair si var non définie */
     background-color: var(--bg-page, #f8fafc);
-    /* V491: Emp├¬che bounce/pull-to-refresh et zones grises */
+    background-attachment: fixed; /* V602: Le fond ne bouge pas avec le scroll */
+    /* V491: Empêche bounce/pull-to-refresh et zones grises */
     overscroll-behavior: none;
     overscroll-behavior-x: none;
     overscroll-behavior-y: none;
+}
+
+/* V602: Pseudo-élément fixe pour garantir un fond solide permanent sur mobile Chrome */
+html::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh; /* Large viewport height - couvre même l'overscroll */
+    background-color: #f8fafc;
+    background-color: var(--bg-page, #f8fafc);
+    z-index: -9999; /* Derrière tout le contenu */
+    pointer-events: none;
+}
+
+/* V602: Thème sombre - fond fixe adapté */
+body.dark-theme::before,
+html:has(body.dark-theme)::before {
+    background-color: #0b1220 !important;
 }
 
 html, body {
     -webkit-font-smoothing: antialiased;
     font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
-    background-color: var(--bg-page, #f8fafc); 
-    /* V491: Emp├¬che bounce/pull-to-refresh et zones grises Chrome */
+    background-color: var(--bg-page, #f8fafc);
+    background-attachment: fixed; /* V602: Fond fixe */
+    /* V491: Empêche bounce/pull-to-refresh et zones grises Chrome */
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     overscroll-behavior-x: none;
-    /* V347: Emp├¬cher les sauts lors du scroll mobile (barre adresse) */
+    /* V347: Empêcher les sauts lors du scroll mobile (barre adresse) */
     overflow-anchor: none;
 }
 
@@ -53,8 +78,9 @@ body {
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh; /* V59: Dynamic viewport height pour mobile */
-    /* Par d├®faut, le scroll est port├® par html (body reste non scrollable). */
-    overflow-y: auto;
+    /* V601: body laisse passer le scroll au html - pas de overflow-y ici */
+    overflow-y: visible;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch; /* V59: Smooth scroll iOS */
     overscroll-behavior: none;
     touch-action: pan-y; /* V455: Scroll vertical uniquement, pas de zoom */
@@ -65,7 +91,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow-y: auto; /* V59: Permettre le scroll du contenu */
+    overflow: visible; /* V601: Laisse passer le scroll au html */
 }
 
 #legal-strip {
@@ -505,16 +531,16 @@ body.view-is-locked {
     inset: auto;
     width: 100%;
     overflow-x: hidden;
-    overflow-y: visible;
+    overflow-y: auto;
 }
 
-/* Quand la vue d├®tail est ouverte, bloquer TOUT scroll */
+/* Quand la vue détail est ouverte, permettre le scroll */
 body.detail-view-open {
     position: relative !important;
     inset: auto !important;
     width: 100% !important;
     overflow-x: hidden !important;
-    overflow-y: visible !important;
+    overflow-y: auto !important;
     touch-action: pan-y;
 }
 
@@ -571,16 +597,13 @@ body.detail-view-open #legal-strip {
 /* Conteneurs de vue principaux */
 #dashboard-container {
     flex: 1 0 auto;
-    /* Le dashboard utilise le scroll naturel du body - AUCUNE r├¿gle overflow */
-    overflow-y: visible; /* V59: Permettre le scroll */
+    /* V601: Le scroll est géré par html - ce conteneur laisse passer */
+    overflow: visible;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none; /* V455: Emp├¬che pull-to-refresh et zones grises */
+    overscroll-behavior: none; /* V455: Empêche pull-to-refresh et zones grises */
     touch-action: pan-y; /* V455: Scroll vertical uniquement */
-    padding-bottom: 0; /* Supprim├®: le nouveau footer g├¿re son propre espacement */
-    will-change: scroll-position;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    min-height: 100vh;
+    padding-bottom: 0; /* Supprimé: le nouveau footer gère son propre espacement */
+    min-height: auto; /* V601: Hauteur naturelle selon le contenu */
 }
 
 /* *** CORRECTION IDFM-STYLE *** */
