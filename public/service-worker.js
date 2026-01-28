@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v606 - Badge horaires arrondi + format durée 1h05 (2026-01-28)
+ * Service Worker v607 - Init trajets récents au démarrage (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v606 - 2026-01-28 : Badge horaires style pill arrondi + format durée "1h05" (pas "1h 5min")
-const CACHE_VERSION = 'v606';
+// v607 - 2026-01-28 : Fix affichage trajets récents (initRecentJourneys manquant)
+const CACHE_VERSION = 'v607';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

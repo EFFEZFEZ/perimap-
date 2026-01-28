@@ -33,7 +33,7 @@ import { loadBaseLayout } from './viewLoader.js';
 import { realtimeManager } from './realtimeManager.js';
 import { analyticsManager } from './analyticsManager.js';
 import { userPreferences } from './userPreferences.js';
-import { addRecentJourney } from './recentJourneys.js';
+import { addRecentJourney, initRecentJourneys } from './recentJourneys.js';
 
 // === PHASE 2: Modular API Services ===
 import { initializeAPIServices, getAPIServiceFactory } from './services/index.js';
@@ -1014,6 +1014,9 @@ async function initializeApp() {
         // Wire theme toggles now that fragments sont chargés, puis applique le thème initial
         wireThemeToggles();
         initTheme();
+        
+        // V607: Initialiser les trajets récents (afficher ceux sauvegardés)
+        initRecentJourneys();
 
         // Hydrate the "Horaires express" list from config (popular lines)
         try { await hydrateHallExpressChips(); } catch (e) { /* ignore */ }
