@@ -2398,16 +2398,19 @@ body.dark-theme .route-next-departures {
         text-align: left;
     }
     
-    /* V433: Summary badge sobre */
+    /* V433: Summary badge sobre - V606: style pill arrondi comme bouton retour */
     #detail-map-summary {
         background: var(--bg-main);
         border: 1px solid var(--border);
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        border-radius: 20px; /* V606: Pill arrondi comme bouton retour */
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         font-weight: 500;
         font-size: 0.8125rem;
         pointer-events: none;
+        height: 40px; /* V606: Même hauteur que bouton retour */
+        display: inline-flex;
+        align-items: center;
     }
     
     #detail-map-summary .route-time { 

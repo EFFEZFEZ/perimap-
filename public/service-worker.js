@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v605 - Fix vue détail trajets z-index complet (2026-01-28)
+ * Service Worker v606 - Badge horaires arrondi + format durée 1h05 (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v605 - 2026-01-28 : Fix conteneur détail trajets + backdrop z-index > main-header mobile (2000)
-const CACHE_VERSION = 'v605';
+// v606 - 2026-01-28 : Badge horaires style pill arrondi + format durée "1h05" (pas "1h 5min")
+const CACHE_VERSION = 'v606';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
