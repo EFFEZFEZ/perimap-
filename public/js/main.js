@@ -2494,6 +2494,9 @@ async function executeItinerarySearch(source, sourceElements) {
             logger.warn('Erreur lors de l\'assurance des polylines', e);
         }
 
+        // V618: Validation destination globale (Google + GTFS)
+        markDestinationMismatch(allFetchedItineraries, toLabel, toGtfsStops);
+
         // TOUJOURS filtrer les trajets dont le départ est passé (même en mode "arriver")
         // Mais seulement si la recherche est pour aujourd'hui
         allFetchedItineraries = filterExpiredDepartures(allFetchedItineraries, searchTime);
@@ -3443,6 +3446,57 @@ function processGoogleRoutesResponse(data) {
 }
 
 // (Déduplication déplacée vers itinerary/ranking.js)
+
+// V618: Validation globale de la destination (Google + GTFS)
+function markDestinationMismatch(itineraries, destinationLabel = '', destinationStopIds = null) {
+    if (!Array.isArray(itineraries) || itineraries.length === 0) return;
+
+    const normalize = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const destNorm = normalize(destinationLabel);
+    const destIdSet = Array.isArray(destinationStopIds) && destinationStopIds.length
+        ? new Set(destinationStopIds)
+        : null;
+
+    const matchesByName = (stopName) => {
+        if (!destNorm) return true;
+        if (!stopName) return true;
+        const stopNorm = normalize(stopName);
+        if (!stopNorm) return true;
+        return stopNorm.includes(destNorm) || destNorm.includes(stopNorm);
+    };
+
+    itineraries.forEach(it => {
+        if (!it || it._destinationMismatch) return;
+        if (it.type === 'BIKE' || it.type === 'WALK' || it._isBike || it._isWalk) return;
+
+        let mismatch = false;
+
+        // Priorité: validation stricte via stop_id (GTFS/hybrid)
+        const alightStopId = it?._hybridDiagnostics?.alightingStopId;
+        if (destIdSet && alightStopId) {
+            mismatch = !destIdSet.has(alightStopId);
+        }
+
+        // Fallback: validation via nom d'arrêt (Google + cas non GTFS)
+        if (!mismatch && it.steps) {
+            const lastBusStep = [...it.steps].reverse().find(s => s.type === 'BUS');
+            if (lastBusStep && lastBusStep.arrivalStop) {
+                mismatch = !matchesByName(lastBusStep.arrivalStop);
+            }
+        }
+
+        if (mismatch) {
+            console.warn(`⚠️ V618: Itinéraire aboutit à un arrêt non demandé → pénalité -100`, {
+                arrivalStop: it?.steps?.slice(-1)?.[0]?.arrivalStop,
+                destinationLabel
+            });
+            it._destinationMismatch = true;
+            if (typeof it.score === 'number') {
+                it.score = Math.max(-100, it.score - 100);
+            }
+        }
+    });
+}
 
 function processIntelligentResults(intelligentResults, searchTime, destinationLabel = '') {
     console.log("=== DÉBUT PROCESS INTELLIGENT RESULTS ===");
