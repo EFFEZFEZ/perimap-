@@ -231,8 +231,19 @@ export function rankArrivalItineraries(itineraries, searchTime) {
   const bikeItins = itineraries.filter(it => it.type === 'BIKE' || it._isBike);
   const walkItins = itineraries.filter(it => it.type === 'WALK' || it._isWalk);
   
-  // Trier les bus par arrivée DÉCROISSANTE (plus proche de l'heure cible en premier)
-  busItins.sort((a, b) => {
+  // V618: Dédupliquer les correspondances identiques avec heures différentes (garder le départ plus tard)
+  const deduplicatedBus = deduplicateByTransferPattern(busItins);
+  
+  // Trier les bus par : 1) destination exacte, 2) arrivée DÉCROISSANTE (plus proche de l'heure cible en premier)
+  deduplicatedBus.sort((a, b) => {
+    // V617: PRIORITÉ 1: Destination correcte vs mismatch
+    const aMismatch = a._destinationMismatch ? 1 : 0;
+    const bMismatch = b._destinationMismatch ? 1 : 0;
+    if (aMismatch !== bMismatch) {
+      console.log(`📌 V618: Prioriser destination correcte: ${a._destinationMismatch ? 'A' : 'B'} au mauvais arrêt`);
+      return aMismatch - bMismatch; // Bon arrêt d'abord (0 < 1)
+    }
+    
     const arrA = parseTimeToMinutes(a.arrivalTime);
     const arrB = parseTimeToMinutes(b.arrivalTime);
     
@@ -246,11 +257,53 @@ export function rankArrivalItineraries(itineraries, searchTime) {
   });
 
   // Recomposer: BUS triés, puis BIKE, puis WALK
-  const sorted = [...busItins, ...bikeItins, ...walkItins];
+  const sorted = [...deduplicatedBus, ...bikeItins, ...walkItins];
 
-  console.log('📋 Tri ARRIVER (BUS d\'abord, arrivée décroissante):', sorted.slice(0, 5).map(it => `${it.type}:${it.arrivalTime}`).join(', '));
+  console.log('📋 Tri ARRIVER (BUS d\'abord, destination correcte, arrivée décroissante):', sorted.slice(0, 5).map(it => `${it.type}:${it.arrivalTime}${it._destinationMismatch ? '❌' : '✓'}`).join(', '));
 
   return sorted;
+}
+
+/**
+ * V618: Dédupliquer les correspondances identiques avec heures différentes
+ * Garde celle qui part LE PLUS TARD (moins d'attente à la correspondance)
+ */
+function deduplicateByTransferPattern(itineraries) {
+  if (!itineraries.length) return itineraries;
+  
+  // Créer une clé basée sur le pattern de correspondances
+  const getTransferKey = (it) => {
+    if (!it.steps || it.steps.length === 0) return `${it.arrivalTime}`;
+    
+    // Clé = numéros de lignes + arrêts d'arrivée de chaque segment bus
+    const busSteps = it.steps.filter(s => s.type === 'BUS');
+    if (busSteps.length === 0) return `${it.arrivalTime}`;
+    
+    return busSteps.map(s => `${s.routeShortName}_${s.arrivalStop}`).join('|');
+  };
+  
+  // Grouper par clé
+  const groups = new Map();
+  itineraries.forEach(it => {
+    const key = getTransferKey(it);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(it);
+  });
+  
+  // Pour chaque groupe, garder celui qui part LE PLUS TARD (moins d'attente)
+  const deduplicated = [];
+  groups.forEach(group => {
+    if (group.length === 1) {
+      deduplicated.push(group[0]);
+    } else {
+      // Trier par heure de départ DÉCROISSANTE, garder le premier
+      group.sort((a, b) => parseTimeToMinutes(b.departureTime) - parseTimeToMinutes(a.departureTime));
+      console.log(`📌 V618: Dédup - Correspondance ${group[0].steps?.map(s => s.routeShortName).join('-') || 'unknown'}: gardé ${group[0].departureTime}, rejeté ${group.slice(1).map(g => g.departureTime).join(', ')}`);
+      deduplicated.push(group[0]);
+    }
+  });
+  
+  return deduplicated;
 }
 
 /**

@@ -3487,8 +3487,8 @@ function processIntelligentResults(intelligentResults, searchTime, destinationLa
                                 const lastStopNorm = normalize(lastBusStep.arrivalStop);
                                 // Si l'arrêt final NE correspond PAS à la destination, pénaliser fortement
                                 if (!lastStopNorm.includes(destNorm) && !destNorm.includes(lastStopNorm)) {
-                                    console.warn(`⚠️ V617: Itinéraire aboutit à "${lastBusStep.arrivalStop}", pas à "${destinationLabel}" → pénalité -10`);
-                                    itin.score = Math.max(0, itin.score - 10);
+                                    console.warn(`⚠️ V617: Itinéraire aboutit à "${lastBusStep.arrivalStop}", pas à "${destinationLabel}" → pénalité -100`);
+                                    itin.score = Math.max(-100, itin.score - 100);
                                     itin._destinationMismatch = true;
                                 }
                             }
