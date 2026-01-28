@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v618 - Alias pôles multimodaux (Campus) avec gtfsStops
+ * Service Worker v619 - Alias pôles multimodaux (Campus) avec gtfsStops
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v618 - 2026-01-28 : Alias pôles multimodaux (Campus) avec gtfsStops - AutocompleteService, GeocodeService, apiManager sync
-const CACHE_VERSION = 'v618';
+// v619 - 2026-01-28 : Alias pôles multimodaux (Campus) avec gtfsStops - AutocompleteService, GeocodeService, apiManager sync
+const CACHE_VERSION = 'v619';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
