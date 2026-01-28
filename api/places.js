@@ -350,6 +350,65 @@ export default async function handler(req) {
           }
         }
         
+        if (googleResults.length === 0) {
+          try {
+            const textSearchResponse = await fetch(
+              'https://places.googleapis.com/v1/places:searchText',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Goog-Api-Key': apiKey,
+                  'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location'
+                },
+                body: JSON.stringify({
+                  textQuery: input,
+                  languageCode: 'fr',
+                  regionCode: 'FR',
+                  locationRestriction: {
+                    rectangle: {
+                      low: { latitude: DORDOGNE_BOUNDS.south, longitude: DORDOGNE_BOUNDS.west },
+                      high: { latitude: DORDOGNE_BOUNDS.north, longitude: DORDOGNE_BOUNDS.east }
+                    }
+                  },
+                  pageSize: googleNeeded
+                })
+              }
+            );
+
+            if (textSearchResponse.ok) {
+              const textData = await textSearchResponse.json();
+              const places = textData.places || [];
+
+              for (const place of places) {
+                if (googleCount >= googleNeeded) break;
+                const name = place.displayName?.text || '';
+                const normalizedName = normalize(name);
+                if (!name || seenNames.has(normalizedName)) continue;
+                const location = place.location || { latitude: CENTER.lat, longitude: CENTER.lng };
+                const item = {
+                  description: `📍 ${name}, ${place.formattedAddress || ''}`,
+                  place_id: place.id,
+                  placeId: place.id,
+                  main_text: name,
+                  secondary_text: place.formattedAddress || '',
+                  coordinates: { lat: location.latitude, lng: location.longitude },
+                  source: 'google-text',
+                  type: 'google',
+                  name: name,
+                  formattedAddress: place.formattedAddress
+                };
+                results.push(item);
+                googleResults.push(item);
+                googleCount++;
+                seenNames.add(normalizedName);
+              }
+            }
+          } catch (textError) {
+            console.error('Google Text Search error:', textError.message);
+          }
+        }
+
         if (googleResults.length > 0) {
           placesCache.set(cacheKey, {
             data: googleResults,

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v621 - Autocomplete restreint à la Dordogne
+ * Service Worker v622 - Fallback Text Search pour autocomplete
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v621 - 2026-01-28 : Autocomplete Places (New) restreint à la Dordogne
-const CACHE_VERSION = 'v621';
+// v622 - 2026-01-28 : Fallback Text Search (New) si autocomplete vide
+const CACHE_VERSION = 'v622';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement
