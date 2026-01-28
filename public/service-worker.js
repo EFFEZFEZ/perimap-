@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v604 - Fix boutons trajets (z-index) (2026-01-28)
+ * Service Worker v604 - Fix boutons trajets (z-index main-header) (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,7 +9,7 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v604 - 2026-01-28 : Fix boutons header trajets (retour + horaires) masqués par bottom-sheet
+// v604 - 2026-01-28 : Fix boutons header trajets masqués par main-header mobile (z-index 2000)
 const CACHE_VERSION = 'v604';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
