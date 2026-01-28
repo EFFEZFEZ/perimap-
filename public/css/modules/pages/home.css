@@ -1174,7 +1174,7 @@ body.dark-theme #info-trafic.view-active {
     box-sizing: border-box;
     margin-left: 0;
     margin-right: 0;
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 0.25rem 1.5rem;
 }
 
 @media (prefers-reduced-motion: reduce), (prefers-reduced-data: reduce), (update: slow) {

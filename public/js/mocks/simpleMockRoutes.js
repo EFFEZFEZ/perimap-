@@ -87,7 +87,7 @@ export function injectSimpleMockRoute(eventBus, index = 1) {
     // Afficher la vue résultats
     if (window.showResultsView) {
       console.log('[SimpleMock] 📍 Navigation vers vue résultats...');
-      window.showResultsView();
+      window.showResultsView({ hasSearch: true });
     }
     
     // Configurer les onglets si disponible
@@ -139,7 +139,7 @@ export function injectAllSimpleMockRoutes(eventBus) {
 
     if (window.showResultsView) {
       console.log('[SimpleMock] 📍 Navigation vers vue résultats...');
-      window.showResultsView();
+      window.showResultsView({ hasSearch: true });
     }
 
     if (window.setupResultTabs) {

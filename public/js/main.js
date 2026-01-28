@@ -1049,6 +1049,7 @@ async function initializeApp() {
         window.resultsRenderer = resultsRenderer;
         window.showResultsView = showResultsView;
         window.setupResultTabs = setupResultTabs;
+        window.renderRecentJourneys = renderRecentJourneys; // V612: Exposer pour debug
         
         initializeRouteFilter();
 
@@ -1671,11 +1672,8 @@ function setupStaticEventListeners() {
             lastSearchTime = { ...searchTime };
         }
         
-        // Remplir les champs de recherche
-        const resultsFromInput = document.getElementById('results-planner-from');
-        const resultsToInput = document.getElementById('results-planner-to');
-        if (resultsFromInput) resultsFromInput.value = from || '';
-        if (resultsToInput) resultsToInput.value = to || '';
+        // ❌ NE PAS remplir les champs de recherche - l'utilisateur ne veut pas
+        // que les trajets récents modifient le formulaire
         
         // Afficher la vue résultats
         showResultsView({ hasSearch: true });
@@ -5386,8 +5384,12 @@ function showResultsView({ hasSearch = false } = {}) {
             document.body.classList.add('has-search');
         } else {
             document.body.classList.remove('has-search');
-            // V611: Re-rendre les trajets récents du cache localStorage
-            setTimeout(() => renderRecentJourneys(), 100);
+            // V612: Re-rendre les trajets récents du cache localStorage
+            console.log('[Main] showResultsView - va appeler renderRecentJourneys dans 250ms');
+            setTimeout(() => {
+                console.log('[Main] Appel renderRecentJourneys maintenant');
+                renderRecentJourneys();
+            }, 250);
         }
         // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 
@@ -5493,6 +5495,12 @@ function hideDetailView() {
     // 3. Débloquer le scroll IMMÉDIATEMENT (pas d'attente)
     document.body.classList.remove('detail-view-open');
     unlockBodyScrollIfStuck();
+    
+    // ✅ IMPORTANT: Retirer la classe 'has-search' et re-afficher "Vos trajets"
+    document.body.classList.remove('has-search');
+    if (typeof renderRecentJourneys === 'function') {
+        renderRecentJourneys();
+    }
     
     // 4. Attendre la transition CSS AVANT de nettoyer le contenu
     setTimeout(() => {

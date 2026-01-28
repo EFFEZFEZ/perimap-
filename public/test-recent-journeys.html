@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Trajets Récents - Périmap</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a1628;
+            color: #fff;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .success {
+            background: #10b981;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        .warning {
+            background: #f59e0b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        pre {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        h1 { color: #10b981; }
+        h2 { color: #60a5fa; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Trajets Récents - Périmap</h1>
+    
+    <div class="warning">
+        ⚠️ Cette page permet d'injecter des trajets de test dans le cache localStorage
+    </div>
+
+    <h2>Actions rapides</h2>
+    <button onclick="addTestJourneys()">✅ Ajouter 3 trajets de test</button>
+    <button onclick="clearJourneys()">🗑️ Vider le cache</button>
+    <button onclick="viewCache()">👁️ Voir le cache actuel</button>
+    <button onclick="goToItinerary()">🚀 Aller à l'onglet Trajets</button>
+
+    <div id="success" class="success"></div>
+
+    <h2>Cache actuel</h2>
+    <pre id="cache-display">Cliquez sur "Voir le cache actuel" pour afficher...</pre>
+
+    <script>
+        const STORAGE_KEY = 'perimap_journeys_v3';
+        const TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
+        function addTestJourneys() {
+            const now = Date.now();
+            const testJourneys = [
+                {
+                    key: 'gare de perpignan|aéroport perpignan rivesaltes',
+                    fromName: 'Gare de Perpignan',
+                    toName: 'Aéroport Perpignan Rivesaltes',
+                    departureTime: 'Maintenant',
+                    summary: {
+                        type: 'BUS',
+                        duration: '45 min',
+                        segments: [
+                            { name: 'R4', color: '#FF6B35', textColor: '#FFFFFF' },
+                            { name: 'A', color: '#0066CC', textColor: '#FFFFFF' }
+                        ],
+                        hasWalk: true
+                    },
+                    fullItinerary: null,
+                    searchTime: null,
+                    savedAt: now,
+                    expiresAt: now + TTL_MS,
+                    accessCount: 1
+                },
+                {
+                    key: 'république|clinique saint pierre',
+                    fromName: 'République',
+                    toName: 'Clinique Saint Pierre',
+                    departureTime: 'Maintenant',
+                    summary: {
+                        type: 'BUS',
+                        duration: '22 min',
+                        segments: [
+                            { name: 'B', color: '#E91E63', textColor: '#FFFFFF' }
+                        ],
+                        hasWalk: false
+                    },
+                    fullItinerary: null,
+                    searchTime: null,
+                    savedAt: now - 3600000, // 1h avant
+                    expiresAt: now + TTL_MS,
+                    accessCount: 3
+                },
+                {
+                    key: 'castillet|université',
+                    fromName: 'Castillet',
+                    toName: 'Université',
+                    departureTime: 'Maintenant',
+                    summary: {
+                        type: 'BUS',
+                        duration: '18 min',
+                        segments: [
+                            { name: 'C', color: '#4CAF50', textColor: '#FFFFFF' }
+                        ],
+                        hasWalk: true
+                    },
+                    fullItinerary: null,
+                    searchTime: null,
+                    savedAt: now - 7200000, // 2h avant
+                    expiresAt: now + TTL_MS,
+                    accessCount: 5
+                }
+            ];
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(testJourneys));
+                showSuccess('✅ 3 trajets de test ajoutés avec succès !');
+                viewCache();
+            } catch (e) {
+                alert('❌ Erreur : ' + e.message);
+            }
+        }
+
+        function clearJourneys() {
+            if (confirm('Voulez-vous vraiment vider le cache ?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                showSuccess('🗑️ Cache vidé');
+                viewCache();
+            }
+        }
+
+        function viewCache() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            const display = document.getElementById('cache-display');
+            
+            if (!stored) {
+                display.textContent = '❌ Aucun trajet en cache';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(stored);
+                display.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                display.textContent = '❌ Erreur de parsing : ' + e.message;
+            }
+        }
+
+        function showSuccess(message) {
+            const el = document.getElementById('success');
+            el.textContent = message;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        function goToItinerary() {
+            window.location.href = '/index.html#itineraire';
+        }
+
+        // Afficher le cache au chargement
+        viewCache();
+    </script>
+</body>
+</html>

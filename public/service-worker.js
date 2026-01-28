@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v612 - UX Trajets: espacement + persistance cache (2026-01-28)
+ * Service Worker v613 - Fix scroll Horaires/Trafic SPA views (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v612 - 2026-01-28 : UX Trajets mobile (espacement header/form, titre conditionnel, persistance localStorage)
-const CACHE_VERSION = 'v612';
+// v613 - 2026-01-28 : Fix scroll vues Horaires/Trafic (overflow visible, double scroll container fix)
+const CACHE_VERSION = 'v613';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

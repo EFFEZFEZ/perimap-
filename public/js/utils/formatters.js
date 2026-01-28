@@ -48,12 +48,17 @@ export function isMissingTextValue(value) {
 
 /**
  * Retourne un label d'arrêt sécurisé (avec fallback)
- * @param {*} value - Valeur à afficher
+ * @param {*} value - Valeur à afficher (string ou objet {name: string})
  * @param {string} fallback - Valeur par défaut
  * @returns {string}
  */
 export function getSafeStopLabel(value, fallback = 'Arrêt à préciser') {
-    return isMissingTextValue(value) ? fallback : value;
+    // Si c'est un objet avec une propriété 'name', extraire le nom
+    if (value && typeof value === 'object' && value.name) {
+        return isMissingTextValue(value.name) ? fallback : String(value.name);
+    }
+    // Sinon traiter comme une string
+    return isMissingTextValue(value) ? fallback : String(value);
 }
 
 /**

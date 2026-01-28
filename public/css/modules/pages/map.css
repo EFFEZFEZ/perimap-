@@ -1514,7 +1514,8 @@ body.dark-theme .map-theme-toggle:hover {
     font-size: 0.9375rem;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-top: 0.75rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
     box-shadow: none !important;
 }
 .btn-load-more:hover:not(:disabled) {

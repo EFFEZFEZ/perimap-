@@ -1162,6 +1162,12 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         overscroll-behavior: none !important;
     }
 
+    /* V612: Supprimer min-height pour vues horaires/trafic - évite l'espace vide en bas */
+    body.horaires-view-active #app-view-root,
+    body.trafic-view-active #app-view-root {
+        min-height: auto !important;
+    }
+
     .horaires-hero,
     #horaires-container,
     .horaire-card,

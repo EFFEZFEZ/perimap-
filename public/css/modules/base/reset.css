@@ -663,7 +663,25 @@ body.itinerary-view-active {
 body.dark-theme.itinerary-view-active {
     background-color: #0b1220 !important;
 }
+/* V612: Horaires et Trafic views - pas de min-height de 100vh pour éviter espace blanc */
+body.horaires-view-active,
+body.trafic-view-active {
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    position: relative !important;
+    width: 100% !important;
+    min-height: auto !important;
+    top: auto !important;
+    left: auto !important;
+    background-color: #0b1220 !important;
+    overscroll-behavior: auto !important;
+}
 
+body.horaires-view-active #app-view-root,
+body.trafic-view-active #app-view-root {
+    min-height: auto !important;
+    flex: 0 0 auto !important;
+}
 /* V120: Forcer la vue carte en plein ├®cran sur mobile */
 body.view-map-locked #map-container {
     position: fixed !important;

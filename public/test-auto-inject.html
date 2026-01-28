@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Injection Trajets</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        .info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 2px solid #3b82f6;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .journeys-list {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .journey-item {
+            padding: 10px;
+            background: #f9fafb;
+            border-left: 3px solid #0066cc;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Test Auto-Injection</h1>
+        <div id="status" class="status info">
+            Injection en cours...
+        </div>
+        <div id="journeys" class="journeys-list"></div>
+        <button onclick="goToItinerary()">📍 Aller à l'onglet TRAJETS</button>
+        <button onclick="clearCache()" style="background: #dc2626;">🗑️ Vider le cache</button>
+    </div>
+
+    <script>
+        // Auto-injection au chargement
+        (function() {
+            const STORAGE_KEY = 'perimap_journeys_v3';
+            const TTL_MS = 7 * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            // Créer des itinéraires complets et réalistes
+            const mockItinerary1 = {
+                type: 'BUS',
+                departureTime: '14:30',
+                arrivalTime: '15:15',
+                duration: '45 min',
+                durationRaw: 2700,
+                steps: [
+                    {
+                        type: 'BUS',
+                        routeShortName: 'R4',
+                        routeColor: '#FF6B35',
+                        routeTextColor: '#FFFFFF',
+                        departureStop: 'Gare de Perpignan',
+                        arrivalStop: 'Place République',
+                        departureTime: '14:30',
+                        arrivalTime: '14:50',
+                        duration: '20 min',
+                        numStops: 8
+                    },
+                    {
+                        type: 'WAIT',
+                        duration: '5 min',
+                        departureTime: '14:50',
+                        arrivalTime: '14:55'
+                    },
+                    {
+                        type: 'BUS',
+                        routeShortName: 'A',
+                        routeColor: '#0066CC',
+                        routeTextColor: '#FFFFFF',
+                        departureStop: 'Place République',
+                        arrivalStop: 'Aéroport Perpignan',
+                        departureTime: '14:55',
+                        arrivalTime: '15:15',
+                        duration: '20 min',
+                        numStops: 5
+                    }
+                ],
+                summarySegments: [
+                    { name: 'R4', color: '#FF6B35', textColor: '#FFFFFF' },
+                    { name: 'A', color: '#0066CC', textColor: '#FFFFFF' }
+                ]
+            };
+
+            const mockItinerary2 = {
+                type: 'BUS',
+                departureTime: '10:15',
+                arrivalTime: '10:37',
+                duration: '22 min',
+                durationRaw: 1320,
+                steps: [
+                    {
+                        type: 'BUS',
+                        routeShortName: 'B',
+                        routeColor: '#E91E63',
+                        routeTextColor: '#FFFFFF',
+                        departureStop: 'République',
+                        arrivalStop: 'Clinique Saint Pierre',
+                        departureTime: '10:15',
+                        arrivalTime: '10:37',
+                        duration: '22 min',
+                        numStops: 12
+                    }
+                ],
+                summarySegments: [
+                    { name: 'B', color: '#E91E63', textColor: '#FFFFFF' }
+                ]
+            };
+
+            const mockItinerary3 = {
+                type: 'BUS',
+                departureTime: '16:00',
+                arrivalTime: '16:18',
+                duration: '18 min',
+                durationRaw: 1080,
+                steps: [
+                    {
+                        type: 'BUS',
+                        routeShortName: 'C',
+                        routeColor: '#4CAF50',
+                        routeTextColor: '#FFFFFF',
+                        departureStop: 'Castillet',
+                        arrivalStop: 'Université',
+                        departureTime: '16:00',
+                        arrivalTime: '16:18',
+                        duration: '18 min',
+                        numStops: 10
+                    }
+                ],
+                summarySegments: [
+                    { name: 'C', color: '#4CAF50', textColor: '#FFFFFF' }
+                ]
+            };
+
+            const testJourneys = [
+                {
+                    key: 'gare de perpignan|aéroport perpignan rivesaltes',
+                    fromName: 'Gare de Perpignan',
+                    toName: 'Aéroport Perpignan Rivesaltes',
+                    departureTime: '14:30',
+                    summary: {
+                        type: 'BUS',
+                        duration: '45 min',
+                        segments: [
+                            { name: 'R4', color: '#FF6B35', textColor: '#FFFFFF' },
+                            { name: 'A', color: '#0066CC', textColor: '#FFFFFF' }
+                        ],
+                        hasWalk: true
+                    },
+                    fullItinerary: [mockItinerary1],
+                    searchTime: {
+                        type: 'partir',
+                        date: new Date().toISOString().split('T')[0],
+                        hour: '14',
+                        minute: '30'
+                    },
+                    savedAt: now,
+                    expiresAt: now + TTL_MS,
+                    accessCount: 1
+                },
+                {
+                    key: 'république|clinique saint pierre',
+                    fromName: 'République',
+                    toName: 'Clinique Saint Pierre',
+                    departureTime: '10:15',
+                    summary: {
+                        type: 'BUS',
+                        duration: '22 min',
+                        segments: [{ name: 'B', color: '#E91E63', textColor: '#FFFFFF' }],
+                        hasWalk: false
+                    },
+                    fullItinerary: [mockItinerary2],
+                    searchTime: {
+                        type: 'partir',
+                        date: new Date().toISOString().split('T')[0],
+                        hour: '10',
+                        minute: '15'
+                    },
+                    savedAt: now - 3600000,
+                    expiresAt: now + TTL_MS,
+                    accessCount: 3
+                },
+                {
+                    key: 'castillet|université',
+                    fromName: 'Castillet',
+                    toName: 'Université',
+                    departureTime: '16:00',
+                    summary: {
+                        type: 'BUS',
+                        duration: '18 min',
+                        segments: [{ name: 'C', color: '#4CAF50', textColor: '#FFFFFF' }],
+                        hasWalk: true
+                    },
+                    fullItinerary: [mockItinerary3],
+                    searchTime: {
+                        type: 'partir',
+                        date: new Date().toISOString().split('T')[0],
+                        hour: '16',
+                        minute: '00'
+                    },
+                    savedAt: now - 7200000,
+                    expiresAt: now + TTL_MS,
+                    accessCount: 5
+                }
+            ];
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(testJourneys));
+            
+            // Afficher le résultat
+            const statusDiv = document.getElementById('status');
+            const journeysDiv = document.getElementById('journeys');
+            
+            statusDiv.className = 'status success';
+            statusDiv.innerHTML = '✅ 3 TRAJETS COMPLETS INJECTÉS !<br>🎯 Ils sont maintenant cliquables';
+            
+            journeysDiv.innerHTML = `
+                <strong>Trajets injectés :</strong>
+                <div class="journey-item">🚌 R4 + A : Gare de Perpignan → Aéroport (14:30)</div>
+                <div class="journey-item">🚌 B : République → Clinique Saint Pierre (10:15)</div>
+                <div class="journey-item">🚌 C : Castillet → Université (16:00)</div>
+            `;
+            
+            console.log('%c✅ INJECTION RÉUSSIE', 'background: #10b981; color: white; padding: 8px 16px; border-radius: 4px; font-weight: bold;');
+            console.log('📦 Trajets:', testJourneys);
+        })();
+
+        function goToItinerary() {
+            window.location.href = '/itineraire.html#trajets';
+        }
+
+        function clearCache() {
+            localStorage.removeItem('perimap_journeys_v3');
+            alert('✅ Cache vidé !');
+            location.reload();
+        }
+    </script>
+</body>
+</html>

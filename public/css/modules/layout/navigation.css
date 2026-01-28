@@ -30,6 +30,19 @@
         background: #111b2b !important;
     }
 
+    /* V612: Horaires et Trafic views - padding-bottom minimal */
+    body.horaires-view-active,
+    body.trafic-view-active {
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    }
+
+    body.horaires-view-active #app-view-root,
+    body.horaires-view-active .main-container,
+    body.trafic-view-active #app-view-root,
+    body.trafic-view-active .main-container {
+        padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    }
+
     .bottom-nav {
         display: grid;
         grid-template-columns: repeat(5, 1fr);

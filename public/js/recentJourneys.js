@@ -17,7 +17,9 @@ class RecentJourneysManager {
     }
 
     init() {
-        this.renderRecentJourneys();
+        // V612: Ne plus appeler renderRecentJourneys ici car le DOM n'est pas encore chargé
+        // Le rendu sera fait dans showResultsView() quand la vue est affichée
+        console.log('[RecentJourneys] Init - trajets chargés:', this.journeys.length);
     }
 
     loadJourneys() {
@@ -264,11 +266,18 @@ compactObject(obj) {
     }
 
     renderRecentJourneys() {
+        console.log('[RecentJourneys] renderRecentJourneys appelé, trajets:', this.journeys.length);
+        
         const section = document.getElementById('recent-journeys-section');
         const container = document.getElementById('recent-journeys-container');
         const list = document.getElementById('recent-journeys-list');
 
-        if (!section || !container || !list) return;
+        console.log('[RecentJourneys] Éléments DOM:', { section: !!section, container: !!container, list: !!list });
+
+        if (!section || !container || !list) {
+            console.warn('[RecentJourneys] Éléments DOM non trouvés - vue pas encore chargée');
+            return;
+        }
 
         if (this.journeys.length === 0) {
             section.classList.add('hidden');
@@ -351,10 +360,11 @@ compactObject(obj) {
         const resultsFromInput = document.getElementById('results-planner-from');
         const resultsToInput = document.getElementById('results-planner-to');
 
-        if (resultsFromInput && resultsToInput) {
-            resultsFromInput.value = journey.fromName;
-            resultsToInput.value = journey.toName;
-        }
+        // ❌ NE PAS remplir le formulaire - l'utilisateur le demande
+        // if (resultsFromInput && resultsToInput) {
+        //     resultsFromInput.value = journey.fromName;
+        //     resultsToInput.value = journey.toName;
+        // }
         
         // V505: Si on a l'itinéraire complet en cache, déclencher un événement pour l'afficher
         if (journey.fullItinerary) {
@@ -369,12 +379,10 @@ compactObject(obj) {
                 }
             }));
         } else {
-            // Pas de cache complet, relancer la recherche
-            console.log('[RecentJourneys] Pas de cache, relance recherche:', journey.fromName, '->', journey.toName);
-            setTimeout(() => {
-                const searchBtn = document.getElementById('results-planner-submit-btn');
-                if (searchBtn) searchBtn.click();
-            }, 100);
+            // Pas de cache complet - cela ne devrait JAMAIS arriver en production
+            console.error('[RecentJourneys] ❌ ERREUR : Trajet sans itinéraire complet', journey);
+            alert('Erreur : Ce trajet ne contient pas de données complètes et ne peut pas être rechargé.\n\nIl sera supprimé du cache.');
+            this.removeJourney(journey.key);
         }
     }
     
