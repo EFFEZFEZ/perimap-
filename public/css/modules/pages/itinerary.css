@@ -2172,7 +2172,7 @@ body.dark-theme .route-next-departures {
         position: fixed;
         inset: 0;
         background: rgb(8, 15, 28);
-        z-index: 1080;
+        z-index: 2080; /* V604: Au-dessus du main-header mobile (z-index 2000) */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -2189,7 +2189,7 @@ body.dark-theme .route-next-departures {
         display: block;
         position: fixed;
         inset: 0;
-        z-index: 1110;
+        z-index: 2100; /* V604: Au-dessus du main-header mobile (z-index 2000) */
         pointer-events: none;
         /* Bloquer absolument tout scroll */
         overflow: hidden !important;
