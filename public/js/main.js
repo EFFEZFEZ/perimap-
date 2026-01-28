@@ -33,7 +33,7 @@ import { loadBaseLayout } from './viewLoader.js';
 import { realtimeManager } from './realtimeManager.js';
 import { analyticsManager } from './analyticsManager.js';
 import { userPreferences } from './userPreferences.js';
-import { addRecentJourney, initRecentJourneys } from './recentJourneys.js';
+import { addRecentJourney, initRecentJourneys, renderRecentJourneys } from './recentJourneys.js';
 
 // === PHASE 2: Modular API Services ===
 import { initializeAPIServices, getAPIServiceFactory } from './services/index.js';
@@ -5386,6 +5386,8 @@ function showResultsView({ hasSearch = false } = {}) {
             document.body.classList.add('has-search');
         } else {
             document.body.classList.remove('has-search');
+            // V611: Re-rendre les trajets récents du cache localStorage
+            setTimeout(() => renderRecentJourneys(), 100);
         }
         // Ne pas verrouiller le scroll pour permettre de voir tous les itinéraires
 

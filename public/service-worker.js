@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025-2026 Périmap. Tous droits réservés.
- * Service Worker v611 - Fix cascade CSS has-search (2026-01-28)
+ * Service Worker v612 - UX Trajets: espacement + persistance cache (2026-01-28)
  * 
  * Stratégies:
  * - Cache-first pour assets statiques (CSS, JS, fonts, images)
@@ -9,8 +9,8 @@
  * - Network-first pour API calls avec fallback
  */
 
-// v611 - 2026-01-28 : Correction cascade CSS has-search (mobile.css écrasait itinerary.css)
-const CACHE_VERSION = 'v611';
+// v612 - 2026-01-28 : UX Trajets mobile (espacement header/form, titre conditionnel, persistance localStorage)
+const CACHE_VERSION = 'v612';
 const CACHE_NAME = `peribus-${CACHE_VERSION}`;
 
 // Assets à pré-cacher au premier chargement

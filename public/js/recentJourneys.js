@@ -430,4 +430,10 @@ function addRecentJourney(fromName, toName, departureTime = 'Maintenant', itiner
     recentJourneysManager.addJourney(fromName, toName, departureTime, itinerary, allItineraries, searchTime);
 }
 
-export { initRecentJourneys, addRecentJourney };
+function renderRecentJourneys() {
+    if (recentJourneysManager) {
+        recentJourneysManager.renderRecentJourneys();
+    }
+}
+
+export { initRecentJourneys, addRecentJourney, renderRecentJourneys };

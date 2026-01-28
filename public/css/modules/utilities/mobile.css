@@ -1089,7 +1089,7 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         flex-direction: column;
         gap: 0.5rem;
         flex: 0 1 auto !important;
-        padding: 0 0 80px 0 !important;
+        padding: 0 0 20px 0 !important;
     }
 
     /* CRITIQUE: Masquer la section quand recherche active (surcharge la règle précédente) */
@@ -1097,18 +1097,18 @@ body.dark-theme *::-webkit-scrollbar-thumb:hover {
         display: none !important;
     }
 
-    /* Header itinéraire : style cohérent */
+    /* Header itinéraire : style cohérent + espacement du header principal */
     body.itinerary-view-active .itinerary-top-bar {
         background: transparent !important;
         border: none !important;
-        padding: 0 !important;
+        padding: 1rem 0.75rem 0 0.75rem !important;
     }
 
     body.itinerary-view-active #itinerary-edit-panel {
         background: #111b2b !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
-        margin: 0 0.75rem 1rem !important;
+        margin: 1rem 0.75rem 1rem !important;
         padding: 0.9rem !important;
     }
 
