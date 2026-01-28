@@ -54,7 +54,7 @@ body {
     min-height: 100vh;
     min-height: 100dvh; /* V59: Dynamic viewport height pour mobile */
     /* Par d├®faut, le scroll est port├® par html (body reste non scrollable). */
-    overflow-y: visible !important;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* V59: Smooth scroll iOS */
     overscroll-behavior: none;
     touch-action: pan-y; /* V455: Scroll vertical uniquement, pas de zoom */
@@ -65,7 +65,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow-y: visible; /* V59: Ne pas bloquer le scroll */
+    overflow-y: auto; /* V59: Permettre le scroll du contenu */
 }
 
 #legal-strip {
